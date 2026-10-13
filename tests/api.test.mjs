@@ -17,7 +17,8 @@ test('Neon-backed CMS and guest access end to end',async t => {
   await pool.query("UPDATE wedding.settings SET value='{}' WHERE id=1");
   const password = 'integration-test-password';const salt = randomBytes(16).toString('hex');
   const events = new Map();const origin = 'https://invitation.example';
-  const server = createApp(pool,{origin,production:true,passwordHash:`${salt}:${scryptSync(password,salt,64).toString('hex')}`,publicKey:'test',secretKey:'test',region:'ap'},async id => events.get(id));
+  const endpoint = 'https://validator.firsta.my.id';
+  const server = createApp(pool,{origin,production:true,passwordHash:`${salt}:${scryptSync(password,salt,64).toString('hex')}`,publicKey:'test',secretKey:'test',region:'ap',endpoint},async id => events.get(id));
   server.listen(0,'127.0.0.1');await once(server,'listening');
   const base = `http://127.0.0.1:${server.address().port}`;
   const admin = {};
@@ -41,7 +42,10 @@ test('Neon-backed CMS and guest access end to end',async t => {
   try {
     await t.test('database health, admin auth, private content and CSRF',async () => {
       assert.equal((await request('/healthz')).response.status,200);
-      assert.deepEqual((await request('/api/identification/config')).value,{endpoint:'',region:'ap'});
+      const config = await request('/api/identification/config');
+      assert.deepEqual(config.value,{endpoint,region:'ap'});
+      assert.match(config.response.headers.get('content-security-policy'),/script-src 'self' https:\/\/validator\.firsta\.my\.id/);
+      assert.match(config.response.headers.get('content-security-policy'),/connect-src 'self' https:\/\/validator\.firsta\.my\.id/);
       assert.equal((await request('/api/admin/guests')).response.status,401);
       assert.equal((await request('/api/invitation')).response.status,401);
       assert.equal((await request('/')).value.includes('access-message'),true);

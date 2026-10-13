@@ -4,8 +4,8 @@ const fpPromise = fetch('/api/identification/config').then(async response => {
   const {endpoint} = await response.json();
   const source = endpoint ? `${endpoint}/web/v4/k3IGGzMGUOYb5FnccL4s` : 'https://fpjscdn.net/v4/k3IGGzMGUOYb5FnccL4s';
   const Fingerprint = await import(source);
-    const agent = Fingerprint.start({region: 'ap', ...(endpoint ? {endpoints: endpoint} : {})});
-    return new Promise(resolve => setTimeout(() => resolve(agent), 1000));
+  const agent = Fingerprint.start({region: 'ap', ...(endpoint ? {endpoints: [endpoint]} : {})});
+  return new Promise(resolve => setTimeout(() => resolve(agent), 1000));
 });
 
 export async function identify(linkedId) {
