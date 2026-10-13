@@ -22,6 +22,7 @@
 
 html {
   scroll-behavior:smooth;
+  scroll-snap-type:y mandatory;
   overflow-x:clip;
 }
 
@@ -131,6 +132,11 @@ main {
   min-height:1200px;
 }
 
+.entrance-track,.scene {
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+}
+
 .entrance-scene {
   position:sticky;
   top:0;
@@ -220,7 +226,10 @@ main {
   text-align:center;
   width:min(100%,900px);
   margin:auto;
+  transform-origin:center top;
 }
+
+.scene.is-in-view .scene-copy {will-change:transform,opacity;}
 
 .scene-copy>.eyebrow {
   color:#dbc3a1;
@@ -291,6 +300,7 @@ main {
   gap:18px;
   max-width:660px;
   margin:52px auto 20px;
+  perspective:1200px;
 }
 
 .portrait-paper {
@@ -453,6 +463,21 @@ main {
   transform:perspective(1000px) rotateX(2deg);
 }
 
+.portrait-paper,.event-paper,.location-paper {
+  border-radius:16px;
+  box-shadow:inset 0 1px 0 #fff,0 2px 4px #020c0826,0 24px 60px #020c0880;
+  transition:translate .35s ease,box-shadow .35s ease;
+}
+.event-paper:before {border-radius:10px;}
+
+@media(hover:hover) and (pointer:fine) {
+  .portrait-paper:hover,.event-paper:hover,.location-paper:hover {
+    translate:0 -8px 20px;
+    box-shadow:inset 0 1px 0 #fff,0 8px 12px #020c0826,0 36px 75px #020c08a0;
+  }
+  .gallery-collage button:hover,.gallery-featured:hover {translate:0 -4px;}
+}
+
 .location-paper h3 {
   font-size:34px;
 }
@@ -504,20 +529,20 @@ main {
 }
 .countdown>p {font-size:13px;letter-spacing:.08em;margin-bottom:16px;color:#e3cfb0;}
 .countdown-units {display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-.countdown-units>div {padding:14px 4px;background:#faf7f210;border:1px solid #e3cfb045;border-radius:4px;}
+.countdown-units>div {padding:14px 4px;background:linear-gradient(145deg,#faf7f21c,#faf7f205);border:1px solid #e3cfb045;border-radius:14px;box-shadow:inset 0 1px 0 #fff2,0 12px 28px #020c0830;backdrop-filter:blur(8px);}
 .countdown-units strong {display:block;font-family:var(--serif);font-size:clamp(32px,5vw,44px);line-height:1.1;font-weight:500;font-variant-numeric:tabular-nums;}
 .countdown-units span {font-size:12px;color:#e3cfb0;}
 
 .gallery-album {max-width:650px;margin:40px auto 0;}
-.gallery-album button {display:block;padding:0;border:0;background:var(--paper);cursor:pointer;overflow:hidden;}
+.gallery-album button {display:block;padding:0;border:0;background:var(--paper);cursor:pointer;overflow:hidden;border-radius:8px;transition:translate .3s ease,box-shadow .3s ease;}
 .gallery-album button[hidden],.gallery-album [hidden] {display:none;}
 .gallery-album img {display:block;width:100%;height:100%;object-fit:cover;}
-.gallery-featured {width:100%;aspect-ratio:4/5;box-shadow:0 18px 45px #030e0950;}
+.gallery-featured {width:100%;aspect-ratio:4/5;box-shadow:0 2px 5px #030e0930,0 24px 60px #030e0980;}
 .gallery-thumbnails {display:flex;gap:10px;margin:14px 0 22px;padding:4px;overflow-x:auto;}
 .gallery-thumbnails button {flex:0 0 70px;height:60px;opacity:.65;}
 .gallery-thumbnails button[aria-pressed="true"] {opacity:1;outline:2px solid #e3cfb0;outline-offset:2px;}
 .gallery-collage {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
-.gallery-collage button {aspect-ratio:2/3;}
+.gallery-collage button {aspect-ratio:2/3;box-shadow:0 12px 24px #020c0840;}
 .gallery-album button:focus-visible {outline-offset:-4px;}
 .gallery-viewer {width:min(94vw,1000px);max-width:none;max-height:94svh;border:1px solid #e3cfb050;padding:48px 16px 16px;background:var(--forest-dark);color:var(--paper);}
 .gallery-viewer::backdrop {background:#020c08e8;}
@@ -706,6 +731,7 @@ body.gallery-open {overflow:hidden;}
 @media(prefers-reduced-motion:reduce) {
   html {
     scroll-behavior:auto;
+    scroll-snap-type:none;
   }
   *,*:before,*:after {
     animation:none!important;
@@ -727,6 +753,14 @@ body.gallery-open {overflow:hidden;}
   .cover-copy {
     opacity:1!important;
     transform:none!important;
+  }
+  .scene-copy {
+    opacity:1!important;
+    transform:none!important;
+    will-change:auto;
+  }
+  .portrait-paper,.event-paper,.location-paper,.gallery-album button {
+    translate:none!important;
   }
 }
 

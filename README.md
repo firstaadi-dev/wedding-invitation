@@ -64,6 +64,8 @@ Domain: https://wedding.firsta.my.id. CNAME `wedding` menuju `wedding-invitation
 
 ## Desain
 
+Scroll berhenti di batas section dengan native scroll snap; section panjang tetap bisa digulir. Konten masuk dengan perspektif 3D ringan, parallax hutan, kartu membulat dan bayangan berlapis. Reduced motion mematikan snap, parallax dan gerakan konten.
+
 - [Prompt amplop terbaru](docs/stitch-envelope-prompt.md)
 - [Brief desain/pengembangan](docs/stitch-prompts.md)
 - [Proyek Google Stitch](https://stitch.withgoogle.com/projects/3122156932953261093)

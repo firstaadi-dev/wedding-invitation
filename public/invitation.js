@@ -2,6 +2,10 @@ export function entranceProgress(top, height, viewport) {
   return Math.min(1, Math.max(0, -top / Math.max(1, height - viewport)));
 }
 
+export function sectionProgress(top, viewport) {
+  return 1 - Math.min(1, Math.max(0, top / Math.max(1, viewport)));
+}
+
 if (typeof document !== 'undefined') {
   const cover = document.querySelector('.entrance-track');
   const picture = document.querySelector('.entrance-picture');
@@ -11,6 +15,7 @@ if (typeof document !== 'undefined') {
   const entranceTrees = [...document.querySelectorAll('.entrance-trees')];
   const scenes = [...document.querySelectorAll('.scene')].map(section => ({
     section,
+    content: section.querySelector('.scene-copy'),
     backdrop: section.querySelector('.forest-backdrop'),
     trees: [...section.querySelectorAll('.trees')],
   }));
@@ -33,11 +38,16 @@ if (typeof document !== 'undefined') {
     entranceTrees.forEach((tree, index) => {
       tree.style.transform = `translateX(${(index === 0 ? -1 : 1) * progress * 180}px) scale(${1 + progress * .6})`;
     });
-    scenes.forEach(({section, backdrop, trees}) => {
+    scenes.forEach(({section, content, backdrop, trees}) => {
       const bounds = section.getBoundingClientRect();
+      section.classList.toggle('is-in-view', bounds.bottom > 0 && bounds.top < viewport && !motion.matches);
       if (bounds.bottom < -200 || bounds.top > viewport + 200) return;
+      const arrival = motion.matches ? 0 : 1 - sectionProgress(bounds.top, viewport);
+      const depth = window.innerWidth <= 600 ? 60 : 120;
+      content.style.transform = `perspective(1400px) translate3d(0, ${arrival * 48}px, ${-arrival * depth}px) rotateX(${arrival * 7}deg)`;
+      content.style.opacity = String(1 - arrival * .45);
       const distance = motion.matches ? 0 : (viewport / 2 - bounds.top - bounds.height / 2) / viewport;
-      backdrop.style.transform = `translateY(${Math.max(-70, Math.min(70, distance * 28))}px)`;
+      backdrop.style.transform = `translate3d(0, ${Math.max(-70, Math.min(70, distance * 40))}px, 0) scale(${motion.matches ? 1 : 1.04})`;
       trees.forEach((tree, index) => {
         tree.style.transform = `translateY(${Math.max(-110, Math.min(110, distance * -foregroundSpeed))}px) rotate(${distance * (index === 0 ? 1 : -1) * 1.8}deg)`;
       });
