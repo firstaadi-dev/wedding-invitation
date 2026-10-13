@@ -1,30 +1,42 @@
 $kind: http-request
-description: Save event times and official map embed URL
+name: Save event names, times, countdown time and official map embed URL
+description: Save editable event names, displayed times, WIB countdown start and official map embed URL
 url: "{{baseUrl}}/api/admin/content"
 method: PUT
 headers:
   - key: X-CSRF-Token
-    value: string
+    value: "{{csrf}}"
     disabled: false
     description: (Required) Token returned by admin session/login, matching HttpOnly cookie session.
   - key: Content-Type
     value: application/json
+  - key: Origin
+    value: "{{baseUrl}}"
   - key: Accept
     value: application/json
 body:
   type: json
   content: |-
     {
-      "ceremonyTime": "string",
-      "receptionTime": "string",
-      "mapEmbedUrl": "string"
+      "ceremonyTime": "09.00 WIB",
+      "receptionTime": "11.00–13.00 WIB",
+      "mapEmbedUrl": "",
+      "ceremonyTitle": "Akad",
+      "receptionTitle": "Resepsi",
+      "countdownTime": "09:00"
     }
 auth:
-  type: apikey
-  credentials:
-    key: wedding_admin
-    value: "{{apiKey}}"
-    in: header
+  type: noauth
 settings: {}
 examples: ./.resources/Save event times and official map embed URL.resources/examples
 order: 2000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Event settings save succeeds', () => pm.response.to.have.status(200));
+      const settings = pm.response.json().settings;
+      pm.test('Custom ceremony name saved', () => pm.expect(settings.ceremonyTitle).to.eql('Akad'));
+      pm.test('Reception name saved', () => pm.expect(settings.receptionTitle).to.eql('Resepsi'));
+      pm.test('WIB countdown time saved', () => pm.expect(settings.countdownTime).to.eql('09:00'));
+      pm.collectionVariables.set('savedSettings', JSON.stringify(settings));

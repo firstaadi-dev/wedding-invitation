@@ -5,11 +5,15 @@ method: GET
 headers:
   Accept: application/json
 auth:
-  type: apikey
-  credentials:
-    key: wedding_admin
-    value: "{{apiKey}}"
-    in: header
+  type: noauth
 settings: {}
 examples: ./.resources/Read settings and selected media.resources/examples
 order: 1000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Content read succeeds', () => pm.response.to.have.status(200));
+      if (pm.collectionVariables.get('savedSettings')) {
+        pm.test('Event settings persist across requests', () => pm.expect(pm.response.json().settings).to.deep.eql(JSON.parse(pm.collectionVariables.get('savedSettings'))));
+      }

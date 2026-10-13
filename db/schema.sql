@@ -37,11 +37,13 @@ CREATE TABLE IF NOT EXISTS settings (
 );
 INSERT INTO settings (id) VALUES (1) ON CONFLICT DO NOTHING;
 CREATE TABLE IF NOT EXISTS media (
-  slot text PRIMARY KEY CHECK (slot IN ('groom','bride','gallery1','gallery2','gallery3','music')),
+  slot text PRIMARY KEY,
   id text NOT NULL UNIQUE,
   mime text NOT NULL,
   data bytea NOT NULL
 );
+ALTER TABLE media DROP CONSTRAINT IF EXISTS media_slot_check;
+ALTER TABLE media ADD CONSTRAINT media_slot_check CHECK (slot IN ('groom','bride','gallery1','gallery2','gallery3','gallery4','gallery5','gallery6','gallery7','gallery8','gallery9','music'));
 CREATE TABLE IF NOT EXISTS rate_limits (
   key text PRIMARY KEY,
   hits integer NOT NULL,

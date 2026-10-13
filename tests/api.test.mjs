@@ -81,11 +81,34 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal((await request('/',{jar:guestBrowser})).value.includes('envelope-card'),true);
     });
     await t.test('content, photo and MP3 uploads, authenticated media and range response',async () => {
-      const saved = await adminRequest('/api/admin/content',{method:'PUT',data:{ceremonyTime:'09.00 WIB',mapEmbedUrl:'https://www.google.com/maps/embed?pb=test'}});
+      const saved = await adminRequest('/api/admin/content',{method:'PUT',data:{ceremonyTitle:' Akad ',receptionTitle:'Syukuran',countdownTime:'09:00',ceremonyTime:'09.00 WIB',mapEmbedUrl:'https://www.google.com/maps/embed?pb=test'}});
+      assert.equal(saved.response.status,200);
       assert.equal(saved.value.settings.ceremonyTime,'09.00 WIB');
+      assert.equal(saved.value.settings.ceremonyTitle,'Akad');
+      assert.equal(saved.value.settings.receptionTitle,'Syukuran');
+      assert.equal(saved.value.settings.countdownTime,'09:00');
+      assert.deepEqual((await request('/api/invitation',{jar:guestBrowser})).value.settings,saved.value.settings);
+      for (const data of [{ceremonyTitle:'a'.repeat(81)},{receptionTitle:9},{countdownTime:'24:00'},{countdownTime:'09:60'},{countdownTime:900},{unknown:'Akad'}]) {
+        assert.equal((await adminRequest('/api/admin/content',{method:'PUT',data})).response.status,400);
+      }
+      const partialSettings = await adminRequest('/api/admin/content',{method:'PUT',data:{receptionTime:'11.00–13.00 WIB'}});
+      assert.equal(partialSettings.value.settings.ceremonyTitle,'Akad');
+      assert.equal(partialSettings.value.settings.countdownTime,'09:00');
+      const cleared = await adminRequest('/api/admin/content',{method:'PUT',data:{ceremonyTitle:'',countdownTime:''}});
+      assert.equal(cleared.value.settings.ceremonyTitle,'');
+      assert.equal(cleared.value.settings.countdownTime,'');
       assert.equal((await adminRequest('/api/admin/content',{method:'PUT',data:{mapEmbedUrl:'https://attacker.example/embed'}})).response.status,400);
       const photo = await sharp({create:{width:20,height:30,channels:3,background:'#183d32'}}).png().toBuffer();
       const response = await fetch(base+'/api/admin/media/groom',{method:'PUT',headers:{Origin:origin,Cookie:`wedding_admin=${admin.wedding_admin}`,'X-CSRF-Token':csrf,'Content-Type':'image/png'},body:photo});
+      for (const slot of ['gallery1','gallery4','gallery9']) {
+        const uploaded = await fetch(base+`/api/admin/media/${slot}`,{method:'PUT',headers:{Origin:origin,Cookie:`wedding_admin=${admin.wedding_admin}`,'X-CSRF-Token':csrf,'Content-Type':'image/png'},body:photo});
+        assert.equal(uploaded.status,200);
+        const path = (await uploaded.json()).media[slot];
+        assert.equal((await request('/api/invitation',{jar:guestBrowser})).value.media[slot],path);
+      }
+      assert.equal((await adminRequest('/api/admin/media/gallery10',{method:'DELETE'})).response.status,404);
+      assert.equal((await adminRequest('/api/admin/media/gallery4',{method:'DELETE'})).response.status,200);
+      assert.equal((await request('/api/invitation',{jar:guestBrowser})).value.media.gallery4,undefined);
       assert.equal(response.status,200);const value = await response.json();const path = value.media.groom;
       assert.equal((await request(path)).response.status,401);
       const media = await fetch(base+path,{headers:{Cookie:`wedding_guest=${guestBrowser.wedding_guest}`}});

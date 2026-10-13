@@ -22,7 +22,7 @@ async function refresh() {
   [guests,content] = await Promise.all([api('/api/admin/guests'),api('/api/admin/content')]);
   login.hidden = true;dashboard.hidden = false;logout.hidden = false;
   renderGuests();renderMedia();
-  for (const key of ['ceremonyTime','receptionTime','mapEmbedUrl']) document.querySelector('#settings').elements[key].value = content.settings[key] || '';
+  for (const key of ['ceremonyTitle','receptionTitle','ceremonyTime','receptionTime','countdownTime','mapEmbedUrl']) document.querySelector('#settings').elements[key].value = content.settings[key] || '';
 }
 function element(tag,text,className) {const node = document.createElement(tag);if(text!==undefined) node.textContent = text;if(className) node.className = className;return node;}
 async function confirm(message,title) {
@@ -75,7 +75,7 @@ function renderGuests() {
 }
 function renderMedia() {
   const grid = document.querySelector('#media-grid');grid.replaceChildren();
-  for (const [slot,title] of Object.entries({groom:'Foto Firsta',bride:'Foto Talitha',gallery1:'Galeri · Kenangan kami',gallery2:'Galeri · Bersama',gallery3:'Galeri · Perjalanan',music:'Lagu undangan'})) {
+  for (const [slot,title] of Object.entries({groom:'Foto Firsta',bride:'Foto Talitha',gallery1:'Galeri · Kenangan kami',gallery2:'Galeri · Bersama',gallery3:'Galeri · Perjalanan',...Object.fromEntries(Array.from({length:6},(_,i)=>[`gallery${i+4}`,`Galeri · Foto ${i+4}`])),music:'Lagu undangan'})) {
     const card = element('article',undefined,'media-card');card.append(element('h3',title));
     if (content.media[slot]) {
       const preview = element(slot === 'music' ? 'audio' : 'img');preview.src = content.media[slot];

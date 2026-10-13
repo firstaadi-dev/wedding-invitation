@@ -3,3 +3,6 @@ description: Authoritative local contract. Same-origin cookies; no public admin 
 variables:
   baseUrl: http://127.0.0.1:5174
   apiKey: ""
+  adminPassword: ""
+  csrf: ""
+  savedSettings: ""

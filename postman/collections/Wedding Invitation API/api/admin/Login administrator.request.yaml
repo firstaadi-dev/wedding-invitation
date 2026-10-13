@@ -5,12 +5,19 @@ method: POST
 headers:
   Content-Type: application/json
   Accept: application/json
+  Origin: "{{baseUrl}}"
 body:
   type: json
   content: |-
     {
-      "password": "string"
+      "password": "{{adminPassword}}"
     }
 settings: {}
 examples: ./.resources/Login administrator.resources/examples
 order: 1000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Admin login succeeds', () => pm.response.to.have.status(200));
+      pm.collectionVariables.set('csrf', pm.response.json().csrf);

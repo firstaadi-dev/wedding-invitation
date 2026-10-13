@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=7">
+  <link rel="stylesheet" href="/styles.css?v=8">
   <script type="module" src="/invitation.js"></script>
   <script type="module" src="/content.js"></script>
 </head>
@@ -92,9 +92,13 @@
         <p class="eyebrow">Hari yang kami nantikan</p>
         <h2 id="event-title">Sebuah awal,<br><em>selamanya.</em></h2>
         <p class="ceremony-date">22 <span>November</span> 2026</p>
+        <div class="countdown" role="group" aria-label="Hitung mundur menuju hari pernikahan">
+          <p id="countdown-label">Menuju hari bahagia</p>
+          <div class="countdown-units"><div><strong>00</strong><span>Hari</span></div><div><strong>00</strong><span>Jam</span></div><div><strong>00</strong><span>Menit</span></div><div><strong>00</strong><span>Detik</span></div></div>
+        </div>
         <div class="event-grid">
-          <article class="event-paper"><span class="paper-ornament" aria-hidden="true">❦</span><h3>Prosesi Pernikahan</h3><p>Minggu, 22 November 2026</p><p class="pending-time">Waktu akan diinformasikan</p><div class="fine-rule" aria-hidden="true"></div><p>Arjuna Ballroom<br>Alam Indah Resto</p></article>
-          <article class="event-paper"><span class="paper-ornament" aria-hidden="true">❦</span><h3>Resepsi</h3><p>Minggu, 22 November 2026</p><p class="pending-time">Waktu akan diinformasikan</p><div class="fine-rule" aria-hidden="true"></div><p>Arjuna Ballroom<br>Alam Indah Resto</p></article>
+          <article class="event-paper"><span class="paper-ornament" aria-hidden="true">❦</span><h3 id="ceremony-title">Prosesi Pernikahan</h3><p>Minggu, 22 November 2026</p><p class="pending-time">Waktu akan diinformasikan</p><div class="fine-rule" aria-hidden="true"></div><p>Arjuna Ballroom<br>Alam Indah Resto</p></article>
+          <article class="event-paper"><span class="paper-ornament" aria-hidden="true">❦</span><h3 id="reception-title">Resepsi</h3><p>Minggu, 22 November 2026</p><p class="pending-time">Waktu akan diinformasikan</p><div class="fine-rule" aria-hidden="true"></div><p>Arjuna Ballroom<br>Alam Indah Resto</p></article>
         </div>
       </div>
     </section>
@@ -121,10 +125,12 @@
       <div class="scene-copy">
         <p class="eyebrow">Cerita dalam bingkai</p>
         <h2 id="gallery-title">Kenangan kecil,<br><em>cinta yang besar.</em></h2>
-        <div class="gallery-papers">
-          <figure class="gallery-paper"><div class="photo-placeholder"><span class="leaf-mark" aria-hidden="true">❦</span><span>Foto akan ditambahkan</span></div><figcaption>01 · Kenangan kami</figcaption></figure>
-          <figure class="gallery-paper"><div class="photo-placeholder"><span class="leaf-mark" aria-hidden="true">❦</span><span>Foto akan ditambahkan</span></div><figcaption>02 · Bersama</figcaption></figure>
-          <figure class="gallery-paper"><div class="photo-placeholder"><span class="leaf-mark" aria-hidden="true">❦</span><span>Foto akan ditambahkan</span></div><figcaption>03 · Sebuah perjalanan</figcaption></figure>
+        <p class="introduction">Setiap foto menyimpan cerita. Sentuh untuk melihat lebih dekat.</p>
+        <div class="gallery-album">
+          <p id="gallery-empty" class="photo-placeholder"><span class="leaf-mark" aria-hidden="true">❦</span><span>Foto akan ditambahkan</span></p>
+          <button id="gallery-featured" class="gallery-featured" type="button" aria-label="Perbesar foto pilihan" hidden></button>
+          <div id="gallery-thumbnails" class="gallery-thumbnails" role="group" aria-label="Pilih foto utama"></div>
+          <div id="gallery-collage" class="gallery-collage" role="group" aria-label="Kolase foto"></div>
         </div>
       </div>
     </section>
@@ -142,6 +148,11 @@
       </div>
     </section>
   </main>
+  <dialog id="gallery-viewer" class="gallery-viewer" aria-label="Foto kenangan" aria-describedby="gallery-caption">
+    <button id="gallery-close" class="gallery-close" type="button" aria-label="Tutup foto" autofocus>×</button>
+    <img id="gallery-full" alt="">
+    <div class="gallery-viewer-controls"><button id="gallery-previous" type="button" aria-label="Foto sebelumnya">←</button><p id="gallery-caption" aria-live="polite"></p><button id="gallery-next" type="button" aria-label="Foto berikutnya">→</button></div>
+  </dialog>
   <button class="music-status" type="button" disabled aria-label="Lagu belum ditambahkan" title="Lagu belum ditambahkan"><span aria-hidden="true">♫</span></button>
 </body>
 </html>

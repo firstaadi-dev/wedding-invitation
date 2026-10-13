@@ -189,14 +189,20 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
         if (path === '/api/admin/content') {
           if (method === 'GET') return json(200,await content());
           if (method === 'PUT') {
-            const value = await body(); only(value,['ceremonyTime','receptionTime','mapEmbedUrl']);
+            const value = await body(); only(value,['ceremonyTitle','receptionTitle','ceremonyTime','receptionTime','countdownTime','mapEmbedUrl']);
             for (const key of ['ceremonyTime','receptionTime']) if (value[key] !== undefined && (typeof value[key] !== 'string' || value[key].length > 80)) fail(400,'time','Waktu tidak valid.');
+            for (const key of ['ceremonyTitle','receptionTitle']) {
+              if (value[key] === undefined) continue;
+              if (typeof value[key] !== 'string' || value[key].length > 80) fail(400,'event_title','Nama acara maksimal 80 karakter.');
+              value[key] = value[key].trim();
+            }
+            if (value.countdownTime !== undefined && (typeof value.countdownTime !== 'string' || !/^(?:|(?:[01]\d|2[0-3]):[0-5]\d)$/.test(value.countdownTime))) fail(400,'countdown_time','Jam countdown tidak valid. Gunakan HH:mm dalam WIB.');
             if (value.mapEmbedUrl !== undefined && !validMap(value.mapEmbedUrl)) fail(400,'map_url','Gunakan URL embed resmi Google Maps.');
             await pool.query('UPDATE wedding.settings SET value=value || $1::jsonb WHERE id=1',[JSON.stringify(value)]);
             return json(200,await content());
           }
         }
-        const mediaMatch = path.match(/^\/api\/admin\/media\/(groom|bride|gallery[123]|music)$/);
+        const mediaMatch = path.match(/^\/api\/admin\/media\/(groom|bride|gallery[1-9]|music)$/);
         if (mediaMatch && ['PUT','DELETE'].includes(method)) {
           const slot = mediaMatch[1];
           if (method === 'DELETE') await pool.query('DELETE FROM wedding.media WHERE slot=$1',[slot]);
@@ -216,7 +222,7 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
               } catch {fail(415,'invalid_image','Foto tidak dapat dibaca. Gunakan JPG, PNG atau WebP yang valid.');}
               mime = 'image/webp';
             }
-            // shortcut: six small media slots live in Postgres; move blobs to object storage for a large gallery.
+            // shortcut: small media slots live in Postgres; move blobs to object storage for a large gallery.
             await pool.query(`INSERT INTO wedding.media(slot,id,mime,data) VALUES($1,$2,$3,$4)
               ON CONFLICT(slot) DO UPDATE SET id=EXCLUDED.id,mime=EXCLUDED.mime,data=EXCLUDED.data`,[slot,randomUUID(),mime,data]);
           }
@@ -293,7 +299,7 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
         if (path === '/' || path === '/index.html') filename = !url.searchParams.has('access') && (await session() || await session(true)) ? 'index.html' : 'access.html';
         else if (path === '/preview' && (!production || await session(true))) filename = 'index.html';
         else if (path === '/admin') filename = 'admin.html';
-        else if (/^\/(?:assets\/[a-zA-Z0-9_-]+\.webp|(?:styles|admin|access)\.css|(?:invitation|content|admin|access|identification)\.js)$/.test(path)) filename = path.slice(1);
+        else if (/^\/(?:assets\/[a-zA-Z0-9_-]+\.webp|(?:styles|admin|access)\.css|(?:invitation|content|countdown|admin|access|identification)\.js)$/.test(path)) filename = path.slice(1);
         if (filename) {
           const file = await readFile(new URL(filename,publicDirectory));
           const mime = {'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.webp':'image/webp'}[extname(filename)];

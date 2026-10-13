@@ -1477,8 +1477,8 @@
       },
       "put": {
         "operationId": "setContent",
-        "summary": "Save event times and official map embed URL",
-        "description": "Save event times and official map embed URL",
+        "summary": "Save event names, times, countdown time and official map embed URL",
+        "description": "Merge editable event names, displayed times, WIB countdown start and official map embed URL. Omitted fields keep their stored values; empty names use the invitation defaults.",
         "tags": [
           "Admin"
         ],
@@ -1740,6 +1740,12 @@
                 "gallery1",
                 "gallery2",
                 "gallery3",
+                "gallery4",
+                "gallery5",
+                "gallery6",
+                "gallery7",
+                "gallery8",
+                "gallery9",
                 "music"
               ]
             }
@@ -1911,6 +1917,12 @@
                 "gallery1",
                 "gallery2",
                 "gallery3",
+                "gallery4",
+                "gallery5",
+                "gallery6",
+                "gallery7",
+                "gallery8",
+                "gallery9",
                 "music"
               ]
             }
@@ -2465,6 +2477,22 @@
           "mapEmbedUrl": {
             "type": "string",
             "description": "Empty or an HTTPS www.google.com/maps/embed URL; other origins rejected."
+          },
+          "ceremonyTitle": {
+            "type": "string",
+            "maxLength": 80,
+            "description": "Editable first event name; empty uses Prosesi Pernikahan."
+          },
+          "receptionTitle": {
+            "type": "string",
+            "maxLength": 80,
+            "description": "Editable second event name; empty uses Resepsi."
+          },
+          "countdownTime": {
+            "type": "string",
+            "pattern": "^(?:|(?:[01][0-9]|2[0-3]):[0-5][0-9])$",
+            "description": "Countdown start time on 22 November 2026 in WIB (UTC+07:00). Empty defaults to 00:00.",
+            "example": "09:00"
           }
         },
         "additionalProperties": false

@@ -30,13 +30,13 @@ Saat setup ini password admin acak dan hash disimpan di `.env.local` sebagai `AD
 
 ## CMS dan akses tamu
 
-CMS mengelola tambah/edit/hapus/aktif/nonaktif tamu, tautan pengganti, reset perangkat, foto pasangan, tiga foto galeri, lagu MP3, jam acara, dan URL embed resmi Google Maps. Tautan rahasia tampil sekali saat dibuat/diganti; simpan sebelum meninggalkan halaman. Hash tautan, bukan token asli, tersimpan di database. Mengganti tautan mencabut tautan lama dan seluruh sesi/perangkat. Menonaktifkan tamu langsung mencabut sesi.
+CMS mengelola tambah/edit/hapus/aktif/nonaktif tamu, tautan pengganti, reset perangkat, foto pasangan, hingga sembilan foto galeri dengan foto utama, thumbnail dan pembesaran, lagu MP3, nama serta jam acara, jam countdown (WIB), dan URL embed resmi Google Maps. Tautan rahasia tampil sekali saat dibuat/diganti; simpan sebelum meninggalkan halaman. Hash tautan, bukan token asli, tersimpan di database. Mengganti tautan mencabut tautan lama dan seluruh sesi/perangkat. Menonaktifkan tamu langsung mencabut sesi.
 
 Fingerprint agent v4 melalui custom subdomain `validator.firsta.my.id`, region `ap`. Public key memang boleh dipublikasikan. Secret key hanya di server. Origin, challenge cookie, umur event, linked ID dan event ID diverifikasi menggunakan Server API v4. Identitas dari browser tidak dipercaya. Transaksi Postgres mengunci baris tamu sehingga empat atau lebih request bersamaan tetap dibatasi tiga visitor IDs. Visitor yang sama dapat kembali tanpa memakai slot baru; fingerprint mengenali profil/browser, bukan jaminan tiga unit hardware fisik.
 
 Ad blocker harus dinonaktifkan untuk tes CDN lokal. Helium terdeteksi sebagai anti-detect/tampering pada pengujian ini dan ditolak oleh kebijakan server yang ketat; uji juga Safari/Chrome biasa. Custom subdomain sudah Active dan environment Render `FINGERPRINT_ENDPOINT=https://validator.firsta.my.id` sudah diisi. Agent memakai `/web/v4/` dan `endpoints` pada subdomain tersebut, tetap dengan region `ap`. Alur tamu Chrome di domain produksi berhasil pada 14 Oktober 2026.
 
-Media disimpan di enam slot Postgres; foto didekode, diputar sesuai EXIF, diperkecil dan dikonversi ke WebP. Ini cukup untuk undangan kecil. Gunakan object storage jika galeri besar; transfer media memakai bandwidth database. MP3 dibatasi 25 MiB dengan validasi header frame; audio belum dipilih pengguna. Fixture tes `tests/fixtures/silence.mp3` adalah 40 frame MPEG-1 Layer III hening yang dibuat sendiri, bukan lagu produksi; decoder macOS memeriksanya. Media hanya dilayani kepada sesi admin/tamu aktif, dengan dukungan Range.
+Media disimpan di dua belas slot Postgres; foto didekode, diputar sesuai EXIF, diperkecil dan dikonversi ke WebP. Ini cukup untuk undangan kecil. Gunakan object storage jika galeri besar; transfer media memakai bandwidth database. MP3 dibatasi 25 MiB dengan validasi header frame; audio belum dipilih pengguna. Fixture tes `tests/fixtures/silence.mp3` adalah 40 frame MPEG-1 Layer III hening yang dibuat sendiri, bukan lagu produksi; decoder macOS memeriksanya. Media hanya dilayani kepada sesi admin/tamu aktif, dengan dukungan Range.
 
 ## Verifikasi
 
@@ -70,4 +70,4 @@ Domain: https://wedding.firsta.my.id. CNAME `wedding` menuju `wedding-invitation
 - [Aset visual](docs/asset-prompts.md)
 - [Status dan bukti verifikasi](docs/stitch-results.md)
 
-Jam acara belum diberikan; peta embed dapat diisi di CMS; tautan lokasi yang diberikan pengguna tetap berfungsi. Perangkat mobile fisik, performa jaringan seluler dan runtime reduced motion belum diuji. Safari desktop telah melewati verifikasi tamu produksi dan membuka segel. Bukti build/test/runtime serta status custom subdomain tersedia di dokumen verifikasi.
+Nama kedua acara dan jam acara bisa diubah melalui CMS. Countdown menuju 22 November 2026, dengan jam tujuan dalam WIB yang diatur terpisah (bawaan 00.00). Migrasi memperluas slot galeri tanpa menghapus foto lama. Peta embed dapat diisi di CMS; tautan lokasi yang diberikan pengguna tetap berfungsi. Perangkat mobile fisik, performa jaringan seluler dan runtime reduced motion belum diuji. Safari desktop telah melewati verifikasi tamu produksi dan membuka segel. Bukti build/test/runtime serta status custom subdomain tersedia di dokumen verifikasi.
