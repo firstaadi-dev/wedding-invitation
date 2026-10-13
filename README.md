@@ -32,11 +32,11 @@ Saat setup ini password admin acak dan hash disimpan di `.env.local` sebagai `AD
 
 CMS mengelola tambah/edit/hapus/aktif/nonaktif tamu, tautan pengganti, reset perangkat, foto pasangan, tiga foto galeri, lagu MP3, jam acara, dan URL embed resmi Google Maps. Tautan rahasia tampil sekali saat dibuat/diganti; simpan sebelum meninggalkan halaman. Hash tautan, bukan token asli, tersimpan di database. Mengganti tautan mencabut tautan lama dan seluruh sesi/perangkat. Menonaktifkan tamu langsung mencabut sesi.
 
-Fingerprint agent v4 via CDN, region `ap`. Public key memang boleh dipublikasikan. Secret key hanya di server. Origin, challenge cookie, umur event, linked ID dan event ID diverifikasi menggunakan Server API v4. Identitas dari browser tidak dipercaya. Transaksi Postgres mengunci baris tamu sehingga empat atau lebih request bersamaan tetap dibatasi tiga visitor IDs. Visitor yang sama dapat kembali tanpa memakai slot baru; fingerprint mengenali profil/browser, bukan jaminan tiga unit hardware fisik.
+Fingerprint agent v4 melalui custom subdomain `validator.firsta.my.id`, region `ap`. Public key memang boleh dipublikasikan. Secret key hanya di server. Origin, challenge cookie, umur event, linked ID dan event ID diverifikasi menggunakan Server API v4. Identitas dari browser tidak dipercaya. Transaksi Postgres mengunci baris tamu sehingga empat atau lebih request bersamaan tetap dibatasi tiga visitor IDs. Visitor yang sama dapat kembali tanpa memakai slot baru; fingerprint mengenali profil/browser, bukan jaminan tiga unit hardware fisik.
 
-Ad blocker harus dinonaktifkan untuk tes CDN lokal. Helium terdeteksi sebagai anti-detect/tampering pada pengujian ini dan ditolak oleh kebijakan server yang ketat; uji juga Safari/Chrome biasa. Custom subdomain Fingerprint diperlukan untuk perlindungan ad blocker produksi. Isi `FINGERPRINT_ENDPOINT=https://validator.firsta.my.id` hanya setelah subdomain berstatus Active; agent kemudian memakai `/web/v4/` dan `endpoints` pada subdomain tersebut, tetap dengan region `ap`.
+Ad blocker harus dinonaktifkan untuk tes CDN lokal. Helium terdeteksi sebagai anti-detect/tampering pada pengujian ini dan ditolak oleh kebijakan server yang ketat; uji juga Safari/Chrome biasa. Custom subdomain sudah Active dan environment Render `FINGERPRINT_ENDPOINT=https://validator.firsta.my.id` sudah diisi. Agent memakai `/web/v4/` dan `endpoints` pada subdomain tersebut, tetap dengan region `ap`. Alur tamu Chrome di domain produksi berhasil pada 14 Oktober 2026.
 
-Media disimpan di enam slot Postgres; foto didekode, diputar sesuai EXIF, diperkecil dan dikonversi ke WebP. Ini cukup untuk undangan kecil. Gunakan object storage jika galeri besar; transfer media memakai bandwidth database. MP3 dibatasi 25 MiB dengan validasi header frame; audio belum dipilih pengguna. Media hanya dilayani kepada sesi admin/tamu aktif, dengan dukungan Range.
+Media disimpan di enam slot Postgres; foto didekode, diputar sesuai EXIF, diperkecil dan dikonversi ke WebP. Ini cukup untuk undangan kecil. Gunakan object storage jika galeri besar; transfer media memakai bandwidth database. MP3 dibatasi 25 MiB dengan validasi header frame; audio belum dipilih pengguna. Fixture tes `tests/fixtures/silence.mp3` adalah 40 frame MPEG-1 Layer III hening yang dibuat sendiri, bukan lagu produksi; decoder macOS memeriksanya. Media hanya dilayani kepada sesi admin/tamu aktif, dengan dukungan Range.
 
 ## Verifikasi
 
@@ -47,7 +47,7 @@ npm run test:integration
 
 Tes integrasi memerlukan `TEST_DATABASE_URL` dan `TEST_DATABASE_URL_UNPOOLED` pada `.env.test.local`, menunjuk branch terpisah `dev-invitation-verification`. Tes menghapus data pada branch pengujian tersebut; jangan pernah memakai koneksi produksi. Branch test kedaluwarsa 20 Oktober 2026, buat ulang untuk pengujian berikutnya.
 
-Kontrak API: `postman/specs/invitation.json`. Koleksi yang dihasilkan: `postman/collections/Wedding Invitation API`. Syntax spec dan lint koleksi lulus. Health request memiliki dua assertion untuk status HTTP dan koneksi database. Governance lint Postman tidak dijalankan karena tidak ada login Postman; file lokal tetap dapat diuji.
+Kontrak API: `postman/specs/invitation.json`. Koleksi yang dihasilkan: `postman/collections/Wedding Invitation API`. Syntax spec dan lint koleksi lulus. Health dan konfigurasi Fingerprint produksi diuji dengan dua request, lima assertion, nol kegagalan. Governance lint Postman tidak dijalankan karena tidak ada login Postman; file lokal tetap dapat diuji.
 
 ```sh
 postman collection run 'postman/collections/Wedding Invitation API' -i 'Health check' --no-report-events
@@ -57,6 +57,8 @@ postman collection run 'postman/collections/Wedding Invitation API' -i 'Health c
 
 Repository: https://github.com/firstaadi-dev/wedding-invitation
 Render service: `srv-db7335bncjis73fbrlpg`, Docker, Singapore, paket free. `Dockerfile` menjalankan build dan tes unit saat image dibangun, kemudian migrasi dan server saat startup. Bind `0.0.0.0:$PORT`; health `/healthz` menguji database. Tidak membutuhkan persistent disk karena metadata dan media ada di Neon.
+
+Peta venue memakai URL embed resmi dari Google Maps, disimpan melalui CMS dan diperiksa di Chrome.
 
 Domain: https://wedding.firsta.my.id. CNAME `wedding` menuju `wedding-invitation-zuta.onrender.com`. Semua secret environment diisi lewat API Render tanpa masuk repository. File lokal `.env*` dan context Docker mengecualikan secret.
 

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {randomBytes,scryptSync} from 'node:crypto';
 import {once} from 'node:events';
-import {existsSync} from 'node:fs';
+import {existsSync,readFileSync} from 'node:fs';
 import sharp from 'sharp';
 import {database,migrate} from '../server/db.mjs';
 import {createApp} from '../server/app.mjs';
@@ -80,7 +80,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
       const invitation = await request('/api/invitation',{jar:guestBrowser});assert.equal(invitation.value.guestName,'Keluarga Uji');
       assert.equal((await request('/',{jar:guestBrowser})).value.includes('envelope-card'),true);
     });
-    await t.test('content, real photo decoding, authenticated media and range response',async () => {
+    await t.test('content, photo and MP3 uploads, authenticated media and range response',async () => {
       const saved = await adminRequest('/api/admin/content',{method:'PUT',data:{ceremonyTime:'09.00 WIB',mapEmbedUrl:'https://www.google.com/maps/embed?pb=test'}});
       assert.equal(saved.value.settings.ceremonyTime,'09.00 WIB');
       assert.equal((await adminRequest('/api/admin/content',{method:'PUT',data:{mapEmbedUrl:'https://attacker.example/embed'}})).response.status,400);
@@ -95,6 +95,19 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal(partial.status,206);assert.equal((await partial.arrayBuffer()).byteLength,10);
       const invalid = await fetch(base+'/api/admin/media/bride',{method:'PUT',headers:{Origin:origin,Cookie:`wedding_admin=${admin.wedding_admin}`,'X-CSRF-Token':csrf,'Content-Type':'image/png'},body:'<svg onload="evil()"></svg>'});
       assert.equal(invalid.status,415);
+      const music = readFileSync(new URL('./fixtures/silence.mp3',import.meta.url));
+      const musicHeaders = {Origin:origin,Cookie:`wedding_admin=${admin.wedding_admin}`,'X-CSRF-Token':csrf,'Content-Type':'audio/mpeg'};
+      const uploaded = await fetch(base+'/api/admin/media/music',{method:'PUT',headers:musicHeaders,body:music});
+      assert.equal(uploaded.status,200);const musicPath = (await uploaded.json()).media.music;
+      assert.equal((await request(musicPath)).response.status,401);
+      const downloaded = await fetch(base+musicPath,{headers:{Cookie:`wedding_guest=${guestBrowser.wedding_guest}`}});
+      assert.equal(downloaded.headers.get('content-type'),'audio/mpeg');
+      assert.deepEqual(Buffer.from(await downloaded.arrayBuffer()),music);
+      assert.equal((await request('/api/invitation',{jar:guestBrowser})).value.media.music,musicPath);
+      const invalidMusic = await fetch(base+'/api/admin/media/music',{method:'PUT',headers:musicHeaders,body:'not an MP3'});
+      assert.equal(invalidMusic.status,415);
+      assert.equal((await adminRequest('/api/admin/media/music',{method:'DELETE'})).response.status,200);
+      assert.equal((await request('/api/invitation',{jar:guestBrowser})).value.media.music,undefined);
     });
     await t.test('reset, deactivate and link rotation revoke sessions immediately',async () => {
       assert.equal((await adminRequest(`/api/admin/guests/${guest.id}/devices`,{method:'DELETE'})).response.status,200);
