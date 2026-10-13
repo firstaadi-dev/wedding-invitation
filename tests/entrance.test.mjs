@@ -23,7 +23,8 @@ assert.equal((page.match(/class="trees trees-right"/g) || []).length, 6);
 assert.match(page, /Firsta Adi Pradana/);
 assert.match(page, /Talitha Syahda Arundatie/);
 assert.match(page, /22 November 2026/);
-assert.match(page, /dpHfUEkyYunb17L58/);
+assert.doesNotMatch(page, /Buka Google Maps|maps\.app\.goo\.gl/);
+assert.doesNotMatch(page, /Beserta keluarga besar|class="farewell-date"/);
 
 
 for (const name of ['Nugroho Andang Hapsoro', 'Arieta Rahmasari', 'Sudaryatno', 'Wuri Wahyuningsih']) assert.match(page, new RegExp(name));

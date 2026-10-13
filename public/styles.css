@@ -95,37 +95,6 @@ main {
   line-height:1.7;
 }
 
-.button {
-  border:1px solid #d6bcb029;
-  display:inline-flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:32px;
-  padding:15px 25px;
-  min-height:52px;
-  text-decoration:none;
-  font-size:14px;
-  font-weight:500;
-  border-radius:2px;
-  cursor:pointer;
-  box-shadow:0 8px 25px #100b0d26;
-  transition:background .2s;
-}
-
-.burgundy {
-  background:var(--burgundy);
-  color:#fff;
-}
-
-.burgundy:hover {
-  background:#852e42;
-}
-
-.button span {
-  font-size:23px;
-  line-height:1;
-}
-
 .entrance-track {
   position:relative;
   height:185svh;
@@ -509,11 +478,6 @@ main {
   font-size:10px;
 }
 
-.location-paper .button {
-  width:100%;
-  font-size:13px;
-}
-
 .gallery-scene {
   padding-block:160px;
 }
@@ -561,13 +525,6 @@ body.gallery-open {overflow:hidden;}
 .farewell-scene .forest-backdrop {
   opacity:.65;
   background-position:center 35%;
-}
-
-.farewell-date {
-  font-size:11px;
-  letter-spacing:.2em;
-  margin-top:60px;
-  color:#ddd1b6;
 }
 
 .music-status {
