@@ -1,0 +1,11 @@
+node_modules
+.git
+.env
+.env.*
+.neon
+.idea
+design
+docs
+postman
+.postman
+*.log

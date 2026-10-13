@@ -1,0 +1,16 @@
+$kind: http-request
+description: Validates secret link hash. Origin required. Sets challenge cookie. Does not register a device.
+url: "{{baseUrl}}/api/access/challenge"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "token": "yMXOzqi27NzHPR3KAUERQ1vZP6N_da_UUyO3OhxqgxD"
+    }
+settings: {}
+examples: ./.resources/Create five-minute single-use verification challenge.resources/examples
+order: 1000

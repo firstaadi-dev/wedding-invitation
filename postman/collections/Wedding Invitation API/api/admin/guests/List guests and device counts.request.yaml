@@ -1,0 +1,15 @@
+$kind: http-request
+description: List guests and device counts
+url: "{{baseUrl}}/api/admin/guests"
+method: GET
+headers:
+  Accept: application/json
+auth:
+  type: apikey
+  credentials:
+    key: wedding_admin
+    value: "{{apiKey}}"
+    in: header
+settings: {}
+examples: ./.resources/List guests and device counts.resources/examples
+order: 1000

@@ -1,0 +1,25 @@
+$kind: http-request
+description: Revoke admin session
+url: "{{baseUrl}}/api/admin/logout"
+method: POST
+headers:
+  - key: X-CSRF-Token
+    value: string
+    disabled: false
+    description: (Required) Token returned by admin session/login, matching HttpOnly cookie session.
+  - key: Content-Type
+    value: application/json
+  - key: Accept
+    value: application/json
+body:
+  type: json
+  content: "{}"
+auth:
+  type: apikey
+  credentials:
+    key: wedding_admin
+    value: "{{apiKey}}"
+    in: header
+settings: {}
+examples: ./.resources/Revoke admin session.resources/examples
+order: 3000

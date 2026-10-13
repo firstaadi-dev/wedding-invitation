@@ -1,0 +1,15 @@
+$kind: http-request
+description: Read settings and selected media
+url: "{{baseUrl}}/api/admin/content"
+method: GET
+headers:
+  Accept: application/json
+auth:
+  type: apikey
+  credentials:
+    key: wedding_admin
+    value: "{{apiKey}}"
+    in: header
+settings: {}
+examples: ./.resources/Read settings and selected media.resources/examples
+order: 1000

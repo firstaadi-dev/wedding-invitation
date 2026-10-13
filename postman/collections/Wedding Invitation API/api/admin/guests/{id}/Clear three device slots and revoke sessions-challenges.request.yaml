@@ -1,0 +1,26 @@
+$kind: http-request
+name: Clear three device slots and revoke sessions/challenges
+description: Clear three device slots and revoke sessions/challenges
+url: "{{baseUrl}}/api/admin/guests/:id/devices"
+method: DELETE
+headers:
+  - key: X-CSRF-Token
+    value: string
+    disabled: false
+    description: (Required) Token returned by admin session/login, matching HttpOnly cookie session.
+  - key: Accept
+    value: application/json
+pathVariables:
+  - key: id
+    value: string
+    disabled: false
+    description: "(Required) "
+auth:
+  type: apikey
+  credentials:
+    key: wedding_admin
+    value: "{{apiKey}}"
+    in: header
+settings: {}
+examples: ./.resources/Clear three device slots and revoke sessions-challenges.resources/examples
+order: 4000

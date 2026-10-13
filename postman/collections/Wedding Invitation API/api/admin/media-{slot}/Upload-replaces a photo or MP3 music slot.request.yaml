@@ -1,0 +1,31 @@
+$kind: http-request
+name: Upload/replaces a photo or MP3 music slot
+description: Raw binary body, no multipart. Photos up to 12 MiB, decoded/re-encoded by Sharp; music MP3 up to 25 MiB with frame validation. Old file removed after committed replacement.
+url: "{{baseUrl}}/api/admin/media/:slot"
+method: PUT
+headers:
+  - key: X-CSRF-Token
+    value: string
+    disabled: false
+    description: (Required) Token returned by admin session/login, matching HttpOnly cookie session.
+  - key: Content-Type
+    value: image/jpeg
+  - key: Accept
+    value: application/json
+pathVariables:
+  - key: slot
+    value: gallery1
+    disabled: false
+    description: "(Required) "
+body:
+  type: file
+  content: {}
+auth:
+  type: apikey
+  credentials:
+    key: wedding_admin
+    value: "{{apiKey}}"
+    in: header
+settings: {}
+examples: ./.resources/Upload-replaces a photo or MP3 music slot.resources/examples
+order: 1000

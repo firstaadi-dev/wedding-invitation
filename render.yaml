@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: wedding-invitation
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PUBLIC_ORIGIN
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_URL_UNPOOLED
+        sync: false
+      - key: ADMIN_PASSWORD_HASH
+        sync: false
+      - key: FINGERPRINT_PUBLIC_KEY
+        value: k3IGGzMGUOYb5FnccL4s
+      - key: FINGERPRINT_SECRET_KEY
+        sync: false
+      - key: FINGERPRINT_REGION
+        value: ap

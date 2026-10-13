@@ -1,0 +1,4 @@
+workflows:
+  syncSpecToCollection:
+    - spec: ../postman/specs/invitation.json
+      collection: ../postman/collections/Wedding Invitation API

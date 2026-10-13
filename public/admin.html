@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer"><title>Rimba Jawa — Dashboard</title>
+  <link rel="stylesheet" href="/admin.css"><script type="module" src="/admin.js"></script>
+</head>
+<body>
+  <header><a class="brand" href="/admin"><span aria-hidden="true">❦</span> Rimba Jawa</a><span>Firsta & Talitha · 22 November 2026</span><button id="logout" hidden>Keluar</button></header>
+  <main>
+    <form id="login" class="login-panel">
+      <p class="eyebrow">Dashboard undangan</p><h1>Selamat datang.</h1><p>Masuk untuk mengatur tamu, foto, dan lagu.</p>
+      <label>Password admin<input name="password" type="password" autocomplete="current-password" required maxlength="1024"></label><button class="primary">Masuk</button>
+    </form>
+    <div id="dashboard" hidden>
+      <div class="page-heading"><div><p class="eyebrow">Dashboard undangan</p><h1>Hari bahagia, tertata.</h1><p>Atur undangan Firsta dan Talitha dari satu tempat.</p></div><a class="secondary" href="/preview" target="_blank" rel="noopener">Lihat undangan ↗</a></div>
+      <section class="panel" aria-labelledby="guests-title">
+        <div class="section-heading"><h2 id="guests-title">Tamu undangan</h2><span id="guest-count" class="badge">0 tamu</span></div>
+        <form id="add-guest" class="inline-form"><label>Nama tamu<input name="name" required maxlength="120" placeholder="Bapak/Ibu atau keluarga"></label><button class="primary">Tambah tamu</button></form>
+        <div id="new-link" class="new-link" hidden><label>Tautan baru — simpan sebelum meninggalkan halaman<input id="link-value" readonly></label><button id="copy-link" type="button" class="secondary">Salin tautan</button><p>Tautan lama akan berhenti berlaku jika Anda membuat tautan pengganti.</p></div>
+        <label class="search-label">Cari tamu<input id="search" type="search" placeholder="Cari berdasarkan nama…"></label>
+        <div class="table-wrap"><table><thead><tr><th>Nama tamu</th><th>Status</th><th>Perangkat</th><th>Tindakan</th></tr></thead><tbody id="guests"></tbody></table></div>
+        <p id="empty-guests" class="empty">Belum ada tamu. Tambahkan tamu untuk membuat tautan pertama.</p>
+      </section>
+      <section class="panel" aria-labelledby="media-title"><h2 id="media-title">Foto & lagu</h2><p>Foto diperkecil otomatis. JPG, PNG, WebP maksimal 12 MB; lagu MP3 maksimal 25 MB.</p><div class="media-grid" id="media-grid"></div></section>
+      <section class="panel" aria-labelledby="event-settings-title"><h2 id="event-settings-title">Detail acara</h2><form id="settings"><div class="two-columns"><label>Waktu prosesi<input name="ceremonyTime" maxlength="80" placeholder="Contoh: 09.00 WIB"></label><label>Waktu resepsi<input name="receptionTime" maxlength="80" placeholder="Contoh: 11.00–13.00 WIB"></label></div><label>URL embed Google Maps<textarea name="mapEmbedUrl" rows="3" placeholder="Salin URL src dari Google Maps → Bagikan → Sematkan peta"></textarea></label><p>Lokasi: Arjuna Ballroom Alam Indah Resto. URL tautan biasa tetap tersedia di undangan.</p><button class="primary">Simpan detail</button></form></section>
+    </div>
+    <p id="status" role="status" class="status" hidden></p>
+    <dialog id="confirm"><form method="dialog"><h2 id="confirm-title">Konfirmasi perubahan</h2><p id="confirm-message"></p><div class="dialog-actions"><button value="cancel" class="secondary">Batal</button><button value="confirm" class="primary">Lanjutkan</button></div></form></dialog>
+  </main>
+</body>
+</html>

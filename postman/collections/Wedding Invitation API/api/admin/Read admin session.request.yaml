@@ -1,0 +1,15 @@
+$kind: http-request
+description: Read admin session
+url: "{{baseUrl}}/api/admin/session"
+method: GET
+headers:
+  Accept: application/json
+auth:
+  type: apikey
+  credentials:
+    key: wedding_admin
+    value: "{{apiKey}}"
+    in: header
+settings: {}
+examples: ./.resources/Read admin session.resources/examples
+order: 2000

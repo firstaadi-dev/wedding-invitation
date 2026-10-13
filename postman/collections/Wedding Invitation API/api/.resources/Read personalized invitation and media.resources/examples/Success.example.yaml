@@ -1,0 +1,37 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/invitation"
+  method: GET
+  headers:
+    - key: wedding_guest
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+    - key: Accept
+      value: application/json
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "guestName": "string",
+        "settings": {
+          "ceremonyTime": "string",
+          "receptionTime": "string",
+          "mapEmbedUrl": "string"
+        },
+        "media": {
+          "key_0": "string",
+          "key_1": "string",
+          "key_2": "string",
+          "key_3": "string",
+          "key_4": "string"
+        }
+      }
+order: 1000

@@ -1,0 +1,3 @@
+$kind: collection
+name: media/{slot}
+order: 6000

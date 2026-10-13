@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>Pernikahan Firsta &amp; Talitha — Adat Jawa Solo</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with Forms and Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container-highest": "#f0e0d3",
+            "on-tertiary-fixed": "#0b2004",
+            "on-error-container": "#93000a",
+            "secondary-fixed": "#c3ebdb",
+            "on-surface-variant": "#544244",
+            "background": "#fff8f5",
+            "surface-container": "#fcebde",
+            "surface": "#fff8f5",
+            "inverse-on-surface": "#ffeee1",
+            "inverse-primary": "#ffb2bd",
+            "surface-variant": "#f0e0d3",
+            "tertiary-fixed": "#ceebbd",
+            "secondary": "#416659",
+            "tertiary-container": "#2d4423",
+            "error": "#ba1a1a",
+            "secondary-fixed-dim": "#a8cfc0",
+            "on-primary-fixed-variant": "#792c3d",
+            "outline-variant": "#d9c1c3",
+            "inverse-surface": "#382f26",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary-fixed-variant": "#294d42",
+            "tertiary-fixed-dim": "#b3cfa2",
+            "on-secondary-container": "#456a5d",
+            "error-container": "#ffdad6",
+            "surface-bright": "#fff8f5",
+            "on-secondary": "#ffffff",
+            "tertiary": "#172e0f",
+            "primary": "#510d20",
+            "surface-container-low": "#fff1e7",
+            "secondary-container": "#c0e8d8",
+            "primary-fixed": "#ffd9dd",
+            "on-surface": "#221a13",
+            "on-error": "#ffffff",
+            "primary-container": "#6e2435",
+            "surface-tint": "#964454",
+            "surface-container-high": "#f6e5d9",
+            "on-primary-fixed": "#3f0014",
+            "outline": "#867274",
+            "on-primary": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "on-secondary-fixed": "#002118",
+            "on-background": "#221a13",
+            "surface-dim": "#e7d7cb",
+            "on-tertiary-fixed-variant": "#354d2b",
+            "on-tertiary-container": "#96b187",
+            "primary-fixed-dim": "#ffb2bd",
+            "on-primary-container": "#f08c9d"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xl": "2.5rem",
+            "space-lg": "1.5rem",
+            "space-sm": "0.5rem",
+            "gutter-tablet": "1.5rem",
+            "space-2xl": "4rem",
+            "space-md": "1rem",
+            "margin-desktop": "3rem",
+            "margin": "1.25rem",
+            "space-xs": "0.25rem",
+            "margin-tablet": "2rem",
+            "gutter-desktop": "2rem",
+            "gutter": "1rem"
+          },
+          "fontFamily": {
+            "display-hero-mobile": [
+              "Playfair Display"
+            ],
+            "label-md": [
+              "Plus Jakarta Sans"
+            ],
+            "headline-md": [
+              "Playfair Display"
+            ],
+            "couples-script-mobile": [
+              "Playfair Display"
+            ],
+            "body-lg": [
+              "Plus Jakarta Sans"
+            ],
+            "label-sm": [
+              "Plus Jakarta Sans"
+            ],
+            "headline-lg": [
+              "Playfair Display"
+            ],
+            "body-sm": [
+              "Plus Jakarta Sans"
+            ],
+            "body-md": [
+              "Plus Jakarta Sans"
+            ],
+            "display-hero": [
+              "Playfair Display"
+            ],
+            "ornament-caption": [
+              "Playfair Display"
+            ],
+            "couples-script": [
+              "Playfair Display"
+            ],
+            "headline-lg-mobile": [
+              "Playfair Display"
+            ]
+          },
+          "fontSize": {
+            "display-hero-mobile": [
+              "36px",
+              {
+                "lineHeight": "44px",
+                "letterSpacing": "0.01em",
+                "fontWeight": "400"
+              }
+            ],
+            "label-md": [
+              "14px",
+              {
+                "lineHeight": "20px",
+                "letterSpacing": "0.04em",
+                "fontWeight": "600"
+              }
+            ],
+            "headline-md": [
+              "22px",
+              {
+                "lineHeight": "30px",
+                "fontWeight": "500"
+              }
+            ],
+            "couples-script-mobile": [
+              "30px",
+              {
+                "lineHeight": "38px",
+                "letterSpacing": "0.02em",
+                "fontWeight": "400"
+              }
+            ],
+            "body-lg": [
+              "17px",
+              {
+                "lineHeight": "28px",
+                "fontWeight": "400"
+              }
+            ],
+            "label-sm": [
+              "12px",
+              {
+                "lineHeight": "16px",
+                "letterSpacing": "0.08em",
+                "fontWeight": "500"
+              }
+            ],
+            "headline-lg": [
+              "32px",
+              {
+                "lineHeight": "40px",
+                "fontWeight": "400"
+              }
+            ],
+            "body-sm": [
+              "14px",
+              {
+                "lineHeight": "22px",
+                "fontWeight": "400"
+              }
+            ],
+            "body-md": [
+              "16px",
+              {
+                "lineHeight": "26px",
+                "fontWeight": "400"
+              }
+            ],
+            "display-hero": [
+              "48px",
+              {
+                "lineHeight": "56px",
+                "letterSpacing": "0.02em",
+                "fontWeight": "400"
+              }
+            ],
+            "ornament-caption": [
+              "13px",
+              {
+                "lineHeight": "18px",
+                "letterSpacing": "0.14em",
+                "fontWeight": "400"
+              }
+            ],
+            "couples-script": [
+              "38px",
+              {
+                "lineHeight": "46px",
+                "letterSpacing": "0.03em",
+                "fontWeight": "400"
+              }
+            ],
+            "headline-lg-mobile": [
+              "26px",
+              {
+                "lineHeight": "34px",
+                "fontWeight": "400"
+              }
+            ]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      display: inline-block;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+    }
+    .arch-frame {
+      border-top-left-radius: 9999px;
+      border-top-right-radius: 9999px;
+      border-bottom-left-radius: 1.25rem;
+      border-bottom-right-radius: 1.25rem;
+    }
+    .pb-safe {
+      padding-bottom: env(safe-area-inset-bottom, 1.5rem);
+    }
+    /* Motif Kawung Surakarta Transparan */
+    .kawung-pattern {
+      background-image: radial-gradient(circle at 50% 50%, rgba(82, 107, 70, 0.08) 2px, transparent 2px),
+                        radial-gradient(circle at 0 0, rgba(118, 86, 64, 0.05) 12px, transparent 13px),
+                        radial-gradient(circle at 100% 100%, rgba(118, 86, 64, 0.05) 12px, transparent 13px);
+      background-size: 32px 32px;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#242A24] text-on-surface font-body-md text-body-md antialiased min-h-screen flex justify-center selection:bg-primary-container selection:text-on-primary">
+<!-- Canvas Container Framed 390px - 480px -->
+<div class="w-full max-w-[480px] min-h-screen bg-background relative shadow-2xl flex flex-col overflow-x-hidden border-x border-[#765640]/10">
+<!-- 1. STICKY TOP APP BAR (Shared Component Anchor) -->
+<header class="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-4 py-2.5 max-w-[480px] mx-auto w-full bg-surface/90 backdrop-blur-md border-b border-outline-variant/30 shadow-sm transition-all duration-300">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[#526B46]">spa</span>
+<span class="font-couples-script-mobile text-[20px] leading-tight text-primary font-semibold tracking-wide">F &amp; T</span>
+</div>
+<!-- Jump Anchors -->
+<nav class="flex items-center gap-2.5 text-[13px] font-medium text-on-surface-variant">
+<a class="hover:text-primary transition-colors py-1 px-1" href="#mempelai">Mempelai</a>
+<a class="hover:text-primary transition-colors py-1 px-1" href="#acara">Acara</a>
+<a class="hover:text-primary transition-colors py-1 px-1" href="#lokasi">Lokasi</a>
+<a class="hover:text-primary transition-colors py-1 px-1" href="#galeri">Galeri</a>
+</nav>
+<!-- Music Status Button (Explicitly Disabled & Clearly Tooltipped) -->
+<div class="relative group">
+<button aria-disabled="true" aria-label="Lagu belum ditambahkan" class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-container border border-outline-variant/40 text-outline cursor-not-allowed opacity-60" disabled="" type="button">
+<span class="material-symbols-outlined text-[17px]">music_off</span>
+</button>
+<span class="absolute right-0 top-10 pointer-events-none opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-200 whitespace-nowrap bg-[#30271F] text-[#FAF7F2] text-[11px] py-1 px-2.5 rounded shadow-lg z-50">
+          Lagu belum ditambahkan
+        </span>
+</div>
+</header>
+<!-- CONTENT BODY (Padded for fixed top bar) -->
+<main class="flex-grow pt-[52px]">
+<!-- 2. HERO EDITORIAL (Rimba Jawa & Nuansa Hijau Hutan #183D32) -->
+<section class="relative bg-[#183D32] text-[#FAF7F2] px-margin pt-10 pb-16 overflow-hidden">
+<!-- Subtle Kawung Pattern and Gunungan Silhouette Background -->
+<div aria-hidden="true" class="absolute inset-0 opacity-10 pointer-events-none kawung-pattern"></div>
+<div aria-hidden="true" class="absolute -right-12 -top-12 w-64 h-64 rounded-full bg-[#526B46]/20 blur-3xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col items-center text-center">
+<!-- Gunungan Icon Motif -->
+<div class="flex items-center justify-center gap-2 mb-3 text-[#ceebbd]/80">
+<span class="h-[1px] w-8 bg-[#526B46]/60"></span>
+<span class="material-symbols-outlined text-[18px]">filter_vintage</span>
+<span class="h-[1px] w-8 bg-[#526B46]/60"></span>
+</div>
+<p class="font-label-sm text-[11px] tracking-[0.2em] uppercase text-[#c3ebdb] mb-2 font-medium">
+            Walimatul 'Ursy • Adat Jawa Solo
+          </p>
+<h1 class="font-display-hero-mobile text-display-hero-mobile text-[#FAF7F2] mb-1 leading-tight tracking-normal font-normal">
+            Firsta &amp; Talitha
+          </h1>
+<div class="flex items-center gap-2 mt-2 mb-8 text-[#FAF7F2]/90">
+<span class="material-symbols-outlined text-[16px] text-[#ceebbd]">calendar_month</span>
+<span class="font-body-md text-[15px] tracking-wide font-medium">Minggu, 22 November 2026</span>
+</div>
+<!-- Arch Frame Hero Placeholder with Botanical Vignette -->
+<div class="relative w-full max-w-[290px] aspect-[4/5] arch-frame bg-[#22473B] p-2 border border-[#ceebbd]/20 shadow-xl overflow-hidden flex flex-col items-center justify-center group">
+<div class="absolute inset-0 bg-gradient-to-t from-[#183D32] via-transparent to-transparent opacity-80 z-10"></div>
+<img class="w-full h-full object-cover arch-frame filter brightness-90 contrast-95" data-alt="An ethereal editorial wedding portrait framed under an ancient wooden Joglo veranda surrounded by lush tropical Javanese highland ferns and soft morning mist. The aesthetic is peaceful, dignified, and regal, honoring classical Solonese bridal heritage in soft earthy green tones, umber wood, and ivory handmade paper textures. Fine ambient lighting highlights delicate foliage silhouettes." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEIUCkQuLqY4v_J4MENxOY38-kx_fSN8lWeCVUIBP4m8f-poAplZrtgJbdElbmpqLfFD-Qc9itWEGewW6n2Aa3YA2rJYx-AqaRCT6Py2JhuQyDjjMm1tcyW253J3gXZDjZe-BndkzS-rkde4M7jSpX3LNDVWWJhdYG9VPjrkoldDyRvbyBFa89S6VnQaPE0iAIr2uHzE_S9GuqKnxN9DTrfJoL32pMbHcZmYU1VL6G7OPGIAjZZwun8RSc1RAh5GGrxPbLuJQml-8"/>
+<!-- Editorial Overlay Notice -->
+<div class="absolute inset-0 z-20 flex flex-col items-center justify-center p-4 text-center bg-[#183D32]/60 backdrop-blur-[2px]">
+<div class="w-10 h-10 rounded-full bg-[#FAF7F2]/10 border border-[#FAF7F2]/20 flex items-center justify-center mb-2.5 text-[#ceebbd]">
+<span class="material-symbols-outlined text-[22px]">photo_camera</span>
+</div>
+<p class="font-ornament-caption text-ornament-caption text-[#FAF7F2] tracking-wider italic">
+                Foto pasangan akan ditambahkan
+              </p>
+</div>
+<!-- Arch Border Inner Accent -->
+<div class="absolute inset-1.5 arch-frame border border-[#ceebbd]/15 pointer-events-none z-30"></div>
+</div>
+<!-- Subtle Botanical Monogram -->
+<div class="mt-8 flex items-center justify-center gap-3 text-[#ceebbd]/60">
+<span class="w-12 h-[1px] bg-[#526B46]/40"></span>
+<span class="font-couples-script text-[18px] text-[#FAF7F2]/80">F &amp; T</span>
+<span class="w-12 h-[1px] bg-[#526B46]/40"></span>
+</div>
+</div>
+</section>
+<!-- 3. BAGIAN SAPAAN & AYAT / DOA (Latar Putih Hangat #FAF7F2) -->
+<section class="relative bg-[#FAF7F2] px-margin py-12 border-b border-[#765640]/10">
+<div class="max-w-[360px] mx-auto text-center">
+<div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#f0e0d3] text-primary mb-4">
+<span class="material-symbols-outlined text-[18px]">spa</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-[#30271F] mb-3 font-medium">
+            Salam Hangat &amp; Doa
+          </h2>
+<p class="font-body-md text-body-md text-[#30271F] leading-relaxed mb-6 font-normal">
+            Dengan penuh sukacita, kami mengundang Anda untuk hadir dan merayakan hari bahagia kami.
+          </p>
+<!-- Doa Filosofi Pernikahan Jawa Sakinah & Hayuning Bawana -->
+<div class="p-5 rounded-xl bg-surface-container-lowest border border-[#765640]/15 shadow-sm text-center relative">
+<span class="material-symbols-outlined text-[#526B46] text-[24px] mb-2 opacity-80">format_quote</span>
+<p class="font-headline-md text-[17px] italic text-primary leading-relaxed mb-2 font-normal">
+              “Mugi Gusti paring berkah, katentreman, lan karahayon ing salebeting bebrayan agung.”
+            </p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Semoga ikatan suci ini senantiasa dilimpahi cinta kasih, ketenteraman jiwa, serta kebahagiaan lahir dan batin dalam naungan rida Illahi.
+            </p>
+</div>
+</div>
+</section>
+<!-- 4. PROFIL MEMPELAI (Latar Halus & Bento Editorial Card) -->
+<section class="relative px-margin py-space-xl bg-background scroll-mt-14" id="mempelai">
+<div class="text-center mb-8">
+<p class="font-label-sm text-label-sm tracking-[0.16em] uppercase text-[#526B46] font-semibold mb-1">
+            Sang Mempelai
+          </p>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-[#30271F]">
+            Mempelai Berbahagia
+          </h2>
+<div class="w-10 h-[1.5px] bg-[#765640]/30 mx-auto mt-2"></div>
+</div>
+<div class="flex flex-col gap-8 items-center max-w-[360px] mx-auto">
+<!-- Mempelai Pria -->
+<div class="w-full bg-surface-container-lowest rounded-2xl p-5 border border-[#765640]/15 shadow-sm flex flex-col items-center text-center">
+<div class="relative w-40 aspect-[3/4] arch-frame bg-[#f0e0d3] border-2 border-[#526B46]/20 p-1 mb-4 overflow-hidden">
+<img class="w-full h-full object-cover arch-frame" data-alt="An editorial male portrait frame silhouette with classical Javanese heritage motifs, warm earthen lighting, soft ambient foliage, muted botanical deep green and mahogany wood tones, representing an elegant Javanese groom in Solonese wedding attire with timeless grace." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0kfU-LnVqZygsVVTSUBk4jArLeZvjjhsfFsEyQ3dpIKCFUCIkWRp-TvuwboLDjUn80YnnSV39HWEgCzcknGq0CTkajBv0cjm_wOR2PMO16cuml23gozhKsDZLKY9tfXaF1dAqo4cwvRQBiN_8Qfam801WBx12js5V1DyUdJvG5QltsEcuZG_48TX2t7y9dzw96jtRhJdxljG_DQ0RgEyFVdNH4LJtc3MkbdIPlDfmOtKrxFsROujliLtXJfDUAMaEuZxTsnB0ovo"/>
+<div class="absolute inset-0 bg-[#30271F]/40 flex flex-col items-center justify-center p-2 text-center">
+<span class="material-symbols-outlined text-[#FAF7F2] text-[20px] mb-1">person</span>
+<span class="text-[11px] font-label-sm text-[#FAF7F2] tracking-wider">Foto akan ditambahkan</span>
+</div>
+</div>
+<!-- Nama Lengkap Utuh Tanpa Terpotong -->
+<h3 class="font-headline-md text-[20px] text-primary font-semibold leading-snug">
+              Firsta Adi Pradana
+            </h3>
+<p class="font-label-sm text-label-sm text-[#526B46] mt-0.5 tracking-wider uppercase font-semibold">
+              Mempelai Pria
+            </p>
+</div>
+<!-- Ampersand Divider Ornament -->
+<div class="flex items-center justify-center my-[-10px] z-10">
+<div class="w-12 h-12 rounded-full bg-[#183D32] text-[#FAF7F2] flex items-center justify-center shadow-md border-2 border-background">
+<span class="font-display-hero text-[24px] italic leading-none pt-0.5">&amp;</span>
+</div>
+</div>
+<!-- Mempelai Wanita -->
+<div class="w-full bg-surface-container-lowest rounded-2xl p-5 border border-[#765640]/15 shadow-sm flex flex-col items-center text-center">
+<div class="relative w-40 aspect-[3/4] arch-frame bg-[#f0e0d3] border-2 border-[#526B46]/20 p-1 mb-4 overflow-hidden">
+<img class="w-full h-full object-cover arch-frame" data-alt="An artistic bridal portrait composition reflecting Javanese bridal poise with delicate Solonese floral jasmine accents, subtle rim lighting, peaceful warm brown and forest green tones, framed gracefully inside an architectural arch on textured cotton paper." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGQaBdlFQP1DSbMpyRAsyUZ4lLM22r3RfQyV6Tb96Wp5298NMR8mCIY8XzxL4zbC4fhicekAS2zvS_FySe1JJWZl959LqRESTUWTfG93rxQgSNWjZlhoCLGFV-ERo4fOBbncFtRl1KNsFqG-1SeY7WYUcnZ4qbug33nVDKXC6Z0PkrKlXpHE37zVklNCEOZxXZ1g_wR1fbMcfPkUUeXctrCJewQiPyIelLi7O3L4hiPwGBcHB83T1tMmIKhMooigJBBwIg-eAImvc"/>
+<div class="absolute inset-0 bg-[#30271F]/40 flex flex-col items-center justify-center p-2 text-center">
+<span class="material-symbols-outlined text-[#FAF7F2] text-[20px] mb-1">person</span>
+<span class="text-[11px] font-label-sm text-[#FAF7F2] tracking-wider">Foto akan ditambahkan</span>
+</div>
+</div>
+<!-- Nama Lengkap Utuh Tanpa Terpotong -->
+<h3 class="font-headline-md text-[20px] text-primary font-semibold leading-snug">
+              Talitha Syahda Arundatie
+            </h3>
+<p class="font-label-sm text-label-sm text-[#526B46] mt-0.5 tracking-wider uppercase font-semibold">
+              Mempelai Wanita
+            </p>
+</div>
+</div>
+</section>
+<!-- 5. BAGIAN "HARI BAHAGIA KAMI" (Latar Hijau Hutan #183D32) -->
+<section class="relative bg-[#183D32] text-[#FAF7F2] px-margin py-space-xl scroll-mt-14 overflow-hidden" id="acara">
+<div aria-hidden="true" class="absolute inset-0 kawung-pattern opacity-10 pointer-events-none"></div>
+<div class="relative z-10 max-w-[390px] mx-auto text-center">
+<p class="font-label-sm text-label-sm tracking-[0.18em] uppercase text-[#c3ebdb] font-medium mb-1">
+            Rangkaian Acara
+          </p>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-[#FAF7F2] mb-2 font-normal">
+            Hari Bahagia Kami
+          </h2>
+<p class="font-body-md text-body-md text-[#FAF7F2]/80 mb-8 font-medium">
+            Minggu, 22 November 2026
+          </p>
+<!-- Kartu Acara 1: Prosesi Pernikahan -->
+<div class="bg-surface-container-lowest text-[#30271F] rounded-2xl p-6 mb-5 border border-[#ceebbd]/30 shadow-lg text-left relative overflow-hidden">
+<div class="flex items-start justify-between mb-3">
+<div>
+<span class="inline-block px-2.5 py-0.5 rounded-full bg-[#183D32]/10 text-[#183D32] text-[11px] font-semibold tracking-wider uppercase mb-1">
+                  Prosesi Inti
+                </span>
+<h3 class="font-headline-md text-[21px] text-primary font-semibold">
+                  Prosesi Pernikahan
+                </h3>
+</div>
+<div class="w-10 h-10 rounded-full bg-[#183D32] text-[#FAF7F2] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">handshake</span>
+</div>
+</div>
+<div class="space-y-2.5 pt-2 border-t border-[#765640]/10 text-[15px]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#526B46] text-[18px]">event</span>
+<span class="font-medium text-[#30271F]">Minggu, 22 November 2026</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#526B46] text-[18px]">schedule</span>
+<span class="text-on-surface-variant italic">Waktu akan diinformasikan</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-[#526B46] text-[18px] mt-0.5">place</span>
+<div>
+<span class="font-semibold block text-[#30271F]">Arjuna Ballroom Alam Indah Resto</span>
+<span class="text-[13px] text-on-surface-variant block mt-0.5">Pelaksanaan adat &amp; prosesi sakral</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Kartu Acara 2: Resepsi -->
+<div class="bg-surface-container-lowest text-[#30271F] rounded-2xl p-6 mb-7 border border-[#ceebbd]/30 shadow-lg text-left relative overflow-hidden">
+<div class="flex items-start justify-between mb-3">
+<div>
+<span class="inline-block px-2.5 py-0.5 rounded-full bg-[#526B46]/15 text-[#526B46] text-[11px] font-semibold tracking-wider uppercase mb-1">
+                  Syukuran
+                </span>
+<h3 class="font-headline-md text-[21px] text-primary font-semibold">
+                  Resepsi
+                </h3>
+</div>
+<div class="w-10 h-10 rounded-full bg-[#526B46] text-[#FAF7F2] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">celebration</span>
+</div>
+</div>
+<div class="space-y-2.5 pt-2 border-t border-[#765640]/10 text-[15px]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#526B46] text-[18px]">event</span>
+<span class="font-medium text-[#30271F]">Minggu, 22 November 2026</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#526B46] text-[18px]">schedule</span>
+<span class="text-on-surface-variant italic">Waktu akan diinformasikan</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-[#526B46] text-[18px] mt-0.5">place</span>
+<div>
+<span class="font-semibold block text-[#30271F]">Arjuna Ballroom Alam Indah Resto</span>
+<span class="text-[13px] text-on-surface-variant block mt-0.5">Perayaan bersama keluarga &amp; sahabat terkasih</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Tombol "Simpan Tanggal" / "Tambah ke Kalender" (Warna Burgundy #6E2435, min-height 48px) -->
+<a class="inline-flex items-center justify-center gap-2.5 w-full min-h-[48px] px-6 py-3 rounded-lg bg-[#6E2435] hover:bg-[#541926] text-[#FFFFFF] font-label-md text-label-md transition-all duration-200 shadow-md active:scale-95" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Pernikahan+Firsta+%26+Talitha&amp;dates=20261122/20261123&amp;details=Pernikahan+Adat+Jawa+Solo+Firsta+Adi+Pradana+%26+Talitha+Syahda+Arundatie+di+Arjuna+Ballroom+Alam+Indah+Resto&amp;location=Arjuna+Ballroom+Alam+Indah+Resto" rel="noopener noreferrer" target="_blank">
+<span class="material-symbols-outlined text-[20px]">event_available</span>
+<span>Simpan Tanggal ke Kalender</span>
+</a>
+</div>
+</section>
+<!-- 6. LOKASI & NAVIGASI (Latar Putih Hangat #FAF7F2) -->
+<section class="relative bg-[#FAF7F2] px-margin py-space-xl scroll-mt-14 border-b border-[#765640]/10" id="lokasi">
+<div class="max-w-[390px] mx-auto text-center">
+<p class="font-label-sm text-label-sm tracking-[0.16em] uppercase text-[#526B46] font-semibold mb-1">
+            Penunjuk Arah
+          </p>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-[#30271F] mb-1">
+            Lokasi Acara
+          </h2>
+<p class="font-headline-md text-[18px] text-primary font-medium mb-5">
+            Arjuna Ballroom Alam Indah Resto
+          </p>
+<!-- Pratinjau Peta (100% Lebar, min 240px, rounded-2xl) -->
+<div class="relative w-full h-[250px] min-h-[240px] rounded-2xl overflow-hidden border border-[#765640]/20 shadow-md mb-6 bg-[#e5ece2]">
+<img class="w-full h-full object-cover filter contrast-[1.05]" data-alt="An illustrative high-contrast aesthetic cartography preview rendered in earthen moss green, warm ivory, and parchment umber shades, centered on a discreet venue pin surrounded by tranquil highland landscape lines." data-location="Indonesia" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvb171RYPf4bvqsXMyE9ddUd0HJtOLKGDLy6ioQD0rDFaXI6xMlP695g5XdMx2qkkrFnkdNP0ym3u9NNSlCx8xkLFFaFu1s3hyKz19dG27kuRDohIZaT4wqNWb5hxy58y7hdzBP4wK-Rqnpt1Yh3jsSFHp7jjui4o-J_iR3qtAinB_1y8NvtsVGP6BWAAtn0YoW-DudwJHK9cglnWNztnyq_YFBhLyQW_nSNuDcK0AXv61kM5wVfN0Lm8HlShfoMaQaUWvuALSZzI"/>
+<!-- Map Header Overlay -->
+<div class="absolute top-3 left-3 bg-[#FAF7F2]/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-[#765640]/20 flex items-center gap-1.5 text-[#30271F] shadow-sm">
+<span class="material-symbols-outlined text-[#526B46] text-[18px]">map</span>
+<span class="text-[12px] font-semibold font-label-sm">Pratinjau peta</span>
+</div>
+<!-- Pin Koordinat: -7.0402302, 110.4217602 -->
+<div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+<div class="relative flex items-center justify-center">
+<span class="animate-ping absolute inline-flex h-8 w-8 rounded-full bg-[#6E2435] opacity-30"></span>
+<div class="relative w-10 h-10 rounded-full bg-[#6E2435] text-[#FAF7F2] flex items-center justify-center shadow-lg border-2 border-[#FAF7F2]">
+<span class="material-symbols-outlined text-[22px]">location_on</span>
+</div>
+</div>
+<div class="bg-[#30271F]/90 text-[#FAF7F2] text-[11px] px-2.5 py-1 rounded-md mt-1.5 shadow backdrop-blur-sm">
+                Koordinat: -7.0402, 110.4217
+              </div>
+</div>
+</div>
+<!-- Tombol Utama CTA "Buka Google Maps" (Burgundy #6E2435, min-height 48px) -->
+<a class="inline-flex items-center justify-center gap-2.5 w-full min-h-[48px] px-6 py-3 rounded-lg bg-[#6E2435] hover:bg-[#541926] text-[#FFFFFF] font-label-md text-label-md transition-all duration-200 shadow-md active:scale-95" href="https://maps.app.goo.gl/dpHfUEkyYunb17L58" rel="noopener noreferrer" target="_blank">
+<span class="material-symbols-outlined text-[20px]">directions</span>
+<span>Buka Google Maps</span>
+</a>
+</div>
+</section>
+<!-- 7. GALERI KENANGAN (Editorial Asymmetric Arch Grid) -->
+<section class="relative bg-background px-margin py-space-xl scroll-mt-14" id="galeri">
+<div class="text-center mb-8">
+<p class="font-label-sm text-label-sm tracking-[0.16em] uppercase text-[#526B46] font-semibold mb-1">
+            Dokumentasi
+          </p>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-[#30271F] mb-1">
+            Galeri Kenangan
+          </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-[280px] mx-auto">
+            Untaian momen perjalanan kasih dalam kehangatan suasana rimba dan tradisi.
+          </p>
+</div>
+<!-- 3 Bingkai Foto Placeholder Editorial -->
+<div class="grid grid-cols-2 gap-3 max-w-[390px] mx-auto">
+<!-- Foto 1: Full-height Arch (Span 2 row) -->
+<div class="row-span-2 relative aspect-[3/5] arch-frame bg-surface-container-high border border-[#765640]/15 overflow-hidden shadow-sm flex flex-col items-center justify-center group">
+<img class="w-full h-full object-cover arch-frame" data-alt="An editorial fine-art photograph of delicate Javanese highland foliage, tender shadows, and soft handmade linen textures under golden hour light in a peaceful natural garden setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJOepw9EjCoaFJYd-N4k36JdvERqNR1cy6zuVS-kuHc3GAYzg3Wal3UtEw5suJ0XaF-DGg84ohjDk7uxAvbsbD_Krxg7ki5H6dI8OrOyos1nIqyDSrNqAlR9T0ua3M5YTCJco4UyF0nYUQIkq5i0R83c7rCIeGG408-HaxeB8N4eavdPDV7B3Qu4W8kFbi98yicwyMJcEXkNASAOJEdbsVTQT9q_usdzdLdSR6oRilXBNmDPJICEtJhlsC3Xe0iVwn8cibf2JtE70"/>
+<div class="absolute inset-0 bg-[#30271F]/45 flex flex-col items-center justify-center p-3 text-center">
+<span class="material-symbols-outlined text-[#FAF7F2] text-[22px] mb-1">image</span>
+<span class="text-[12px] font-label-sm text-[#FAF7F2] tracking-wider leading-tight">Foto akan ditambahkan</span>
+</div>
+<div class="absolute inset-1 arch-frame border border-[#FAF7F2]/20 pointer-events-none"></div>
+</div>
+<!-- Foto 2: Top Arch -->
+<div class="relative aspect-[4/5] arch-frame bg-surface-container-high border border-[#765640]/15 overflow-hidden shadow-sm flex flex-col items-center justify-center group">
+<img class="w-full h-full object-cover arch-frame" data-alt="Detailed close up of traditional handwoven Indonesian batik fabrics with Sogan and Kawung accents gently draped over warm aged teakwood in natural soft window light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9Pth6ZzDmA882Q6BTqSADSmvIrMkVSoyUQcaTXkS9fv_bnQWycb645LogrNje-C4aticLDudYjYZZf_ez8ea8eU-q3ZnDxYRaQH6pMnW9R06LH2hOaX4tRcunJPZd0aB4TUn9jydUffRTEUwqxSmIt7xLMaKnMlgOxoLsXlfz-9ID7JjzQnLFIHtRk-lgZXXfcabnnf34ThmVxTHetpHJ5PyyuVpQ654efrZ8cRL1LpAW8FGXn-ISKqou4H9m91-YJ5dT5yiJ3Vo"/>
+<div class="absolute inset-0 bg-[#30271F]/45 flex flex-col items-center justify-center p-2 text-center">
+<span class="material-symbols-outlined text-[#FAF7F2] text-[20px] mb-1">image</span>
+<span class="text-[11px] font-label-sm text-[#FAF7F2] tracking-wider leading-tight">Foto akan ditambahkan</span>
+</div>
+<div class="absolute inset-1 arch-frame border border-[#FAF7F2]/20 pointer-events-none"></div>
+</div>
+<!-- Foto 3: Rounded Card Portrait -->
+<div class="relative aspect-[4/5] rounded-2xl bg-surface-container-high border border-[#765640]/15 overflow-hidden shadow-sm flex flex-col items-center justify-center group">
+<img class="w-full h-full object-cover rounded-2xl" data-alt="A serene outdoor botanical composition capturing lush tropical fern silhouettes and soft atmospheric bokeh against a warm neutral morning sky in Central Java." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlSy6E5Dvi-qkiyCby7p06JCQVyDy7xE8aC1G3OkrTDvTdCloU18QkTL_0J9f0iovWcYarFc3z9X4yqda_tzrLXjaMX5pwhrfixmhWr32D4VRnDCNQENUjiB0O9dwiW4laMrTk_zR-wvnWPi3dTatprDGEZPHvE4ehcEhXH79400EW8Hq4IB5iVAenJ_GJET-i6bM55pwG_olVz4rCP3zvajqCBavcU1m8tXe1jYfw7LzlWkQbkV2mEENm27dJEo9T5s6z_itMsU8"/>
+<div class="absolute inset-0 bg-[#30271F]/45 flex flex-col items-center justify-center p-2 text-center">
+<span class="material-symbols-outlined text-[#FAF7F2] text-[20px] mb-1">image</span>
+<span class="text-[11px] font-label-sm text-[#FAF7F2] tracking-wider leading-tight">Foto akan ditambahkan</span>
+</div>
+<div class="absolute inset-1 rounded-2xl border border-[#FAF7F2]/20 pointer-events-none"></div>
+</div>
+</div>
+</section>
+<!-- 8. PENUTUP & SALAM HANGAT (Latar Hijau Hutan Dalam #183D32) -->
+<footer class="relative bg-[#183D32] text-[#FAF7F2] px-margin pt-12 pb-16 overflow-hidden text-center pb-safe">
+<div aria-hidden="true" class="absolute inset-0 kawung-pattern opacity-10 pointer-events-none"></div>
+<div class="relative z-10 max-w-[360px] mx-auto flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-[#FAF7F2]/10 border border-[#FAF7F2]/20 flex items-center justify-center mb-4 text-[#ceebbd]">
+<span class="material-symbols-outlined text-[20px]">favorite</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-[#FAF7F2] mb-3 font-normal">
+            Ungkapan Terima Kasih
+          </h2>
+<p class="font-body-md text-body-md text-[#FAF7F2]/85 leading-relaxed mb-6 font-normal">
+            Merupakan kehormatan dan kebahagiaan yang tak terhingga bagi kami atas doa restu serta kehadiran Bapak/Ibu/Saudara/i sekalian dalam mengawali lembaran baru pernikahan kami.
+          </p>
+<div class="w-16 h-[1px] bg-[#ceebbd]/30 mb-6"></div>
+<!-- Tanda Tangan Editorial -->
+<p class="font-label-sm text-label-sm tracking-[0.2em] uppercase text-[#c3ebdb] mb-1 font-medium">
+            Kami yang berbahagia,
+          </p>
+<p class="font-couples-script text-[32px] text-[#FAF7F2] leading-tight mb-1 font-normal">
+            Firsta &amp; Talitha
+          </p>
+<p class="font-body-sm text-body-sm text-[#FAF7F2]/70 mb-8 font-light">
+            beserta keluarga besar kedua mempelai
+          </p>
+<!-- Indikator Keamanan Santun -->
+<div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FAF7F2]/10 border border-[#FAF7F2]/15 text-[#ceebbd] text-[12px] font-medium tracking-wide">
+<span class="material-symbols-outlined text-[15px]">verified_user</span>
+<span>Tautan undangan digital terverifikasi khusus untuk Anda.</span>
+</div>
+</div>
+</footer>
+</main>
+</div>
+</body></html>

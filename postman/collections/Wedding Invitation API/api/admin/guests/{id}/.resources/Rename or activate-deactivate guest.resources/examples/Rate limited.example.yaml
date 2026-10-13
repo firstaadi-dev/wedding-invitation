@@ -1,0 +1,39 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/admin/guests/:id"
+  method: PATCH
+  headers:
+    - key: wedding_admin
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+    - key: X-CSRF-Token
+      value: string
+      disabled: false
+      description: (Required) Token returned by admin session/login, matching HttpOnly cookie session.
+    - key: Accept
+      value: application/json
+  pathVariables:
+    - key: id
+      value: string
+      disabled: false
+      description: "(Required) "
+  body:
+    type: json
+    content: |-
+      {
+        "name": "string",
+        "active": false
+      }
+response:
+  statusCode: 429
+  statusText: Too Many Requests
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "error": "string",
+        "code": "string"
+      }
+order: 9000

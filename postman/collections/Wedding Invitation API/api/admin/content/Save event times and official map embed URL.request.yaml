@@ -1,0 +1,30 @@
+$kind: http-request
+description: Save event times and official map embed URL
+url: "{{baseUrl}}/api/admin/content"
+method: PUT
+headers:
+  - key: X-CSRF-Token
+    value: string
+    disabled: false
+    description: (Required) Token returned by admin session/login, matching HttpOnly cookie session.
+  - key: Content-Type
+    value: application/json
+  - key: Accept
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "ceremonyTime": "string",
+      "receptionTime": "string",
+      "mapEmbedUrl": "string"
+    }
+auth:
+  type: apikey
+  credentials:
+    key: wedding_admin
+    value: "{{apiKey}}"
+    in: header
+settings: {}
+examples: ./.resources/Save event times and official map embed URL.resources/examples
+order: 2000

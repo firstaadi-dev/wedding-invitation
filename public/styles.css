@@ -1,0 +1,988 @@
+:root {
+  --forest:#183d32;
+  --forest-dark:#0b211b;
+  --paper:#faf7f2;
+  --burgundy:#6e2435;
+  --wood:#765640;
+  --ink:#30271f;
+  --serif:"Cormorant Garamond",Georgia,serif;
+  --body:"Plus Jakarta Sans",sans-serif;
+}
+
+.photo-placeholder.has-photo {position:relative;overflow:hidden;}
+.photo-placeholder.has-photo:after {display:none;}
+.photo-placeholder img {position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.location-paper iframe {width:100%;height:320px;min-width:200px;border:0;margin:28px 0;display:block;}
+.music-status.has-music:after {display:none;}
+.content-error {margin-top:20px;padding:12px;background:#531221;color:#fff;font-size:14px;}
+
+* {
+  box-sizing:border-box;
+}
+
+html {
+  scroll-behavior:smooth;
+  overflow-x:clip;
+}
+
+body {
+  margin:0;
+  background:var(--forest-dark);
+  color:var(--paper);
+  font-family:var(--body);
+  font-size:16px;
+  line-height:1.75;
+}
+
+button,a {
+  -webkit-tap-highlight-color:transparent;
+}
+
+button {
+  font:inherit;
+}
+
+a {
+  color:inherit;
+}
+
+button:focus-visible,a:focus-visible {
+  outline:3px solid #eacda5;
+  outline-offset:6px;
+}
+
+h1,h2,h3,p,figure {
+  margin:0;
+}
+
+h1,h2,h3 {
+  font-family:var(--serif);
+  font-weight:400;
+  line-height:1.05;
+}
+
+h1 {
+  font-size:clamp(56px,9vw,112px);
+}
+
+h2 {
+  font-size:clamp(46px,6vw,78px);
+}
+
+h3 {
+  font-size:clamp(30px,4vw,42px);
+}
+
+em {
+  font-weight:400;
+}
+
+h1 em {
+  font-size:.65em;
+  color:#e7d4b7;
+}
+
+main {
+  isolation:isolate;
+  overflow-x:clip;
+}
+
+.eyebrow {
+  font-size:11px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  line-height:1.7;
+}
+
+.button {
+  border:1px solid #d6bcb029;
+  display:inline-flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:32px;
+  padding:15px 25px;
+  min-height:52px;
+  text-decoration:none;
+  font-size:14px;
+  font-weight:500;
+  border-radius:2px;
+  cursor:pointer;
+  box-shadow:0 8px 25px #100b0d26;
+  transition:background .2s;
+}
+
+.burgundy {
+  background:var(--burgundy);
+  color:#fff;
+}
+
+.burgundy:hover {
+  background:#852e42;
+}
+
+.button span {
+  font-size:23px;
+  line-height:1;
+}
+
+.entrance-track {
+  position:relative;
+  height:185svh;
+  min-height:1200px;
+}
+
+.entrance-scene {
+  position:sticky;
+  top:0;
+  min-height:760px;
+  height:100svh;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  background:var(--forest-dark);
+}
+
+.entrance-picture {
+  position:absolute;
+  inset:-3%;
+  background:url('/assets/joglo-forest.webp') center 45%/cover no-repeat;
+  transform-origin:center 55%;
+  will-change:transform;
+  pointer-events:none;
+}
+
+.entrance-shade {
+  position:absolute;
+  inset:0;
+  background:radial-gradient(ellipse at center,#071b175c,transparent 80%),linear-gradient(90deg,#08201870,transparent 25%,transparent 75%,#08201870),linear-gradient(0deg,#0b211bcf 0%,#0b211b15 28%,#0b211b40 85%,#0b211b70);
+}
+
+.cover-copy {
+  position:relative;
+  z-index:5;
+  text-align:center;
+  padding:50px 24px 65px;
+  width:min(100%,690px);
+  text-shadow:0 2px 20px #041610a6;
+}
+
+.entrance-mist {
+  position:absolute;
+  inset:auto 0 0;
+  height:20%;
+  background:linear-gradient(0deg,var(--forest-dark),transparent);
+  pointer-events:none;
+  z-index:5;
+}
+
+.scene {
+  position:relative;
+  min-height:100svh;
+  padding:130px 24px;
+  display:grid;
+  align-items:center;
+  overflow:clip;
+  background:var(--forest-dark);
+}
+
+.scene:before,.scene:after {
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  height:160px;
+  pointer-events:none;
+  z-index:2;
+}
+
+.scene:before {
+  top:0;
+  background:linear-gradient(180deg,var(--forest-dark),transparent);
+}
+
+.scene:after {
+  bottom:0;
+  background:linear-gradient(0deg,var(--forest-dark),transparent);
+}
+
+.forest-backdrop {
+  position:absolute;
+  inset:-100px 0;
+  background:linear-gradient(#0b211bbc,#0b211bf0),url('/assets/joglo-forest.webp') center/cover no-repeat;
+  pointer-events:none;
+  transform-origin:center;
+  will-change:transform;
+}
+
+.scene-copy {
+  position:relative;
+  z-index:5;
+  text-align:center;
+  width:min(100%,900px);
+  margin:auto;
+}
+
+.scene-copy>.eyebrow {
+  color:#dbc3a1;
+  margin-bottom:18px;
+}
+
+.introduction,.closing-line {
+  max-width:510px;
+  margin:26px auto;
+  color:#eee6d9de;
+  line-height:1.95;
+}
+
+.closing-line {
+  font-size:14px;
+  margin-bottom:0;
+}
+
+.trees {
+  position:absolute;
+  top:-5%;
+  bottom:-5%;
+  width:clamp(130px,22vw,360px);
+  z-index:4;
+  pointer-events:none;
+  filter:drop-shadow(15px 14px 22px #020c09a1);
+  will-change:transform;
+  opacity:.92;
+  transform-origin:center;
+}
+
+.trees:before {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:url('/assets/forest-foreground.webp') left center/auto 100% no-repeat;
+}
+
+.trees-right:before {
+  transform:scaleX(-1);
+}
+
+.trees-left {
+  left:-8%;
+  mask-image:linear-gradient(90deg,#000 0%,#000 38%,transparent 100%);
+}
+
+.trees-right {
+  right:-8%;
+  mask-image:linear-gradient(270deg,#000 0%,#000 38%,transparent 100%);
+}
+
+.entrance-trees {
+  width:clamp(160px,26vw,470px);
+  top:-12%;
+  bottom:-12%;
+  opacity:.96;
+}
+
+.couple-scene .forest-backdrop {
+  opacity:.8;
+}
+
+.couple-grid {
+  display:grid;
+  grid-template-columns:1fr 60px 1fr;
+  align-items:center;
+  gap:18px;
+  max-width:660px;
+  margin:52px auto 20px;
+}
+
+.portrait-paper {
+  padding:22px 18px 28px;
+  background:var(--paper);
+  color:var(--ink);
+  border:1px solid #d9c7b0;
+  box-shadow:0 25px 55px #010d08a0;
+  transform:perspective(900px) rotateY(3deg) rotateZ(-3deg);
+}
+
+.portrait-paper:last-child {
+  transform:perspective(900px) rotateY(-3deg) rotateZ(3deg);
+}
+
+.portrait-paper h3 {
+  font-size:30px;
+  line-height:1.15;
+}
+
+.photo-placeholder {
+  min-height:250px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:18px;
+  padding:20px;
+  background:radial-gradient(ellipse at 50% 30%,#70866b,#344f3e);
+  color:var(--paper);
+  border:1px solid #76816a;
+  position:relative;
+}
+
+.photo-placeholder:after {
+  content:"";
+  position:absolute;
+  inset:9px;
+  border:1px solid #f0e6d636;
+  pointer-events:none;
+}
+
+.photo-placeholder span:last-child {
+  font-size:10px;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  text-align:center;
+}
+
+.arch,.arch:after {
+  border-radius:150px 150px 2px 2px;
+}
+
+.leaf-mark {
+  font-family:Georgia,serif;
+  font-size:56px;
+  color:#ddd1b6;
+  font-weight:400;
+}
+
+.couple-ampersand {
+  font-family:var(--serif);
+  font-size:56px;
+  color:#d4bd94;
+}
+
+.event-scene .forest-backdrop {
+  background-image:linear-gradient(#211e16b8,#0b211be6),url('/assets/joglo-forest.webp');
+  background-position:center 25%;
+}
+
+.ceremony-date {
+  font-family:var(--serif);
+  font-size:45px;
+  margin:25px 0 45px;
+  line-height:1.4;
+  color:#e3cfb0;
+}
+
+.ceremony-date span {
+  font-style:italic;
+}
+
+.event-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:30px;
+  max-width:690px;
+  margin:auto;
+  perspective:1200px;
+}
+
+.event-paper {
+  position:relative;
+  padding:32px 24px 38px;
+  background:var(--paper);
+  color:var(--ink);
+  border:1px solid #d7c5ab;
+  box-shadow:14px 26px 40px #020c08a6;
+  transform:rotateY(4deg) rotateZ(-2deg);
+}
+
+.event-paper:before {
+  content:"";
+  position:absolute;
+  inset:9px;
+  border:1px solid #76564035;
+  pointer-events:none;
+}
+
+.event-paper:last-child {
+  transform:rotateY(-4deg) rotateZ(2deg);
+}
+
+.event-paper h3 {
+  font-size:34px;
+  margin:12px 0 22px;
+}
+
+.event-paper p {
+  font-size:16px;
+}
+
+.pending-time {
+  font-size:11px!important;
+  color:#746452;
+  margin:7px 0 18px;
+}
+
+.paper-ornament {
+  font-family:Georgia,serif;
+  font-size:40px;
+  color:var(--wood);
+}
+
+.fine-rule {
+  height:1px;
+  background:#76564044;
+  width:45px;
+  margin:20px auto;
+}
+
+.location-scene .forest-backdrop {
+  opacity:.55;
+  background-position:center 65%;
+}
+
+.location-paper {
+  width:min(100%,560px);
+  padding:38px;
+  background:var(--paper);
+  color:var(--ink);
+  margin:44px auto 0;
+  border:1px solid #d7c5ab;
+  box-shadow:12px 25px 70px #010c089e;
+  transform:perspective(1000px) rotateX(2deg);
+}
+
+.location-paper h3 {
+  font-size:34px;
+}
+
+.map-placeholder {
+  min-height:240px;
+  background:#dfe2d6;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:20px;
+  margin:28px auto;
+  color:#385144;
+  border:1px solid #bbc6b5;
+}
+
+.map-placeholder>span {
+  font-size:50px;
+  line-height:1;
+}
+
+.map-placeholder p {
+  font-size:14px;
+}
+
+.map-placeholder small {
+  font-size:10px;
+}
+
+.location-paper .button {
+  width:100%;
+  font-size:13px;
+}
+
+.gallery-scene {
+  padding-block:160px;
+}
+
+.gallery-scene .forest-backdrop {
+  opacity:.6;
+}
+
+.gallery-papers {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:22px;
+  align-items:center;
+  max-width:770px;
+  margin:65px auto 30px;
+  perspective:1000px;
+}
+
+.gallery-paper {
+  background:var(--paper);
+  padding:12px 12px 18px;
+  color:var(--wood);
+  box-shadow:12px 22px 50px #030e098f;
+  transform:rotateZ(-6deg) rotateY(5deg);
+}
+
+.gallery-paper:nth-child(2) {
+  transform:translateY(-20px) rotateZ(4deg) rotateY(-3deg);
+}
+
+.gallery-paper:nth-child(3) {
+  transform:translateY(14px) rotateZ(-3deg) rotateY(-4deg);
+}
+
+.gallery-paper .photo-placeholder {
+  min-height:280px;
+}
+
+.gallery-paper figcaption {
+  font-family:var(--serif);
+  font-size:17px;
+  font-style:italic;
+  margin-top:14px;
+  line-height:1.4;
+}
+
+.farewell-scene {
+  min-height:110svh;
+}
+
+.farewell-scene .forest-backdrop {
+  opacity:.65;
+  background-position:center 35%;
+}
+
+.farewell-date {
+  font-size:11px;
+  letter-spacing:.2em;
+  margin-top:60px;
+  color:#ddd1b6;
+}
+
+.music-status {
+  position:fixed;
+  right:max(14px,env(safe-area-inset-right));
+  bottom:max(14px,env(safe-area-inset-bottom));
+  z-index:10;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-height:44px;
+  padding:8px 14px;
+  border:1px solid #e2d5be40;
+  background:#16372df0;
+  color:#eee3d1;
+  border-radius:30px;
+  font-size:10px;
+  box-shadow:0 6px 20px #020b08a1;
+}
+
+.music-status span:first-child {
+  font-size:20px;
+}
+
+.music-status:disabled {
+  opacity:.85;
+}
+
+@media(min-width:1000px) {
+  .entrance-picture {
+    background-size:auto 125%;
+    background-color:#102d23;
+  }
+  .entrance-trees.trees-left {
+    left:-3%;
+  }
+  .entrance-trees.trees-right {
+    right:-3%;
+  }
+  .trees-left {
+    left:-5%;
+  }
+  .trees-right {
+    right:-5%;
+  }
+  .scene-copy {
+    padding-inline:60px;
+  }
+}
+
+@media(max-width:600px) {
+  h1 {
+    font-size:60px;
+  }
+  .entrance-track {
+    height:180svh;
+    min-height:1250px;
+  }
+  .entrance-scene {
+    min-height:750px;
+  }
+  .cover-copy {
+    padding:45px 25px 55px;
+  }
+
+  .scene {
+    padding:120px 28px;
+  }
+  .scene-copy {
+    max-width:390px;
+  }
+  .scene-copy>.eyebrow {
+    font-size:9px;
+    letter-spacing:.15em;
+  }
+  h2 {
+    font-size:47px;
+  }
+  .introduction {
+    font-size:16px;
+  }
+  .trees {
+    width:160px;
+    opacity:.83;
+  }
+  .trees-left {
+    left:-26%;
+  }
+  .trees-right {
+    right:-26%;
+  }
+  .entrance-trees {
+    width:180px;
+    opacity:.92;
+  }
+  .entrance-trees.trees-left {
+    left:-24%;
+  }
+  .entrance-trees.trees-right {
+    right:-24%;
+  }
+  .couple-grid {
+    grid-template-columns:1fr;
+    max-width:265px;
+    gap:28px;
+    margin-top:45px;
+  }
+  .couple-ampersand {
+    font-size:42px;
+    line-height:1;
+  }
+  .portrait-paper {
+    padding:22px 20px 28px;
+  }
+  .portrait-paper h3 {
+    font-size:31px;
+  }
+  .photo-placeholder {
+    min-height:280px;
+  }
+  .event-grid {
+    grid-template-columns:1fr;
+    gap:30px;
+    max-width:280px;
+  }
+  .ceremony-date {
+    font-size:38px;
+  }
+  .event-paper p {
+    font-size:16px;
+  }
+  .location-paper {
+    padding:24px 17px;
+    margin-inline:-4px;
+    width:calc(100% + 8px);
+  }
+  .location-paper h3 {
+    font-size:30px;
+  }
+  .map-placeholder {
+    min-height:220px;
+    padding:15px;
+  }
+  .gallery-papers {
+    grid-template-columns:1fr;
+    max-width:235px;
+    gap:40px;
+  }
+  .gallery-paper {
+    padding:13px 13px 20px;
+  }
+  .gallery-paper:nth-child(2) {
+    transform:rotateZ(5deg) rotateY(-3deg);
+  }
+  .gallery-paper:nth-child(3) {
+    transform:rotateZ(-4deg) rotateY(3deg);
+  }
+  .gallery-paper .photo-placeholder {
+    min-height:280px;
+  }
+  .closing-line {
+    font-size:16px;
+  }
+  .music-status {
+    font-size:9px;
+    padding:7px 11px;
+  }
+  .farewell-scene {
+    padding-bottom:170px;
+  }
+  .entrance-mist {
+    height:15%;
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  html {
+    scroll-behavior:auto;
+  }
+  *,*:before,*:after {
+    animation:none!important;
+    transition:none!important;
+  }
+  .entrance-track {
+    height:auto;
+    min-height:0;
+  }
+  .entrance-scene {
+    position:relative;
+    min-height:780px;
+    height:auto;
+  }
+  .entrance-picture,.trees,.forest-backdrop {
+    transform:none!important;
+    will-change:auto;
+  }
+  .cover-copy {
+    opacity:1!important;
+    transform:none!important;
+  }
+}
+
+/* The two printed panels open from the centre like the physical invitation. */
+.cover-copy {
+  width:min(100%,620px);
+  padding:35px 24px 65px;
+  text-shadow:none;
+}
+.envelope-card {
+  position:relative;
+  width:min(100%,460px);
+  height:580px;
+  margin:auto;
+  background:#601823;
+  border:1px solid #bd986a;
+  box-shadow:0 30px 90px #010b09a6,0 3px 12px #010b0990;
+  perspective:1400px;
+  border-radius:3px;
+}
+.envelope-card:after {
+  content:"";
+  position:absolute;
+  inset:13px;
+  border:1px solid #d7bb862e;
+  pointer-events:none;
+  z-index:4;
+}
+.envelope-flap {
+  position:absolute;
+  top:0;
+  bottom:0;
+  width:50%;
+  background:#711922 url('/assets/envelope-botanical.webp') no-repeat;
+  background-size:200% 100%;
+  backface-visibility:hidden;
+  will-change:transform;
+}
+.envelope-flap-left {
+  left:0;
+  background-position:left center;
+  transform-origin:left center;
+  border-right:1px solid #3b0f19;
+}
+.envelope-flap-right {
+  right:0;
+  background-position:right center;
+  transform-origin:right center;
+  border-left:1px solid #e7c88b26;
+}
+.envelope-print {
+  position:absolute;
+  inset:38px 25px;
+  z-index:3;
+  pointer-events:none;
+  color:#f0dfb9;
+  text-shadow:0 2px 8px #370d1659;
+}
+.envelope-print h1 {
+  font-size:62px;
+  line-height:1.05;
+  display:flex;
+  flex-direction:column;
+  text-transform:uppercase;
+  letter-spacing:.045em;
+}
+.envelope-print h1 em {
+  font-size:30px;
+  text-transform:none;
+  margin:4px auto;
+  color:#f0dfb9;
+}
+.envelope-date {
+  font-size:12px;
+  letter-spacing:.24em;
+  margin-top:20px;
+  color:#fff4e0;
+}
+.envelope-address {
+  position:absolute;
+  bottom:15px;
+  left:0;
+  right:0;
+  color:#fff4e0;
+  padding:12px 0;
+  background:#531221d9;
+}
+.envelope-address p {
+  font-size:11px;
+  line-height:1.6;
+}
+.envelope-address strong {
+  display:block;
+  font-family:var(--serif);
+  font-size:30px;
+  line-height:1.2;
+  font-weight:500;
+  margin-top:8px;
+}
+.envelope-seal {
+  position:absolute;
+  left:50%;
+  top:57%;
+  translate:-50% -50%;
+  z-index:7;
+  width:108px;
+  height:108px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:5px;
+  color:#fff0cc;
+  background:radial-gradient(circle at 30% 20%,#954951,#5a1524 70%);
+  border:2px solid #b59569;
+  border-radius:50%;
+  box-shadow:inset 0 0 0 5px #722636,inset 0 0 0 6px #c8a47570,0 7px 0 #38121b,0 13px 25px #2d081b80;
+  font-size:11px;
+  cursor:pointer;
+  line-height:1.4;
+}
+.envelope-seal:hover {
+  background:radial-gradient(circle at 30% 20%,#a75761,#682030 70%);
+}
+.envelope-seal:active {
+  box-shadow:inset 0 0 0 5px #722636,inset 0 0 0 6px #c8a47570,0 2px 0 #38121b,0 5px 15px #2d081b80;
+}
+.seal-gunungan {
+  width:27px;
+  height:37px;
+  stroke:#e9c88e;
+  stroke-width:1.5;
+  filter:drop-shadow(1px 1px 1px #270e0f);
+}
+.portrait-paper h3 {
+  margin-top:23px;
+}
+.parents {
+  font-size:16px;
+  line-height:1.85;
+  margin-top:18px;
+  color:#665343;
+}
+.parents strong {
+  font-weight:500;
+}
+.quran-verse {
+  max-width:720px;
+  margin:48px auto 25px;
+}
+.arabic {
+  font-family:"Amiri",serif;
+  font-size:32px;
+  line-height:2.05;
+  color:#f6ead1;
+}
+.verse-source {
+  display:inline-block;
+  margin-top:24px;
+  font-size:12px;
+  text-decoration:none;
+  letter-spacing:.08em;
+  border-bottom:1px solid #d8bc8b70;
+  color:#e7cfa7;
+  padding:8px 5px;
+  min-height:44px;
+}
+.verse-meaning-label {
+  margin-top:34px;
+}
+.verse-meaning {
+  margin-top:14px;
+  font-size:16px;
+}
+.music-status {
+  width:44px;
+  height:44px;
+  min-height:44px;
+  padding:0;
+  justify-content:center;
+  border-radius:50%;
+}
+.music-status:after {
+  content:"";
+  width:19px;
+  height:1px;
+  background:#eee3d1;
+  position:absolute;
+  rotate:45deg;
+}
+@media(max-width:600px) {
+  .cover-copy {
+    padding:30px 24px 60px;
+  }
+  .envelope-card {
+    height:510px;
+    max-width:340px;
+  }
+  .envelope-print {
+    inset:32px 17px;
+  }
+  .envelope-print h1 {
+    font-size:46px;
+  }
+  .envelope-print h1 em {
+    font-size:25px;
+  }
+  .envelope-date {
+    font-size:10px;
+    margin-top:16px;
+  }
+  .envelope-address p {
+    font-size:10px;
+  }
+  .envelope-address strong {
+    font-size:26px;
+  }
+  .envelope-seal {
+    width:96px;
+    height:96px;
+    font-size:12px;
+  }
+  .arabic {
+    font-size:27px;
+    line-height:2;
+  }
+  .quran-verse {
+    margin-top:34px;
+  }
+  .parents {
+    font-size:16px;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .envelope-flap {
+    transform:none!important;
+    will-change:auto;
+  }
+  .envelope-seal {
+    opacity:1!important;
+  }
+}

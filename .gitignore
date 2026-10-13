@@ -1,0 +1,13 @@
+.neon
+.env.local
+node_modules/
+.env
+.env.*
+!.env.example
+.idea/
+.DS_Store
+coverage/
+postman/.dependencies/
+*.log
+.smoke.local.json
+.deploy.local.json

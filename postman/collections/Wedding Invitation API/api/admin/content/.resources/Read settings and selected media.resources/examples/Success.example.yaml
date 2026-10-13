@@ -1,0 +1,32 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/admin/content"
+  method: GET
+  headers:
+    - key: wedding_admin
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+    - key: Accept
+      value: application/json
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "settings": {
+          "ceremonyTime": "string",
+          "receptionTime": "string",
+          "mapEmbedUrl": "string"
+        },
+        "media": {
+          "key_0": "string"
+        }
+      }
+order: 1000

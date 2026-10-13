@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+
+<html class="light" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CMS Tamu Undangan - Firsta &amp; Talitha | Rimba Jawa Solo</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Playfair Display & Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary-container": "#f08c9d",
+            "tertiary-fixed": "#ceebbd",
+            "surface-container-high": "#f6e5d9",
+            "on-surface-variant": "#544244",
+            "inverse-surface": "#382f26",
+            "on-surface": "#221a13",
+            "surface-variant": "#f0e0d3",
+            "background": "#fff8f5",
+            "surface-container": "#fcebde",
+            "on-secondary-fixed": "#002118",
+            "inverse-on-surface": "#ffeee1",
+            "tertiary-fixed-dim": "#b3cfa2",
+            "error": "#ba1a1a",
+            "secondary": "#416659",
+            "outline": "#867274",
+            "on-primary-fixed-variant": "#792c3d",
+            "tertiary-container": "#2d4423",
+            "secondary-fixed-dim": "#a8cfc0",
+            "primary": "#510d20",
+            "secondary-container": "#c0e8d8",
+            "on-secondary-container": "#456a5d",
+            "primary-container": "#6e2435",
+            "on-secondary": "#ffffff",
+            "on-primary-fixed": "#3f0014",
+            "surface-tint": "#964454",
+            "secondary-fixed": "#c3ebdb",
+            "on-error-container": "#93000a",
+            "surface": "#fff8f5",
+            "on-background": "#221a13",
+            "surface-container-low": "#fff1e7",
+            "surface-container-highest": "#f0e0d3",
+            "error-container": "#ffdad6",
+            "on-tertiary-container": "#96b187",
+            "on-primary": "#ffffff",
+            "surface-dim": "#e7d7cb",
+            "primary-fixed": "#ffd9dd",
+            "surface-container-lowest": "#ffffff",
+            "on-tertiary-fixed-variant": "#354d2b",
+            "on-tertiary-fixed": "#0b2004",
+            "on-tertiary": "#ffffff",
+            "tertiary": "#172e0f",
+            "on-error": "#ffffff",
+            "inverse-primary": "#ffb2bd",
+            "surface-bright": "#fff8f5",
+            "primary-fixed-dim": "#ffb2bd",
+            "outline-variant": "#d9c1c3",
+            "on-secondary-fixed-variant": "#294d42"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin-desktop": "3rem",
+            "space-lg": "1.5rem",
+            "margin-tablet": "2rem",
+            "gutter-desktop": "2rem",
+            "space-2xl": "4rem",
+            "gutter": "1rem",
+            "gutter-tablet": "1.5rem",
+            "space-xs": "0.25rem",
+            "space-xl": "2.5rem",
+            "margin": "1.25rem",
+            "space-sm": "0.5rem",
+            "space-md": "1rem"
+          },
+          "fontFamily": {
+            "ornament-caption": ["Playfair Display"],
+            "body-md": ["Plus Jakarta Sans"],
+            "couples-script": ["Playfair Display"],
+            "display-hero-mobile": ["Playfair Display"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "headline-lg-mobile": ["Playfair Display"],
+            "headline-lg": ["Playfair Display"],
+            "couples-script-mobile": ["Playfair Display"],
+            "label-md": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "display-hero": ["Playfair Display"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "headline-md": ["Playfair Display"]
+          },
+          "fontSize": {
+            "ornament-caption": ["13px", {"lineHeight": "18px", "letterSpacing": "0.14em", "fontWeight": "400"}],
+            "body-md": ["16px", {"lineHeight": "26px", "fontWeight": "400"}],
+            "couples-script": ["38px", {"lineHeight": "46px", "letterSpacing": "0.03em", "fontWeight": "400"}],
+            "display-hero-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "0.01em", "fontWeight": "400"}],
+            "body-lg": ["17px", {"lineHeight": "28px", "fontWeight": "400"}],
+            "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "400"}],
+            "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "400"}],
+            "couples-script-mobile": ["30px", {"lineHeight": "38px", "letterSpacing": "0.02em", "fontWeight": "400"}],
+            "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.04em", "fontWeight": "600"}],
+            "body-sm": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+            "display-hero": ["48px", {"lineHeight": "56px", "letterSpacing": "0.02em", "fontWeight": "400"}],
+            "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "500"}],
+            "headline-md": ["22px", {"lineHeight": "30px", "fontWeight": "500"}]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+    /* Kawung watermark ornament */
+    .kawung-pattern {
+      background-image: radial-gradient(circle at 50% 50%, rgba(206, 235, 189, 0.05) 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
+    .kawung-subtle-border {
+      border-image: linear-gradient(to right, rgba(134, 114, 116, 0.1), rgba(110, 36, 53, 0.25), rgba(134, 114, 116, 0.1)) 1;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-low text-on-surface antialiased overflow-x-hidden min-h-screen flex selection:bg-primary-fixed selection:text-primary">
+<!-- ======================================================== -->
+<!-- 1. SIDEBAR KIRI (Shared Component: SideNavBar)            -->
+<!-- ======================================================== -->
+<aside class="fixed top-0 left-0 h-screen w-64 z-40 bg-tertiary border-r border-outline-variant/20 shadow-sm kawung-pattern select-none">
+<div class="flex flex-col justify-between h-full p-4">
+<!-- Top Brand Section -->
+<div>
+<div class="px-3 py-4 mb-4 border-b border-white/10">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-tertiary-container border border-tertiary-fixed/30 flex items-center justify-center shadow-inner">
+<span class="font-couples-script text-headline-md text-tertiary-fixed font-semibold" title="Monogram Rimba Jawa F dan T">F&amp;T</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md text-tertiary-fixed leading-tight font-medium tracking-wide">Rimba Jawa Solo</h1>
+<p class="font-body-sm text-label-sm text-tertiary-fixed-dim tracking-wider opacity-85">Firsta &amp; Talitha</p>
+</div>
+</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>
+<span class="font-label-sm text-label-sm text-tertiary-fixed-dim/90 uppercase tracking-widest text-[11px]">Adat Jawa Surakarta</span>
+</div>
+</div>
+<!-- Navigation Tabs -->
+<nav class="space-y-1">
+<!-- Ringkasan -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-tertiary-fixed-dim hover:text-tertiary-fixed font-label-md transition-colors hover:bg-tertiary-container/60 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="dashboard">dashboard</span>
+<span>Ringkasan</span>
+</a>
+<!-- Tamu Undangan (AKTIF MATCH) -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-tertiary-container text-tertiary-fixed font-label-md transition-colors shadow-sm active:scale-[0.98] border-l-2 border-tertiary-fixed" href="#">
+<span class="material-symbols-outlined text-tertiary-fixed" data-icon="group" data-weight="fill" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-semibold">Tamu Undangan</span>
+</a>
+<!-- Foto -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-tertiary-fixed-dim hover:text-tertiary-fixed font-label-md transition-colors hover:bg-tertiary-container/60 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="photo_library">photo_library</span>
+<span>Foto</span>
+</a>
+<!-- Lagu -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-tertiary-fixed-dim hover:text-tertiary-fixed font-label-md transition-colors hover:bg-tertiary-container/60 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="music_note">music_note</span>
+<span>Lagu</span>
+</a>
+<!-- Pengaturan Acara -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-tertiary-fixed-dim hover:text-tertiary-fixed font-label-md transition-colors hover:bg-tertiary-container/60 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="tune">tune</span>
+<span>Pengaturan Acara</span>
+</a>
+</nav>
+</div>
+<!-- Footer Sidebar -->
+<div class="pt-4 border-t border-white/10 space-y-2">
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-tertiary-fixed-dim hover:text-tertiary-fixed font-label-md transition-colors hover:bg-tertiary-container/60" href="#">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="help">help</span>
+<span>Pusat Bantuan</span>
+</a>
+<button class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-rose-200/80 hover:text-rose-100 hover:bg-rose-950/40 font-label-md transition-colors" type="button">
+<span class="flex items-center gap-3">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>Keluar</span>
+</span>
+<span class="text-[11px] px-2 py-0.5 rounded bg-tertiary-container text-tertiary-fixed-dim">CMS v1.2</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- ======================================================== -->
+<!-- 2. TOP HEADER BAR (Shared Component: TopNavBar)           -->
+<!-- ======================================================== -->
+<header class="fixed top-0 right-0 left-64 h-16 z-30 bg-surface border-b border-outline-variant/15 shadow-[0_2px_6px_rgba(48,39,31,0.04)] flex items-center justify-between px-8">
+<!-- Breadcrumb & Context -->
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 font-label-md text-label-md">
+<span class="text-on-surface-variant font-normal">Pernikahan</span>
+<span class="text-outline-variant">/</span>
+<span class="text-primary font-semibold">Tamu Undangan</span>
+</div>
+<span class="hidden xl:inline-block w-px h-4 bg-outline-variant/40"></span>
+<p class="hidden xl:inline-block font-body-sm text-body-sm text-on-surface-variant">Personalisasi tautan undangan Firsta &amp; Talitha</p>
+</div>
+<!-- Right Controls -->
+<div class="flex items-center gap-3">
+<!-- Data demo Badge -->
+<div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container border border-outline-variant/30 text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+<span class="font-label-sm text-label-sm tracking-wider uppercase">Data demo</span>
+</div>
+<!-- Secondary Action: Pratinjau Undangan -->
+<button class="flex items-center gap-2 px-3.5 py-2 rounded-lg border border-secondary text-secondary hover:bg-secondary/10 transition-colors font-label-md text-label-md active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-secondary" data-icon="visibility">visibility</span>
+<span>Pratinjau Undangan</span>
+</button>
+<!-- Trailing Icon Action: Notifikasi -->
+<button aria-label="Notifikasi" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors relative" type="button">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary-container"></span>
+</button>
+<!-- Avatar Admin -->
+<div class="flex items-center gap-3 pl-2 border-l border-outline-variant/30">
+<div class="w-9 h-9 rounded-full bg-primary-container text-white flex items-center justify-center font-label-md font-semibold ring-2 ring-primary-fixed" title="Avatar Admin Pernikahan Rimba Jawa Solo">
+          AD
+        </div>
+</div>
+</div>
+</header>
+<!-- ======================================================== -->
+<!-- 3. KONTEN UTAMA CMS (Desk 1440px Canvas)                 -->
+<!-- ======================================================== -->
+<main class="ml-64 mt-16 flex-1 min-h-[calc(100vh-4rem)] p-8 pr-[440px] transition-all duration-300">
+<div class="max-w-6xl mx-auto space-y-6">
+<!-- Page Header Editorial -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-outline-variant/20">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="font-ornament-caption text-ornament-caption text-secondary uppercase tracking-widest">Manajemen Akses Tamu</span>
+<span class="text-outline-variant">•</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Arjuna Ballroom Alam Indah</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">Tamu Undangan</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Kelola daftar nama, kuota akses aman (maksimal 3 perangkat per tautan), dan status undangan.</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container px-3 py-1.5 rounded-lg border border-outline-variant/20">
+            Total Kuota Acara: <strong class="text-on-surface">350 Tamu</strong>
+</span>
+</div>
+</div>
+<!-- 3 Kartu Metrik Ringkas (No fake charts) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+<!-- Metric 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/20 shadow-sm relative overflow-hidden group hover:border-secondary/40 transition-colors">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Total Tamu Terdaftar</span>
+<span class="px-2 py-0.5 rounded text-[11px] font-label-sm bg-surface-container text-on-surface-variant border border-outline-variant/30">Data demo</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface">142</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Tamu</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="check_circle">check_circle</span>
+<span>100% token unik dibuat</span>
+</p>
+</div>
+<!-- Metric 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/20 shadow-sm relative overflow-hidden group hover:border-secondary/40 transition-colors">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Sudah Membuka Undangan</span>
+<span class="px-2 py-0.5 rounded text-[11px] font-label-sm bg-secondary-container text-on-secondary-container">Akses tercatat</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg font-bold text-tertiary">98</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Tamu (69.0%)</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-secondary" data-icon="devices">devices</span>
+<span>184 perangkat terverifikasi aktif</span>
+</p>
+</div>
+<!-- Metric 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/20 shadow-sm relative overflow-hidden group hover:border-secondary/40 transition-colors">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Tautan Aktif &amp; Aman</span>
+<span class="px-2 py-0.5 rounded text-[11px] font-label-sm bg-rose-100 text-primary-container">3 Tautan dicabut</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg font-bold text-secondary">139</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Tautan Siap Akses</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-tertiary" data-icon="lock">lock</span>
+<span>Enkripsi token 256-bit</span>
+</p>
+</div>
+</div>
+<!-- Info Box Banner: Keamanan Tautan -->
+<div class="bg-surface-container rounded-xl p-4 border border-secondary/20 flex items-start gap-3.5 shadow-sm">
+<div class="p-2 bg-secondary/15 rounded-lg text-secondary shrink-0 mt-0.5">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+</div>
+<div class="text-body-sm font-body-sm text-on-surface">
+<strong class="font-semibold text-primary">Keamanan Tautan:</strong>
+          Maksimal 3 perangkat untuk setiap tautan tamu. Penghitungan dilakukan otomatis via identifikasi terverifikasi. Pengunjung berulang pada perangkat yang sama tidak memakai slot baru.
+        </div>
+</div>
+<!-- Toolbar Aksi -->
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/20 shadow-sm">
+<div class="flex flex-1 items-center gap-3">
+<!-- Search Input -->
+<div class="relative flex-1 max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-outline-variant/40 bg-surface focus:bg-white text-body-sm font-body-sm text-on-surface placeholder-on-surface-variant/60 focus:outline-none focus:border-primary-container transition-colors" placeholder="Cari nama tamu atau ID..." type="text" value="Bapak Budi"/>
+</div>
+<!-- Filter Dropdown 1 -->
+<div class="relative">
+<select aria-label="Filter Status Tautan" class="appearance-none pl-3.5 pr-8 py-2.5 rounded-lg border border-outline-variant/40 bg-surface text-body-sm font-body-sm text-on-surface focus:outline-none focus:border-primary-container cursor-pointer">
+<option>Semua Status</option>
+<option>Status: Aktif</option>
+<option>Status: Dicabut</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-base" data-icon="arrow_drop_down">arrow_drop_down</span>
+</div>
+<!-- Filter Dropdown 2 -->
+<div class="relative">
+<select aria-label="Filter Status Perangkat" class="appearance-none pl-3.5 pr-8 py-2.5 rounded-lg border border-outline-variant/40 bg-surface text-body-sm font-body-sm text-on-surface focus:outline-none focus:border-primary-container cursor-pointer">
+<option>Status Perangkat</option>
+<option>Penuh (3/3)</option>
+<option>Tersedia (1-2/3)</option>
+<option>Belum Terbuka (0/3)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-base" data-icon="arrow_drop_down">arrow_drop_down</span>
+</div>
+</div>
+<!-- Tombol Tambah Tamu (Burgundy CTA) -->
+<button class="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary-container hover:bg-primary text-white font-label-md text-label-md transition-colors shadow-sm active:scale-[0.98] shrink-0" type="button">
+<span class="material-symbols-outlined" data-icon="person_add">person_add</span>
+<span>+ Tambah Tamu</span>
+</button>
+</div>
+<!-- Tabel Tamu Undangan -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/20 shadow-sm overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container/60 border-b border-outline-variant/25 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+<th class="py-3.5 px-5">Nama Tamu</th>
+<th class="py-3.5 px-4">Status Tautan</th>
+<th class="py-3.5 px-4">Kuota Perangkat</th>
+<th class="py-3.5 px-4">Terakhir Membuka</th>
+<th class="py-3.5 px-4">Tautan Undangan</th>
+<th class="py-3.5 px-5 text-right">Aksi</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/15 text-body-sm font-body-sm">
+<!-- Row 1: TERPILIH / FOKUS -->
+<tr class="bg-surface-container-high/40 border-l-4 border-l-primary-container hover:bg-surface-container-high/60 transition-colors">
+<td class="py-4 px-5">
+<div class="font-semibold text-on-surface">Bapak Budi &amp; Ibu Sari</div>
+<div class="text-[12px] text-on-surface-variant flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> VIP • Rekan Bisnis Solo
+                  </div>
+</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-tertiary-fixed/30 text-tertiary border border-tertiary/20">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                    Aktif
+                  </span>
+</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-100 text-primary-container border border-primary-container/20">
+<span class="material-symbols-outlined text-[14px]" data-icon="smartphone">smartphone</span>
+                    3/3 (Penuh)
+                  </span>
+</td>
+<td class="py-4 px-4 text-on-surface">
+<div class="font-medium">Hari ini, 10:14 WIB</div>
+<div class="text-[12px] text-on-surface-variant">iPhone 15 Pro • Jakarta</div>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-1.5">
+<code class="px-2 py-1 rounded bg-surface border border-outline-variant/30 text-[12px] text-on-surface-variant font-mono">
+                      firsta-talitha.wedding/u/tk_b89•••
+                    </code>
+<button aria-label="Salin tautan Bapak Budi &amp; Ibu Sari" class="p-1 rounded text-secondary hover:bg-secondary/10" title="Salin Tautan" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="content_copy">content_copy</span>
+</button>
+</div>
+</td>
+<td class="py-4 px-5 text-right">
+<button class="px-3.5 py-1.5 rounded-lg bg-primary-container text-white font-label-sm text-label-sm hover:bg-primary transition-colors inline-flex items-center gap-1 shadow-sm" type="button">
+<span>Detail</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container/30 transition-colors">
+<td class="py-4 px-5">
+<div class="font-medium text-on-surface">Keluarga dr. Raden Mas Hendra</div>
+<div class="text-[12px] text-on-surface-variant">Keluarga Besar Sasana Keraton</div>
+</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-tertiary-fixed/30 text-tertiary border border-tertiary/20">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                    Aktif
+                  </span>
+</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-secondary-container/40 text-on-secondary-container border border-secondary/20">
+<span class="material-symbols-outlined text-[14px]" data-icon="devices">devices</span>
+                    2/3
+                  </span>
+</td>
+<td class="py-4 px-4 text-on-surface">
+<div>Kemarin, 19:30 WIB</div>
+<div class="text-[12px] text-on-surface-variant">MacBook Pro • Solo</div>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-1.5">
+<code class="px-2 py-1 rounded bg-surface border border-outline-variant/30 text-[12px] text-on-surface-variant font-mono">
+                      firsta-talitha.wedding/u/tk_44c•••
+                    </code>
+<button aria-label="Salin tautan Keluarga dr. Raden Mas Hendra" class="p-1 rounded text-secondary hover:bg-secondary/10" title="Salin Tautan" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="content_copy">content_copy</span>
+</button>
+</div>
+</td>
+<td class="py-4 px-5 text-right">
+<button class="px-3.5 py-1.5 rounded-lg border border-outline-variant/40 hover:border-secondary hover:text-secondary text-on-surface-variant font-label-sm text-label-sm transition-colors inline-flex items-center gap-1" type="button">
+<span>Detail</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container/30 transition-colors">
+<td class="py-4 px-5">
+<div class="font-medium text-on-surface">Anindya Putri &amp; Rekan</div>
+<div class="text-[12px] text-on-surface-variant">Sahabat Kuliah Pengantin</div>
+</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-tertiary-fixed/30 text-tertiary border border-tertiary/20">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                    Aktif
+                  </span>
+</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-surface-container text-on-surface-variant border border-outline-variant/30">
+<span class="material-symbols-outlined text-[14px]" data-icon="smartphone">smartphone</span>
+                    1/3
+                  </span>
+</td>
+<td class="py-4 px-4 text-on-surface">
+<div>20 Okt 2026, 14:12 WIB</div>
+<div class="text-[12px] text-on-surface-variant">Samsung S24 • Bandung</div>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-1.5">
+<code class="px-2 py-1 rounded bg-surface border border-outline-variant/30 text-[12px] text-on-surface-variant font-mono">
+                      firsta-talitha.wedding/u/tk_12a•••
+                    </code>
+<button aria-label="Salin tautan Anindya Putri &amp; Rekan" class="p-1 rounded text-secondary hover:bg-secondary/10" title="Salin Tautan" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="content_copy">content_copy</span>
+</button>
+</div>
+</td>
+<td class="py-4 px-5 text-right">
+<button class="px-3.5 py-1.5 rounded-lg border border-outline-variant/40 hover:border-secondary hover:text-secondary text-on-surface-variant font-label-sm text-label-sm transition-colors inline-flex items-center gap-1" type="button">
+<span>Detail</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container/30 transition-colors opacity-75">
+<td class="py-4 px-5">
+<div class="font-medium text-on-surface">Baskoro Wicaksono, S.T.</div>
+<div class="text-[12px] text-on-surface-variant">Tamu Umum</div>
+</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-error border border-error/20">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                    Dicabut
+                  </span>
+</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-surface-container text-outline border border-outline-variant/30">
+                    0/3
+                  </span>
+</td>
+<td class="py-4 px-4 text-on-surface-variant">
+                  Belum pernah
+                </td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-1.5">
+<code class="px-2 py-1 rounded bg-surface border border-outline-variant/20 text-[12px] text-outline line-through font-mono">
+                      firsta-talitha.wedding/u/tk_99x•••
+                    </code>
+</div>
+</td>
+<td class="py-4 px-5 text-right">
+<button class="px-3.5 py-1.5 rounded-lg border border-outline-variant/40 hover:border-secondary hover:text-secondary text-on-surface-variant font-label-sm text-label-sm transition-colors inline-flex items-center gap-1" type="button">
+<span>Detail</span>
+</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container/30 transition-colors">
+<td class="py-4 px-5">
+<div class="font-medium text-on-surface">Prof. Ir. Soegondo &amp; Keluarga</div>
+<div class="text-[12px] text-on-surface-variant">Keluarga Mempelai Pria</div>
+</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-tertiary-fixed/30 text-tertiary border border-tertiary/20">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                    Aktif
+                  </span>
+</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-secondary-container/40 text-on-secondary-container border border-secondary/20">
+<span class="material-symbols-outlined text-[14px]" data-icon="devices">devices</span>
+                    2/3
+                  </span>
+</td>
+<td class="py-4 px-4 text-on-surface">
+<div>21 Okt 2026, 08:45 WIB</div>
+<div class="text-[12px] text-on-surface-variant">iPad Pro • Surakarta</div>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-1.5">
+<code class="px-2 py-1 rounded bg-surface border border-outline-variant/30 text-[12px] text-on-surface-variant font-mono">
+                      firsta-talitha.wedding/u/tk_71e•••
+                    </code>
+<button aria-label="Salin tautan Prof. Ir. Soegondo &amp; Keluarga" class="p-1 rounded text-secondary hover:bg-secondary/10" title="Salin Tautan" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="content_copy">content_copy</span>
+</button>
+</div>
+</td>
+<td class="py-4 px-5 text-right">
+<button class="px-3.5 py-1.5 rounded-lg border border-outline-variant/40 hover:border-secondary hover:text-secondary text-on-surface-variant font-label-sm text-label-sm transition-colors inline-flex items-center gap-1" type="button">
+<span>Detail</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer Pagination -->
+<div class="p-4 bg-surface-container/30 border-t border-outline-variant/20 flex items-center justify-between font-body-sm text-body-sm text-on-surface-variant">
+<div>Menampilkan <strong class="text-on-surface">1 - 5</strong> dari <strong class="text-on-surface">142</strong> tamu undangan</div>
+<div class="flex items-center gap-1.5">
+<button class="px-3 py-1.5 rounded border border-outline-variant/30 bg-white hover:bg-surface text-on-surface-variant disabled:opacity-50" disabled="" type="button">Sebelumnya</button>
+<button class="px-3 py-1.5 rounded bg-primary-container text-white font-medium" type="button">1</button>
+<button class="px-3 py-1.5 rounded border border-outline-variant/30 bg-white hover:bg-surface text-on-surface" type="button">2</button>
+<button class="px-3 py-1.5 rounded border border-outline-variant/30 bg-white hover:bg-surface text-on-surface" type="button">3</button>
+<span class="px-1 text-outline">...</span>
+<button class="px-3 py-1.5 rounded border border-outline-variant/30 bg-white hover:bg-surface text-on-surface" type="button">29</button>
+<button class="px-3 py-1.5 rounded border border-outline-variant/30 bg-white hover:bg-surface text-on-surface" type="button">Berikutnya</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- ======================================================== -->
+<!-- 4. SIDE PANEL / DETAIL DRAWER TERBUKA (Kanan Layar 420px) -->
+<!-- ======================================================== -->
+<aside class="fixed top-16 right-0 w-[420px] h-[calc(100vh-4rem)] z-30 bg-surface border-l border-outline-variant/25 shadow-2xl flex flex-col justify-between overflow-y-auto">
+<!-- Drawer Content -->
+<div class="p-6 space-y-6">
+<!-- Drawer Header -->
+<div class="flex items-center justify-between pb-4 border-b border-outline-variant/20">
+<div>
+<span class="font-ornament-caption text-ornament-caption text-secondary uppercase tracking-widest">Detail Tamu Undangan</span>
+<h3 class="font-headline-md text-headline-md font-semibold text-on-surface">Bapak Budi &amp; Ibu Sari</h3>
+</div>
+<button aria-label="Tutup panel detail" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors" title="Tutup Detail" type="button">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<!-- Form Edit Nama -->
+<div class="space-y-1.5">
+<label class="block font-label-md text-label-md text-on-surface font-semibold" for="input-nama-tamu">Nama Tamu Undangan</label>
+<input class="w-full px-3.5 py-2.5 rounded-lg border border-outline-variant/40 bg-surface-container-lowest focus:bg-white text-body-md font-body-md text-on-surface focus:outline-none focus:border-primary-container" id="input-nama-tamu" type="text" value="Bapak Budi &amp; Ibu Sari"/>
+<p class="font-body-sm text-[12px] text-on-surface-variant">Tampil pada kartu sampul fisik digital &amp; personalisasi salam pembuka.</p>
+</div>
+<!-- Info Tautan Unik Token -->
+<div class="space-y-2">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Tautan Personalisasi Aman</span>
+<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-tertiary-fixed/30 text-tertiary">Status: Aktif</span>
+</div>
+<div class="p-3 bg-surface-container-low rounded-lg border border-outline-variant/30 flex items-center justify-between gap-2">
+<div class="truncate font-mono text-[13px] text-on-surface">
+            firsta-talitha.wedding/u/budi-sari-••••••
+          </div>
+<button class="px-3 py-1.5 rounded-lg border border-secondary text-secondary hover:bg-secondary/10 font-label-sm text-label-sm shrink-0 flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="content_copy">content_copy</span>
+<span>Salin</span>
+</button>
+</div>
+</div>
+<!-- Section: Perangkat Terdaftar (3/3 Slot Terpakai) -->
+<div class="space-y-3 pt-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Perangkat Terdaftar</span>
+<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-primary-container border border-primary-container/20">3/3 Penuh</span>
+</div>
+<span class="text-[12px] text-on-surface-variant">Maks 3 Slot</span>
+</div>
+<div class="p-3 bg-surface-container rounded-lg border border-outline-variant/20 text-[12px] text-on-surface-variant leading-relaxed">
+          Maksimal 3 perangkat untuk setiap tautan tamu. Pencabutan akan melepas slot dan membatalkan sesi perangkat tersebut.
+        </div>
+<!-- List 3 Perangkat -->
+<div class="space-y-2.5">
+<!-- Item Perangkat 1: Ponsel -->
+<div class="p-3.5 bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-sm flex items-start justify-between gap-3">
+<div class="flex items-start gap-3">
+<div class="p-2 rounded-lg bg-surface-container text-secondary shrink-0 mt-0.5">
+<span class="material-symbols-outlined" data-icon="smartphone">smartphone</span>
+</div>
+<div>
+<div class="font-label-md text-label-md font-semibold text-on-surface">Safari on iPhone 15 Pro (iOS 17.5)</div>
+<div class="text-[12px] text-on-surface-variant mt-0.5">Hari ini, 10:14 WIB • IP Jakarta</div>
+<div class="mt-1 flex items-center gap-1 text-[11px] text-tertiary">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Sesi aktif saat ini
+                </div>
+</div>
+</div>
+<button class="px-2.5 py-1 rounded text-xs font-medium border border-error/30 text-error hover:bg-rose-50 transition-colors shrink-0" type="button">
+              Cabut
+            </button>
+</div>
+<!-- Item Perangkat 2: Komputer -->
+<div class="p-3.5 bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-sm flex items-start justify-between gap-3">
+<div class="flex items-start gap-3">
+<div class="p-2 rounded-lg bg-surface-container text-secondary shrink-0 mt-0.5">
+<span class="material-symbols-outlined" data-icon="laptop_mac">laptop_mac</span>
+</div>
+<div>
+<div class="font-label-md text-label-md font-semibold text-on-surface">Chrome on macOS Sonoma (Desktop)</div>
+<div class="text-[12px] text-on-surface-variant mt-0.5">Kemarin, 21:05 WIB • IP Semarang</div>
+</div>
+</div>
+<button class="px-2.5 py-1 rounded text-xs font-medium border border-error/30 text-error hover:bg-rose-50 transition-colors shrink-0" type="button">
+              Cabut
+            </button>
+</div>
+<!-- Item Perangkat 3: Tablet -->
+<div class="p-3.5 bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-sm flex items-start justify-between gap-3">
+<div class="flex items-start gap-3">
+<div class="p-2 rounded-lg bg-surface-container text-secondary shrink-0 mt-0.5">
+<span class="material-symbols-outlined" data-icon="tablet_mac">tablet_mac</span>
+</div>
+<div>
+<div class="font-label-md text-label-md font-semibold text-on-surface">Chrome on iPad Air (iPadOS)</div>
+<div class="text-[12px] text-on-surface-variant mt-0.5">21 Okt 2026, 16:20 WIB • IP Solo</div>
+</div>
+</div>
+<button class="px-2.5 py-1 rounded text-xs font-medium border border-error/30 text-error hover:bg-rose-50 transition-colors shrink-0" type="button">
+              Cabut
+            </button>
+</div>
+</div>
+</div>
+<!-- Aksi Bahaya / Pemulihan -->
+<div class="p-4 bg-rose-50/60 rounded-xl border border-error/20 space-y-2">
+<div class="flex items-center gap-2 text-error font-semibold text-label-md">
+<span class="material-symbols-outlined text-base" data-icon="warning">warning</span>
+<span>Aksi Pemulihan Keamanan</span>
+</div>
+<p class="text-[12px] text-on-surface-variant leading-relaxed">
+          Nonaktifkan seluruh akses undangan ini jika tautan tersebar tidak wajar atau terjadi kebocoran token.
+        </p>
+<button class="w-full py-2 px-3 rounded-lg border border-error text-error hover:bg-error hover:text-white font-label-md text-label-md transition-colors font-medium" type="button">
+          Cabut Tautan Undangan
+        </button>
+</div>
+</div>
+<!-- Drawer Footer Actions -->
+<div class="p-4 bg-surface-container/60 border-t border-outline-variant/20 flex items-center justify-end gap-3">
+<button class="px-4 py-2.5 rounded-lg border border-outline-variant/40 hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors" type="button">
+        Batal
+      </button>
+<button class="px-5 py-2.5 rounded-lg bg-primary-container hover:bg-primary text-white font-label-md text-label-md transition-colors shadow-sm active:scale-[0.98]" type="button">
+        Simpan Perubahan
+      </button>
+</div>
+</aside>
+<!-- Visual Toast Feedback (Micro-interaction mock) -->
+<div class="fixed bottom-6 right-[440px] z-50 bg-inverse-surface text-inverse-on-surface px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 font-body-sm text-body-sm animate-fade-in border border-white/10">
+<span class="material-symbols-outlined text-tertiary-fixed text-[20px]" data-icon="check_circle">check_circle</span>
+<span>Data detail tamu <strong class="text-white">Bapak Budi &amp; Ibu Sari</strong> berhasil dimuat.</span>
+</div>
+</body></html>

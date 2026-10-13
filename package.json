@@ -1,0 +1,25 @@
+{
+  "name": "wedding-invitation",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch server/start.mjs",
+    "start": "node server/start.mjs",
+    "build": "node scripts/build.mjs",
+    "db:migrate": "node scripts/migrate.mjs",
+    "admin:hash": "node scripts/admin-password.mjs",
+    "test": "node tests/entrance.test.mjs && node --test tests/fingerprint.test.mjs",
+    "test:integration": "node --test tests/api.test.mjs"
+  },
+  "engines": {"node": ">=22"},
+  "dependencies": {
+    "@neon/config": "^1.9.1",
+    "@neon/env": "^1.6.1",
+    "pg": "^8.23.1",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
+  }
+}

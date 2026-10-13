@@ -1,0 +1,27 @@
+$kind: http-example
+name: Forbidden / three-device limit / verification rejected
+request:
+  url: "{{baseUrl}}/api/access/verify"
+  method: POST
+  headers:
+    Accept: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "challenge": "string",
+        "eventId": "string"
+      }
+response:
+  statusCode: 403
+  statusText: Forbidden
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "error": "string",
+        "code": "string"
+      }
+order: 4000

@@ -1,0 +1,26 @@
+$kind: http-example
+name: Forbidden / three-device limit / verification rejected
+request:
+  url: "{{baseUrl}}/api/admin/login"
+  method: POST
+  headers:
+    Accept: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "password": "string"
+      }
+response:
+  statusCode: 403
+  statusText: Forbidden
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "error": "string",
+        "code": "string"
+      }
+order: 4000

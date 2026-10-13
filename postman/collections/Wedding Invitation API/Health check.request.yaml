@@ -1,0 +1,16 @@
+$kind: http-request
+description: Health check
+url: "{{baseUrl}}/healthz"
+method: GET
+headers:
+  Accept: application/json
+settings: {}
+examples: ./.resources/Health check.resources/examples
+order: 1000
+
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Neon-backed health endpoint responds 200', () => pm.response.to.have.status(200));
+      pm.test('Database health succeeds', () => pm.expect(pm.response.json().ok).to.eql(true));

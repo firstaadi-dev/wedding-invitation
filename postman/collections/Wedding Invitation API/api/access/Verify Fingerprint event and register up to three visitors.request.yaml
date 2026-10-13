@@ -1,0 +1,17 @@
+$kind: http-request
+description: Server v4 API verifies event age, linked_id challenge, origin, visitor identity and anti-tampering signals. Atomic Postgres transaction deduplicates visitor, rejects fourth, consumes challenge/event and issues HttpOnly guest session.
+url: "{{baseUrl}}/api/access/verify"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "challenge": "string",
+      "eventId": "string"
+    }
+settings: {}
+examples: ./.resources/Verify Fingerprint event and register up to three visitors.resources/examples
+order: 2000

@@ -1,0 +1,15 @@
+$kind: http-request
+description: Development /preview can read demo content; production always requires active guest session or admin session.
+url: "{{baseUrl}}/api/invitation"
+method: GET
+headers:
+  Accept: application/json
+auth:
+  type: apikey
+  credentials:
+    key: wedding_guest
+    value: "{{apiKey}}"
+    in: header
+settings: {}
+examples: ./.resources/Read personalized invitation and media.resources/examples
+order: 3000

@@ -1,0 +1,26 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/access/challenge"
+  method: POST
+  headers:
+    Accept: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "token": "yMXOzqi27NzHPR3KAUERQ1vZP6N_da_UUyO3OhxqgxD"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "challenge": "string",
+        "publicKey": "string",
+        "region": "us"
+      }
+order: 1000

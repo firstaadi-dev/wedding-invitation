@@ -1,0 +1,5 @@
+$kind: collection
+description: Authoritative local contract. Same-origin cookies; no public admin credentials or visitor IDs accepted from browser.
+variables:
+  baseUrl: http://127.0.0.1:5174
+  apiKey: ""

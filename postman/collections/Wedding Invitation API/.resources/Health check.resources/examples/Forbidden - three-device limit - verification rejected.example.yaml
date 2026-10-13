@@ -1,0 +1,23 @@
+$kind: http-example
+name: Forbidden / three-device limit / verification rejected
+request:
+  url: "{{baseUrl}}/healthz"
+  method: GET
+  headers:
+    Accept: application/json
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 403
+  statusText: Forbidden
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "error": "string",
+        "code": "string"
+      }
+order: 4000
