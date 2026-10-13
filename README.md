@@ -68,4 +68,4 @@ Domain: https://wedding.firsta.my.id. CNAME `wedding` menuju `wedding-invitation
 - [Aset visual](docs/asset-prompts.md)
 - [Status dan bukti verifikasi](docs/stitch-results.md)
 
-Jam acara belum diberikan; peta embed dapat diisi di CMS; tautan lokasi yang diberikan pengguna tetap berfungsi. Perangkat mobile fisik, performa jaringan seluler dan runtime reduced motion belum diuji.
+Jam acara belum diberikan; peta embed dapat diisi di CMS; tautan lokasi yang diberikan pengguna tetap berfungsi. Perangkat mobile fisik, performa jaringan seluler dan runtime reduced motion belum diuji. Safari desktop telah melewati verifikasi tamu produksi dan membuka segel. Bukti build/test/runtime serta status custom subdomain tersedia di dokumen verifikasi.

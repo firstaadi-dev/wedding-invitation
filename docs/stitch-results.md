@@ -19,7 +19,7 @@ Desain Stitch kini dihubungkan ke backend Node dan Neon Postgres. Tabel ini memb
 | Fingerprint maksimal 3 perangkat | Agent v4 region ap + verifikasi Server API; transaksi Postgres; enam request paralel hanya tiga lolos; Safari live | Diterapkan untuk visitor IDs, bukan jaminan hardware fisik |
 | CMS mengatur tamu/foto/lagu | `/admin`, cookie/CSRF, validasi file, penyimpanan Neon; tes end to end | Diterapkan |
 | Peta embed | CMS menerima URL embed resmi, frontend iframe; URL asli tersedia | Fitur tersedia; URL embed aktual belum diisi |
-| Hosting render.com | Dockerfile, health check, delapan environment di Render; custom domain verified | Konfigurasi selesai, menunggu bukti deploy live |
+| Hosting render.com | Dockerfile, health check, delapan environment di Render; custom domain verified | Live: commit b8fad6c; health HTTP 200; CMS login/create dan alur tamu Safari diperiksa |
 | Menggunakan MCP Google Stitch dan prompt pengembangan | Proyek `3122156932953261093`, manifest ekspor, dokumen prompt terbaru | Selesai untuk tahap desain |
 
 ## Pemeriksaan dijalankan
@@ -30,7 +30,7 @@ Desain Stitch kini dihubungkan ke backend Node dan Neon Postgres. Tabel ini memb
 - Inspeksi PNG/WebP: foreground memiliki alpha transparan; aset frontend dikonversi ke WebP dan sumber PNG disimpan terpisah di `design/assets/`.
 - Pemeriksaan nama orang tua dan teks ayat terhadap referensi yang tersedia.
 
-Backend/CMS telah diuji pada branch Neon terpisah; satu alur tamu dengan Fingerprint nyata juga berhasil pada Safari. Situs live masih harus diperiksa setelah push dan deploy. Fingerprint custom subdomain `validator.firsta.my.id` masih Pending saat pemeriksaan terakhir; CDN digunakan sampai Active. Helium ditolak karena sinyal anti-detect/tampering. Tidak ada klaim batas tiga unit hardware fisik.
+Backend/CMS telah diuji pada branch Neon terpisah; satu alur tamu dengan Fingerprint nyata juga berhasil pada Safari. Situs live telah diperiksa pada https://wedding.firsta.my.id; CMS login/create mengembalikan 200/201, dan tamu Safari masuk melalui verifikasi nyata. Fingerprint custom subdomain `validator.firsta.my.id` masih Pending saat pemeriksaan terakhir; CDN digunakan sampai Active. Helium ditolak karena sinyal anti-detect/tampering. Tidak ada klaim batas tiga unit hardware fisik.
 
 ## Backend dan Neon — 13 Oktober 2026
 
@@ -43,5 +43,16 @@ Backend/CMS telah diuji pada branch Neon terpisah; satu alur tamu dengan Fingerp
 - Postman: syntax OpenAPI dan collection lint lulus; health 1 request, 2 assertions, 0 failed. Governance lint membutuhkan login dan tidak dijalankan.
 - Server lokal: `Invitation server ready on port 5174; Neon Postgres connected.`
 - Fingerprint CDN v4 mengembalikan visitor_id/event_id; Server API Asia mengembalikan event dan visitor. Safari membuka undangan dengan nama tamu setelah verifikasi live.
-- Docker daemon lokal tidak berjalan; image akan dibuktikan lewat build Render.
+- Docker daemon lokal tidak berjalan; image berhasil dibangun di Render, menjalankan build/tes/migrasi/server. Deployment `dep-db73mcqjnfac73ej1uqg` berstatus live.
 - Secret dan password lokal dikecualikan dari Git dan context Docker.
+
+## Produksi — GitHub dan Render
+
+- Push `main` ke repository `firstaadi-dev/wedding-invitation` berhasil, source commit `b8fad6c`.
+- Delapan environment produksi di Render dikonfigurasi tanpa mencetak secret: DATABASE_URL, DATABASE_URL_UNPOOLED, ADMIN_PASSWORD_HASH, FINGERPRINT_PUBLIC_KEY, FINGERPRINT_SECRET_KEY, FINGERPRINT_REGION, PUBLIC_ORIGIN, NODE_ENV.
+- Domain `wedding.firsta.my.id` verified. Origin HTTPS memakai domain tersebut; host alternatif dialihkan ke domain kanonis.
+- `GET /healthz`: HTTP 200, `{"ok":true}`. Admin tanpa sesi: 401. Login admin: 200. Create guest: 201.
+- Safari mengakses tautan produksi, Fingerprint Asia v4 terverifikasi, nama tamu muncul, segel membuka isi one page. Database mencatat satu visitor untuk guest tes.
+- Koleksi Postman pada domain produksi: 2 requests, 5 assertions, 0 failed. CLI memberi pesan tidak login, namun eksekusi file lokal berhasil.
+- Build filter Render mencakup source/runtime; perubahan dokumentasi saja tidak memicu rebuild.
+- Subdomain Fingerprint `validator.firsta.my.id` sudah didaftarkan oleh pengguna. Saat ini menunggu DNS benar/sertifikat Active; aplikasi menyediakan FINGERPRINT_ENDPOINT untuk aktivasi.
