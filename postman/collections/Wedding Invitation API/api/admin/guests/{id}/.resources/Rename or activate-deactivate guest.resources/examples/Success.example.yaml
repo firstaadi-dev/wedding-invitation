@@ -37,6 +37,7 @@ response:
         "name": "string",
         "active": 1,
         "deviceCount": 2,
+          "response": null,
         "createdAt": 9291
       }
 order: 1000

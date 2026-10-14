@@ -5,3 +5,4 @@
 .guest-link{min-width:250px;margin:0 0 8px;font-size:12px}.legacy-link{min-width:210px;font-size:12px;margin:0}.message-preview{white-space:pre-wrap;overflow-wrap:anywhere;padding:18px;background:#e8eee8;border-radius:4px;font:14px/1.7 system-ui,sans-serif;margin:0 0 24px}.row-actions a{padding:6px 10px;min-height:36px;font-size:12px}
 
 #preview-media{max-width:480px;margin-bottom:24px}#preview-media img{height:auto;aspect-ratio:1200/630}
+.guest-wish{min-width:220px;max-width:320px;white-space:pre-wrap;overflow-wrap:anywhere}

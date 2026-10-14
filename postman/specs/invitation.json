@@ -531,7 +531,7 @@
       "get": {
         "operationId": "listGuests",
         "summary": "List guests and device counts",
-        "description": "List guest contact numbers and stored invitation URLs. Admin authentication required.",
+        "description": "List guest contact numbers and stored invitation URLs. Admin authentication required. Includes private attendance, headcount, and wish in response (null before submission).",
         "tags": [
           "Admin"
         ],
@@ -2461,6 +2461,186 @@
           }
         }
       }
+    },
+    "/api/response": {
+      "put": {
+        "operationId": "saveResponse",
+        "summary": "Save attendance and a congratulatory wish",
+        "description": "Replace the current guest response, one per invitation shared across devices. Guest identity comes only from the active cookie session. Same-origin Origin header is mandatory; guests have no CSRF token. Attendance/count remain private to the guest and admin. Guest deletion cascades to their response.",
+        "tags": [
+          "Guest"
+        ],
+        "security": [
+          {
+            "guestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Origin",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResponseInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden / three-device limit / verification rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Temporary server failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/wishes": {
+      "get": {
+        "operationId": "listWishes",
+        "summary": "Read congratulatory wishes",
+        "description": "Only nonempty wishes from active guests. No attendance, count, guest ID, phone or invitation link. Ten per page ordered by latest update then guest ID. Offset pages may shift when wishes change. Production needs guest or admin cookie; development previews can read.",
+        "tags": [
+          "Guest"
+        ],
+        "security": [
+          {
+            "guestSession": []
+          },
+          {
+            "adminSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Wishes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2551,6 +2731,42 @@
             "type": "string",
             "nullable": true,
             "description": "Persisted secret invitation URL, visible only to admins. Null for guests created before link storage; existing access remains valid until reissue."
+          },
+          "response": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "attendance": {
+                "type": "string",
+                "enum": [
+                  "attending",
+                  "not_attending",
+                  "unsure"
+                ]
+              },
+              "guestCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10,
+                "description": "1\u201310 when attending; exactly 0 otherwise."
+              },
+              "message": {
+                "type": "string",
+                "maxLength": 1000,
+                "description": "Trimmed plain text. Empty removes the wish. Visible to other invited guests."
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "attendance",
+              "guestCount",
+              "message",
+              "updatedAt"
+            ],
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -2687,13 +2903,55 @@
           },
           "media": {
             "$ref": "#/components/schemas/Media"
+          },
+          "response": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "attendance": {
+                "type": "string",
+                "enum": [
+                  "attending",
+                  "not_attending",
+                  "unsure"
+                ]
+              },
+              "guestCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10,
+                "description": "1\u201310 when attending; exactly 0 otherwise."
+              },
+              "message": {
+                "type": "string",
+                "maxLength": 1000,
+                "description": "Trimmed plain text. Empty removes the wish. Visible to other invited guests."
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "attendance",
+              "guestCount",
+              "message",
+              "updatedAt"
+            ],
+            "nullable": true
+          },
+          "canRespond": {
+            "type": "boolean",
+            "description": "Only a verified active guest can submit. False for admin/development previews."
           }
         },
         "additionalProperties": false,
         "required": [
           "guestName",
           "settings",
-          "media"
+          "media",
+          "response",
+          "canRespond"
         ]
       },
       "Challenge": {
@@ -2751,6 +3009,114 @@
           "challenge",
           "eventId"
         ]
+      },
+      "ResponseInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "attendance": {
+            "type": "string",
+            "enum": [
+              "attending",
+              "not_attending",
+              "unsure"
+            ]
+          },
+          "guestCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
+            "description": "1\u201310 when attending; exactly 0 otherwise."
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Trimmed plain text. Empty removes the wish. Visible to other invited guests."
+          }
+        },
+        "required": [
+          "attendance",
+          "guestCount",
+          "message"
+        ]
+      },
+      "GuestResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "attendance": {
+            "type": "string",
+            "enum": [
+              "attending",
+              "not_attending",
+              "unsure"
+            ]
+          },
+          "guestCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
+            "description": "1\u201310 when attending; exactly 0 otherwise."
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Trimmed plain text. Empty removes the wish. Visible to other invited guests."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "attendance",
+          "guestCount",
+          "message",
+          "updatedAt"
+        ]
+      },
+      "Wish": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "message",
+          "updatedAt"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Wishes": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "wishes",
+          "hasMore"
+        ],
+        "properties": {
+          "wishes": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "$ref": "#/components/schemas/Wish"
+            }
+          },
+          "hasMore": {
+            "type": "boolean"
+          }
+        }
       }
     },
     "securitySchemes": {

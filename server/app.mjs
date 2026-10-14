@@ -106,8 +106,11 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
       const media = Object.fromEntries((await client.query('SELECT slot,id FROM wedding.media')).rows.map(row => [row.slot,`/${row.slot === 'preview' ? 'preview-image' : 'media'}/${row.id}`]));
       return {settings,media};
     }
+    const responseSelect = `SELECT attendance,guest_count AS "guestCount",message,updated_at AS "updatedAt" FROM wedding.responses WHERE guest_id=$1`;
     const guestSelect = `SELECT g.id,g.name,g.phone,g.invitation_link AS link,g.active,(EXTRACT(EPOCH FROM g.created_at)*1000)::float8 AS "createdAt",
-      (SELECT count(*)::integer FROM wedding.devices d WHERE d.guest_id=g.id) AS "deviceCount" FROM wedding.guests g`;
+      (SELECT count(*)::integer FROM wedding.devices d WHERE d.guest_id=g.id) AS "deviceCount",
+      CASE WHEN r.guest_id IS NULL THEN NULL ELSE json_build_object('attendance',r.attendance,'guestCount',r.guest_count,'message',r.message,'updatedAt',r.updated_at) END AS response
+      FROM wedding.guests g LEFT JOIN wedding.responses r ON r.guest_id=g.id`;
     async function guest(id, client = pool) {
       return (await client.query(`${guestSelect} WHERE g.id=$1`,[id])).rows[0];
     }
@@ -290,7 +293,36 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
       if (path === '/api/invitation' && method === 'GET') {
         const g = await session(); const a = !g && await session(true);
         if (!g && !a && production) fail(401,'unauthorized','Buka tautan undangan yang Bapak/Ibu/Sdr/Sdri terima.');
-        return json(200,{guestName:g?.name || 'Tamu Undangan',...await content(pool,false)});
+        const response = g ? (await pool.query(responseSelect,[g.guest_id])).rows[0] || null : null;
+        return json(200,{guestName:g?.name || 'Tamu Undangan',canRespond:!!g,response,...await content(pool,false)});
+      }
+      if (path === '/api/response' && method === 'PUT') {
+        const current = await authorized();
+        await limited('response',20);
+        const value = await body(); only(value,['attendance','guestCount','message']);
+        if (!['attending','not_attending','unsure'].includes(value.attendance)) fail(400,'attendance','Pilih konfirmasi kehadiran.');
+        if (!Number.isInteger(value.guestCount) || (value.attendance === 'attending' ? value.guestCount < 1 || value.guestCount > 10 : value.guestCount !== 0)) fail(400,'guest_count','Jumlah tamu hadir harus 1–10 orang, atau 0 jika tidak hadir/belum pasti.');
+        if (typeof value.message !== 'string' || value.message.length > 1000 || /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(value.message)) fail(400,'message','Ucapan maksimal 1000 karakter.');
+        const response = await transaction(async client => {
+          // Lock with revocation so a disabled/reissued invitation cannot save using a stale session.
+          const g = (await client.query('SELECT active,version FROM wedding.guests WHERE id=$1 FOR UPDATE',[current.guest_id])).rows[0];
+          if (!g || !g.active || g.version !== current.version) fail(401,'unauthorized','Silakan buka undangan kembali.');
+          await client.query(`INSERT INTO wedding.responses(guest_id,attendance,guest_count,message) VALUES($1,$2,$3,$4)
+            ON CONFLICT(guest_id) DO UPDATE SET attendance=EXCLUDED.attendance,guest_count=EXCLUDED.guest_count,message=EXCLUDED.message,
+            updated_at=CASE WHEN (responses.attendance,responses.guest_count,responses.message) IS DISTINCT FROM (EXCLUDED.attendance,EXCLUDED.guest_count,EXCLUDED.message) THEN now() ELSE responses.updated_at END`,[current.guest_id,value.attendance,value.guestCount,value.message.trim()]);
+          return (await client.query(responseSelect,[current.guest_id])).rows[0];
+        });
+        return json(200,response);
+      }
+      if (path === '/api/wishes' && method === 'GET') {
+        if (!await session() && !await session(true) && production) fail(401,'unauthorized','Silakan buka undangan dahulu.');
+        const page = url.searchParams.get('page') ?? '1';
+        if (!/^[1-9]\d{0,4}$/.test(page) || Number(page) > 10000) fail(400,'page','Halaman ucapan tidak valid.');
+        // shortcut: offset pages can shift as wishes change; use a cursor for a busy guestbook.
+        const {rows} = await pool.query(`SELECT g.name,r.message,r.updated_at AS "updatedAt" FROM wedding.responses r
+          JOIN wedding.guests g ON g.id=r.guest_id WHERE g.active=1 AND r.message<>''
+          ORDER BY r.updated_at DESC,r.guest_id LIMIT 11 OFFSET $1`,[(Number(page)-1)*10]);
+        return json(200,{wishes:rows.slice(0,10),hasMore:rows.length>10});
       }
       if ((path.startsWith('/media/') || path.startsWith('/preview-image/')) && ['GET','HEAD'].includes(method)) {
         const preview = path.startsWith('/preview-image/');

@@ -25,6 +25,7 @@ response:
           "name": "string",
           "active": 1,
           "deviceCount": 2,
+          "response": null,
           "createdAt": 5586
         },
         {
@@ -32,6 +33,7 @@ response:
           "name": "string",
           "active": 0,
           "deviceCount": 2,
+          "response": null,
           "createdAt": 816
         }
       ]

@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {randomBytes,scryptSync} from 'node:crypto';
+import {randomBytes,scryptSync,createHash} from 'node:crypto';
 import {once} from 'node:events';
 import {existsSync,readFileSync} from 'node:fs';
 import sharp from 'sharp';
+import {spawn} from 'node:child_process';
 import {database,migrate} from '../server/db.mjs';
 import {createApp} from '../server/app.mjs';
 if (existsSync('.env.test.local')) process.loadEnvFile('.env.test.local');
@@ -22,7 +23,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
   server.listen(0,'127.0.0.1');await once(server,'listening');
   const base = `http://127.0.0.1:${server.address().port}`;
   const admin = {};
-  let csrf;let guest;let token;let guestBrowser;
+  let csrf;let guest;let token;let guestBrowser;let guestVisitor;
   async function request(path,{method='GET',data,jar={},headers={}} = {}) {
     const response = await fetch(base+path,{method,headers:{Origin:origin,...(Object.keys(jar).length ? {Cookie:Object.entries(jar).map(([k,v])=>`${k}=${v}`).join('; ')} : {}),...(data ? {'Content-Type':'application/json'} : {}),...headers},body:data ? JSON.stringify(data) : undefined});
     for (const cookie of response.headers.getSetCookie()) {const [key,value] = cookie.split(';')[0].split('=');jar[key]=value;}
@@ -92,12 +93,79 @@ test('Neon-backed CMS and guest access end to end',async t => {
       const results = await Promise.all(challenges.map((c,i)=>verify(c,`visitor-${i}`)));
       assert.equal(results.filter(r=>r.response.status===200).length,3);
       assert.equal(results.filter(r=>r.value.code==='device_limit').length,3);
-      const index = results.findIndex(r=>r.response.status===200);guestBrowser = results[index].jar;
+      const index = results.findIndex(r=>r.response.status===200);guestBrowser = results[index].jar;guestVisitor = `visitor-${index}`;
       assert.equal(Number((await pool.query('SELECT count(*) FROM wedding.devices WHERE guest_id=$1',[guest.id])).rows[0].count),3);
       const repeat = await verify(await challenge(),`visitor-${index}`);assert.equal(repeat.response.status,200);
       const reuse = challenges[index];assert.equal((await verify(reuse,`visitor-${index}`)).response.status,409);
       const invitation = await request('/api/invitation',{jar:guestBrowser});assert.equal(invitation.value.guestName,'Keluarga Uji');
       assert.equal((await request('/',{jar:guestBrowser})).value.includes('envelope-card'),true);
+    });
+    await t.test('attendance and wishes persist per guest, validate input, and keep private fields private',async () => {
+      const submit = (data,options={}) => request('/api/response',{method:'PUT',data,jar:guestBrowser,...options});
+      const value = {attendance:'attending',guestCount:2,message:'  Selamat <script>alert(1)</script>\nBahagia selalu!  '};
+      const invitation = await request('/api/invitation',{jar:guestBrowser});
+      assert.equal(invitation.value.canRespond,true);assert.equal(invitation.value.response,null);
+      assert.equal((await request('/api/invitation',{jar:admin})).value.canRespond,false);
+      for (const path of ['/api/response','/api/wishes']) {
+        assert.equal((await request(path,path.endsWith('response') ? {method:'PUT',data:value} : {})).response.status,401);
+      }
+      assert.equal((await submit(value,{jar:admin})).response.status,401);
+      assert.equal((await submit(value,{headers:{Origin:'https://attacker.example'}})).response.status,403);
+      assert.equal((await submit(value,{headers:{Origin:''}})).response.status,403);
+      const saved = await submit(value);assert.equal(saved.response.status,200);
+      assert.equal(saved.value.message,value.message.trim());assert.equal(saved.value.guestCount,2);
+      const repeated = await submit(value);assert.deepEqual(repeated.value,saved.value);
+      assert.equal((await pool.query('SELECT count(*) FROM wedding.responses WHERE guest_id=$1',[guest.id])).rows[0].count,'1');
+      const anotherDevice = await verify(await challenge(),guestVisitor);assert.equal(anotherDevice.response.status,200);
+      const refreshed = await request('/api/invitation',{jar:anotherDevice.jar});assert.deepEqual(refreshed.value.response,saved.value);
+      const listed = (await request('/api/wishes',{jar:guestBrowser})).value;
+      assert.equal(listed.wishes.length,1);assert.deepEqual(Object.keys(listed.wishes[0]).sort(),['message','name','updatedAt']);
+      assert.equal(listed.wishes[0].message,value.message.trim());assert.equal(listed.hasMore,false);
+      assert.equal((await adminRequest('/api/admin/guests')).value[0].response.message,value.message.trim());
+      for (const data of [{...value,attendance:'invalid'},{...value,guestCount:0},{...value,guestCount:11},{...value,guestCount:1.5},{...value,guestCount:'2'},{...value,attendance:'not_attending'},{...value,message:'x'.repeat(1001)},{...value,message:null},{...value,message:'bad\u0000'},{...value,guestId:guest.id},{attendance:'unsure',guestCount:0}]) {
+        assert.equal((await submit(data)).response.status,400);
+      }
+      assert.deepEqual((await request('/api/invitation',{jar:guestBrowser})).value.response,saved.value);
+      const cleared = await submit({attendance:'not_attending',guestCount:0,message:'   '});assert.equal(cleared.response.status,200);
+      assert.equal((await request('/api/wishes',{jar:guestBrowser})).value.wishes.length,0);
+      assert.equal((await submit({attendance:'unsure',guestCount:0,message:'Doa terbaik untuk kalian.'})).response.status,200);
+      await migrate(process.env.TEST_DATABASE_URL_UNPOOLED);
+      assert.equal((await request('/api/invitation',{jar:guestBrowser})).value.response.attendance,'unsure');
+      for (const page of ['0','-1','1.5','abc','10001','']) assert.equal((await request(`/api/wishes?page=${page}`,{jar:guestBrowser})).response.status,400);
+    });
+    await t.test('wishes paginate, exclude inactive guests, and cannot change another invitation',async () => {
+      for (let i=0;i<11;i++) {
+        const id = `wish-fixture-${i}`;
+        await pool.query('INSERT INTO wedding.guests(id,name,token_hash,active) VALUES($1,$2,$1,$3)',[id,`Tamu ${i}`,i === 10 ? 0 : 1]);
+        await pool.query("INSERT INTO wedding.responses(guest_id,attendance,guest_count,message,updated_at) VALUES($1,'attending',1,$2,'2026-01-01')",[id,`Ucapan ${i}`]);
+      }
+      const first = (await request('/api/wishes',{jar:guestBrowser})).value;
+      const second = (await request('/api/wishes?page=2',{jar:guestBrowser})).value;
+      assert.equal(first.wishes.length,10);assert.equal(first.hasMore,true);assert.equal(second.wishes.length,1);assert.equal(second.hasMore,false);
+      assert.equal(new Set([...first.wishes,...second.wishes].map(w => w.name)).size,11);
+      assert.equal([...first.wishes,...second.wishes].some(w => w.name === 'Tamu 10'),false);
+      const own = (await request('/api/invitation',{jar:guestBrowser})).value.response;
+      assert.equal(own.message,'Doa terbaik untuk kalian.');
+      const other = await adminRequest('/api/admin/guests',{method:'POST',data:{name:'Undangan lain'}});
+      const browser = await verify(await challenge(other.value.link.split('#')[1]),'other-visitor');
+      const data = {attendance:'not_attending',guestCount:0,message:'Ucapan tamu lain'};
+      assert.equal((await request('/api/response',{method:'PUT',data:{...data,guestId:guest.id},jar:browser.jar})).response.status,400);
+      assert.equal((await request('/api/response',{method:'PUT',data,jar:browser.jar})).response.status,200);
+      assert.deepEqual((await request('/api/invitation',{jar:guestBrowser})).value.response,own);
+      await adminRequest(`/api/admin/guests/${other.value.guest.id}`,{method:'DELETE'});
+      await pool.query("DELETE FROM wedding.guests WHERE id LIKE 'wish-fixture-%'");
+      assert.equal((await pool.query("SELECT count(*) FROM wedding.responses WHERE guest_id LIKE 'wish-fixture-%'")).rows[0].count,'0');
+    });
+    await t.test('Postman collection verifies the local Neon-backed response endpoints',async () => {
+      const child = spawn('postman',['collection','run','postman/collections/Wedding Invitation API','-i','Save attendance and a congratulatory wish','-i','Read personalized invitation and media','-i','Read congratulatory wishes','--env-var',`baseUrl=${base}`,'--env-var',`origin=${origin}`,'--env-var',`guestCookie=wedding_guest=${guestBrowser.wedding_guest}`,'--no-report-events'],{stdio:['ignore','pipe','pipe']});
+      let output = '';child.stdout.on('data',chunk => {output += chunk;});child.stderr.on('data',chunk => {output += chunk;});
+      const [code] = await once(child,'close');console.log(output);assert.equal(code,0,output);
+    });
+    await t.test('response submissions are rate limited',async () => {
+      const key = createHash('sha256').update('response:127.0.0.1').digest('hex');
+      await pool.query('UPDATE wedding.rate_limits SET hits=20,expires_at=now()+interval \'1 minute\' WHERE key=$1',[key]);
+      const result = await request('/api/response',{method:'PUT',data:{attendance:'attending',guestCount:1,message:'Too many'},jar:guestBrowser});
+      assert.equal(result.response.status,429);assert.equal(result.response.headers.get('retry-after'),'60');
     });
     await t.test('content, photo and MP3 uploads, authenticated media and range response',async () => {
       const saved = await adminRequest('/api/admin/content',{method:'PUT',data:{ceremonyTitle:' Akad ',receptionTitle:'Syukuran',countdownTime:'09:00',ceremonyTime:'09.00 WIB',mapEmbedUrl:'https://www.google.com/maps/embed?pb=test'}});
@@ -214,8 +282,10 @@ test('Neon-backed CMS and guest access end to end',async t => {
     await t.test('reset, deactivate and link rotation revoke sessions immediately',async () => {
       assert.equal((await adminRequest(`/api/admin/guests/${guest.id}/devices`,{method:'DELETE'})).response.status,200);
       assert.equal((await request('/api/invitation',{jar:guestBrowser})).response.status,401);
+      assert.equal((await request('/api/response',{method:'PUT',jar:guestBrowser,data:{attendance:'attending',guestCount:1,message:'Stale'}})).response.status,401);
       assert.equal((await adminRequest(`/api/admin/guests/${guest.id}`,{method:'PATCH',data:{active:false}})).value.active,0);
       assert.equal((await request('/api/access/challenge',{method:'POST',data:{token}})).response.status,404);
+      assert.equal((await request('/api/wishes',{jar:admin})).value.wishes.length,0);
       await adminRequest(`/api/admin/guests/${guest.id}`,{method:'PATCH',data:{active:true}});
       const changed = await adminRequest(`/api/admin/guests/${guest.id}/link`,{method:'POST',data:{}});
       assert.equal(changed.response.status,200);assert.notEqual(changed.value.link.split('#')[1],token);
@@ -226,6 +296,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
       await adminRequest(`/api/admin/guests/${guest.id}`,{method:'DELETE'});
       assert.equal((await request('/api/invitation',{jar:result.jar})).response.status,401);
       assert.equal((await pool.query('SELECT count(*) FROM wedding.devices')).rows[0].count,'0');
+      assert.equal((await pool.query('SELECT count(*) FROM wedding.responses')).rows[0].count,'0');
     });
     await t.test('logout invalidates server-side session',async () => {
       assert.equal((await adminRequest('/api/admin/logout',{method:'POST',data:{}})).response.status,200);

@@ -3,13 +3,23 @@ description: Development /preview can read demo content; production always requi
 url: "{{baseUrl}}/api/invitation"
 method: GET
 headers:
-  Accept: application/json
-auth:
-  type: apikey
-  credentials:
-    key: wedding_guest
-    value: "{{apiKey}}"
-    in: header
+  - key: Accept
+    value: application/json
+  - key: Cookie
+    value: '{{guestCookie}}'
 settings: {}
 examples: ./.resources/Read personalized invitation and media.resources/examples
-order: 3000
+order: 5500
+
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Own response is readable', () => pm.response.to.have.status(200));
+      pm.test('Invitation contains the saved response and permits guest submissions', () => {
+        const result = pm.response.json();
+        pm.expect(result.canRespond).to.eql(true);
+        pm.expect(result.response.attendance).to.eql('attending');
+        pm.expect(result.response.guestCount).to.eql(2);
+        pm.expect(result.response.message).to.eql('Selamat menempuh hidup baru!');
+      });

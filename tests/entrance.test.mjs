@@ -18,8 +18,8 @@ assert.equal(sectionProgress(0, 0), 1);
 
 const page = readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
 assert.doesNotMatch(page, /<nav\b|hamburger|bottom-nav/i);
-assert.equal((page.match(/class="trees trees-left"/g) || []).length, 6);
-assert.equal((page.match(/class="trees trees-right"/g) || []).length, 6);
+assert.equal((page.match(/class="trees trees-left"/g) || []).length, 8);
+assert.equal((page.match(/class="trees trees-right"/g) || []).length, 8);
 assert.match(page, /Firsta Adi Pradana/);
 assert.match(page, /Talitha Syahda Arundatie/);
 assert.match(page, /22 November 2026/);

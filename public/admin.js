@@ -61,10 +61,15 @@ function renderGuests() {
   const query = document.querySelector('#search').value.trim().toLocaleLowerCase('id');
   const filtered = guests.filter(g => `${g.name} ${g.phone}`.toLocaleLowerCase('id').includes(query));
   document.querySelector('#guest-count').textContent = `${guests.length} tamu`;
+  const active = guests.filter(g => g.active);
+  const attending = active.filter(g => g.response?.attendance === 'attending');
+  document.querySelector('#attendance-summary').textContent = `${attending.length} undangan hadir · ${attending.reduce((total,g) => total+g.response.guestCount,0)} orang · ${active.filter(g => g.response?.attendance === 'not_attending').length} tidak hadir · ${active.filter(g => g.response?.attendance === 'unsure').length} belum pasti · ${active.filter(g => !g.response).length} belum konfirmasi (tamu aktif)`;
   document.querySelector('#empty-guests').hidden = filtered.length > 0;
   document.querySelector('#empty-guests').textContent = guests.length ? 'Tidak ada tamu yang cocok.' : 'Belum ada tamu. Tambahkan tamu untuk membuat tautan pertama.';
   for (const guest of filtered) {
     const row = element('tr');row.append(element('td',guest.name),element('td',guest.phone || 'Belum diisi'),element('td',guest.active ? 'Aktif' : 'Nonaktif'),element('td',`${guest.deviceCount} / 3`));
+    const attendance = guest.response ? {attending:`Hadir · ${guest.response.guestCount} orang`,not_attending:'Tidak hadir',unsure:'Belum pasti'}[guest.response.attendance] : 'Belum konfirmasi';
+    row.append(element('td',attendance),element('td',guest.response?.message || '—','guest-wish'));
     const linkCell = element('td');
     if (guest.link) {
       const input = element('input');input.value = guest.link;input.readOnly = true;input.className = 'guest-link';input.setAttribute('aria-label',`Tautan undangan ${guest.name}`);
@@ -98,7 +103,7 @@ function renderGuests() {
       await api(`/api/admin/guests/${guest.id}/devices`,'DELETE');await refresh();notice('Slot perangkat direset.');
     }));
     actions.append(action('Hapus',async () => {
-      if (!await confirm(`Hapus ${guest.name} beserta tautan dan seluruh aksesnya?`,'Hapus tamu?')) return;
+      if (!await confirm(`Hapus ${guest.name} beserta tautan, seluruh akses, konfirmasi, dan ucapannya?`,'Hapus tamu?')) return;
       await api(`/api/admin/guests/${guest.id}`,'DELETE');await refresh();notice('Tamu dihapus.');
     },true));
     cell.append(actions);row.append(cell);rows.append(row);

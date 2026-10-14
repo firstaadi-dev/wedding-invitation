@@ -19,7 +19,8 @@
         <form id="add-guest" class="inline-form"><label>Nama tamu<input name="name" required maxlength="120" placeholder="Bapak/Ibu atau keluarga"></label><label>No. telepon WhatsApp (opsional)<input name="phone" type="tel" maxlength="40" placeholder="0812… atau +62812…"></label><button class="primary">Tambah tamu</button></form>
         <div id="new-link" class="new-link" hidden><label>Tautan baru — sudah tersimpan di daftar tamu<input id="link-value" readonly></label><button id="copy-link" type="button" class="secondary">Salin tautan</button><p>Tautan lama akan berhenti berlaku jika Anda membuat tautan pengganti.</p></div>
         <label class="search-label">Cari tamu<input id="search" type="search" placeholder="Cari nama atau nomor telepon…"></label>
-        <div class="table-wrap"><table><thead><tr><th>Nama tamu</th><th>No. telepon</th><th>Status</th><th>Perangkat</th><th>Tautan undangan</th><th>Tindakan</th></tr></thead><tbody id="guests"></tbody></table></div>
+        <p id="attendance-summary"></p>
+        <div class="table-wrap"><table><thead><tr><th>Nama tamu</th><th>No. telepon</th><th>Status</th><th>Perangkat</th><th>Konfirmasi</th><th>Ucapan & doa</th><th>Tautan undangan</th><th>Tindakan</th></tr></thead><tbody id="guests"></tbody></table></div>
         <p id="empty-guests" class="empty">Belum ada tamu. Tambahkan tamu untuk membuat tautan pertama.</p>
       </section>
       <section class="panel" aria-labelledby="whatsapp-title">

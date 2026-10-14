@@ -1,0 +1,36 @@
+$kind: http-request
+description: Replace the current guest response, one per invitation shared across devices. Guest identity comes only from the active cookie session. Same-origin Origin header is mandatory; guests have no CSRF token. Attendance/count remain private to the guest and admin. Guest deletion cascades to their response.
+url: "{{baseUrl}}/api/response"
+method: PUT
+headers:
+  - key: Origin
+    value: '{{origin}}'
+  - key: Cookie
+    value: '{{guestCookie}}'
+  - key: Content-Type
+    value: application/json
+  - key: Accept
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "attendance": "attending",
+      "guestCount": 2,
+      "message": "Selamat menempuh hidup baru!"
+    }
+settings: {}
+order: 5000
+
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Guest response is saved', () => pm.response.to.have.status(200));
+      pm.test('Saved attendance and headcount match', () => {
+        const result = pm.response.json();
+        pm.expect(result.attendance).to.eql('attending');
+        pm.expect(result.guestCount).to.eql(2);
+        pm.expect(result.message).to.eql('Selamat menempuh hidup baru!');
+        pm.expect(Number.isFinite(Date.parse(result.updatedAt))).to.eql(true);
+      });

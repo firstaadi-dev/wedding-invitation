@@ -134,6 +134,73 @@
       </div>
     </section>
 
+    <section class="scene gift-scene" id="sumbangan" aria-labelledby="gift-title">
+      <div class="forest-backdrop" aria-hidden="true"></div>
+      <div class="trees trees-left" aria-hidden="true"></div>
+      <div class="trees trees-right" aria-hidden="true"></div>
+      <div class="scene-copy">
+        <p class="eyebrow">Tanda kasih</p>
+        <h2 id="gift-title">Sumbangan<br><em>untuk awal cerita kami.</em></h2>
+        <p class="introduction">Doa restu dan kehadiran Bapak/Ibu/Sdr/Sdri adalah hadiah terindah. Jika berkenan memberikan tanda kasih, dapat melalui rekening berikut.</p>
+        <div class="guest-paper gift-paper">
+          <p class="eyebrow">BLU</p>
+          <label for="gift-account-blu">Nomor rekening BLU</label>
+          <input id="gift-account-blu" class="gift-account" value="0033 1600 0000" readonly inputmode="numeric">
+          <p>Atas nama <strong>Firsta Adi Pradana</strong></p>
+          <button class="guest-button" type="button" aria-label="Salin nomor rekening BLU">Salin nomor rekening</button>
+          <p class="form-status" role="status"></p>
+        </div>
+        <div class="guest-paper gift-paper">
+          <p class="eyebrow">Bank Mandiri</p>
+          <label for="gift-account-mandiri">Nomor rekening Mandiri</label>
+          <input id="gift-account-mandiri" class="gift-account" value="1350018340537" readonly inputmode="numeric">
+          <p>Atas nama <strong>TALITHA SYAHDA ARUND</strong></p>
+          <button class="guest-button" type="button" aria-label="Salin nomor rekening Mandiri">Salin nomor rekening</button>
+          <p class="form-status" role="status"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="scene response-scene" id="konfirmasi" aria-labelledby="response-title">
+      <div class="forest-backdrop" aria-hidden="true"></div>
+      <div class="trees trees-left" aria-hidden="true"></div>
+      <div class="trees trees-right" aria-hidden="true"></div>
+      <div class="scene-copy">
+        <p class="eyebrow">Kabar & doa dari Bapak/Ibu/Sdr/Sdri</p>
+        <h2 id="response-title">Konfirmasi kehadiran<br><em>& ucapan selamat.</em></h2>
+        <p class="introduction">Kabarkan rencana kehadiran dan titipkan doa untuk perjalanan kami.</p>
+        <div class="guest-paper">
+          <form id="response-form">
+            <fieldset id="response-fields" disabled>
+              <legend id="response-guest">Tamu Undangan</legend>
+              <label for="attendance">Konfirmasi kehadiran</label>
+              <select id="attendance" name="attendance" required>
+                <option value="">Pilih kehadiran</option>
+                <option value="attending">Hadir</option>
+                <option value="not_attending">Tidak hadir</option>
+                <option value="unsure">Belum pasti</option>
+              </select>
+              <div id="guest-count-field" hidden>
+                <label for="response-count">Jumlah yang hadir (termasuk Bapak/Ibu/Sdr/Sdri)</label>
+                <input id="response-count" name="guestCount" type="number" min="1" max="10" step="1" value="1" required disabled>
+              </div>
+              <label for="wish-message">Ucapan & doa (opsional)</label>
+              <textarea id="wish-message" name="message" rows="4" maxlength="1000" placeholder="Selamat menempuh hidup baru…" aria-describedby="response-help"></textarea>
+              <p id="response-help" class="form-help">Ucapan ditampilkan kepada tamu undangan lain. Konfirmasi kehadiran dan jumlah tamu hanya terlihat oleh Bapak/Ibu/Sdr/Sdri dan admin. Konfirmasi serta ucapan dapat diperbarui melalui formulir ini.</p>
+              <button class="guest-button" type="submit">Simpan konfirmasi & ucapan</button>
+            </fieldset>
+            <p id="response-status" class="form-status" role="status">Memuat formulir…</p>
+          </form>
+        </div>
+        <div class="wishes-area" aria-labelledby="wishes-title">
+          <h3 id="wishes-title">Ucapan & doa</h3>
+          <div id="wishes-list" class="wishes-list"></div>
+          <p id="wishes-status" class="form-status" role="status"></p>
+          <button id="more-wishes" class="guest-button" type="button">Muat ucapan</button>
+        </div>
+      </div>
+    </section>
+
     <section class="scene farewell-scene" aria-labelledby="farewell-title">
       <div class="forest-backdrop" aria-hidden="true"></div>
       <div class="trees trees-left" aria-hidden="true"></div>

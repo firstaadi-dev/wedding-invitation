@@ -1,0 +1,26 @@
+$kind: http-request
+description: Only nonempty wishes from active guests. No attendance, count, guest ID, phone or invitation link. Ten per page ordered by latest update then guest ID. Offset pages may shift when wishes change. Production needs guest or admin cookie; development previews can read.
+url: "{{baseUrl}}/api/wishes?page=1"
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+  - key: Cookie
+    value: '{{guestCookie}}'
+queryParams:
+  page: "1"
+settings: {}
+order: 6000
+
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Wishes are readable for an invited guest', () => pm.response.to.have.status(200));
+      pm.test('Wishes are bounded and contain no private attendance or contact fields', () => {
+        const result = pm.response.json();
+        pm.expect(result.wishes.length).to.be.at.most(10);
+        pm.expect(result.hasMore).to.be.a('boolean');
+        result.wishes.forEach(wish => pm.expect(Object.keys(wish).sort()).to.eql(['message','name','updatedAt']));
+      });
+      pm.test('Saved wish is visible', () => pm.expect(pm.response.json().wishes.some(w => w.message === 'Selamat menempuh hidup baru!')).to.eql(true));

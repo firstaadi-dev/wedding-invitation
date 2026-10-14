@@ -38,6 +38,14 @@ Ad blocker harus dinonaktifkan untuk tes CDN lokal. Helium terdeteksi sebagai an
 
 Media disimpan di tiga belas slot Postgres; foto didekode, diputar sesuai EXIF, diperkecil dan dikonversi ke WebP. Ini cukup untuk undangan kecil. Gunakan object storage jika galeri besar; transfer media memakai bandwidth database. MP3 dibatasi 25 MiB dengan validasi header frame; audio belum dipilih pengguna. Fixture tes `tests/fixtures/silence.mp3` adalah 40 frame MPEG-1 Layer III hening yang dibuat sendiri, bukan lagu produksi; decoder macOS memeriksanya. Media hanya dilayani kepada sesi admin/tamu aktif, dengan dukungan Range.
 
+## Sumbangan, konfirmasi & ucapan
+
+Bagian sumbangan menampilkan BLU **0033 1600 0000**, atas nama **Firsta Adi Pradana**, dan Bank Mandiri **1350018340537**, atas nama **TALITHA SYAHDA ARUND**. Masing-masing memiliki tombol salin (digit saja, termasuk nol di depan) dan pilihan salin manual jika clipboard tidak tersedia. Tamu yang sudah terverifikasi dapat memilih Hadir/Tidak hadir/Belum pasti, mengisi jumlah hadir 1–10 orang termasuk dirinya, dan ucapan opsional maksimal 1000 karakter. Satu jawaban per undangan tersimpan di Postgres dan dapat diperbarui dari perangkat yang terdaftar. Kosongkan ucapan untuk menghapusnya dari daftar. Preview admin/desain tidak dapat mengirim jawaban.
+
+Ucapan tamu aktif terlihat oleh tamu lain, sepuluh per halaman; status kehadiran dan jumlah tamu hanya diberikan kepada tamu pemilik undangan serta admin. Dashboard tamu memuat konfirmasi, ucapan, dan rekap jumlah hadir untuk undangan aktif. Menghapus tamu juga menghapus jawabannya; menonaktifkan tamu menyembunyikan ucapan tanpa menghapus jawaban. Migrasi menambahkan tabel `wedding.responses` tanpa mengubah data tamu lama. Jalankan migrasi sebelum menjalankan kode baru (Docker sudah menjalankannya saat startup).
+
+API `PUT /api/response` membutuhkan sesi tamu aktif dan Origin situs yang sesuai, membatasi 20 percobaan/menit per IP, dan menolak identitas tamu dari payload. `GET /api/invitation` memuat jawaban sendiri serta `canRespond`; `GET /api/wishes?page=1` hanya memuat nama, ucapan, dan waktu pembaruan. Pengiriman identik tidak mengubah waktu pembaruan. Pagination memakai offset sehingga daftar dapat bergeser jika ucapan diperbarui saat membaca.
+
 ## Verifikasi
 
 ```sh
@@ -45,7 +53,7 @@ npm test
 npm run test:integration
 ```
 
-Tes integrasi memerlukan `TEST_DATABASE_URL` dan `TEST_DATABASE_URL_UNPOOLED` pada `.env.test.local`, menunjuk branch terpisah `dev-invitation-verification`. Tes menghapus data pada branch pengujian tersebut; jangan pernah memakai koneksi produksi. Branch test kedaluwarsa 20 Oktober 2026, buat ulang untuk pengujian berikutnya.
+Tes integrasi memerlukan Postman CLI, `TEST_DATABASE_URL` dan `TEST_DATABASE_URL_UNPOOLED` pada `.env.test.local`, menunjuk branch terpisah `dev-invitation-verification`. Tes menghapus data pada branch pengujian tersebut; jangan pernah memakai koneksi produksi. Branch test kedaluwarsa 20 Oktober 2026, buat ulang untuk pengujian berikutnya. Pemeriksaan RSVP lokal menjalankan tiga request Postman dengan tujuh assertion (simpan jawaban, baca jawaban sendiri, dan daftar ucapan); hasil lengkap dicetak oleh tes integrasi. Tampilan sumbangan, tombol salin, pengiriman, pengisian ulang setelah reload, dan rekap admin diperiksa di Chrome; layout formulir serta ucapan juga diperiksa pada emulasi 400 piksel.
 
 Kontrak API: `postman/specs/invitation.json`. Koleksi yang dihasilkan: `postman/collections/Wedding Invitation API`. Syntax spec dan lint koleksi lulus. Health dan konfigurasi Fingerprint produksi diuji dengan dua request, lima assertion, nol kegagalan. Governance lint Postman tidak dijalankan karena tidak ada login Postman; file lokal tetap dapat diuji.
 

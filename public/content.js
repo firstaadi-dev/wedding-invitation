@@ -6,8 +6,17 @@ async function load() {
   const response = await fetch('/api/invitation');
   if (response.status === 401) {location.replace('/');return;}
   if (!response.ok) throw new Error('Konten belum dapat dimuat. Muat ulang halaman.');
-  const {guestName,settings,media} = await response.json();
+  const {guestName,settings,media,response:guestResponse,canRespond} = await response.json();
   document.querySelector('#guest-name').textContent = guestName;
+  document.querySelector('#response-guest').textContent = guestName;
+  if (guestResponse) {
+    for (const key of ['attendance','message']) responseForm.elements[key].value = guestResponse[key];
+    responseForm.elements.guestCount.value = guestResponse.guestCount || 1;
+  }
+  attendanceChanged();
+  document.querySelector('#response-fields').disabled = !canRespond;
+  responseStatus.textContent = canRespond ? (guestResponse ? 'Konfirmasi sudah tersimpan. Bapak/Ibu/Sdr/Sdri dapat memperbaruinya.' : '') : 'Formulir aktif saat dibuka melalui tautan tamu. Preview tidak dapat mengirim konfirmasi.';
+  loadWishes();
   for (const [key,fallback] of [['ceremonyTitle','Prosesi Pernikahan'],['receptionTitle','Resepsi']]) {
     document.querySelector(key === 'ceremonyTitle' ? '#ceremony-title' : '#reception-title').textContent = settings[key] || fallback;
   }
@@ -95,9 +104,67 @@ function label(playing) {
   const text = playing ? 'Jeda musik' : 'Putar musik';
   music.title = text;music.setAttribute('aria-label',text);music.setAttribute('aria-pressed',String(playing));
 }
+const responseForm = document.querySelector('#response-form');
+const responseStatus = document.querySelector('#response-status');
+const moreWishes = document.querySelector('#more-wishes');
+let wishesPage = 0;
+let wishesRequest = 0;
+function attendanceChanged() {
+  const attending = responseForm.elements.attendance.value === 'attending';
+  document.querySelector('#guest-count-field').hidden = !attending;
+  responseForm.elements.guestCount.disabled = !attending;
+}
+responseForm.elements.attendance.addEventListener('change',attendanceChanged);
+responseForm.addEventListener('submit',async event => {
+  event.preventDefault();
+  const button = responseForm.querySelector('button');button.disabled = true;
+  document.querySelector('#response-fields').disabled = true;
+  responseStatus.classList.remove('error');responseStatus.textContent = 'Menyimpan…';
+  try {
+    const attendance = responseForm.elements.attendance.value;
+    const response = await fetch('/api/response',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({attendance,guestCount:attendance === 'attending' ? Number(responseForm.elements.guestCount.value) : 0,message:responseForm.elements.message.value})});
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Konfirmasi belum tersimpan. Silakan coba kembali.');
+    responseForm.elements.message.value = result.message;
+    responseStatus.textContent = 'Terima kasih! Konfirmasi dan ucapan sudah tersimpan.';
+    await loadWishes(true);
+  } catch (error) {
+    responseStatus.classList.add('error');responseStatus.textContent = error.message;
+  } finally {document.querySelector('#response-fields').disabled = false;button.disabled = false;}
+});
+async function loadWishes(reset = false) {
+  const request = ++wishesRequest;
+  const list = document.querySelector('#wishes-list');const status = document.querySelector('#wishes-status');
+  moreWishes.disabled = true;status.textContent = 'Memuat ucapan…';
+  if (reset) {wishesPage = 0;list.replaceChildren();}
+  try {
+    const response = await fetch(`/api/wishes?page=${wishesPage+1}`);
+    const result = await response.json();
+    if (request !== wishesRequest) return;
+    if (!response.ok) throw new Error(result.error || 'Ucapan belum dapat dimuat.');
+    for (const wish of result.wishes) {
+      const card = document.createElement('article');card.className = 'wish-card';
+      const name = document.createElement('h4');name.textContent = wish.name;
+      const message = document.createElement('p');message.textContent = wish.message;
+      card.append(name,message);list.append(card);
+    }
+    wishesPage++;moreWishes.hidden = !result.hasMore;moreWishes.textContent = 'Lihat ucapan lainnya';
+    status.textContent = list.children.length ? '' : 'Belum ada ucapan. Jadilah yang pertama menitipkan doa.';
+  } catch (error) {if (request === wishesRequest) {status.textContent = error.message;moreWishes.hidden = false;moreWishes.textContent = 'Coba muat ucapan lagi';}}
+  finally {if (request === wishesRequest) moreWishes.disabled = false;}
+}
+moreWishes.addEventListener('click',() => loadWishes());
+for (const card of document.querySelectorAll('.gift-paper')) {
+  card.querySelector('button').addEventListener('click',async () => {
+    const input = card.querySelector('.gift-account');const status = card.querySelector('.form-status');
+    try {await navigator.clipboard.writeText(input.value.replace(/\s/g,''));status.textContent = 'Nomor rekening disalin.';}
+    catch {input.focus();input.select();status.textContent = 'Salin nomor rekening yang sudah dipilih.';}
+  });
+}
 music.addEventListener('click',() => {if (audio) audio.paused ? audio.play().catch(() => label(false)) : audio.pause();});
 document.querySelector('#open-invitation').addEventListener('click',() => {audio?.play().catch(() => label(false));});
 load().catch(error => {
+  responseStatus.textContent = 'Formulir belum dapat dimuat. Muat ulang halaman.';
   const message = document.createElement('p');message.className = 'content-error';message.setAttribute('role','alert');
   message.textContent = error.message;document.querySelector('.cover-copy').append(message);
 });

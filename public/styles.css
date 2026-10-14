@@ -15,6 +15,27 @@
 .location-paper iframe {width:100%;height:320px;min-width:200px;border:0;margin:28px 0;display:block;}
 .music-status.has-music:after {display:none;}
 .content-error {margin-top:20px;padding:12px;background:#531221;color:#fff;font-size:14px;}
+.guest-paper {width:min(100%,560px);margin:32px auto 0;padding:clamp(22px,5vw,36px);background:var(--paper);color:var(--ink);border:1px solid #d7c5ab;border-radius:16px;box-shadow:0 25px 55px #010d08a0;text-align:left;}
+.guest-paper fieldset {border:0;padding:0;margin:0;min-width:0;}
+.guest-paper legend {font-family:var(--serif);font-size:30px;line-height:1.25;margin-bottom:24px;overflow-wrap:anywhere;}
+.guest-paper label {display:block;font-size:14px;margin:18px 0 8px;}
+.guest-paper input,.guest-paper select,.guest-paper textarea {display:block;width:100%;padding:12px;border:1px solid #b9aa97;border-radius:6px;background:#fff;color:var(--ink);font:inherit;}
+.guest-paper textarea {resize:vertical;min-height:120px;}
+.guest-paper input:focus-visible,.guest-paper select:focus-visible,.guest-paper textarea:focus-visible {outline:3px solid var(--burgundy);outline-offset:3px;}
+.guest-button {min-height:44px;margin-top:20px;padding:12px 20px;border:1px solid var(--burgundy);border-radius:8px;background:var(--burgundy);color:var(--paper);cursor:pointer;line-height:1.5;}
+.guest-button:disabled {opacity:.6;cursor:wait;}
+.form-help {font-size:12px;line-height:1.8;margin-top:12px;}
+.form-status {font-size:14px;line-height:1.6;margin-top:16px;overflow-wrap:anywhere;}
+.guest-paper .form-status {color:var(--forest);}
+.guest-paper .form-status.error {color:var(--burgundy);}
+.gift-paper {text-align:center;}
+.gift-paper .gift-account {border:0;background:transparent;text-align:center;font-size:clamp(20px,4vw,30px);font-weight:600;letter-spacing:.04em;}
+.gift-paper strong {display:block;}
+.wishes-area {width:min(100%,560px);margin:44px auto 0;}
+.wishes-list {display:grid;gap:16px;margin-top:24px;text-align:left;}
+.wish-card {padding:22px;background:var(--paper);color:var(--ink);border:1px solid #d7c5ab;border-radius:12px;overflow-wrap:anywhere;}
+.wish-card h4 {margin:0 0 8px;font-size:15px;}
+.wish-card p {font-size:14px;white-space:pre-wrap;line-height:1.8;}
 
 * {
   box-sizing:border-box;

@@ -32,6 +32,7 @@ response:
           "name": "string",
           "active": 1,
           "deviceCount": 1,
+          "response": null,
           "createdAt": 3854
         },
         "link": "string"

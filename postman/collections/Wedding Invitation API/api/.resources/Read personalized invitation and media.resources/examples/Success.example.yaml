@@ -20,7 +20,9 @@ response:
     type: json
     content: |-
       {
-        "guestName": "string",
+        "guestName": "Tamu Undangan",
+        "response": null,
+        "canRespond": true,
         "settings": {
           "ceremonyTime": "string",
           "receptionTime": "string",
