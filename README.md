@@ -74,10 +74,11 @@ Domain: https://wedding.firsta.my.id. CNAME `wedding` menuju `wedding-invitation
 
 ## Desain
 
-Scroll berhenti di batas section dengan native scroll snap; section panjang tetap bisa digulir. Konten masuk dengan perspektif 3D ringan, parallax hutan, kartu membulat dan bayangan berlapis. Kartu muncul bergantian dari kiri/kanan dengan fade-in saat masuk layar, sekali per kunjungan halaman. Kartu tetap terlihat tanpa JavaScript/IntersectionObserver, saat menerima fokus keyboard, dan saat reduced motion aktif. Reduced motion mematikan snap, parallax dan gerakan konten.
+Scroll berhenti di batas section dengan native scroll snap; section panjang tetap bisa digulir. Konten masuk dengan perspektif 3D ringan, parallax hutan, kartu membulat dan bayangan berlapis. Kartu muncul bergantian dari kiri/kanan dengan fade-in setiap masuk layar, termasuk saat scroll kembali dari arah sebaliknya; animasi direset setelah kartu sepenuhnya keluar layar. Kartu tetap terlihat tanpa JavaScript/IntersectionObserver, saat menerima fokus keyboard, dan saat reduced motion aktif. Reduced motion mematikan snap, parallax dan gerakan konten.
 
 - [Prompt amplop terbaru](docs/stitch-envelope-prompt.md)
 - [Brief desain/pengembangan](docs/stitch-prompts.md)
+- [Penyelarasan kartu dan map bersama Stitch](docs/stitch-card-notes.md)
 - [Proyek Google Stitch](https://stitch.withgoogle.com/projects/3122156932953261093)
 - [Aset visual](docs/asset-prompts.md)
 - [Status dan bukti verifikasi](docs/stitch-results.md)

@@ -12,14 +12,14 @@
 .photo-placeholder.has-photo {position:relative;overflow:hidden;}
 .photo-placeholder.has-photo:after {display:none;}
 .photo-placeholder img {position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
-.location-paper iframe {width:100%;height:320px;min-width:200px;border:0;margin:28px 0;display:block;}
+.location-paper iframe {width:100%;height:320px;min-width:200px;border:0;display:block;}
 .music-status.has-music:after {display:none;}
 .content-error {margin-top:20px;padding:12px;background:#531221;color:#fff;font-size:14px;}
-.guest-paper {width:min(100%,560px);margin:32px auto 0;padding:clamp(22px,5vw,36px);background:var(--paper);color:var(--ink);border:1px solid #d7c5ab;border-radius:16px;box-shadow:0 25px 55px #010d08a0;text-align:left;}
+.guest-paper {width:min(100%,560px);margin:32px auto 0;padding:clamp(22px,5vw,36px);text-align:left;}
 .guest-paper fieldset {border:0;padding:0;margin:0;min-width:0;}
 .guest-paper legend {font-family:var(--serif);font-size:30px;line-height:1.25;margin-bottom:24px;overflow-wrap:anywhere;}
 .guest-paper label {display:block;font-size:14px;margin:18px 0 8px;}
-.guest-paper input,.guest-paper select,.guest-paper textarea {display:block;width:100%;padding:12px;border:1px solid #b9aa97;border-radius:6px;background:#fff;color:var(--ink);font:inherit;}
+.guest-paper input,.guest-paper select,.guest-paper textarea {display:block;width:100%;padding:12px;border:1px solid #b9aa97;border-radius:6px;background:#f3ede4;color:var(--ink);font:inherit;}
 .guest-paper textarea {resize:vertical;min-height:120px;}
 .guest-paper input:focus-visible,.guest-paper select:focus-visible,.guest-paper textarea:focus-visible {outline:3px solid var(--burgundy);outline-offset:3px;}
 .guest-button {min-height:44px;margin-top:20px;padding:12px 20px;border:1px solid var(--burgundy);border-radius:8px;background:var(--burgundy);color:var(--paper);cursor:pointer;line-height:1.5;}
@@ -305,10 +305,6 @@ main {
 
 .portrait-paper {
   padding:22px 18px 28px;
-  background:var(--paper);
-  color:var(--ink);
-  border:1px solid #d9c7b0;
-  box-shadow:0 25px 55px #010d08a0;
   transform:perspective(900px) rotateY(3deg) rotateZ(-3deg);
 }
 
@@ -394,20 +390,16 @@ main {
 }
 
 .event-paper {
-  position:relative;
   padding:32px 24px 38px;
-  background:var(--paper);
-  color:var(--ink);
-  border:1px solid #d7c5ab;
-  box-shadow:14px 26px 40px #020c08a6;
   transform:rotateY(4deg) rotateZ(-2deg);
 }
 
-.event-paper:before {
+.event-paper:before,.location-paper:before,.guest-paper:before {
   content:"";
   position:absolute;
   inset:9px;
   border:1px solid #76564035;
+  border-radius:10px;
   pointer-events:none;
 }
 
@@ -455,20 +447,19 @@ main {
 .location-paper {
   width:min(100%,560px);
   padding:38px;
-  background:var(--paper);
-  color:var(--ink);
   margin:44px auto 0;
-  border:1px solid #d7c5ab;
-  box-shadow:12px 25px 70px #010c089e;
   transform:perspective(1000px) rotateX(2deg);
 }
 
-.portrait-paper,.event-paper,.location-paper {
+.portrait-paper,.event-paper,.location-paper,.guest-paper {
+  position:relative;
+  background:var(--paper);
+  color:var(--ink);
+  border:1px solid #d7c5ab;
   border-radius:16px;
   box-shadow:inset 0 1px 0 #fff,0 2px 4px #020c0826,0 24px 60px #020c0880;
   transition:translate .35s ease,box-shadow .35s ease;
 }
-.event-paper:before {border-radius:10px;}
 
 @media(hover:hover) and (pointer:fine) {
   .portrait-paper:hover,.event-paper:hover,.location-paper:hover {
@@ -479,8 +470,11 @@ main {
 }
 
 .location-paper h3 {
-  font-size:34px;
+  font-size:clamp(30px,4vw,38px);
+  margin:8px 0 4px;
 }
+.location-paper .venue-name {font-size:14px;color:var(--wood);letter-spacing:.06em;}
+.map-frame {overflow:hidden;border:1px solid #d7c5ab;border-radius:12px;margin-top:24px;background:#dfe2d6;}
 
 .map-placeholder {
   min-height:240px;
@@ -491,9 +485,8 @@ main {
   justify-content:center;
   gap:10px;
   padding:20px;
-  margin:28px auto;
+  margin:0;
   color:#385144;
-  border:1px solid #bbc6b5;
 }
 
 .map-placeholder>span {
@@ -688,9 +681,7 @@ body.gallery-open {overflow:hidden;}
     font-size:16px;
   }
   .location-paper {
-    padding:24px 17px;
-    margin-inline:-4px;
-    width:calc(100% + 8px);
+    padding:24px;
   }
   .location-paper h3 {
     font-size:30px;
