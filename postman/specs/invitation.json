@@ -531,7 +531,7 @@
       "get": {
         "operationId": "listGuests",
         "summary": "List guests and device counts",
-        "description": "List guests and device counts",
+        "description": "List guest contact numbers and stored invitation URLs. Admin authentication required.",
         "tags": [
           "Admin"
         ],
@@ -786,7 +786,7 @@
     "/api/admin/guests/{id}": {
       "patch": {
         "operationId": "updateGuest",
-        "summary": "Rename or activate/deactivate guest",
+        "summary": "Edit guest name, phone or active status",
         "description": "Deactivation immediately revokes sessions and challenges. Device slots remain until explicit reset.",
         "tags": [
           "Admin"
@@ -2372,6 +2372,11 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 120
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "Optional phone number. Accepts 08\u2026, 62\u2026, or +country code, spaces, hyphens and parentheses; saved as 8\u201315 international digits. Empty clears it."
           }
         },
         "additionalProperties": false,
@@ -2389,6 +2394,11 @@
           },
           "active": {
             "type": "boolean"
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "Optional phone number. Accepts 08\u2026, 62\u2026, or +country code, spaces, hyphens and parentheses; saved as 8\u201315 international digits. Empty clears it."
           }
         },
         "additionalProperties": false
@@ -2416,6 +2426,15 @@
           },
           "createdAt": {
             "type": "integer"
+          },
+          "phone": {
+            "type": "string",
+            "pattern": "^(?:|[1-9][0-9]{7,14})$"
+          },
+          "link": {
+            "type": "string",
+            "nullable": true,
+            "description": "Persisted secret invitation URL, visible only to admins. Null for guests created before link storage; existing access remains valid until reissue."
           }
         },
         "additionalProperties": false
@@ -2428,7 +2447,7 @@
           },
           "link": {
             "type": "string",
-            "description": "Secret fragment token. Returned only on create/reissue; database stores its hash."
+            "description": "Secret invitation URL, stored for later copying from the authenticated admin guest list."
           }
         },
         "additionalProperties": false,
@@ -2493,6 +2512,22 @@
             "pattern": "^(?:|(?:[01][0-9]|2[0-3]):[0-5][0-9])$",
             "description": "Countdown start time on 22 November 2026 in WIB (UTC+07:00). Empty defaults to 00:00.",
             "example": "09:00"
+          },
+          "whatsappTemplate": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "description": "Global WhatsApp message. Supports {nama} and {link}; {link} is required. Admin-only."
+          },
+          "linkPreviewTitle": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Public page and Open Graph title; empty uses Firsta & Talitha \u2014 Undangan."
+          },
+          "linkPreviewDescription": {
+            "type": "string",
+            "maxLength": 300,
+            "description": "Public description and Open Graph description; empty uses the wedding date and venue."
           }
         },
         "additionalProperties": false
@@ -2526,7 +2561,12 @@
             "type": "string"
           },
           "settings": {
-            "$ref": "#/components/schemas/Settings"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Settings"
+              }
+            ],
+            "description": "Public settings only; whatsappTemplate is omitted."
           },
           "media": {
             "$ref": "#/components/schemas/Media"

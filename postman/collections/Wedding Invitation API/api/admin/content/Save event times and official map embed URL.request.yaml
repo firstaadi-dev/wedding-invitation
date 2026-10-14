@@ -23,7 +23,10 @@ body:
       "mapEmbedUrl": "",
       "ceremonyTitle": "Akad",
       "receptionTitle": "Resepsi",
-      "countdownTime": "09:00"
+      "countdownTime": "09:00",
+      "whatsappTemplate": "Yth. {nama},\nUndangan Firsta & Talitha:\n{link}",
+      "linkPreviewTitle": "Firsta & Talitha — Undangan",
+      "linkPreviewDescription": "22 November 2026 · Arjuna Ballroom Alam Indah Resto."
     }
 auth:
   type: noauth
@@ -39,4 +42,7 @@ scripts:
       pm.test('Custom ceremony name saved', () => pm.expect(settings.ceremonyTitle).to.eql('Akad'));
       pm.test('Reception name saved', () => pm.expect(settings.receptionTitle).to.eql('Resepsi'));
       pm.test('WIB countdown time saved', () => pm.expect(settings.countdownTime).to.eql('09:00'));
-      pm.collectionVariables.set('savedSettings', JSON.stringify(settings));
+      pm.test('Global message saved', () => pm.expect(settings.whatsappTemplate).to.include('{link}'));
+      pm.test('Preview title saved', () => pm.expect(settings.linkPreviewTitle).to.eql('Firsta & Talitha — Undangan'));
+      const {whatsappTemplate, ...publicSettings} = settings;
+      pm.collectionVariables.set('savedSettings', JSON.stringify(publicSettings));

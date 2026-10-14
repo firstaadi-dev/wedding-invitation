@@ -1,35 +1,34 @@
 $kind: http-request
-name: Rename or activate/deactivate guest
+name: Edit guest name, phone or active status
 description: Deactivation immediately revokes sessions and challenges. Device slots remain until explicit reset.
 url: "{{baseUrl}}/api/admin/guests/:id"
 method: PATCH
 headers:
   - key: X-CSRF-Token
-    value: string
+    value: "{{csrf}}"
     disabled: false
     description: (Required) Token returned by admin session/login, matching HttpOnly cookie session.
   - key: Content-Type
     value: application/json
+  - key: Origin
+    value: "{{baseUrl}}"
   - key: Accept
     value: application/json
 pathVariables:
   - key: id
-    value: string
+    value: "{{deliveryGuestId}}"
     disabled: false
     description: "(Required) "
 body:
   type: json
   content: |-
     {
-      "name": "string",
+      "name": "Keluarga Contoh",
+      "phone": "+6281234567890",
       "active": false
     }
 auth:
-  type: apikey
-  credentials:
-    key: wedding_admin
-    value: "{{apiKey}}"
-    in: header
+  type: noauth
 settings: {}
 examples: ./.resources/Rename or activate-deactivate guest.resources/examples
 order: 1000

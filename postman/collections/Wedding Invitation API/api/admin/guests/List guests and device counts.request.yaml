@@ -5,11 +5,27 @@ method: GET
 headers:
   Accept: application/json
 auth:
-  type: apikey
-  credentials:
-    key: wedding_admin
-    value: "{{apiKey}}"
-    in: header
+  type: noauth
 settings: {}
 examples: ./.resources/List guests and device counts.resources/examples
-order: 1000
+order: 3000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Admin guest list succeeds', () => pm.response.to.have.status(200));
+      const guests = pm.response.json();
+      pm.test('Guests expose saved link and phone fields', () => {
+        for (const guest of guests) {
+          pm.expect(guest).to.have.property('phone');
+          pm.expect(guest).to.have.property('link');
+          if (guest.link !== null) pm.expect(guest.link).to.match(/^https?:\/\/.+\/#[-_A-Za-z0-9]{43}$/);
+        }
+      });
+      if (pm.collectionVariables.get('deliveryGuestId')) {
+        pm.test('Generated link survives rereading guest list', () => {
+          const guest = guests.find(g => g.id === pm.collectionVariables.get('deliveryGuestId'));
+          pm.expect(guest.link).to.eql(pm.collectionVariables.get('deliveryGuestLink'));
+          pm.expect(guest.phone).to.eql('6281234567890');
+        });
+      }

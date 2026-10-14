@@ -5,6 +5,7 @@ import {readFile} from 'node:fs/promises';
 import {extname} from 'node:path';
 import sharp from 'sharp';
 import {fingerprintEvent, verifiedVisitor} from './fingerprint.mjs';
+import {defaultWhatsappTemplate} from '../public/whatsapp.js';
 
 const hash = value => createHash('sha256').update(value).digest('hex');
 const secret = () => randomBytes(32).toString('base64url');
@@ -98,12 +99,14 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
       catch (error) {await client.query('ROLLBACK'); throw error;}
       finally {client.release();}
     }
-    async function content(client = pool) {
+    async function content(client = pool, admin = true) {
       const settings = (await client.query('SELECT value FROM wedding.settings WHERE id=1')).rows[0].value;
+      if (admin) settings.whatsappTemplate ??= defaultWhatsappTemplate;
+      else delete settings.whatsappTemplate;
       const media = Object.fromEntries((await client.query('SELECT slot,id FROM wedding.media')).rows.map(row => [row.slot,`/media/${row.id}`]));
       return {settings,media};
     }
-    const guestSelect = `SELECT g.id,g.name,g.active,(EXTRACT(EPOCH FROM g.created_at)*1000)::float8 AS "createdAt",
+    const guestSelect = `SELECT g.id,g.name,g.phone,g.invitation_link AS link,g.active,(EXTRACT(EPOCH FROM g.created_at)*1000)::float8 AS "createdAt",
       (SELECT count(*)::integer FROM wedding.devices d WHERE d.guest_id=g.id) AS "deviceCount" FROM wedding.guests g`;
     async function guest(id, client = pool) {
       return (await client.query(`${guestSelect} WHERE g.id=$1`,[id])).rows[0];
@@ -153,10 +156,11 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
         if (path === '/api/admin/guests') {
           if (method === 'GET') return json(200,(await pool.query(`${guestSelect} ORDER BY g.created_at DESC`)).rows);
           if (method === 'POST') {
-            const value = await body(); only(value,['name']);
+            const value = await body(); only(value,['name','phone']);
             const name = validName(value.name); const id = randomUUID(); const token = secret();
-            await pool.query('INSERT INTO wedding.guests(id,name,token_hash) VALUES($1,$2,$3)',[id,name,hash(token)]);
-            return json(201,{guest:await guest(id),link:`${origin}/#${token}`});
+            const link = `${origin}/#${token}`;
+            await pool.query('INSERT INTO wedding.guests(id,name,phone,token_hash,invitation_link) VALUES($1,$2,$3,$4,$5)',[id,name,validPhone(value.phone === undefined ? '' : value.phone),hash(token),link]);
+            return json(201,{guest:await guest(id),link});
           }
         }
         const match = path.match(/^\/api\/admin\/guests\/([a-f0-9-]{36})(?:\/(link|devices))?$/);
@@ -165,9 +169,10 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
           const result = await transaction(async client => {
             if (!(await client.query('SELECT id FROM wedding.guests WHERE id=$1 FOR UPDATE',[id])).rowCount) fail(404,'guest_not_found','Tamu tidak ditemukan.');
             if (!action && method === 'PATCH') {
-              const value = await body(); only(value,['name','active']);
-              if (!Object.keys(value).length) fail(400,'invalid_field','Isi nama atau status.');
+              const value = await body(); only(value,['name','phone','active']);
+              if (!Object.keys(value).length) fail(400,'invalid_field','Isi nama, nomor telepon atau status.');
               if (value.name !== undefined) await client.query('UPDATE wedding.guests SET name=$2 WHERE id=$1',[id,validName(value.name)]);
+              if (value.phone !== undefined) await client.query('UPDATE wedding.guests SET phone=$2 WHERE id=$1',[id,validPhone(value.phone)]);
               if (value.active !== undefined) {
                 if (typeof value.active !== 'boolean') fail(400,'active','Status tidak valid.');
                 await client.query('UPDATE wedding.guests SET active=$2 WHERE id=$1',[id,Number(value.active)]);
@@ -179,7 +184,7 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
             if (action === 'devices' && method === 'DELETE') {await revoke(client,id,true);return {ok:true};}
             if (action === 'link' && method === 'POST') {
               const token = secret(); await revoke(client,id,true);
-              await client.query('UPDATE wedding.guests SET token_hash=$2 WHERE id=$1',[id,hash(token)]);
+              await client.query('UPDATE wedding.guests SET token_hash=$2,invitation_link=$3 WHERE id=$1',[id,hash(token),`${origin}/#${token}`]);
               return {guest:await guest(id,client),link:`${origin}/#${token}`};
             }
             fail(404,'not_found','Halaman tidak ditemukan.');
@@ -189,7 +194,13 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
         if (path === '/api/admin/content') {
           if (method === 'GET') return json(200,await content());
           if (method === 'PUT') {
-            const value = await body(); only(value,['ceremonyTitle','receptionTitle','ceremonyTime','receptionTime','countdownTime','mapEmbedUrl']);
+            const value = await body(32768); only(value,['ceremonyTitle','receptionTitle','ceremonyTime','receptionTime','countdownTime','mapEmbedUrl','whatsappTemplate','linkPreviewTitle','linkPreviewDescription']);
+            if (value.whatsappTemplate !== undefined && (typeof value.whatsappTemplate !== 'string' || !value.whatsappTemplate.trim() || value.whatsappTemplate.length > 4000 || !value.whatsappTemplate.includes('{link}') || /\{([^{}]+)\}/g.test(value.whatsappTemplate.replace(/\{(?:nama|link)\}/g,'')))) fail(400,'whatsapp_template','Pesan maksimal 4000 karakter, wajib memuat {link}, dan hanya mendukung {nama} serta {link}.');
+            for (const [key,max] of [['linkPreviewTitle',120],['linkPreviewDescription',300]]) {
+              if (value[key] === undefined) continue;
+              if (typeof value[key] !== 'string' || value[key].length > max) fail(400,'link_preview',`Teks preview maksimal ${max} karakter.`);
+              value[key] = value[key].trim();
+            }
             for (const key of ['ceremonyTime','receptionTime']) if (value[key] !== undefined && (typeof value[key] !== 'string' || value[key].length > 80)) fail(400,'time','Waktu tidak valid.');
             for (const key of ['ceremonyTitle','receptionTitle']) {
               if (value[key] === undefined) continue;
@@ -274,7 +285,7 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
       if (path === '/api/invitation' && method === 'GET') {
         const g = await session(); const a = !g && await session(true);
         if (!g && !a && production) fail(401,'unauthorized','Buka tautan undangan yang Bapak/Ibu/Sdr/Sdri terima.');
-        return json(200,{guestName:g?.name || 'Tamu Undangan',...await content()});
+        return json(200,{guestName:g?.name || 'Tamu Undangan',...await content(pool,false)});
       }
       if (path.startsWith('/media/') && ['GET','HEAD'].includes(method)) {
         if (!await session() && !await session(true)) fail(401,'unauthorized','Silakan buka undangan dahulu.');
@@ -299,9 +310,16 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
         if (path === '/' || path === '/index.html') filename = !url.searchParams.has('access') && (await session() || await session(true)) ? 'index.html' : 'access.html';
         else if (path === '/preview' && (!production || await session(true))) filename = 'index.html';
         else if (path === '/admin') filename = 'admin.html';
-        else if (/^\/(?:assets\/[a-zA-Z0-9_-]+\.webp|(?:styles|admin|access)\.css|(?:invitation|content|countdown|admin|access|identification)\.js)$/.test(path)) filename = path.slice(1);
+        else if (/^\/(?:assets\/[a-zA-Z0-9_-]+\.webp|(?:styles|admin|access)\.css|(?:invitation|content|countdown|admin|access|identification|whatsapp)\.js)$/.test(path)) filename = path.slice(1);
         if (filename) {
-          const file = await readFile(new URL(filename,publicDirectory));
+          let file = await readFile(new URL(filename,publicDirectory));
+          if (['access.html','index.html'].includes(filename)) {
+            const {value:settings} = (await pool.query('SELECT value FROM wedding.settings WHERE id=1')).rows[0];
+            const title = escapeHtml(settings.linkPreviewTitle || 'Firsta & Talitha — Undangan');
+            const description = escapeHtml(settings.linkPreviewDescription || '22 November 2026 · Arjuna Ballroom Alam Indah Resto.');
+            const metadata = `<title>${title}</title>\n<meta name="description" content="${description}">\n<meta property="og:title" content="${title}">\n<meta property="og:description" content="${description}">\n<meta property="og:type" content="website">\n<meta property="og:url" content="${escapeHtml(origin)}/">`;
+            file = Buffer.from(file.toString().replace(/<title>.*?<\/title>/,metadata));
+          }
           const mime = {'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.webp':'image/webp'}[extname(filename)];
           if (filename.startsWith('assets/')) res.setHeader('Cache-Control','public, max-age=86400');
           res.writeHead(200,{'Content-Type':mime,'Content-Length':file.length});return res.end(method === 'HEAD' ? undefined : file);
@@ -322,6 +340,17 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
 function validName(value) {
   if (typeof value !== 'string' || !value.trim() || value.trim().length > 120 || /[\x00-\x1f]/.test(value)) fail(400,'name','Nama tamu harus berisi 1–120 karakter.');
   return value.trim();
+}
+function validPhone(value) {
+  if (typeof value !== 'string' || value.length > 40 || !/^\+?[0-9\s()-]*$/.test(value.trim())) fail(400,'phone','Nomor telepon tidak valid. Gunakan 08…, 62…, atau +kode negara.');
+  let phone = value.replace(/[\s()-]/g,'').replace(/^\+/,'');
+  if (value.trim() && !phone) fail(400,'phone','Nomor telepon harus berisi digit.');
+  if (phone.startsWith('0')) phone = `62${phone.slice(1)}`;
+  if (phone && !/^[1-9][0-9]{7,14}$/.test(phone)) fail(400,'phone','Nomor telepon harus berisi 8–15 digit dalam format internasional.');
+  return phone;
+}
+function escapeHtml(value) {
+  return value.replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 }
 function validMap(value) {
   if (value === '') return true;

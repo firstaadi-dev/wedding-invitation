@@ -1,3 +1,5 @@
+import {defaultWhatsappTemplate, invitationMessage, whatsappUrl} from './whatsapp.js';
+
 let csrf = ''; let guests = []; let content;
 const status = document.querySelector('#status');
 const login = document.querySelector('#login');
@@ -20,8 +22,14 @@ async function api(path,method = 'GET',value) {
 function showLogin() {csrf = '';login.hidden = false;dashboard.hidden = true;logout.hidden = true;}
 async function refresh() {
   [guests,content] = await Promise.all([api('/api/admin/guests'),api('/api/admin/content')]);
+  document.querySelector('#new-link').hidden = true;
   login.hidden = true;dashboard.hidden = false;logout.hidden = false;
   renderGuests();renderMedia();
+  const form = document.querySelector('#whatsapp-settings');
+  form.elements.whatsappTemplate.value = content.settings.whatsappTemplate ?? defaultWhatsappTemplate;
+  form.elements.linkPreviewTitle.value = content.settings.linkPreviewTitle || '';
+  form.elements.linkPreviewDescription.value = content.settings.linkPreviewDescription || '';
+  renderMessagePreview();
   for (const key of ['ceremonyTitle','receptionTitle','ceremonyTime','receptionTime','countdownTime','mapEmbedUrl']) document.querySelector('#settings').elements[key].value = content.settings[key] || '';
 }
 function element(tag,text,className) {const node = document.createElement(tag);if(text!==undefined) node.textContent = text;if(className) node.className = className;return node;}
@@ -40,19 +48,42 @@ function action(text,callback,danger = false) {
   });return button;
 }
 function showLink(link) {document.querySelector('#new-link').hidden = false;document.querySelector('#link-value').value = link;document.querySelector('#new-link').scrollIntoView({behavior:'smooth',block:'center'});}
+async function copyLink(input) {
+  try {await navigator.clipboard.writeText(input.value);notice('Tautan disalin.');}
+  catch {input.focus();input.select();notice('Salin tautan yang sudah dipilih.');}
+}
+function renderMessagePreview() {
+  const guest = guests.find(g => g.link) || {name:'Bapak/Ibu Tamu Undangan',link:`${location.origin}/#contoh-tautan`};
+  document.querySelector('#message-preview').textContent = invitationMessage(document.querySelector('#whatsapp-settings').elements.whatsappTemplate.value,guest);
+}
 function renderGuests() {
   const rows = document.querySelector('#guests');rows.replaceChildren();
   const query = document.querySelector('#search').value.trim().toLocaleLowerCase('id');
-  const filtered = guests.filter(g => g.name.toLocaleLowerCase('id').includes(query));
+  const filtered = guests.filter(g => `${g.name} ${g.phone}`.toLocaleLowerCase('id').includes(query));
   document.querySelector('#guest-count').textContent = `${guests.length} tamu`;
   document.querySelector('#empty-guests').hidden = filtered.length > 0;
   document.querySelector('#empty-guests').textContent = guests.length ? 'Tidak ada tamu yang cocok.' : 'Belum ada tamu. Tambahkan tamu untuk membuat tautan pertama.';
   for (const guest of filtered) {
-    const row = element('tr');row.append(element('td',guest.name),element('td',guest.active ? 'Aktif' : 'Nonaktif'),element('td',`${guest.deviceCount} / 3`));
+    const row = element('tr');row.append(element('td',guest.name),element('td',guest.phone || 'Belum diisi'),element('td',guest.active ? 'Aktif' : 'Nonaktif'),element('td',`${guest.deviceCount} / 3`));
+    const linkCell = element('td');
+    if (guest.link) {
+      const input = element('input');input.value = guest.link;input.readOnly = true;input.className = 'guest-link';input.setAttribute('aria-label',`Tautan undangan ${guest.name}`);
+      linkCell.append(input,action('Salin',() => copyLink(input)));
+    } else linkCell.append(element('p','Link lama belum tersimpan. Gunakan Tautan baru jika link asli sudah hilang.','legacy-link'));
+    row.append(linkCell);
     const cell = element('td');const actions = element('div',undefined,'row-actions');
-    actions.append(action('Edit nama',async () => {
-      const name = window.prompt('Nama tamu',guest.name);if (name === null) return;
-      await api(`/api/admin/guests/${guest.id}`,'PATCH',{name});await refresh();notice('Nama tamu disimpan.');
+    if (guest.phone && guest.link && guest.active) {
+      const send = element('a','Kirim','primary');send.href = whatsappUrl(content.settings.whatsappTemplate,guest);send.target = '_blank';send.rel = 'noopener noreferrer';send.setAttribute('aria-label',`Kirim undangan ${guest.name} melalui WhatsApp`);actions.append(send);
+    } else {
+      const send = element('button','Kirim');send.type = 'button';send.disabled = true;send.title = 'Isi nomor telepon, gunakan tautan tersimpan, dan aktifkan tamu untuk mengirim.';actions.append(send);
+    }
+    actions.append(action('Edit',async () => {
+      const dialog = document.querySelector('#edit-guest');const form = dialog.querySelector('form');
+      form.elements.name.value = guest.name;form.elements.phone.value = guest.phone;
+      dialog.returnValue = 'cancel';dialog.showModal();
+      const saved = await new Promise(resolve => dialog.addEventListener('close',() => resolve(dialog.returnValue === 'save'),{once:true}));
+      if (!saved) return;
+      await api(`/api/admin/guests/${guest.id}`,'PATCH',{name:form.elements.name.value,phone:form.elements.phone.value});await refresh();notice('Data tamu disimpan.');
     }));
     actions.append(action(guest.active ? 'Nonaktifkan' : 'Aktifkan',async () => {
       if (guest.active && !await confirm('Tautan tamu ini tidak bisa dibuka dan seluruh sesi akan dicabut.','Nonaktifkan undangan?')) return;
@@ -103,17 +134,22 @@ login.addEventListener('submit',async event => {
 logout.addEventListener('click',async () => {try {await api('/api/admin/logout','POST',{});showLogin();notice('Anda sudah keluar.');} catch(error) {notice(error.message,true);}});
 document.querySelector('#search').addEventListener('input',renderGuests);
 document.querySelector('#copy-link').addEventListener('click',async () => {
-  try {await navigator.clipboard.writeText(document.querySelector('#link-value').value);notice('Tautan disalin.');}
-  catch {document.querySelector('#link-value').select();notice('Salin tautan yang sudah dipilih.');}
+  await copyLink(document.querySelector('#link-value'));
 });
 document.querySelector('#add-guest').addEventListener('submit',async event => {
   event.preventDefault();const form = event.currentTarget;const button = form.querySelector('button');button.disabled = true;
-  try {const result = await api('/api/admin/guests','POST',{name:form.elements.name.value});form.reset();await refresh();showLink(result.link);notice('Tamu ditambahkan.');}
+  try {const result = await api('/api/admin/guests','POST',{name:form.elements.name.value,phone:form.elements.phone.value});form.reset();await refresh();showLink(result.link);notice('Tamu ditambahkan.');}
   catch(error) {notice(error.message,true);} finally {button.disabled = false;}
 });
 document.querySelector('#settings').addEventListener('submit',async event => {
   event.preventDefault();const form = event.currentTarget;const button = form.querySelector('button');button.disabled = true;
   try {content = await api('/api/admin/content','PUT',Object.fromEntries(new FormData(form)));notice('Detail acara disimpan.');}
+  catch(error) {notice(error.message,true);} finally {button.disabled = false;}
+});
+document.querySelector('#whatsapp-settings').addEventListener('input',renderMessagePreview);
+document.querySelector('#whatsapp-settings').addEventListener('submit',async event => {
+  event.preventDefault();const form = event.currentTarget;const button = form.querySelector('button');button.disabled = true;
+  try {content = await api('/api/admin/content','PUT',Object.fromEntries(new FormData(form)));renderGuests();notice('Template WhatsApp dan preview tautan disimpan.');}
   catch(error) {notice(error.message,true);} finally {button.disabled = false;}
 });
 api('/api/admin/session').then(result => {csrf = result.csrf;return refresh();}).catch(error => {showLogin();if(error.message!=='Silakan masuk kembali.') notice(error.message,true);});

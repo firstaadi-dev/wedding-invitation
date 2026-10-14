@@ -57,15 +57,34 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal((await adminRequest('/api/admin/guests',{method:'POST',data:{name:' '}})).response.status,400);
     });
     await t.test('create guest secret link, persist and rename',async () => {
-      const created = await adminRequest('/api/admin/guests',{method:'POST',data:{name:'Keluarga Uji <script>'}});
+      const created = await adminRequest('/api/admin/guests',{method:'POST',data:{name:'Keluarga Uji <script>',phone:'0812-3456 7890'}});
       assert.equal(created.response.status,201);guest=created.value.guest;token=created.value.link.split('#')[1];
       assert.equal(token.length,43);
-      const stored = (await pool.query('SELECT token_hash FROM wedding.guests WHERE id=$1',[guest.id])).rows[0];
+      const stored = (await pool.query('SELECT token_hash,invitation_link,phone FROM wedding.guests WHERE id=$1',[guest.id])).rows[0];
       assert.notEqual(stored.token_hash,token);assert.equal(stored.token_hash.length,64);
+      assert.equal(stored.invitation_link,created.value.link);assert.equal(stored.phone,'6281234567890');
       const listed = await adminRequest('/api/admin/guests');assert.equal(listed.value.length,1);
-      assert.equal(JSON.stringify(listed.value).includes(token),false);
+      assert.equal(listed.value[0].link,created.value.link);assert.equal(listed.value[0].phone,stored.phone);
+      assert.equal((await adminRequest('/api/admin/session')).response.status,200);
+      assert.equal((await adminRequest('/api/admin/guests')).value[0].link,created.value.link);
       const renamed = await adminRequest(`/api/admin/guests/${guest.id}`,{method:'PATCH',data:{name:'Keluarga Uji'}});
       assert.equal(renamed.value.name,'Keluarga Uji');
+      assert.equal(renamed.value.link,created.value.link);
+      for (const phone of ['+62 (812) 3456-7890','6281234567890','081234567890']) {
+        const edited = await adminRequest(`/api/admin/guests/${guest.id}`,{method:'PATCH',data:{phone}});
+        assert.equal(edited.response.status,200);assert.equal(edited.value.phone,'6281234567890');assert.equal(edited.value.link,created.value.link);
+      }
+      assert.equal((await adminRequest(`/api/admin/guests/${guest.id}`,{method:'PATCH',data:{phone:''}})).value.phone,'');
+      for (const phone of ['abc','123','+','()','+62&text=bad','1'.repeat(16),123,null]) {
+        assert.equal((await adminRequest('/api/admin/guests',{method:'POST',data:{name:'Invalid phone',phone}})).response.status,400);
+        assert.equal((await adminRequest(`/api/admin/guests/${guest.id}`,{method:'PATCH',data:{name:'Must roll back',phone}})).response.status,400);
+      }
+      assert.equal((await adminRequest('/api/admin/guests')).value[0].name,'Keluarga Uji');
+      // Legacy rows keep their original hash and valid access; migration cannot recover the URL.
+      await pool.query('UPDATE wedding.guests SET invitation_link=NULL WHERE id=$1',[guest.id]);
+      await migrate(process.env.TEST_DATABASE_URL_UNPOOLED);
+      assert.equal((await adminRequest('/api/admin/guests')).value[0].link,null);
+      assert.equal((await pool.query('SELECT token_hash FROM wedding.guests WHERE id=$1',[guest.id])).rows[0].token_hash,stored.token_hash);
     });
     await t.test('atomic max-three limit, repeat visitor and replay rejection',async () => {
       const challenges = [];
@@ -87,7 +106,9 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal(saved.value.settings.ceremonyTitle,'Akad');
       assert.equal(saved.value.settings.receptionTitle,'Syukuran');
       assert.equal(saved.value.settings.countdownTime,'09:00');
-      assert.deepEqual((await request('/api/invitation',{jar:guestBrowser})).value.settings,saved.value.settings);
+      const {whatsappTemplate, ...publicSettings} = saved.value.settings;
+      assert.ok(whatsappTemplate.includes('{link}'));
+      assert.deepEqual((await request('/api/invitation',{jar:guestBrowser})).value.settings,publicSettings);
       for (const data of [{ceremonyTitle:'a'.repeat(81)},{receptionTitle:9},{countdownTime:'24:00'},{countdownTime:'09:60'},{countdownTime:900},{unknown:'Akad'}]) {
         assert.equal((await adminRequest('/api/admin/content',{method:'PUT',data})).response.status,400);
       }
@@ -132,6 +153,31 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal((await adminRequest('/api/admin/media/music',{method:'DELETE'})).response.status,200);
       assert.equal((await request('/api/invitation',{jar:guestBrowser})).value.media.music,undefined);
     });
+    await t.test('global WhatsApp settings persist, stay private, and preview metadata is public and escaped',async () => {
+      const template = 'Yth. {nama},\nUndangan Firsta & Talitha:\n{link}';
+      const title = 'Firsta & Talitha <3 "Undangan"';
+      const description = '22 November 2026 & keluarga';
+      const saved = await adminRequest('/api/admin/content',{method:'PUT',data:{whatsappTemplate:template,linkPreviewTitle:title,linkPreviewDescription:description}});
+      assert.equal(saved.response.status,200);assert.equal(saved.value.settings.whatsappTemplate,template);
+      assert.equal((await adminRequest('/api/admin/content')).value.settings.whatsappTemplate,template);
+      const invitation = await request('/api/invitation',{jar:guestBrowser});
+      assert.equal(invitation.value.settings.whatsappTemplate,undefined);
+      assert.equal(invitation.value.phone,undefined);assert.equal(invitation.value.link,undefined);
+      for (const options of [{},{jar:guestBrowser}]) {
+        const page = (await request('/',options)).value;
+        assert.ok(page.includes('property="og:title" content="Firsta &amp; Talitha &lt;3 &quot;Undangan&quot;"'));
+        assert.ok(page.includes('property="og:description" content="22 November 2026 &amp; keluarga"'));
+        assert.equal(page.includes(template),false);assert.equal(page.includes(token),false);
+      }
+      for (const data of [{whatsappTemplate:''},{whatsappTemplate:123},{whatsappTemplate:'No link'},{whatsappTemplate:'{link} {unknown}'},{whatsappTemplate:'x'.repeat(4000)+'{link}'},{linkPreviewTitle:'x'.repeat(121)},{linkPreviewTitle:null},{linkPreviewDescription:'x'.repeat(301)}]) {
+        assert.equal((await adminRequest('/api/admin/content',{method:'PUT',data})).response.status,400);
+      }
+      const partial = await adminRequest('/api/admin/content',{method:'PUT',data:{receptionTitle:'Resepsi'}});
+      assert.equal(partial.value.settings.whatsappTemplate,template);
+      const cleared = await adminRequest('/api/admin/content',{method:'PUT',data:{linkPreviewTitle:'',linkPreviewDescription:''}});
+      assert.equal(cleared.response.status,200);
+      assert.ok((await request('/')).value.includes('property="og:title" content="Firsta &amp; Talitha — Undangan"'));
+    });
     await t.test('reset, deactivate and link rotation revoke sessions immediately',async () => {
       assert.equal((await adminRequest(`/api/admin/guests/${guest.id}/devices`,{method:'DELETE'})).response.status,200);
       assert.equal((await request('/api/invitation',{jar:guestBrowser})).response.status,401);
@@ -140,6 +186,8 @@ test('Neon-backed CMS and guest access end to end',async t => {
       await adminRequest(`/api/admin/guests/${guest.id}`,{method:'PATCH',data:{active:true}});
       const changed = await adminRequest(`/api/admin/guests/${guest.id}/link`,{method:'POST',data:{}});
       assert.equal(changed.response.status,200);assert.notEqual(changed.value.link.split('#')[1],token);
+      assert.equal(changed.value.guest.link,changed.value.link);
+      assert.equal((await adminRequest('/api/admin/guests')).value[0].link,changed.value.link);
       assert.equal((await request('/api/access/challenge',{method:'POST',data:{token}})).response.status,404);
       const c = await challenge(changed.value.link.split('#')[1]);const result=await verify(c,'visitor-new');assert.equal(result.response.status,200);
       await adminRequest(`/api/admin/guests/${guest.id}`,{method:'DELETE'});

@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS guests (
   version integer NOT NULL DEFAULT 1,
   created_at timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE guests ADD COLUMN IF NOT EXISTS phone text NOT NULL DEFAULT '' CHECK (phone = '' OR phone ~ '^[1-9][0-9]{7,14}$');
+ALTER TABLE guests ADD COLUMN IF NOT EXISTS invitation_link text;
 CREATE TABLE IF NOT EXISTS devices (
   guest_id text NOT NULL REFERENCES guests(id) ON DELETE CASCADE,
   visitor_hash text NOT NULL,
