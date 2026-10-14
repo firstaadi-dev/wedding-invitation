@@ -106,7 +106,8 @@ function renderGuests() {
 }
 function renderMedia() {
   const grid = document.querySelector('#media-grid');grid.replaceChildren();
-  for (const [slot,title] of Object.entries({groom:'Foto Firsta',bride:'Foto Talitha',gallery1:'Galeri · Kenangan kami',gallery2:'Galeri · Bersama',gallery3:'Galeri · Perjalanan',...Object.fromEntries(Array.from({length:6},(_,i)=>[`gallery${i+4}`,`Galeri · Foto ${i+4}`])),music:'Lagu undangan'})) {
+  const previewGrid = document.querySelector('#preview-media');previewGrid.replaceChildren();
+  for (const [slot,title] of Object.entries({preview:'Thumbnail preview WhatsApp',groom:'Foto Firsta',bride:'Foto Talitha',gallery1:'Galeri · Kenangan kami',gallery2:'Galeri · Bersama',gallery3:'Galeri · Perjalanan',...Object.fromEntries(Array.from({length:6},(_,i)=>[`gallery${i+4}`,`Galeri · Foto ${i+4}`])),music:'Lagu undangan'})) {
     const card = element('article',undefined,'media-card');card.append(element('h3',title));
     if (content.media[slot]) {
       const preview = element(slot === 'music' ? 'audio' : 'img');preview.src = content.media[slot];
@@ -120,10 +121,10 @@ function renderMedia() {
       notice('Mengunggah…');content = await api(`/api/admin/media/${slot}`,'PUT',input.files[0]);renderMedia();notice(`${title} disimpan.`);
     }));
     if (content.media[slot]) card.append(action('Hapus',async () => {
-      if (!await confirm('Media akan dihapus dan bingkai undangan kembali menjadi placeholder.','Hapus media?')) return;
+      if (!await confirm(slot === 'preview' ? 'Thumbnail akan dihapus dari preview tautan undangan.' : 'Media akan dihapus dan bingkai undangan kembali menjadi placeholder.','Hapus media?')) return;
       content = await api(`/api/admin/media/${slot}`,'DELETE');renderMedia();notice('Media dihapus.');
     },true));
-    grid.append(card);
+    (slot === 'preview' ? previewGrid : grid).append(card);
   }
 }
 login.addEventListener('submit',async event => {

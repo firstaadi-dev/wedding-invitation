@@ -1616,7 +1616,7 @@
       "put": {
         "operationId": "uploadMedia",
         "summary": "Upload/replaces a photo or MP3 music slot",
-        "description": "Raw binary body, no multipart. Photos up to 12 MiB, decoded/re-encoded by Sharp; music MP3 up to 25 MiB with frame validation. Old file removed after committed replacement.",
+        "description": "Raw binary body, no multipart. Photos up to 12 MiB, decoded/re-encoded by Sharp; music MP3 up to 25 MiB with frame validation. Old file removed after committed replacement. The preview slot creates a public 1200\u00d7630 JPEG for link thumbnails; other media remains session-protected.",
         "tags": [
           "Admin"
         ],
@@ -1746,7 +1746,8 @@
                 "gallery7",
                 "gallery8",
                 "gallery9",
-                "music"
+                "music",
+                "preview"
               ]
             }
           },
@@ -1923,7 +1924,8 @@
                 "gallery7",
                 "gallery8",
                 "gallery9",
-                "music"
+                "music",
+                "preview"
               ]
             }
           },
@@ -2345,6 +2347,120 @@
           }
         }
       }
+    },
+    "/preview-image/{id}": {
+      "get": {
+        "operationId": "getPreviewImage",
+        "summary": "Read public link preview thumbnail",
+        "description": "No authentication required. Only the preview slot is readable here. Replacement changes its ID and revokes the old URL. Supports a single byte Range.",
+        "tags": [
+          "Guest"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "1200\u00d7630 JPEG thumbnail",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "Partial JPEG for a valid Range header"
+          },
+          "404": {
+            "description": "Image missing, replaced, deleted, or ID belongs to a private media slot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "416": {
+            "description": "Invalid or unsatisfiable byte range",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "head": {
+        "operationId": "headPreviewImage",
+        "summary": "Read public thumbnail headers",
+        "description": "No authentication required. Only the preview slot is readable here. Replacement changes its ID and revokes the old URL. Supports a single byte Range.",
+        "tags": [
+          "Guest"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "1200\u00d7630 JPEG thumbnail",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "Partial JPEG for a valid Range header"
+          },
+          "404": {
+            "description": "Image missing, replaced, deleted, or ID belongs to a private media slot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "416": {
+            "description": "Invalid or unsatisfiable byte range",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2536,7 +2652,8 @@
         "type": "object",
         "additionalProperties": {
           "type": "string"
-        }
+        },
+        "description": "Slot URLs. Preview uses /preview-image/{id}, publicly readable; other slots use authenticated /media/{id}."
       },
       "Content": {
         "type": "object",

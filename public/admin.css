@@ -3,3 +3,5 @@
 @media(max-width:700px){header{flex-wrap:wrap;padding:16px 20px;gap:12px}header>span{margin-left:0;order:3;width:100%}header button{margin-left:auto}main{padding:28px 16px 100px}h1{font-size:32px}.page-heading{align-items:start;flex-direction:column;gap:10px}.panel{padding:20px}.inline-form{display:block}.media-grid,.two-columns{grid-template-columns:1fr}.media-card img,.media-card .placeholder{height:230px}.login-panel{padding:24px}.section-heading{gap:12px}}
 
 .guest-link{min-width:250px;margin:0 0 8px;font-size:12px}.legacy-link{min-width:210px;font-size:12px;margin:0}.message-preview{white-space:pre-wrap;overflow-wrap:anywhere;padding:18px;background:#e8eee8;border-radius:4px;font:14px/1.7 system-ui,sans-serif;margin:0 0 24px}.row-actions a{padding:6px 10px;min-height:36px;font-size:12px}
+
+#preview-media{max-width:480px;margin-bottom:24px}#preview-media img{height:auto;aspect-ratio:1200/630}

@@ -103,7 +103,7 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
       const settings = (await client.query('SELECT value FROM wedding.settings WHERE id=1')).rows[0].value;
       if (admin) settings.whatsappTemplate ??= defaultWhatsappTemplate;
       else delete settings.whatsappTemplate;
-      const media = Object.fromEntries((await client.query('SELECT slot,id FROM wedding.media')).rows.map(row => [row.slot,`/media/${row.id}`]));
+      const media = Object.fromEntries((await client.query('SELECT slot,id FROM wedding.media')).rows.map(row => [row.slot,`/${row.slot === 'preview' ? 'preview-image' : 'media'}/${row.id}`]));
       return {settings,media};
     }
     const guestSelect = `SELECT g.id,g.name,g.phone,g.invitation_link AS link,g.active,(EXTRACT(EPOCH FROM g.created_at)*1000)::float8 AS "createdAt",
@@ -213,7 +213,7 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
             return json(200,await content());
           }
         }
-        const mediaMatch = path.match(/^\/api\/admin\/media\/(groom|bride|gallery[1-9]|music)$/);
+        const mediaMatch = path.match(/^\/api\/admin\/media\/(groom|bride|gallery[1-9]|music|preview)$/);
         if (mediaMatch && ['PUT','DELETE'].includes(method)) {
           const slot = mediaMatch[1];
           if (method === 'DELETE') await pool.query('DELETE FROM wedding.media WHERE slot=$1',[slot]);
@@ -229,9 +229,14 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
                 const image = sharp(data,{limitInputPixels:40000000});
                 const metadata = await image.metadata();
                 if (!['jpeg','png','webp'].includes(metadata.format) || (metadata.pages || 1)>1) throw new Error();
-                data = await image.rotate().resize(1800,1800,{fit:'inside',withoutEnlargement:true}).webp({quality:82}).toBuffer();
+                if (slot === 'preview') {
+                  data = await image.rotate().resize(1200,630,{fit:'cover'}).flatten({background:'#faf7f2'}).jpeg({quality:85}).toBuffer();
+                  mime = 'image/jpeg';
+                } else {
+                  data = await image.rotate().resize(1800,1800,{fit:'inside',withoutEnlargement:true}).webp({quality:82}).toBuffer();
+                  mime = 'image/webp';
+                }
               } catch {fail(415,'invalid_image','Foto tidak dapat dibaca. Gunakan JPG, PNG atau WebP yang valid.');}
-              mime = 'image/webp';
             }
             // shortcut: small media slots live in Postgres; move blobs to object storage for a large gallery.
             await pool.query(`INSERT INTO wedding.media(slot,id,mime,data) VALUES($1,$2,$3,$4)
@@ -287,11 +292,12 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
         if (!g && !a && production) fail(401,'unauthorized','Buka tautan undangan yang Bapak/Ibu/Sdr/Sdri terima.');
         return json(200,{guestName:g?.name || 'Tamu Undangan',...await content(pool,false)});
       }
-      if (path.startsWith('/media/') && ['GET','HEAD'].includes(method)) {
-        if (!await session() && !await session(true)) fail(401,'unauthorized','Silakan buka undangan dahulu.');
-        const id = path.slice(7);
+      if ((path.startsWith('/media/') || path.startsWith('/preview-image/')) && ['GET','HEAD'].includes(method)) {
+        const preview = path.startsWith('/preview-image/');
+        if (!preview && !await session() && !await session(true)) fail(401,'unauthorized','Silakan buka undangan dahulu.');
+        const id = path.slice(preview ? '/preview-image/'.length : '/media/'.length);
         if (!/^[a-f0-9-]{36}$/.test(id)) fail(404,'media_not_found','Media tidak ditemukan.');
-        const media = (await pool.query('SELECT mime,data FROM wedding.media WHERE id=$1',[id])).rows[0];
+        const media = (await pool.query(`SELECT mime,data FROM wedding.media WHERE id=$1${preview ? " AND slot='preview'" : ''}`,[id])).rows[0];
         if (!media) fail(404,'media_not_found','Media tidak ditemukan.');
         const size = media.data.length; let start = 0; let end = size-1; let status = 200;
         if (req.headers.range) {
@@ -314,10 +320,11 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
         if (filename) {
           let file = await readFile(new URL(filename,publicDirectory));
           if (['access.html','index.html'].includes(filename)) {
-            const {value:settings} = (await pool.query('SELECT value FROM wedding.settings WHERE id=1')).rows[0];
+            const {value:settings,previewId} = (await pool.query(`SELECT s.value,m.id AS "previewId" FROM wedding.settings s LEFT JOIN wedding.media m ON m.slot='preview' WHERE s.id=1`)).rows[0];
             const title = escapeHtml(settings.linkPreviewTitle || 'Firsta & Talitha — Undangan');
             const description = escapeHtml(settings.linkPreviewDescription || '22 November 2026 · Arjuna Ballroom Alam Indah Resto.');
-            const metadata = `<title>${title}</title>\n<meta name="description" content="${description}">\n<meta property="og:title" content="${title}">\n<meta property="og:description" content="${description}">\n<meta property="og:type" content="website">\n<meta property="og:url" content="${escapeHtml(origin)}/">`;
+            let metadata = `<title>${title}</title>\n<meta name="description" content="${description}">\n<meta property="og:title" content="${title}">\n<meta property="og:description" content="${description}">\n<meta property="og:type" content="website">\n<meta property="og:url" content="${escapeHtml(origin)}/">`;
+            if (previewId) metadata += `\n<meta property="og:image" content="${escapeHtml(origin)}/preview-image/${previewId}">\n<meta property="og:image:type" content="image/jpeg">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta property="og:image:alt" content="${title}">`;
             file = Buffer.from(file.toString().replace(/<title>.*?<\/title>/,metadata));
           }
           const mime = {'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.webp':'image/webp'}[extname(filename)];

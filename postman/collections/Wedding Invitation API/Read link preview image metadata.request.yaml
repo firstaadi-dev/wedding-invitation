@@ -1,0 +1,23 @@
+$kind: http-request
+url: '{{baseUrl}}/'
+method: GET
+auth:
+  type: noauth
+order: 2000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Public page is readable', () => pm.response.to.have.status(200));
+      const page = pm.response.text();
+      const match = page.match(/property="og:image" content="([^"]+)"/);
+      pm.test('Thumbnail URL is absolute and public', () => {
+        pm.expect(match).not.to.eql(null);
+        pm.expect(match[1]).to.match(/^https?:\/\/.+\/preview-image\/[a-f0-9-]{36}$/);
+      });
+      pm.test('Thumbnail dimensions and JPEG type are declared', () => {
+        pm.expect(page).to.include('property="og:image:type" content="image/jpeg"');
+        pm.expect(page).to.include('property="og:image:width" content="1200"');
+        pm.expect(page).to.include('property="og:image:height" content="630"');
+      });
+      if (match) pm.collectionVariables.set('previewImageUrl', match[1]);

@@ -178,6 +178,39 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal(cleared.response.status,200);
       assert.ok((await request('/')).value.includes('property="og:title" content="Firsta &amp; Talitha — Undangan"'));
     });
+    await t.test('preview thumbnails are public JPEGs, replace safely, and cannot expose private media',async () => {
+      const photo = await sharp({create:{width:60,height:90,channels:4,background:'#183d32'}}).png().toBuffer();
+      const upload = data => fetch(base+'/api/admin/media/preview',{method:'PUT',headers:{Origin:origin,Cookie:`wedding_admin=${admin.wedding_admin}`,'X-CSRF-Token':csrf,'Content-Type':'image/png'},body:data});
+      assert.equal((await fetch(base+'/api/admin/media/preview',{method:'PUT',headers:{Origin:origin,'Content-Type':'image/png'},body:photo})).status,401);
+      const response = await upload(photo);assert.equal(response.status,200);
+      const path = (await response.json()).media.preview;assert.match(path,/^\/preview-image\/[a-f0-9-]{36}$/);
+      const image = await fetch(base+path);assert.equal(image.status,200);assert.equal(image.headers.get('content-type'),'image/jpeg');
+      const data = Buffer.from(await image.arrayBuffer());const metadata = await sharp(data).metadata();
+      assert.equal(metadata.width,1200);assert.equal(metadata.height,630);assert.equal(metadata.format,'jpeg');
+      const head = await fetch(base+path,{method:'HEAD'});assert.equal(head.status,200);assert.equal(Number(head.headers.get('content-length')),data.length);assert.equal((await head.arrayBuffer()).byteLength,0);
+      const range = await fetch(base+path,{headers:{Range:'bytes=0-9'}});assert.equal(range.status,206);assert.equal((await range.arrayBuffer()).byteLength,10);
+      for (const options of [{},{jar:guestBrowser}]) {
+        const page = (await request('/',options)).value;
+        assert.ok(page.includes(`property="og:image" content="${origin}${path}"`));
+        assert.ok(page.includes('property="og:image:width" content="1200"'));
+        assert.ok(page.includes('property="og:image:height" content="630"'));
+      }
+      const privatePath = (await adminRequest('/api/admin/content')).value.media.groom;
+      assert.equal((await fetch(base+privatePath)).status,401);
+      assert.equal((await fetch(base+privatePath.replace('/media/','/preview-image/'))).status,404);
+      assert.equal((await upload('<svg onload="evil()"></svg>')).status,415);
+      assert.equal((await adminRequest('/api/admin/content')).value.media.preview,path);
+      await migrate(process.env.TEST_DATABASE_URL_UNPOOLED);
+      assert.equal((await adminRequest('/api/admin/content')).value.media.groom,privatePath);
+      assert.equal((await adminRequest('/api/admin/content')).value.media.preview,path);
+      const replaced = await upload(photo);assert.equal(replaced.status,200);
+      const newPath = (await replaced.json()).media.preview;assert.notEqual(newPath,path);
+      assert.equal((await fetch(base+path)).status,404);assert.equal((await fetch(base+newPath)).status,200);
+      assert.equal((await adminRequest('/api/admin/media/preview',{method:'DELETE'})).response.status,200);
+      assert.equal((await fetch(base+newPath)).status,404);
+      assert.equal((await request('/')).value.includes('property="og:image"'),false);
+      assert.equal((await fetch(base+privatePath)).status,401);
+    });
     await t.test('reset, deactivate and link rotation revoke sessions immediately',async () => {
       assert.equal((await adminRequest(`/api/admin/guests/${guest.id}/devices`,{method:'DELETE'})).response.status,200);
       assert.equal((await request('/api/invitation',{jar:guestBrowser})).response.status,401);

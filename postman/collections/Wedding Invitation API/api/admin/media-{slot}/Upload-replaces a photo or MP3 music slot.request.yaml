@@ -1,6 +1,6 @@
 $kind: http-request
 name: Upload/replaces a photo or MP3 music slot
-description: Raw binary body, no multipart. Photos up to 12 MiB, decoded/re-encoded by Sharp; music MP3 up to 25 MiB with frame validation. Old file removed after committed replacement.
+description: Raw binary body, no multipart. Photos up to 12 MiB, decoded/re-encoded by Sharp; music MP3 up to 25 MiB with frame validation. Old file removed after committed replacement. The preview slot produces a public 1200×630 JPEG thumbnail; other slots remain private.
 url: "{{baseUrl}}/api/admin/media/:slot"
 method: PUT
 headers:
