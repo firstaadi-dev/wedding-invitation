@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=9">
-  <script type="module" src="/invitation.js"></script>
+  <link rel="stylesheet" href="/styles.css?v=10">
+  <script type="module" src="/invitation.js?v=2"></script>
   <script type="module" src="/content.js"></script>
 </head>
 <body>
@@ -143,19 +143,17 @@
         <h2 id="gift-title">Sumbangan<br><em>untuk awal cerita kami.</em></h2>
         <p class="introduction">Doa restu dan kehadiran Bapak/Ibu/Sdr/Sdri adalah hadiah terindah. Jika berkenan memberikan tanda kasih, dapat melalui rekening berikut.</p>
         <div class="guest-paper gift-paper">
-          <p class="eyebrow">BLU</p>
-          <label for="gift-account-blu">Nomor rekening BLU</label>
-          <input id="gift-account-blu" class="gift-account" value="0033 1600 0000" readonly inputmode="numeric">
-          <p>Atas nama <strong>Firsta Adi Pradana</strong></p>
-          <button class="guest-button" type="button" aria-label="Salin nomor rekening BLU">Salin nomor rekening</button>
+          <img class="gift-bank-logo" src="/assets/bank-blu.webp" alt="blu by BCA Digital" width="200" height="89" loading="lazy" decoding="async">
+          <input id="gift-account-blu" class="gift-account" value="0033 1600 0000" aria-label="Nomor rekening blu by BCA Digital atas nama Firsta Adi Pradana" readonly inputmode="numeric">
+          <p>a.n <strong>Firsta Adi Pradana</strong></p>
+          <button class="guest-button" type="button" aria-label="Salin nomor rekening blu">Salin nomor</button>
           <p class="form-status" role="status"></p>
         </div>
         <div class="guest-paper gift-paper">
-          <p class="eyebrow">Bank Mandiri</p>
-          <label for="gift-account-mandiri">Nomor rekening Mandiri</label>
-          <input id="gift-account-mandiri" class="gift-account" value="1350018340537" readonly inputmode="numeric">
-          <p>Atas nama <strong>TALITHA SYAHDA ARUND</strong></p>
-          <button class="guest-button" type="button" aria-label="Salin nomor rekening Mandiri">Salin nomor rekening</button>
+          <img class="gift-bank-logo" src="/assets/bank-mandiri.webp" alt="Bank Mandiri" width="400" height="117" loading="lazy" decoding="async">
+          <input id="gift-account-mandiri" class="gift-account" value="1350018340537" aria-label="Nomor rekening Mandiri atas nama TALITHA SYAHDA ARUND" readonly inputmode="numeric">
+          <p>a.n <strong>TALITHA SYAHDA ARUND</strong></p>
+          <button class="guest-button" type="button" aria-label="Salin nomor rekening Mandiri">Salin nomor</button>
           <p class="form-status" role="status"></p>
         </div>
       </div>

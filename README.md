@@ -40,7 +40,9 @@ Media disimpan di tiga belas slot Postgres; foto didekode, diputar sesuai EXIF, 
 
 ## Sumbangan, konfirmasi & ucapan
 
-Bagian sumbangan menampilkan BLU **0033 1600 0000**, atas nama **Firsta Adi Pradana**, dan Bank Mandiri **1350018340537**, atas nama **TALITHA SYAHDA ARUND**. Masing-masing memiliki tombol salin (digit saja, termasuk nol di depan) dan pilihan salin manual jika clipboard tidak tersedia. Tamu yang sudah terverifikasi dapat memilih Hadir/Tidak hadir/Belum pasti, mengisi jumlah hadir 1–10 orang termasuk dirinya, dan ucapan opsional maksimal 1000 karakter. Satu jawaban per undangan tersimpan di Postgres dan dapat diperbarui dari perangkat yang terdaftar. Kosongkan ucapan untuk menghapusnya dari daftar. Preview admin/desain tidak dapat mengirim jawaban.
+Logo bank memakai artwork dari situs resmi [blu](https://blubybcadigital.id/) dan [Mandiri](https://www.bankmandiri.co.id/en/brandguideline), disimpan lokal sebagai WebP tanpa mengubah warna atau bentuk logo.
+
+Kartu sumbangan menampilkan logo bank, nomor rekening, nama pemilik, dan tombol salin. Rekening blu **0033 1600 0000** milik **Firsta Adi Pradana** dan Mandiri **1350018340537** milik **TALITHA SYAHDA ARUND**; nama pemilik ditampilkan di bawah nomor rekening dan tersedia pada label aksesibilitas. Masing-masing memiliki tombol salin (digit saja, termasuk nol di depan) dan pilihan salin manual jika clipboard tidak tersedia. Tamu yang sudah terverifikasi dapat memilih Hadir/Tidak hadir/Belum pasti, mengisi jumlah hadir 1–10 orang termasuk dirinya, dan ucapan opsional maksimal 1000 karakter. Satu jawaban per undangan tersimpan di Postgres dan dapat diperbarui dari perangkat yang terdaftar. Kosongkan ucapan untuk menghapusnya dari daftar. Preview admin/desain tidak dapat mengirim jawaban.
 
 Ucapan tamu aktif terlihat oleh tamu lain, sepuluh per halaman; status kehadiran dan jumlah tamu hanya diberikan kepada tamu pemilik undangan serta admin. Dashboard tamu memuat konfirmasi, ucapan, dan rekap jumlah hadir untuk undangan aktif. Menghapus tamu juga menghapus jawabannya; menonaktifkan tamu menyembunyikan ucapan tanpa menghapus jawaban. Migrasi menambahkan tabel `wedding.responses` tanpa mengubah data tamu lama. Jalankan migrasi sebelum menjalankan kode baru (Docker sudah menjalankannya saat startup).
 
@@ -72,7 +74,7 @@ Domain: https://wedding.firsta.my.id. CNAME `wedding` menuju `wedding-invitation
 
 ## Desain
 
-Scroll berhenti di batas section dengan native scroll snap; section panjang tetap bisa digulir. Konten masuk dengan perspektif 3D ringan, parallax hutan, kartu membulat dan bayangan berlapis. Reduced motion mematikan snap, parallax dan gerakan konten.
+Scroll berhenti di batas section dengan native scroll snap; section panjang tetap bisa digulir. Konten masuk dengan perspektif 3D ringan, parallax hutan, kartu membulat dan bayangan berlapis. Kartu muncul bergantian dari kiri/kanan dengan fade-in saat masuk layar, sekali per kunjungan halaman. Kartu tetap terlihat tanpa JavaScript/IntersectionObserver, saat menerima fokus keyboard, dan saat reduced motion aktif. Reduced motion mematikan snap, parallax dan gerakan konten.
 
 - [Prompt amplop terbaru](docs/stitch-envelope-prompt.md)
 - [Brief desain/pengembangan](docs/stitch-prompts.md)

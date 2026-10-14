@@ -22,6 +22,21 @@ if (typeof document !== 'undefined') {
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let frame = null;
 
+  if (typeof IntersectionObserver !== 'undefined') {
+    const observer = new IntersectionObserver(entries => {
+      for (const {target,isIntersecting} of entries) {
+        if (!isIntersecting) continue;
+        target.classList.add('is-revealed');
+        observer.unobserve(target);
+      }
+    },{rootMargin:'0px 0px -64px 0px'});
+    document.querySelectorAll('.portrait-paper,.countdown,.event-paper,.location-paper,.gallery-album,.guest-paper,.wishes-area').forEach((card,index) => {
+      card.classList.add('reveal-card');
+      if (index % 2) card.classList.add('reveal-right');
+      observer.observe(card);
+    });
+  }
+
   function render() {
     frame = null;
     const viewport = window.innerHeight;
