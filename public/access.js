@@ -18,14 +18,14 @@ async function request(path,data) {
 async function open() {
   retry.hidden = true;
   if (!token) {
-    message.textContent = 'Silakan buka tautan undangan yang Anda terima.';
+    message.textContent = 'Silakan buka tautan undangan yang Bapak/Ibu/Sdr/Sdri terima.';
     if (['localhost','127.0.0.1'].includes(location.hostname)) {
       document.querySelector('.preview-link').hidden = false;
       try {await identify();} catch (error) {console.warn('Fingerprint local test failed:',error.code || error.message);}
     }
     return;
   }
-  message.textContent = 'Menyiapkan undangan Anda…';
+  message.textContent = 'Menyiapkan undangan Bapak/Ibu/Sdr/Sdri…';
   try {
     const challenge = await request('/api/access/challenge',{token});
     const result = await identify(challenge.challenge);

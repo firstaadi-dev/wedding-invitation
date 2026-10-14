@@ -273,7 +273,7 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
       }
       if (path === '/api/invitation' && method === 'GET') {
         const g = await session(); const a = !g && await session(true);
-        if (!g && !a && production) fail(401,'unauthorized','Buka tautan undangan yang Anda terima.');
+        if (!g && !a && production) fail(401,'unauthorized','Buka tautan undangan yang Bapak/Ibu/Sdr/Sdri terima.');
         return json(200,{guestName:g?.name || 'Tamu Undangan',...await content()});
       }
       if (path.startsWith('/media/') && ['GET','HEAD'].includes(method)) {
