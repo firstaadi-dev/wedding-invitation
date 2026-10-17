@@ -154,7 +154,7 @@ async function loadWishes(reset = false) {
   finally {if (request === wishesRequest) moreWishes.disabled = false;}
 }
 moreWishes.addEventListener('click',() => loadWishes());
-for (const card of document.querySelectorAll('.gift-paper')) {
+for (const card of document.querySelectorAll('.gift-bank')) {
   card.querySelector('button').addEventListener('click',async () => {
     const input = card.querySelector('.gift-account');const status = card.querySelector('.form-status');
     try {await navigator.clipboard.writeText(input.value.replace(/\s/g,''));status.textContent = 'Nomor rekening disalin.';}

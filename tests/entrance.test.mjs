@@ -73,4 +73,11 @@ assert.doesNotMatch(page, /Undangan Pernikahan · Adat Solo|class="full-names"/)
 assert.match(page, /lang="ar" dir="rtl"/);
 assert.match(page, /quran.com\/id\/ar-rum\/21/);
 
+const gifts = page.match(/<details class="gift-details">([\s\S]*?)<\/details>/)[1];
+assert.match(gifts, /<summary class="guest-button">[\s\S]*?<span>Kirim Hadiah<\/span>[\s\S]*?<\/summary>/);
+assert.equal((gifts.match(/class="guest-paper gift-paper"/g) || []).length,1);
+assert.equal((gifts.match(/class="gift-bank"/g) || []).length,2);
+for (const account of ['0033 1600 0000','1350018340537']) assert.ok(gifts.includes(`value="${account}"`));
+for (const bank of ['blu','Mandiri']) assert.ok(gifts.includes(`aria-label="Salin nomor rekening ${bank}"`));
+
 console.log('Lolos: parallax, transisi section 3D, kartu berulang saat masuk layar dari kedua arah scroll, fallback tanpa observer, dan konten undangan.');

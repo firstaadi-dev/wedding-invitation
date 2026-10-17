@@ -146,20 +146,42 @@
         <p class="eyebrow">Tanda kasih</p>
         <h2 id="gift-title">Sumbangan<br><em>untuk awal cerita kami.</em></h2>
         <p class="introduction">Doa restu dan kehadiran Bapak/Ibu/Sdr/Sdri adalah hadiah terindah. Jika berkenan memberikan tanda kasih, dapat melalui rekening berikut.</p>
-        <div class="guest-paper gift-paper">
-          <img class="gift-bank-logo" src="/assets/bank-blu.webp" alt="blu by BCA Digital" width="200" height="89" loading="lazy" decoding="async">
-          <input id="gift-account-blu" class="gift-account" value="0033 1600 0000" aria-label="Nomor rekening blu by BCA Digital atas nama Firsta Adi Pradana" readonly inputmode="numeric">
-          <p>a.n <strong>Firsta Adi Pradana</strong></p>
-          <button class="guest-button" type="button" aria-label="Salin nomor rekening blu">Salin nomor</button>
-          <p class="form-status" role="status"></p>
-        </div>
-        <div class="guest-paper gift-paper">
-          <img class="gift-bank-logo" src="/assets/bank-mandiri.webp" alt="Bank Mandiri" width="400" height="117" loading="lazy" decoding="async">
-          <input id="gift-account-mandiri" class="gift-account" value="1350018340537" aria-label="Nomor rekening Mandiri atas nama TALITHA SYAHDA ARUND" readonly inputmode="numeric">
-          <p>a.n <strong>TALITHA SYAHDA ARUND</strong></p>
-          <button class="guest-button" type="button" aria-label="Salin nomor rekening Mandiri">Salin nomor</button>
-          <p class="form-status" role="status"></p>
-        </div>
+        <details class="gift-details">
+          <summary class="guest-button">
+            <svg class="gift-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 8h18v4H3zM5 12v9h14v-9M12 8v13M12 8H7.5A2.5 2.5 0 1 1 10 5.5L12 8Zm0 0h4.5A2.5 2.5 0 1 0 14 5.5L12 8Z"/></svg>
+            <span>Kirim Hadiah</span>
+          </summary>
+          <div class="guest-paper gift-paper">
+            <div class="gift-bank">
+              <img class="gift-bank-logo" src="/assets/bank-blu.webp" alt="blu by BCA Digital" width="200" height="89" loading="lazy" decoding="async">
+              <div class="gift-bank-info">
+                <div class="gift-account-row">
+                  <input id="gift-account-blu" class="gift-account" value="0033 1600 0000" aria-label="Nomor rekening blu by BCA Digital atas nama Firsta Adi Pradana" readonly inputmode="numeric">
+                  <button class="guest-button" type="button" aria-label="Salin nomor rekening blu">
+                    <svg class="gift-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>
+                    <span>Salin</span>
+                  </button>
+                </div>
+                <p>a.n. <strong>Firsta Adi Pradana</strong></p>
+                <p class="form-status" role="status"></p>
+              </div>
+            </div>
+            <div class="gift-bank">
+              <img class="gift-bank-logo" src="/assets/bank-mandiri.webp" alt="Bank Mandiri" width="400" height="117" loading="lazy" decoding="async">
+              <div class="gift-bank-info">
+                <div class="gift-account-row">
+                  <input id="gift-account-mandiri" class="gift-account" value="1350018340537" aria-label="Nomor rekening Mandiri atas nama TALITHA SYAHDA ARUND" readonly inputmode="numeric">
+                  <button class="guest-button" type="button" aria-label="Salin nomor rekening Mandiri">
+                    <svg class="gift-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>
+                    <span>Salin</span>
+                  </button>
+                </div>
+                <p>a.n. <strong>TALITHA SYAHDA ARUND</strong></p>
+                <p class="form-status" role="status"></p>
+              </div>
+            </div>
+          </div>
+        </details>
       </div>
     </section>
 

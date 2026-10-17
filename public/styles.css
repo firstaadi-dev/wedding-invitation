@@ -28,9 +28,30 @@
 .form-status {font-size:14px;line-height:1.6;margin-top:16px;overflow-wrap:anywhere;}
 .guest-paper .form-status {color:var(--forest);}
 .guest-paper .form-status.error {color:var(--burgundy);}
-.gift-paper {text-align:center;}
-.gift-bank-logo {display:block;width:160px;max-width:100%;height:72px;object-fit:contain;margin:0 auto 16px;}
-.gift-paper .gift-account {border:0;background:transparent;text-align:center;font-size:clamp(20px,4vw,30px);font-weight:600;letter-spacing:.04em;}
+.gift-details summary {display:flex;align-items:center;justify-content:center;gap:10px;width:fit-content;margin:24px auto 0;list-style:none;}
+.gift-details summary::-webkit-details-marker {display:none;}
+.gift-details summary:after {content:"";width:7px;height:7px;margin:0 2px 4px 6px;border-right:1.5px solid;border-bottom:1.5px solid;transform:rotate(45deg);}
+.gift-details[open] summary:after {transform:rotate(225deg);margin-bottom:-4px;}
+.gift-details summary:focus-visible {outline:3px solid #eacda5;outline-offset:6px;}
+.gift-icon {width:18px;height:18px;flex-shrink:0;}
+.gift-details .gift-paper {width:min(100%,380px);margin-top:16px;padding:20px;box-shadow:inset 0 1px 0 #fff,0 12px 32px #020c0859;}
+.gift-details .gift-paper:before {display:none;}
+.gift-bank {display:grid;gap:8px;}
+.gift-bank + .gift-bank {margin-top:16px;padding-top:16px;border-top:1px solid #d7c5ab;}
+.gift-bank-logo {display:block;width:48px;max-width:100%;height:24px;object-fit:contain;object-position:left center;}
+.gift-bank-logo[src$="bank-mandiri.webp"] {width:76px;}
+.gift-account-row {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;}
+.gift-paper .gift-account {min-width:0;border:0;background:transparent;padding:0;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;user-select:all;}
+.gift-bank-info>p {font-size:13px;line-height:1.6;margin-top:4px;color:var(--wood);}
+.gift-bank-info strong {font-weight:500;}
+.gift-bank .guest-button {display:flex;align-items:center;justify-content:center;gap:6px;min-width:44px;margin:0;padding:8px 12px;border-color:#76564066;background:transparent;color:var(--forest);font-size:13px;}
+.gift-bank .guest-button:hover {background:#7656400d;border-color:var(--wood);}
+.gift-bank .guest-button:focus-visible {outline-color:var(--burgundy);outline-offset:3px;}
+.gift-bank .form-status:empty {display:none;}
+@media(max-width:380px) {
+  .gift-bank .guest-button {padding:8px;}
+  .gift-bank .guest-button span {display:none;}
+}
 .wishes-area {width:min(100%,560px);margin:44px auto 0;}
 .wishes-list {display:grid;gap:16px;margin-top:24px;text-align:left;}
 .wish-card {padding:22px;background:var(--paper);color:var(--ink);border:1px solid #d7c5ab;border-radius:12px;overflow-wrap:anywhere;}
