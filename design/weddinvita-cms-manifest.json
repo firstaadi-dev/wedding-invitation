@@ -1,0 +1,100 @@
+{
+  "brand": "weddinvita",
+  "projectId": "3122156932953261093",
+  "projectUrl": "https://stitch.withgoogle.com/projects/3122156932953261093",
+  "status": "Design review only; active CMS in public/ is unchanged",
+  "refinements": "weddinvita-cms-refinements.json",
+  "screenshotsStatus": "Original Stitch export images; corrected HTML includes the final DOM refinements.",
+  "screens": [
+    {
+      "deviceType": "DESKTOP",
+      "height": "2174",
+      "htmlCode": {
+        "downloadUrl": "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sX2RhMWU4ZWRkMzIxZTQyYTVhZGE2ZGNjMzE3MzhlNTZmEgsSBxDqgsfNpxQYAZIBIwoKcHJvamVjdF9pZBIVQhMzMTIyMTU2OTMyOTUzMjYxMDkz&filename=&opi=96797242",
+        "mimeType": "text/html",
+        "name": "projects/3122156932953261093/files/b84febfb3057491dbdebd6a38d324a64"
+      },
+      "name": "projects/3122156932953261093/screens/f4215ad24fd04545907af65645e3878b",
+      "screenshot": {
+        "downloadUrl": "https://lh3.googleusercontent.com/aida/AEtjO1VZzd7v3h3SsjiwMUXs5maqK8xxetZQdFAeBdq5QHHBQ20pNhvt6p2Vz76IPsIU_VuKtYu6VyDHr5OeSRWAeceHqwDvHSiYKLOz1yq8RY7EG-L1vpIjkdeiUmFPdz7C_DTTen1AUD5jrnWdFPfQ5_r0_53XRzNoYrTpeNxN5pwniN_jC0FF8GahGwHXtIIDG-iN76ioBFimVPpoPDaihXO0E78bls3UVhTb_LuknM0Zp4NGMwKAnd9ZUg",
+        "name": "projects/3122156932953261093/files/d21f33d523704f738c8e6b810d2e915c"
+      },
+      "title": "weddinvita — Tamu undangan (Desktop 1440px)",
+      "width": "2560",
+      "htmlFile": "weddinvita-cms-guests.html",
+      "screenshotFile": "weddinvita-cms-guests.png"
+    },
+    {
+      "deviceType": "DESKTOP",
+      "height": "2408",
+      "htmlCode": {
+        "downloadUrl": "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sXzk4YTI1ZDUwNDI4MjRiNmY4NDhkYjg2Njk3MWYzN2ZkEgsSBxDqgsfNpxQYAZIBIwoKcHJvamVjdF9pZBIVQhMzMTIyMTU2OTMyOTUzMjYxMDkz&filename=&opi=96797242",
+        "mimeType": "text/html",
+        "name": "projects/3122156932953261093/files/0b14b994ddc5480285a98130cbafb625"
+      },
+      "name": "projects/3122156932953261093/screens/b76bd9f385784d35a8fbee7ddc4b8e2a",
+      "screenshot": {
+        "downloadUrl": "https://lh3.googleusercontent.com/aida/AEtjO1XvOrVMv7M3ls3iWUzDQhH2Vl_EXIN3zkI4NcuWOvzMTHLm3oF9GitNusZbXSMyIw59GlsMtDEQ2uKZLQnjIEwpxhk5X4Hmi4pQOL_HTgeLc8GE7v7rZOTUuawX5ULKq70WVxpOTOXTAQox8EzEzBI-G34f78affmQlGGYPl2bh_IJLO9ILrLa3cvVZyuUDzCFLK0Dt6d2sYsMwSyqAgMp4q09WvmL1GLNZ2daNSuxFVjJSmNzJqmCYH5o",
+        "name": "projects/3122156932953261093/files/8b245393a5f045c2add6080fda56a899"
+      },
+      "title": "weddinvita — Foto & lagu (Desktop 1440px)",
+      "width": "2560",
+      "htmlFile": "weddinvita-cms-media.html",
+      "screenshotFile": "weddinvita-cms-media.png"
+    },
+    {
+      "deviceType": "DESKTOP",
+      "height": "4134",
+      "htmlCode": {
+        "downloadUrl": "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sX2Y5ODJiZjk5ZmU3YjRjYzNhYzU5MTcyYjkxMTVlOGMyEgsSBxDqgsfNpxQYAZIBIwoKcHJvamVjdF9pZBIVQhMzMTIyMTU2OTMyOTUzMjYxMDkz&filename=&opi=96797242",
+        "mimeType": "text/html",
+        "name": "projects/3122156932953261093/files/0e0c3edf8ac84ad4aa929dd8ee6280ca"
+      },
+      "name": "projects/3122156932953261093/screens/557c83051f2b4a83a3dadaf84b8f35da",
+      "screenshot": {
+        "downloadUrl": "https://lh3.googleusercontent.com/aida/AEtjO1WbPkcDEH543SFwgK8T2zEzfNKYEe4v8wCf6RUUpywiQ_u9somswt5kZLHN47zGXYhFQwBmHgFEeuuAdzHfr_sJr0wYxadDJlaFj_TCIQjQYK-zztA0V_YFt-8dKbv95eIgO7SMozpTrn31zd_PHIGJHOKbUqDcsp8qvDE3gjdABn8y5TALVcFCOdHix74_EjzOyuMMgnY3UhxMQ-NRgdn7daL7KBbvvFaz_Tux9pfMPVKHmp-9p0d89TQ",
+        "name": "projects/3122156932953261093/files/ef3ad089c25247ddbd2c2fe98afbd91a"
+      },
+      "title": "weddinvita — Pesan & preview (Desktop 1440px)",
+      "width": "2560",
+      "htmlFile": "weddinvita-cms-messages.html",
+      "screenshotFile": "weddinvita-cms-messages.png"
+    },
+    {
+      "deviceType": "DESKTOP",
+      "height": "3090",
+      "htmlCode": {
+        "downloadUrl": "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sXzk1ZGRlMWY4MjMzNTQ3N2JiNjcyZGVmOTY5OGM4NGRlEgsSBxDqgsfNpxQYAZIBIwoKcHJvamVjdF9pZBIVQhMzMTIyMTU2OTMyOTUzMjYxMDkz&filename=&opi=96797242",
+        "mimeType": "text/html",
+        "name": "projects/3122156932953261093/files/90134f5deddd4ad3b818e63d5c2fa3c5"
+      },
+      "name": "projects/3122156932953261093/screens/596f1b3c61a44811806830b8ad2b4196",
+      "screenshot": {
+        "downloadUrl": "https://lh3.googleusercontent.com/aida/AEtjO1UAQNZ-N9s0J09TpzmYjJPkjZou50hUvOtbkUCt_w828UKisfcN202VBMmL_82llI3hYQdULwphWtRc5cYh5nBdNlYzyrA4NFQ1QhO0BwFcCxcwbbZ70nEmT6ErXwliRFdSPzGa64xVOOLWKa301_sW4cFXjjFHByB_cmGoqP-bXpo-UC3P-FJGaXPJnrXpFZbAUPpWcoAKYChTeFqjqIczommu2ewzPd_DDXjHr1Y-FdA-VZUsfAm1MA",
+        "name": "projects/3122156932953261093/files/0956027c9c044949af0b6f7efd947443"
+      },
+      "title": "weddinvita — Detail acara (Desktop 1440px)",
+      "width": "2560",
+      "htmlFile": "weddinvita-cms-event.html",
+      "screenshotFile": "weddinvita-cms-event.png"
+    },
+    {
+      "deviceType": "DESKTOP",
+      "height": "2342",
+      "htmlCode": {
+        "downloadUrl": "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sXzUzMTcxNmQ0ZDVjZDRiNDE5MmI5YTJkYzRjMWExMzhjEgsSBxDqgsfNpxQYAZIBIwoKcHJvamVjdF9pZBIVQhMzMTIyMTU2OTMyOTUzMjYxMDkz&filename=&opi=96797242",
+        "mimeType": "text/html",
+        "name": "projects/3122156932953261093/files/e361bfac4f954da5a60a2bf775031abe"
+      },
+      "name": "projects/3122156932953261093/screens/de2c03e9e1f04a25b822767407610177",
+      "screenshot": {
+        "downloadUrl": "https://lh3.googleusercontent.com/aida/AEtjO1UEve5IMYU6-cOShJdAbg99v57BASd901BpAiCCHJ6iZoS5yZZq8sk6cxcW2IYPwac3mLk6F_CGGKtqsqGXcAAbxXZXjk1_jyl_qoVMEkusZFjfIDSGRxaZQWD6ddb9qMczP5lXqb3sz49IV5sbS-1vugnGSkO_f0W3hXzlZpvuhgRS07ZZ7fOuT-n5mUh_XckGldaSKIQV1OXlM6G9cLqn9FtxMl0cs1MgVVU32-_Dsy5nLq5RuG5JlF0",
+        "name": "projects/3122156932953261093/files/904bc14e51604ddb9c7843cef9733b72"
+      },
+      "title": "weddinvita — Masuk CMS (Desktop 1440px)",
+      "width": "2560",
+      "htmlFile": "weddinvita-cms-login.html",
+      "screenshotFile": "weddinvita-cms-login.png"
+    }
+  ]
+}

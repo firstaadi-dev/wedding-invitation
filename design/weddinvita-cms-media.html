@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>weddinvita — Foto &amp; lagu</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-secondary-fixed-variant": "#294d42",
+            "inverse-primary": "#ffb2bd",
+            "secondary-container": "#c0e8d8",
+            "on-surface-variant": "#544244",
+            "on-tertiary-fixed-variant": "#354d2b",
+            "tertiary-container": "#2d4423",
+            "on-tertiary-fixed": "#0b2004",
+            "primary-container": "#6e2435",
+            "on-secondary-fixed": "#002118",
+            "error-container": "#ffdad6",
+            "surface-tint": "#964454",
+            "on-tertiary-container": "#96b187",
+            "inverse-surface": "#382f26",
+            "on-primary-fixed": "#3f0014",
+            "error": "#ba1a1a",
+            "on-secondary": "#ffffff",
+            "surface-dim": "#e7d7cb",
+            "inverse-on-surface": "#ffeee1",
+            "background": "#fff8f5",
+            "tertiary": "#172e0f",
+            "surface-variant": "#f0e0d3",
+            "surface-container-highest": "#f0e0d3",
+            "secondary": "#416659",
+            "on-secondary-container": "#456a5d",
+            "primary-fixed-dim": "#ffb2bd",
+            "outline-variant": "#d9c1c3",
+            "on-tertiary": "#ffffff",
+            "primary": "#510d20",
+            "on-error-container": "#93000a",
+            "on-error": "#ffffff",
+            "outline": "#867274",
+            "surface-bright": "#fff8f5",
+            "primary-fixed": "#ffd9dd",
+            "surface-container-high": "#f6e5d9",
+            "surface-container": "#fcebde",
+            "surface": "#fff8f5",
+            "tertiary-fixed": "#ceebbd",
+            "tertiary-fixed-dim": "#b3cfa2",
+            "secondary-fixed-dim": "#a8cfc0",
+            "on-surface": "#221a13",
+            "on-primary-container": "#f08c9d",
+            "on-primary-fixed-variant": "#792c3d",
+            "surface-container-lowest": "#ffffff",
+            "secondary-fixed": "#c3ebdb",
+            "surface-container-low": "#fff1e7",
+            "on-primary": "#ffffff",
+            "on-background": "#221a13"
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "space-sm": "0.5rem",
+            "gutter-tablet": "1.5rem",
+            "gutter-desktop": "2rem",
+            "space-md": "1rem",
+            "space-2xl": "4rem",
+            "space-xl": "2.5rem",
+            "gutter": "1rem",
+            "margin-desktop": "3rem",
+            "space-xs": "0.25rem",
+            "space-lg": "1.5rem",
+            "margin": "1.25rem",
+            "margin-tablet": "2rem"
+          },
+          fontFamily: {
+            "display-hero-mobile": ["Playfair Display"],
+            "body-md": ["Plus Jakarta Sans"],
+            "headline-lg": ["Playfair Display"],
+            "ornament-caption": ["Playfair Display"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "headline-md": ["Playfair Display"],
+            "label-md": ["Plus Jakarta Sans"],
+            "headline-lg-mobile": ["Playfair Display"],
+            "couples-script-mobile": ["Playfair Display"],
+            "display-hero": ["Playfair Display"],
+            "couples-script": ["Playfair Display"]
+          },
+          fontSize: {
+            "display-hero-mobile": ["36px", { lineHeight: "44px", letterSpacing: "0.01em", fontWeight: "400" }],
+            "body-md": ["16px", { lineHeight: "26px", fontWeight: "400" }],
+            "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "400" }],
+            "ornament-caption": ["13px", { lineHeight: "18px", letterSpacing: "0.14em", fontWeight: "400" }],
+            "body-sm": ["14px", { lineHeight: "22px", fontWeight: "400" }],
+            "body-lg": ["17px", { lineHeight: "28px", fontWeight: "400" }],
+            "label-sm": ["12px", { lineHeight: "16px", letterSpacing: "0.08em", fontWeight: "500" }],
+            "headline-md": ["22px", { lineHeight: "30px", fontWeight: "500" }],
+            "label-md": ["14px", { lineHeight: "20px", letterSpacing: "0.04em", fontWeight: "600" }],
+            "headline-lg-mobile": ["26px", { lineHeight: "34px", fontWeight: "400" }],
+            "couples-script-mobile": ["30px", { lineHeight: "38px", letterSpacing: "0.02em", fontWeight: "400" }],
+            "display-hero": ["48px", { lineHeight: "56px", letterSpacing: "0.02em", fontWeight: "400" }],
+            "couples-script": ["38px", { lineHeight: "46px", letterSpacing: "0.03em", fontWeight: "400" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f3ede4;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #d9c1c3;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-[#FAF7F2] text-[#30271F] font-body-md min-h-screen antialiased flex flex-col justify-between selection:bg-[#E7D7CB] selection:text-[#183D32]">
+<div class="flex flex-1 w-full min-h-screen max-w-[1440px] mx-auto shadow-sm">
+<!-- SIDEBAR (w-56 = 224px, 1:1 Layout Consistency) -->
+<aside class="w-56 shrink-0 bg-[#F3EDE4] border-r border-[#E7D7CB] flex flex-col justify-between h-screen sticky top-0 px-4 py-5 z-30">
+<div class="flex flex-col gap-4">
+<!-- Brand Wordmark -->
+<div class="flex items-center gap-1.5 px-2">
+<span class="font-body-md font-bold text-xl tracking-tight text-[#30271F]">weddinvita</span>
+<span class="w-2 h-2 rounded-full bg-[#6E2435] inline-block mb-1"></span>
+</div>
+<!-- Event Context Badge -->
+<div class="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FAF7F2] border border-[#E7D7CB] rounded-full text-xs text-[#765640] font-label-sm w-fit">
+<span class="material-symbols-outlined text-[14px] text-[#6E2435]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span class="truncate">Firsta &amp; Talitha · 22 Nov 2026</span>
+</div>
+<!-- Navigation Links (4 Menu Items) -->
+<nav class="flex flex-col gap-1.5 mt-3">
+<!-- 1. Tamu Undangan -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#544244] font-body-sm hover:bg-[#E7D7CB]/60 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">groups</span>
+<span class="font-label-md font-medium text-sm">Tamu undangan</span>
+</a>
+<!-- 2. Pesan & preview -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#544244] font-body-sm hover:bg-[#E7D7CB]/60 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">mail</span>
+<span class="font-label-md font-medium text-sm">Pesan &amp; preview</span>
+</a>
+<!-- 3. Foto & lagu (ACTIVE STATUS) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#E7D7CB] text-[#183D32] font-label-md font-semibold shadow-xs" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">photo_library</span>
+<span class="text-sm">Foto &amp; lagu</span>
+</a>
+<!-- 4. Detail acara -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#544244] font-body-sm hover:bg-[#E7D7CB]/60 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">calendar_today</span>
+<span class="font-label-md font-medium text-sm">Detail acara</span>
+</a>
+</nav>
+</div>
+<!-- Footer Sidebar -->
+<div class="flex flex-col gap-2 pt-4 border-t border-[#E7D7CB]">
+<a class="flex items-center justify-between px-3 py-2 rounded-lg text-[#544244] hover:text-[#183D32] hover:bg-[#E7D7CB]/50 transition-colors text-xs font-label-md" href="#">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">open_in_new</span>
+<span>Lihat undangan</span>
+</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+<a class="flex items-center gap-2 px-3 py-2 rounded-lg text-[#867274] hover:text-[#BA1A1A] hover:bg-[#FFDAD6]/40 transition-colors text-xs font-label-md" href="#">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+<span>Keluar</span>
+</a>
+<!-- System Tag -->
+<div class="mt-2 px-3 py-1.5 rounded-lg bg-[#FAF7F2] border border-[#E7D7CB] flex items-center justify-between"><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-600"></span><span class="text-[11px] font-label-sm text-[#765640] font-medium">Data demo</span></div></div>
+</div>
+</aside>
+<!-- MAIN CONTENT AREA (1440px Canvas) -->
+<main class="flex-1 min-w-0 bg-[#FAF7F2] flex flex-col overflow-y-auto custom-scrollbar">
+<!-- Top Content Header -->
+<header class="w-full bg-[#FAF7F2] border-b border-[#E7D7CB] px-8 py-6 sticky top-0 z-20 backdrop-blur-sm bg-[#FAF7F2]/95">
+<div class="flex items-center justify-between">
+<div>
+<h1 class="font-headline-lg text-3xl font-semibold text-[#183D32] tracking-tight">Foto &amp; lagu</h1>
+<p class="font-body-sm text-[#544244] text-sm mt-1">Kelola foto profil pasangan, galeri sembilan foto undangan, dan berkas lagu pengiring suasana.</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#D7C5AB] bg-white text-[#183D32] font-label-md text-xs font-medium hover:bg-[#F3EDE4] transition-colors min-h-[44px]" type="button">
+<span class="material-symbols-outlined text-[18px]">help_outline</span>
+<span>Panduan Format</span>
+</button>
+<button class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#6E2435] hover:bg-[#581c2a] text-white font-label-md text-xs font-medium shadow-xs transition-colors min-h-[44px]" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+<span>+ Lihat undangan</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Editorial Grid: Two Balanced Functional Panels -->
+<div class="p-8 grid grid-cols-12 gap-8 items-start">
+<!-- PANEL KIRI: FOTO MEMPELAI & LAGU PENGIRING (5 Kolom) -->
+<div class="col-span-12 xl:col-span-5 flex flex-col gap-6">
+<!-- SECTION A: FOTO PASANGAN -->
+<section class="bg-white rounded-2xl border border-[#D7C5AB] p-6 shadow-[0_2px_8px_rgba(48,39,31,0.04)]">
+<div class="flex items-start justify-between pb-4 border-b border-[#E7D7CB]">
+<div>
+<h2 class="font-headline-md text-lg font-semibold text-[#183D32]">Foto Pasangan</h2>
+<p class="font-body-sm text-xs text-[#765640] mt-0.5">Format JPG, PNG, WebP · Maksimal 12 MB per berkas. Upload langsung tersimpan otomatis.</p>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-label-sm bg-[#F3EDE4] text-[#183D32]">2 Slot Portret</span>
+</div>
+<!-- Two Photo Slots -->
+<div class="grid grid-cols-2 gap-4 mt-5">
+<!-- Slot 1: Foto Firsta (Kosong State) -->
+<div class="flex flex-col">
+<div class="h-60 rounded-2xl border-2 border-dashed border-[#D7C5AB] bg-[#FAF7F2] flex flex-col items-center justify-center p-4 text-center group hover:border-[#6E2435] transition-colors relative overflow-hidden">
+<!-- Subtle Kawung Motif Backdrop Accent -->
+<div class="w-12 h-12 rounded-full bg-[#E7D7CB]/60 flex items-center justify-center mb-2.5 text-[#765640]">
+<span class="material-symbols-outlined text-[24px]">person_outline</span>
+</div>
+<span class="font-label-md text-xs font-semibold text-[#30271F]">Foto Firsta (Mempelai Pria)</span>
+<span class="text-[11px] text-[#867274] mt-1 font-body-sm">Slot Foto Firsta Kosong</span>
+<span class="text-[10px] text-[#A8988B] mt-0.5">Rasio 3:4 disarankan</span>
+<button class="mt-4 px-3 py-1.5 rounded-lg bg-[#FAF7F2] border border-[#765640]/30 hover:border-[#6E2435] text-[#183D32] hover:text-[#6E2435] font-label-md text-xs transition-colors flex items-center gap-1 min-h-[36px]" type="button">
+<span class="material-symbols-outlined text-[16px]">upload</span>
+<span>Pilih berkas</span>
+</button>
+</div>
+<div class="mt-2 flex items-center justify-between px-1">
+<span class="text-[11px] font-label-sm text-[#867274]">Status: Menunggu</span>
+<span class="text-[11px] text-[#A8988B]">Maks 12 MB</span>
+</div>
+</div>
+<!-- Slot 2: Foto Talitha (Terisi State) -->
+<div class="flex flex-col">
+<div class="h-60 rounded-2xl border border-[#D7C5AB] bg-[#FAF7F2] p-3 flex flex-col justify-between relative overflow-hidden shadow-xs">
+<!-- Botanical Solonese Graphic Illustration Placeholder -->
+<div class="relative w-full h-36 rounded-xl overflow-hidden bg-[#E7D7CB]/50 border border-[#D7C5AB]/60">
+<img class="w-full h-full object-cover" data-alt="A serene fine-art photograph of delicate Javanese highland foliage and fern silhouettes bathed in warm, soft-golden morning sunlight. The composition features rich forest green and earthen umber tones on tactile deckle-edged paper texture, completely void of people or human figures, evoking a timeless Solonese royal pavilion atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyJqElgXB_WYPp9a7qa1Eb7vOZK0o1fXLH289H3Y5WCYPg7Z-XEprmS5cuIBSpixWJwhaF9Qa-rb8uNipk2nfRFUtlIvsPnjVE-9oSAeGMVyUUxANexdYnzsWrRVk0XbqeV2XomG3a4cWKVyrWZ72AyiV25jczTgelW9P9YVPIBfNcWf_zbCEokomWH6DalWjvPSv8EvZhiK90C3MkVmwM97t5VLGtb_yOmDAI_lWJ7mkoztAXQd7eN02_XqLfG_dEbFfeZ29_YVA"/>
+<span class="absolute top-2 right-2 bg-[#183D32] text-white text-[10px] font-label-sm px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
+<span class="material-symbols-outlined text-[12px]">check_circle</span>
+<span>Terpasang</span>
+</span>
+</div>
+<!-- File Details & Action -->
+<div class="mt-2">
+<div class="font-label-md text-xs font-semibold text-[#183D32] truncate">talitha_formal_solo.webp</div>
+<div class="flex items-center justify-between text-[11px] text-[#765640] mt-0.5 font-body-sm">
+<span>Mempelai Wanita</span>
+<span>3.4 MB</span>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-2">
+<button class="w-full py-1 rounded-lg bg-white border border-[#D7C5AB] text-[#183D32] hover:bg-[#F3EDE4] text-xs font-label-md transition-colors flex items-center justify-center gap-1 min-h-[34px]" type="button">
+<span class="material-symbols-outlined text-[14px]">sync</span>
+<span>Ganti</span>
+</button>
+<button class="w-full py-1 rounded-lg bg-white border border-[#FFDAD6] text-[#BA1A1A] hover:bg-[#FFDAD6]/30 text-xs font-label-md transition-colors flex items-center justify-center gap-1 min-h-[34px]" title="Klik untuk konfirmasi hapus" type="button">
+<span class="material-symbols-outlined text-[14px]">delete</span>
+<span>Hapus</span>
+</button>
+</div>
+</div>
+</div>
+<div class="mt-2 flex items-center justify-between px-1">
+<span class="text-[11px] font-label-sm text-emerald-800 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-700 inline-block"></span>
+                    Tersimpan otomatis
+                  </span>
+<span class="text-[11px] text-[#765640]">WebP Siap</span>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION B: LAGU PENGIRING UNDANGAN -->
+<section class="bg-white/80 rounded-2xl border border-[#D7C5AB] p-6 shadow-[0_2px_8px_rgba(48,39,31,0.04)]">
+<div class="flex items-start justify-between pb-4 border-b border-[#E7D7CB]">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-headline-md text-lg font-semibold text-[#183D32]">Musik Pengiring Undangan</h2>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-label-sm bg-[#FAF7F2] border border-[#D7C5AB] text-[#6E2435] font-medium">1 Berkas Audio</span>
+</div>
+<p class="font-body-sm text-xs text-[#765640] mt-1">Format MP3 · Maksimal 25 MB. Musik diputar setelah tamu menekan tombol musik.</p>
+</div>
+</div>
+<!-- Audio Player Card Demo -->
+<div class="mt-5 bg-[#FAF7F2] rounded-xl border border-[#E7D7CB] p-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-[#E7D7CB] flex items-center justify-center text-[#183D32]">
+<span class="material-symbols-outlined text-[22px]">music_note</span>
+</div>
+<div>
+<h3 class="font-label-md text-xs font-semibold text-[#183D32]">Gamelan_Kutut_Manggung_Solo.mp3</h3>
+<p class="text-[11px] text-[#765640] font-body-sm">Format MP3 · Maksimal 25 MB. Musik diputar setelah tamu menekan tombol musik.</p>
+</div>
+</div>
+<div class="flex items-center gap-2"><button class="px-3 py-2 rounded-lg border border-[#D7C5AB] bg-white text-[#183D32] hover:bg-[#F3EDE4] text-xs font-label-md flex items-center gap-1.5 min-h-[44px] transition-colors" type="button"><span class="material-symbols-outlined text-[18px]">folder_open</span><span>Ganti berkas</span></button><button aria-label="Hapus lagu" class="px-2.5 py-2 text-[#867274] hover:text-[#BA1A1A] hover:bg-[#FFDAD6]/40 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors border border-transparent hover:border-[#FFDAD6]" title="Hapus lagu" type="button"><span class="material-symbols-outlined text-[20px]">delete_outline</span></button></div>
+</div>
+<!-- Functional Player Controls UI -->
+<div class="mt-4 pt-3 border-t border-[#E7D7CB]/80 flex items-center gap-3">
+<button class="w-10 h-10 rounded-full bg-[#6E2435] text-white flex items-center justify-center hover:bg-[#581c2a] transition-all shrink-0 shadow-xs" title="Putar Pratinjau" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<!-- Audio Track Waveform / Bar -->
+<div class="flex-1 flex flex-col gap-1">
+<div class="w-full bg-[#E7D7CB] h-1.5 rounded-full overflow-hidden relative cursor-pointer">
+<div class="bg-[#183D32] h-full w-[38%] rounded-full"></div>
+</div>
+<div class="flex justify-between items-center text-[10px] font-label-sm text-[#765640]">
+<span>01:24</span>
+<span class="text-[#867274]">Durasi penuh: 03:45</span>
+</div>
+</div>
+<!-- Volume Indicator -->
+<div class="flex items-center gap-1 text-[#765640] pl-2 border-l border-[#E7D7CB]">
+<span class="material-symbols-outlined text-[18px]">volume_up</span>
+<span class="text-[11px] font-label-sm">85%</span>
+</div>
+</div>
+</div>
+<!-- Server Sync Notice -->
+<div class="mt-3 flex items-center justify-between text-[11px] text-[#544244] px-1"><span class="flex items-center gap-1.5 text-[#183D32]"><span class="material-symbols-outlined text-[14px] text-emerald-700">check_circle</span><span>Berkas audio siap diputar</span></span><span class="text-[#765640]">Format MP3</span></div>
+</section>
+<!-- MINI PREVIEW WIDGET: PRATINJAU TAMPILAN TAMU -->
+<div class="rounded-2xl border border-[#D7C5AB] bg-[#FAF7F2] p-5 shadow-xs">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-[#6E2435]">smartphone</span>
+<span class="font-label-md text-xs font-semibold text-[#183D32]">Pratinjau Tampilan Tamu</span>
+</div>
+<span class="text-[11px] font-label-sm text-[#765640] bg-[#E7D7CB]/60 px-2 py-0.5 rounded-md">Mobile Viewport 390px</span>
+</div>
+<div class="p-3.5 bg-white rounded-xl border border-[#E7D7CB] flex items-center gap-3">
+<div class="w-12 h-14 rounded-lg bg-[#FAF7F2] border border-[#D7C5AB] overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A minimalist architectural botanical study in high-key natural lighting showing dry palm leaves and raw woven bamboo textures in warm cream and sepia tones, evoking high-end editorial stationery layout." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0uQLXQHRdCnQJw8-9cFq3QrPL83yAuvsPQ77eId1j--U8FV78WunlDnSeJhh5DcjQTBfqWHiOAqunB3LX7fvYWxJ9eT_5-X3ZdzAgoG-4lItAiH0BgezzEOBn1UHWmq3kSnhV75ikRAcxqY6AP1DRa4ahjrZ73WjXa-2OhBjQ_vCgK_LZPT3aL-UBKB2U6tZCev6QqqbELVl70_ci-l3XPfHuvekZxAtsvi7x3u7oyE3ADTN1PNhsXuJMf-ZOD9bnkm1JdOttOdU"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="font-headline-md text-xs font-semibold text-[#183D32] truncate">Firsta &amp; Talitha · Solo 2026</div>
+<div class="text-[11px] text-[#765640] truncate">Musik latar: Gamelan Kutut Manggung</div>
+<div class="text-[10px] text-emerald-800 flex items-center gap-1 mt-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                  Floating player siap tampil di layar tamu
+                </div>
+</div>
+<span class="material-symbols-outlined text-[18px] text-[#867274]">tune</span>
+</div>
+</div>
+</div>
+<!-- PANEL KANAN: GALERI UNDANGAN (9 SLOT TETAP 1–9) (7 Kolom) -->
+<div class="col-span-12 xl:col-span-7">
+<section class="bg-white rounded-2xl border border-[#D7C5AB] p-6 shadow-[0_2px_8px_rgba(48,39,31,0.04)]">
+<!-- Header Galeri -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#E7D7CB] gap-2">
+<div>
+<div class="flex items-center gap-2.5">
+<h2 class="font-headline-md text-lg font-semibold text-[#183D32]">Galeri Undangan (9 Slot Tetap)</h2>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-label-md bg-[#FAF7F2] border border-[#D7C5AB] text-[#183D32] font-semibold">2 dari 9 terisi</span>
+</div>
+<p class="font-body-sm text-xs text-[#765640] mt-1">Sembilan foto dokumentasi prosesi yang tampil pada lembar galeri undangan tamu. Tiap slot tersimpan langsung saat diunggah.</p>
+</div>
+</div>
+<!-- GRID 3 x 3 (Total Sembilan Slot Terbuka Langsung) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+<!-- SLOT 01: TERISI -->
+<div class="rounded-xl border border-[#D7C5AB] bg-[#FAF7F2] p-2.5 flex flex-col justify-between shadow-xs">
+<div>
+<div class="relative h-32 rounded-lg overflow-hidden bg-[#E7D7CB]/40 border border-[#D7C5AB]/70">
+<img class="w-full h-full object-cover" data-alt="An atmospheric editorial still-life of royal Javanese Siraman floral arrangement with white jasmine blossoms, clay water vessels, and fresh tropical foliage illuminated by soft ambient window lighting. Cream and forest green color tones, pristine and elegant." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCHXnY_OAGgLN5T8DJnyzL1UySy26jtninN6jLRjebp1xm1wmuuhNJb9JvIkqaL0LlY4pxESn-tnD92owUMrmLW_i3IHBLcPV4Gra4rZtx5u31dBmm3w6PcFW59rUjdJ_2qCt7mBM3tJAfcrjYHIfoy4_nZ5R8drrEuJiVmhVbHLuQODNBxkPjfoWdaPaA5KFBVYbVqQqq1z_hh-4M8UH-PiU1eBHC0rAdbo0YVEgR0Lcaa8hakg84j9AiOj6IFZtj5tdswQM91MM"/>
+<span class="absolute top-1.5 left-1.5 bg-[#FAF7F2]/90 backdrop-blur-xs text-[#183D32] text-[10px] font-label-sm px-1.5 py-0.5 rounded border border-[#D7C5AB]/60">01</span>
+<span class="absolute top-1.5 right-1.5 bg-emerald-800 text-white text-[9px] font-label-sm px-1.5 py-0.5 rounded">Aktif</span>
+</div>
+<div class="mt-2">
+<div class="font-label-md text-xs font-medium text-[#183D32] truncate">dekorasi_siraman.jpg</div>
+<div class="text-[10px] text-[#765640]">2.1 MB · Slot 01</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-1.5 mt-2.5 pt-2 border-t border-[#E7D7CB]">
+<button class="py-1 rounded bg-white border border-[#D7C5AB] text-[#183D32] hover:bg-[#F3EDE4] text-[11px] font-label-md transition-colors flex items-center justify-center gap-1 min-h-[32px]" type="button">
+<span class="material-symbols-outlined text-[13px]">refresh</span>
+<span>Ganti</span>
+</button>
+<button class="py-1 rounded bg-white border border-[#FFDAD6] text-[#BA1A1A] hover:bg-[#FFDAD6]/30 text-[11px] font-label-md transition-colors flex items-center justify-center gap-1 min-h-[32px]" type="button">
+<span class="material-symbols-outlined text-[13px]">delete</span>
+<span>Hapus</span>
+</button>
+</div>
+</div>
+<!-- SLOT 02: TERISI -->
+<div class="rounded-xl border border-[#D7C5AB] bg-[#FAF7F2] p-2.5 flex flex-col justify-between shadow-xs">
+<div>
+<div class="relative h-32 rounded-lg overflow-hidden bg-[#E7D7CB]/40 border border-[#D7C5AB]/70">
+<img class="w-full h-full object-cover" data-alt="Macro artistic detail of authentic Solo Javanese batik fabric with intricate brown Sogan and ivory Kawung geometric patterns, folded neatly next to organic dried eucalyptus leaves in warm editorial daylight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDksyDtbRotvftcOESkySeHPzFuPem90D03B9uSVYxHrgHuYXHMzBpQBb59KBNd9nKqfdBMzzuPA6Qsr__fRYVn7u4_SMIKhQuQ0d-ICXWEPwuyE7oI8ZJe0EpS46esU54IzgS3nDEM_ZXl9NCXKclHJCk-whYBMG6mfH0aUKEKtNQZTz7qlM_MSITpgT6mfVQn4lTW7Zs1musVuU8BcH3PvOHV0IiI3Y7LR0tvzsp2FSVfpUAfmNyWW-5ONX2Z6LTfgkkwpn_CxY"/>
+<span class="absolute top-1.5 left-1.5 bg-[#FAF7F2]/90 backdrop-blur-xs text-[#183D32] text-[10px] font-label-sm px-1.5 py-0.5 rounded border border-[#D7C5AB]/60">02</span>
+<span class="absolute top-1.5 right-1.5 bg-emerald-800 text-white text-[9px] font-label-sm px-1.5 py-0.5 rounded">Aktif</span>
+</div>
+<div class="mt-2">
+<div class="font-label-md text-xs font-medium text-[#183D32] truncate">kain_jarik_solo.png</div>
+<div class="text-[10px] text-[#765640]">4.8 MB · Slot 02</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-1.5 mt-2.5 pt-2 border-t border-[#E7D7CB]">
+<button class="py-1 rounded bg-white border border-[#D7C5AB] text-[#183D32] hover:bg-[#F3EDE4] text-[11px] font-label-md transition-colors flex items-center justify-center gap-1 min-h-[32px]" type="button">
+<span class="material-symbols-outlined text-[13px]">refresh</span>
+<span>Ganti</span>
+</button>
+<button class="py-1 rounded bg-white border border-[#FFDAD6] text-[#BA1A1A] hover:bg-[#FFDAD6]/30 text-[11px] font-label-md transition-colors flex items-center justify-center gap-1 min-h-[32px]" type="button">
+<span class="material-symbols-outlined text-[13px]">delete</span>
+<span>Hapus</span>
+</button>
+</div>
+</div>
+<!-- SLOT 03: SEDANG MENGUNGGAH / LOADING -->
+<div class="rounded-xl border border-[#6E2435]/40 bg-[#FAF7F2] p-2.5 flex flex-col justify-between shadow-xs"><div><div class="relative h-32 rounded-lg overflow-hidden bg-[#F3EDE4] border border-[#D7C5AB] flex flex-col items-center justify-center p-3 text-center"><span class="absolute top-1.5 left-1.5 bg-[#FAF7F2]/90 backdrop-blur-xs text-[#183D32] text-[10px] font-label-sm px-1.5 py-0.5 rounded border border-[#D7C5AB]/60">03</span><span class="material-symbols-outlined text-[24px] text-[#6E2435] animate-spin mb-1">progress_activity</span><span class="text-xs font-label-md text-[#6E2435] font-semibold">Mengunggah…</span><span class="text-[10px] text-[#765640] mt-1">Menyimpan berkas</span></div><div class="mt-2"><div class="font-label-md text-xs font-medium text-[#183D32] truncate">prosesi_kembar_mayang.jpg</div><div class="text-[10px] text-[#765640]">Sinkronisasi sedang berjalan</div></div></div><div class="mt-2.5 pt-2 border-t border-[#E7D7CB]"><div class="w-full py-2 rounded bg-[#FAF7F2] border border-[#D7C5AB]/60 text-[#867274] text-xs font-label-md flex items-center justify-center gap-1 min-h-[44px]"><span class="material-symbols-outlined text-[16px]">hourglass_empty</span><span>Mohon tunggu</span></div></div></div>
+<!-- SLOT 04: GAGAL / ERROR -->
+<div class="rounded-xl border border-[#BA1A1A]/30 bg-[#FFDAD6]/20 p-2.5 flex flex-col justify-between shadow-xs"><div><div class="relative h-32 rounded-lg overflow-hidden bg-[#FFDAD6]/40 border border-[#BA1A1A]/30 flex flex-col items-center justify-center p-3 text-center"><span class="absolute top-1.5 left-1.5 bg-[#FAF7F2]/90 backdrop-blur-xs text-[#183D32] text-[10px] font-label-sm px-1.5 py-0.5 rounded border border-[#D7C5AB]/60">04</span><span class="material-symbols-outlined text-[24px] text-[#BA1A1A] mb-1">error_outline</span><span class="text-xs font-label-sm font-semibold text-[#BA1A1A] leading-tight">Gagal diunggah</span><span class="text-[10px] text-[#765640] mt-0.5">Maksimal ukuran 12 MB</span></div><div class="mt-2"><div class="font-label-md text-xs font-medium text-[#BA1A1A] truncate">arsip_mentah.raw</div><div class="text-[10px] text-[#BA1A1A]">Format .RAW tidak didukung</div></div></div><div class="mt-2.5 pt-2 border-t border-[#BA1A1A]/20"><button class="w-full py-2 rounded bg-white border border-[#BA1A1A]/40 text-[#BA1A1A] hover:bg-[#FFDAD6]/40 text-xs font-label-md transition-colors flex items-center justify-center gap-1.5 min-h-[44px]" type="button"><span class="material-symbols-outlined text-[16px]">refresh</span><span>Coba lagi</span></button></div></div>
+<!-- SLOT 05: KOSONG -->
+<div class="rounded-xl border-2 border-dashed border-[#D7C5AB] bg-[#FAF7F2] p-2.5 flex flex-col justify-between hover:border-[#6E2435] transition-colors">
+<div class="h-32 rounded-lg flex flex-col items-center justify-center text-center p-2 relative">
+<span class="absolute top-0 left-0 bg-[#E7D7CB]/80 text-[#765640] text-[10px] font-label-sm px-1.5 py-0.5 rounded">05</span>
+<span class="material-symbols-outlined text-[22px] text-[#A8988B] mb-1">add_photo_alternate</span>
+<span class="text-xs font-label-md font-medium text-[#765640]">Slot 05 Kosong</span>
+<span class="text-[10px] text-[#A8988B]">Maks 12 MB</span>
+</div>
+<div class="pt-2 border-t border-[#E7D7CB]"><button class="w-full py-2 rounded bg-white border border-[#D7C5AB] text-[#183D32] hover:bg-[#F3EDE4] text-xs font-label-md transition-colors flex items-center justify-center gap-1 min-h-[44px]" type="button"><span class="material-symbols-outlined text-[16px]">add</span><span>Pilih file</span></button></div>
+</div>
+<!-- SLOT 06: KOSONG -->
+<div class="rounded-xl border-2 border-dashed border-[#D7C5AB] bg-[#FAF7F2] p-2.5 flex flex-col justify-between hover:border-[#6E2435] transition-colors">
+<div class="h-32 rounded-lg flex flex-col items-center justify-center text-center p-2 relative">
+<span class="absolute top-0 left-0 bg-[#E7D7CB]/80 text-[#765640] text-[10px] font-label-sm px-1.5 py-0.5 rounded">06</span>
+<span class="material-symbols-outlined text-[22px] text-[#A8988B] mb-1">add_photo_alternate</span>
+<span class="text-xs font-label-md font-medium text-[#765640]">Slot 06 Kosong</span>
+<span class="text-[10px] text-[#A8988B]">Maks 12 MB</span>
+</div>
+<div class="pt-2 border-t border-[#E7D7CB]"><button class="w-full py-2 rounded bg-white border border-[#D7C5AB] text-[#183D32] hover:bg-[#F3EDE4] text-xs font-label-md transition-colors flex items-center justify-center gap-1 min-h-[44px]" type="button"><span class="material-symbols-outlined text-[16px]">add</span><span>Pilih file</span></button></div>
+</div>
+<!-- SLOT 07: KOSONG -->
+<div class="rounded-xl border-2 border-dashed border-[#D7C5AB] bg-[#FAF7F2] p-2.5 flex flex-col justify-between hover:border-[#6E2435] transition-colors">
+<div class="h-32 rounded-lg flex flex-col items-center justify-center text-center p-2 relative">
+<span class="absolute top-0 left-0 bg-[#E7D7CB]/80 text-[#765640] text-[10px] font-label-sm px-1.5 py-0.5 rounded">07</span>
+<span class="material-symbols-outlined text-[22px] text-[#A8988B] mb-1">add_photo_alternate</span>
+<span class="text-xs font-label-md font-medium text-[#765640]">Slot 07 Kosong</span>
+<span class="text-[10px] text-[#A8988B]">Maks 12 MB</span>
+</div>
+<div class="pt-2 border-t border-[#E7D7CB]"><button class="w-full py-2 rounded bg-white border border-[#D7C5AB] text-[#183D32] hover:bg-[#F3EDE4] text-xs font-label-md transition-colors flex items-center justify-center gap-1 min-h-[44px]" type="button"><span class="material-symbols-outlined text-[16px]">add</span><span>Pilih file</span></button></div>
+</div>
+<!-- SLOT 08: KOSONG -->
+<div class="rounded-xl border-2 border-dashed border-[#D7C5AB] bg-[#FAF7F2] p-2.5 flex flex-col justify-between hover:border-[#6E2435] transition-colors">
+<div class="h-32 rounded-lg flex flex-col items-center justify-center text-center p-2 relative">
+<span class="absolute top-0 left-0 bg-[#E7D7CB]/80 text-[#765640] text-[10px] font-label-sm px-1.5 py-0.5 rounded">08</span>
+<span class="material-symbols-outlined text-[22px] text-[#A8988B] mb-1">add_photo_alternate</span>
+<span class="text-xs font-label-md font-medium text-[#765640]">Slot 08 Kosong</span>
+<span class="text-[10px] text-[#A8988B]">Maks 12 MB</span>
+</div>
+<div class="pt-2 border-t border-[#E7D7CB]"><button class="w-full py-2 rounded bg-white border border-[#D7C5AB] text-[#183D32] hover:bg-[#F3EDE4] text-xs font-label-md transition-colors flex items-center justify-center gap-1 min-h-[44px]" type="button"><span class="material-symbols-outlined text-[16px]">add</span><span>Pilih file</span></button></div>
+</div>
+<!-- SLOT 09: KOSONG -->
+<div class="rounded-xl border-2 border-dashed border-[#D7C5AB] bg-[#FAF7F2] p-2.5 flex flex-col justify-between hover:border-[#6E2435] transition-colors">
+<div class="h-32 rounded-lg flex flex-col items-center justify-center text-center p-2 relative">
+<span class="absolute top-0 left-0 bg-[#E7D7CB]/80 text-[#765640] text-[10px] font-label-sm px-1.5 py-0.5 rounded">09</span>
+<span class="material-symbols-outlined text-[22px] text-[#A8988B] mb-1">add_photo_alternate</span>
+<span class="text-xs font-label-md font-medium text-[#765640]">Slot 09 Kosong</span>
+<span class="text-[10px] text-[#A8988B]">Maks 12 MB</span>
+</div>
+<div class="pt-2 border-t border-[#E7D7CB]"><button class="w-full py-2 rounded bg-white border border-[#D7C5AB] text-[#183D32] hover:bg-[#F3EDE4] text-xs font-label-md transition-colors flex items-center justify-center gap-1 min-h-[44px]" type="button"><span class="material-symbols-outlined text-[16px]">add</span><span>Pilih file</span></button></div>
+</div>
+</div>
+<!-- Footer Info Card -->
+<div class="mt-6 pt-4 border-t border-[#E7D7CB] flex flex-col sm:flex-row items-center justify-between text-xs text-[#765640] font-body-sm gap-2"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-[#765640]">info</span><span>Foto ditampilkan pada lembar galeri tamu sesuai urutan slot 01–09.</span></div><div class="flex items-center gap-2 font-label-sm text-[11px] text-[#765640]"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span><span>Data demo</span></div></div>
+</section>
+</div>
+</div>
+<!-- SYSTEM FOOTER (Sticky / Bottom Bar) -->
+<footer class="w-full bg-[#FAF7F2] border-t border-[#E7D7CB] px-8 py-3.5 mt-auto flex items-center justify-between text-xs font-body-sm text-[#765640]"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[15px] text-[#765640]">info</span><span>Perubahan tersimpan otomatis di peramban</span></div><div class="flex items-center gap-3 text-xs font-label-sm text-[#765640]"><span class="inline-flex items-center gap-1 text-[#765640]"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>Data demo</span><span>•</span><span>weddinvita</span></div></footer>
+</main>
+</div>
+</body></html>

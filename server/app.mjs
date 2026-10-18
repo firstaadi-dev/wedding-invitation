@@ -348,7 +348,7 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
         if (path === '/' || path === '/index.html') filename = !url.searchParams.has('access') && (await session() || await session(true)) ? 'index.html' : 'access.html';
         else if (path === '/preview' && (!production || await session(true))) filename = 'index.html';
         else if (path === '/admin') filename = 'admin.html';
-        else if (/^\/(?:assets\/[a-zA-Z0-9_-]+\.webp|(?:styles|admin|access)\.css|(?:invitation|content|countdown|admin|access|identification|whatsapp)\.js)$/.test(path)) filename = path.slice(1);
+        else if (/^\/(?:assets\/[a-zA-Z0-9_-]+\.webp|(?:styles|admin|access)\.css|(?:invitation|content|countdown|admin|admin-data|access|identification|whatsapp)\.js)$/.test(path)) filename = path.slice(1);
         if (filename) {
           let file = await readFile(new URL(filename,publicDirectory));
           if (['access.html','index.html'].includes(filename)) {

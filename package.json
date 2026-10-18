@@ -8,7 +8,7 @@
     "build": "node scripts/build.mjs",
     "db:migrate": "node scripts/migrate.mjs",
     "admin:hash": "node scripts/admin-password.mjs",
-    "test": "node tests/entrance.test.mjs && node --test tests/fingerprint.test.mjs tests/countdown.test.mjs tests/whatsapp.test.mjs",
+    "test": "node tests/entrance.test.mjs && node --test tests/fingerprint.test.mjs tests/countdown.test.mjs tests/whatsapp.test.mjs tests/admin-data.test.mjs",
     "test:integration": "node --test tests/api.test.mjs"
   },
   "engines": {"node": ">=22"},

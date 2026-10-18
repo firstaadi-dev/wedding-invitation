@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>weddinvita — Detail acara (Desktop 1440px)</title>
+<!-- Google Fonts: Cormorant Garamond for editorial headings, Plus Jakarta Sans for clean functional UI -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              ivory: '#FAF7F2',
+              cream: '#F3EDE4',
+              surface: '#FFFDFC',
+              border: '#D7C5AB',
+              'border-subtle': '#E7DAC8',
+              forest: '#183D32',
+              'forest-hover': '#112C24',
+              burgundy: '#6E2435',
+              'burgundy-hover': '#581C2A',
+              umber: '#30271F',
+              muted: '#736557',
+              'muted-light': '#9B8E80',
+              highlight: '#EFE5D7',
+              success: '#23533D',
+              'success-bg': '#EAF3ED',
+              alert: '#8A2D3C',
+              'alert-bg': '#FDF1F2',
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+          },
+          boxShadow: {
+            card: '0 2px 10px rgba(48, 39, 31, 0.04)',
+            dropdown: '0 10px 24px -4px rgba(48, 39, 31, 0.08)',
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F3EDE4;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D7C5AB;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9B8E80;
+    }
+  </style>
+</link></head>
+<body class="bg-brand-ivory text-brand-umber font-sans antialiased min-h-screen flex selection:bg-brand-burgundy selection:text-white">
+<!-- ================= SIDEBAR (224px, matching SCREEN_2 & SCREEN_4) ================= -->
+<aside class="w-[224px] shrink-0 bg-brand-cream border-r border-brand-border flex flex-col justify-between h-screen sticky top-0 z-30">
+<!-- Top Brand & Project Context -->
+<div class="p-5 pb-3">
+<!-- weddinvita brand logo lowercase with burgundy dot -->
+<a class="inline-flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-brand-burgundy rounded-md px-1 py-0.5" href="#">
+<span class="text-2xl font-bold tracking-tight text-brand-umber font-sans">weddinvita</span>
+<span class="w-2.5 h-2.5 rounded-full bg-brand-burgundy inline-block"></span>
+</a>
+<!-- Wedding couple & date context badge (pill) -->
+<div class="mt-4 px-3 py-2 bg-brand-ivory border border-brand-border rounded-xl flex items-center gap-2 text-xs text-brand-muted shadow-sm">
+<span class="material-symbols-outlined text-[15px] text-brand-burgundy shrink-0">favorite</span>
+<div class="truncate font-medium">
+<p class="truncate text-brand-umber font-semibold leading-tight">Firsta &amp; Talitha</p>
+<p class="text-[11px] text-brand-muted leading-tight mt-0.5">22 Nov 2026</p>
+</div>
+</div>
+<!-- Navigation Menu -->
+<nav aria-label="Navigasi Utama CMS" class="mt-6 flex flex-col gap-1.5">
+<!-- Tamu Undangan -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-brand-muted hover:text-brand-umber hover:bg-brand-highlight/60 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-burgundy" href="#">
+<span class="material-symbols-outlined text-[20px]">group</span>
+<span>Tamu undangan</span>
+</a>
+<!-- Pesan & Preview -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-brand-muted hover:text-brand-umber hover:bg-brand-highlight/60 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-burgundy" href="#">
+<span class="material-symbols-outlined text-[20px]">mail</span>
+<span>Pesan &amp; preview</span>
+</a>
+<!-- Foto & Lagu -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-brand-muted hover:text-brand-umber hover:bg-brand-highlight/60 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-burgundy" href="#">
+<span class="material-symbols-outlined text-[20px]">photo_library</span>
+<span>Foto &amp; lagu</span>
+</a>
+<!-- Detail Acara (ACTIVE MENU) -->
+<a aria-current="page" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold text-brand-burgundy bg-brand-highlight border border-brand-border/60 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-brand-burgundy" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px] text-brand-burgundy">event_note</span>
+<span>Detail acara</span>
+</div>
+<span class="w-1.5 h-1.5 rounded-full bg-brand-burgundy"></span>
+</a>
+</nav>
+</div>
+<!-- Bottom Sidebar Actions & Data Demo -->
+<div class="p-5 pt-3 border-t border-brand-border/80 flex flex-col gap-2">
+<a class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-brand-muted hover:text-brand-umber hover:bg-brand-highlight transition-colors focus:outline-none focus:ring-2 focus:ring-brand-burgundy" href="https://maps.app.goo.gl/dpHfUEkyYunb17L58" rel="noopener noreferrer" target="_blank">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px]">open_in_new</span>
+          Lihat undangan
+        </span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</a>
+<button class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-brand-muted hover:text-brand-burgundy hover:bg-brand-highlight transition-colors text-left focus:outline-none focus:ring-2 focus:ring-brand-burgundy" type="button">
+<span class="material-symbols-outlined text-[17px]">logout</span>
+        Keluar
+      </button>
+<div class="mt-2 pt-2 border-t border-brand-border/50 flex items-center justify-between text-[11px] text-brand-muted"><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span><span class="font-medium">Data demo</span></div></div>
+</div>
+</aside>
+<!-- ================= MAIN CONTENT AREA ================= -->
+<main class="flex-1 flex flex-col min-w-0 bg-brand-ivory overflow-y-auto">
+<!-- Top Header Bar (sticky) -->
+<header class="h-16 px-8 bg-brand-ivory/95 backdrop-blur-sm border-b border-brand-border flex items-center justify-between sticky top-0 z-20">
+<!-- Breadcrumb / Section Header -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2 text-xs font-medium text-brand-muted">
+<span>weddinvita</span>
+<span class="text-brand-border">/</span>
+<span class="text-brand-umber font-semibold">Detail acara</span>
+</div>
+<span class="px-2 py-0.5 text-[11px] font-semibold bg-brand-cream text-brand-muted border border-brand-border rounded-md">
+          Pengaturan Sesi
+        </span>
+</div>
+<!-- Action Buttons Top Right -->
+<div class="flex items-center gap-3">
+<a class="h-10 px-4 inline-flex items-center gap-2 rounded-xl border border-brand-border bg-brand-surface hover:bg-brand-cream text-brand-umber text-xs font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-brand-forest" href="#" target="_blank">
+<span class="material-symbols-outlined text-[17px] text-brand-muted">visibility</span>
+<span>Lihat undangan</span>
+</a>
+<button class="min-h-[44px] px-5 inline-flex items-center gap-2 rounded-xl bg-brand-burgundy hover:bg-brand-burgundy-hover text-white text-xs font-bold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-burgundy cursor-pointer" id="saveTopBtn" onclick="handleSaveAction()" type="button">
+<span class="material-symbols-outlined text-[17px]">save</span>
+<span>Simpan detail</span>
+</button>
+</div>
+</header>
+<!-- Main Container -->
+<div class="max-w-[1216px] w-full mx-auto px-8 py-8 flex flex-col gap-6">
+<!-- Page Title & Editorial Intro -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-brand-border/60">
+<div>
+<h1 class="font-serif text-3xl md:text-4xl font-bold text-brand-umber tracking-tight leading-tight">
+            Detail acara
+          </h1>
+<p class="mt-1 text-sm text-brand-muted max-w-2xl leading-relaxed">
+            Kelola judul prosesi, jam pelaksanaan, hitung mundur menuju hari bahagia, serta tautan sematan peta lokasi acara.
+          </p>
+</div>
+<!-- Read-only venue pill context -->
+<div class="inline-flex items-center gap-2.5 px-3.5 py-2 bg-brand-cream border border-brand-border rounded-xl text-xs text-brand-muted shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[17px] text-brand-forest">place</span>
+<div>
+<span class="font-bold text-brand-umber block leading-tight">Arjuna Ballroom Alam Indah Resto</span>
+<span class="text-[11px] text-brand-muted block mt-0.5">Venue tetap · Tradisi Adat Jawa Solo</span>
+</div>
+</div>
+</div>
+<!-- Live Notification Banner (Success / Info Alert) -->
+<div class="hidden transition-all duration-300 rounded-xl p-4 border flex items-start gap-3 shadow-sm" id="statusAlert" role="alert">
+<span class="material-symbols-outlined text-[20px] shrink-0 mt-0.5" id="statusIcon">check_circle</span>
+<div class="flex-1 text-xs leading-relaxed">
+<p class="font-bold text-sm" id="statusTitle"></p>
+<p class="mt-0.5 text-brand-muted" id="statusMsg"></p>
+</div>
+<button class="text-brand-muted hover:text-brand-umber focus:outline-none p-1 rounded-md" onclick="closeStatusAlert()" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<!-- Two-Column Editorial Layout (7fr Form Inputs : 5fr Preview & Summary) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- ================= LEFT COLUMN: FORM PANELS (7 Cols) ================= -->
+<div class="lg:col-span-7 flex flex-col gap-6">
+<!-- PANEL 1: Nama & Waktu Acara (2 baris x 2 kolom) -->
+<section aria-labelledby="heading-nama-waktu" class="bg-brand-surface border border-brand-border rounded-2xl p-6 shadow-card relative overflow-hidden">
+<!-- Header Panel -->
+<div class="flex items-center justify-between pb-4 border-b border-brand-border-subtle">
+<div class="flex items-center gap-2.5">
+<span class="w-8 h-8 rounded-lg bg-brand-cream border border-brand-border flex items-center justify-center text-brand-forest">
+<span class="material-symbols-outlined text-[18px]">calendar_clock</span>
+</span>
+<div>
+<h2 class="font-serif text-xl font-bold text-brand-umber leading-tight" id="heading-nama-waktu">
+                    Nama &amp; waktu acara
+                  </h2>
+<p class="text-xs text-brand-muted">Pengaturan dua mata acara utama dalam undangan digital.</p>
+</div>
+</div>
+<span class="text-[11px] font-semibold text-brand-forest bg-brand-forest/10 px-2.5 py-1 rounded-full border border-brand-forest/20">
+                2 Sesi Acara
+              </span>
+</div>
+<!-- Form Grid: 2 baris x 2 kolom -->
+<div class="mt-5 space-y-5">
+<!-- BARIS 1: Acara Pertama (Prosesi Pernikahan) -->
+<div class="p-4 bg-brand-ivory/60 border border-brand-border-subtle rounded-xl space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold text-brand-forest tracking-wide uppercase flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-brand-forest"></span>
+                    Sesi 1 · Akad / Ijab Qobul
+                  </span>
+<span class="text-[11px] text-brand-muted-light">Maksimal 80 karakter</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Input Nama Acara Pertama -->
+<div>
+<label class="block text-xs font-semibold text-brand-umber mb-1.5" for="ceremonyTitleInput">
+                      Nama acara pertama
+                    </label>
+<input class="w-full px-3.5 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs text-brand-umber placeholder:text-brand-muted-light focus:outline-none focus:ring-2 focus:ring-brand-forest focus:border-brand-forest transition-all" id="ceremonyTitleInput" maxlength="80" oninput="updatePreview()" placeholder="Prosesi Pernikahan" type="text" value="Prosesi Pernikahan"/>
+<p class="mt-1 text-[11px] text-brand-muted-light">Opsional (bawaan: Prosesi Pernikahan)</p>
+</div>
+<!-- Input Waktu Acara Pertama -->
+<div>
+<label class="block text-xs font-semibold text-brand-umber mb-1.5" for="ceremonyTimeInput">
+                      Waktu pertama
+                    </label>
+<input class="w-full px-3.5 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs text-brand-umber placeholder:text-brand-muted-light focus:outline-none focus:ring-2 focus:ring-brand-forest focus:border-brand-forest transition-all" id="ceremonyTimeInput" maxlength="80" oninput="updatePreview()" placeholder="contoh: 09.00 WIB" type="text" value="09.00 WIB"/>
+<p class="mt-1 text-[11px] text-brand-muted">Bila kosong tampil: <span class="italic text-brand-burgundy font-medium">"Waktu akan diinformasikan"</span></p>
+</div>
+</div>
+</div>
+<!-- BARIS 2: Acara Kedua (Resepsi) -->
+<div class="p-4 bg-brand-ivory/60 border border-brand-border-subtle rounded-xl space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold text-brand-burgundy tracking-wide uppercase flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-brand-burgundy"></span>
+                    Sesi 2 · Ramah Tamah &amp; Resepsi
+                  </span>
+<span class="text-[11px] text-brand-muted-light">Maksimal 80 karakter</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Input Nama Acara Kedua -->
+<div>
+<label class="block text-xs font-semibold text-brand-umber mb-1.5" for="receptionTitleInput">
+                      Nama acara kedua
+                    </label>
+<input class="w-full px-3.5 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs text-brand-umber placeholder:text-brand-muted-light focus:outline-none focus:ring-2 focus:ring-brand-burgundy focus:border-brand-burgundy transition-all" id="receptionTitleInput" maxlength="80" oninput="updatePreview()" placeholder="Resepsi" type="text" value="Resepsi Pernikahan"/>
+<p class="mt-1 text-[11px] text-brand-muted-light">Opsional (bawaan: Resepsi)</p>
+</div>
+<!-- Input Waktu Acara Kedua -->
+<div>
+<label class="block text-xs font-semibold text-brand-umber mb-1.5" for="receptionTimeInput">
+                      Waktu kedua
+                    </label>
+<input class="w-full px-3.5 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs text-brand-umber placeholder:text-brand-muted-light focus:outline-none focus:ring-2 focus:ring-brand-burgundy focus:border-brand-burgundy transition-all" id="receptionTimeInput" maxlength="80" oninput="updatePreview()" placeholder="contoh: 11.00 WIB" type="text" value="11.00 WIB"/>
+<p class="mt-1 text-[11px] text-brand-muted">Bila kosong tampil: <span class="italic text-brand-burgundy font-medium">"Waktu akan diinformasikan"</span></p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- PANEL 2: Hitung Mundur (Countdown Time) -->
+<section aria-labelledby="heading-countdown" class="bg-brand-surface border border-brand-border rounded-2xl p-6 shadow-card">
+<div class="flex items-center justify-between pb-4 border-b border-brand-border-subtle">
+<div class="flex items-center gap-2.5">
+<span class="w-8 h-8 rounded-lg bg-brand-cream border border-brand-border flex items-center justify-center text-brand-forest">
+<span class="material-symbols-outlined text-[18px]">timer</span>
+</span>
+<div>
+<h2 class="font-serif text-xl font-bold text-brand-umber leading-tight" id="heading-countdown">
+                    Hitung mundur
+                  </h2>
+<p class="text-xs text-brand-muted">Waktu acuan awal penghitung hari pada halaman undangan digital.</p>
+</div>
+</div>
+<span class="text-[11px] font-medium text-brand-muted bg-brand-cream px-2.5 py-1 rounded-md border border-brand-border">
+                Waktu Indonesia Barat (WIB)
+              </span>
+</div>
+<div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+<div>
+<label class="block text-xs font-semibold text-brand-umber mb-1.5" for="countdownTimeInput">
+                  Jam mulai countdown (WIB)
+                </label>
+<div class="relative">
+<input class="w-full px-3.5 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs font-mono font-semibold text-brand-umber focus:outline-none focus:ring-2 focus:ring-brand-forest focus:border-brand-forest transition-all" id="countdownTimeInput" oninput="updatePreview()" type="time" value="00:00"/>
+<span class="absolute right-3.5 top-2.5 text-brand-muted-light pointer-events-none material-symbols-outlined text-[18px]">schedule</span>
+</div>
+<!-- Helper text specified in prompt -->
+<p class="mt-2 text-[11px] text-brand-muted leading-relaxed flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px] text-brand-forest">info</span>
+                  Target 22 Nov 2026, bawaan 00.00
+                </p>
+</div>
+<!-- Read-only countdown logic notes -->
+<div class="p-3.5 bg-brand-ivory/80 border border-brand-border-subtle rounded-xl text-xs text-brand-muted flex flex-col gap-1">
+<span class="font-semibold text-brand-umber flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-brand-burgundy">hourglass_top</span>
+                  Kalkulasi Otomatis
+                </span>
+<p class="text-[11px] leading-relaxed">
+                  Perangkat tamu akan menghitung selisih hari, jam, dan menit secara presisi terhadap tanggal 22 November 2026 jam yang Anda tentukan di samping.
+                </p>
+</div>
+</div>
+</section>
+<!-- PANEL 3: Lokasi (Embed Google Maps Textarea) -->
+<section aria-labelledby="heading-lokasi" class="bg-brand-surface border border-brand-border rounded-2xl p-6 shadow-card">
+<div class="flex items-center justify-between pb-4 border-b border-brand-border-subtle">
+<div class="flex items-center gap-2.5">
+<span class="w-8 h-8 rounded-lg bg-brand-cream border border-brand-border flex items-center justify-center text-brand-forest">
+<span class="material-symbols-outlined text-[18px]">map</span>
+</span>
+<div>
+<h2 class="font-serif text-xl font-bold text-brand-umber leading-tight" id="heading-lokasi">
+                    Lokasi &amp; sematan peta
+                  </h2>
+<p class="text-xs text-brand-muted">URL embed iframe Google Maps resmi untuk penunjuk arah tamu.</p>
+</div>
+</div>
+<span class="text-[11px] font-semibold text-brand-forest bg-brand-forest/10 px-2.5 py-1 rounded-full border border-brand-forest/20">
+                Google Maps Embed
+              </span>
+</div>
+<div class="mt-5 space-y-4">
+<!-- Venue Read-only Fixed Context -->
+<div class="p-3 bg-brand-cream/80 border border-brand-border rounded-xl flex items-center justify-between text-xs">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[18px] text-brand-burgundy">store</span>
+<div>
+<span class="text-[11px] text-brand-muted block font-medium">Nama Venue Resmi (Read-Only)</span>
+<span class="font-bold text-brand-umber text-sm">Arjuna Ballroom Alam Indah Resto</span>
+</div>
+</div>
+<span class="px-2 py-1 bg-brand-ivory text-brand-muted border border-brand-border rounded-md text-[11px] font-medium">
+                  Konteks Tetap
+                </span>
+</div>
+<!-- Textarea for Embed URL -->
+<div>
+<label class="block text-xs font-semibold text-brand-umber mb-1.5 flex items-center justify-between" for="mapEmbedUrlInput">
+<span>URL embed Google Maps</span>
+<button class="text-[11px] text-brand-burgundy hover:underline font-medium" onclick="setExampleEmbed()" type="button">
+                    Gunakan contoh valid
+                  </button>
+</label>
+<textarea class="w-full px-3.5 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs font-mono text-brand-umber placeholder:text-brand-muted-light focus:outline-none focus:ring-2 focus:ring-brand-forest focus:border-brand-forest transition-all" id="mapEmbedUrlInput" oninput="updatePreview()" placeholder="https://www.google.com/maps/embed?pb=..." rows="3">https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3955.1432!2d110.824!3d-7.558!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zN8KwMzMnMjguOCJTIDExMMKwNDknMjYuNCJF!5e0!3m2!1sid!2sid!4v1700000000000</textarea>
+<!-- Helper specified in user prompt -->
+<p class="mt-1.5 text-[11px] text-brand-muted leading-relaxed flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px] text-brand-forest">content_copy</span>
+                  Salin <code class="px-1.5 py-0.5 bg-brand-cream border border-brand-border rounded text-[10px] font-mono text-brand-umber">src</code> dari menu <strong class="font-semibold text-brand-umber">Bagikan &gt; Sematkan peta</strong> di Google Maps.
+                </p>
+</div>
+<!-- Direct Google Maps link for guest navigation -->
+<div class="flex items-center justify-between pt-1 text-xs">
+<span class="text-brand-muted text-[11px]">Tautan navigasi langsung tamu:</span>
+<a class="inline-flex items-center gap-1 text-brand-forest hover:text-brand-forest-hover font-semibold hover:underline" href="https://maps.app.goo.gl/dpHfUEkyYunb17L58" rel="noopener noreferrer" target="_blank">
+<span>https://maps.app.goo.gl/dpHfUEkyYunb17L58</span>
+<span class="material-symbols-outlined text-[14px]">arrow_outward</span>
+</a>
+</div>
+</div>
+</section>
+<!-- Bottom Action Buttons: Simpan & Batalkan -->
+<div class="pt-2 flex items-center justify-between border-t border-brand-border/60"><div class="text-xs text-brand-muted flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-600"></span><span>Perubahan tersimpan otomatis pada sesi peramban ini</span></div><div class="flex items-center gap-3"><button class="min-h-[44px] px-6 rounded-xl bg-brand-burgundy hover:bg-brand-burgundy-hover text-white text-xs font-bold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-burgundy flex items-center gap-2 cursor-pointer" onclick="handleSaveAction()" type="button"><span class="material-symbols-outlined text-[18px]">save</span><span>Simpan detail</span></button></div></div>
+</div>
+<!-- ================= RIGHT COLUMN: RINGKASAN & PRATINJAU JUJUR (5 Cols) ================= -->
+<div class="lg:col-span-5 flex flex-col gap-6 sticky top-24">
+<!-- RINGKASAN EVENT (Konteks Read-Only Pasangan & Tanggal) -->
+<div class="bg-brand-surface border border-brand-border rounded-2xl p-5 shadow-card space-y-4">
+<div class="flex items-center justify-between pb-3 border-b border-brand-border-subtle">
+<span class="text-xs font-bold text-brand-muted uppercase tracking-wider">
+                Ringkasan Event
+              </span>
+<span class="px-2 py-0.5 text-[11px] font-semibold bg-brand-cream text-brand-forest border border-brand-border rounded-md">
+                Data Read-Only
+              </span>
+</div>
+<!-- Read-only Card: Mempelai & Tanggal -->
+<div class="p-4 bg-brand-ivory border border-brand-border rounded-xl flex items-center gap-3.5">
+<div class="w-10 h-10 rounded-full bg-brand-cream border border-brand-border flex items-center justify-center text-brand-burgundy shrink-0">
+<span class="material-symbols-outlined text-[22px]">favorite</span>
+</div>
+<div class="min-w-0 flex-1">
+<h3 class="font-serif text-lg font-bold text-brand-umber truncate">
+                  Firsta &amp; Talitha
+                </h3>
+<p class="text-xs text-brand-muted flex items-center gap-1.5 mt-0.5">
+<span class="material-symbols-outlined text-[14px] text-brand-forest">calendar_month</span>
+<span>Minggu, 22 November 2026</span>
+</p>
+</div>
+</div>
+<!-- Two Warm Ivory Cards: Acara & Tanggal (As specified in prompt) -->
+<div class="grid grid-cols-2 gap-3">
+<!-- Card Sesi 1 -->
+<div class="p-3.5 bg-brand-ivory border border-brand-border rounded-xl space-y-1.5">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold text-brand-forest uppercase tracking-wider">Sesi 1</span>
+<span class="material-symbols-outlined text-[14px] text-brand-forest">check_circle</span>
+</div>
+<h4 class="font-semibold text-xs text-brand-umber leading-tight" id="summaryCeremonyTitle">
+                  Prosesi Pernikahan
+                </h4>
+<p class="text-xs font-mono font-medium text-brand-burgundy" id="summaryCeremonyTime">
+                  09.00 WIB
+                </p>
+<p class="text-[10px] text-brand-muted-light truncate">22 November 2026</p>
+</div>
+<!-- Card Sesi 2 -->
+<div class="p-3.5 bg-brand-ivory border border-brand-border rounded-xl space-y-1.5">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold text-brand-burgundy uppercase tracking-wider">Sesi 2</span>
+<span class="material-symbols-outlined text-[14px] text-brand-burgundy">check_circle</span>
+</div>
+<h4 class="font-semibold text-xs text-brand-umber leading-tight" id="summaryReceptionTitle">
+                  Resepsi Pernikahan
+                </h4>
+<p class="text-xs font-mono font-medium text-brand-burgundy" id="summaryReceptionTime">
+                  11.00 WIB
+                </p>
+<p class="text-[10px] text-brand-muted-light truncate">22 November 2026</p>
+</div>
+</div>
+<!-- Countdown Live Indicator -->
+<div class="p-3 bg-brand-cream/60 border border-brand-border-subtle rounded-xl flex items-center justify-between text-xs">
+<span class="text-brand-muted flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-brand-forest">timer</span>
+                Mulai hitung mundur:
+              </span>
+<span class="font-mono font-bold text-brand-umber bg-brand-surface px-2 py-0.5 rounded border border-brand-border" id="summaryCountdownTime">
+                00:00 WIB
+              </span>
+</div>
+</div>
+<!-- HONEST EMBED MAP PREVIEW (Placeholder jujur Google Maps / Belum ada embed) -->
+<div class="bg-brand-surface border border-brand-border rounded-2xl p-5 shadow-card space-y-3">
+<div class="flex items-center justify-between pb-2 border-b border-brand-border-subtle">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-brand-forest">pin_drop</span>
+<span class="text-xs font-bold text-brand-umber">Pratinjau Sematan Peta</span>
+</div>
+<span class="text-[11px] font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200" id="previewTag">
+                Google Maps Siap
+              </span>
+</div>
+<!-- Peta preview jujur: kotak representasi UI tanpa gambar peta geografi rekaan -->
+<div class="w-full h-48 rounded-xl border border-brand-border bg-brand-cream/60 relative flex flex-col items-center justify-center p-4 text-center overflow-hidden transition-all" id="mapPreviewContainer">
+<!-- Background Grid Pattern to suggest a map canvas without falsifying geography -->
+<div class="absolute inset-0 opacity-15 pointer-events-none" style="background-image: linear-gradient(#30271F 1px, transparent 1px), linear-gradient(to right, #30271F 1px, transparent 1px); background-size: 20px 20px;"></div>
+<!-- Center Pin & Honest Label -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-brand-burgundy text-white flex items-center justify-center shadow-md mb-2">
+<span class="material-symbols-outlined text-[20px]">location_on</span>
+</div>
+<h5 class="font-bold text-xs text-brand-umber" id="previewMapTitle">
+                  Google Maps
+                </h5>
+<p class="text-[11px] text-brand-muted mt-0.5 max-w-[220px]" id="previewMapSubtitle">
+                  Arjuna Ballroom Alam Indah Resto
+                </p>
+<div class="mt-2.5 inline-flex items-center gap-1 px-2.5 py-1 bg-brand-surface border border-brand-border rounded-lg text-[10px] font-medium text-brand-forest shadow-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+<span>Embed URL terdeteksi &amp; valid</span>
+</div>
+</div>
+<!-- Watermark footer inside honest preview -->
+<div class="absolute bottom-2 right-3 text-[10px] text-brand-muted-light font-mono">
+                weddinvita maps preview
+              </div>
+</div>
+<p class="text-[11px] text-brand-muted leading-tight">
+              Pratinjau peta di atas adalah simulasi integrasi iframe resmi yang akan dirender langsung di layar tamu.
+            </p>
+</div>
+<!-- Helper Card for Mobile Viewport Reference (390px) -->
+<div class="p-4 bg-brand-cream/50 border border-brand-border rounded-xl text-xs space-y-2">
+<div class="flex items-center justify-between text-brand-muted">
+<span class="font-semibold text-brand-umber flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-brand-forest">smartphone</span>
+                Responsif Layar Tamu
+              </span>
+<span class="font-mono text-[11px]">Viewport 390px</span>
+</div>
+<p class="text-[11px] text-brand-muted leading-relaxed">
+              Jika kolom waktu dikosongkan, label otomatis berganti menjadi <span class="italic text-brand-burgundy font-medium">"Waktu akan diinformasikan"</span> tanpa merusak layout kartu di ponsel tamu.
+            </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Status Bar (Matching CMS Screens SCREEN_2, SCREEN_4) -->
+<footer class="mt-auto px-8 py-4 bg-brand-cream/80 border-t border-brand-border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-brand-muted"><div class="flex items-center gap-2"><span>weddinvita • Pengaturan detail acara &amp; lokasi pernikahan</span></div><div class="flex items-center gap-4 text-[11px]"><span class="text-brand-muted">Firsta &amp; Talitha</span><span class="text-brand-border">•</span><span>22 November 2026</span></div></footer>
+</main>
+<!-- Interactive Logic Script for Real-Time Synchronization -->
+<script>
+    function updatePreview() {
+      // 1. Get values
+      const ceremonyTitle = document.getElementById('ceremonyTitleInput').value.trim() || 'Prosesi Pernikahan';
+      const ceremonyTime = document.getElementById('ceremonyTimeInput').value.trim() || 'Waktu akan diinformasikan';
+      const receptionTitle = document.getElementById('receptionTitleInput').value.trim() || 'Resepsi';
+      const receptionTime = document.getElementById('receptionTimeInput').value.trim() || 'Waktu akan diinformasikan';
+      const countdownTime = document.getElementById('countdownTimeInput').value || '00:00';
+      const mapEmbedUrl = document.getElementById('mapEmbedUrlInput').value.trim();
+
+      // 2. Update Right Summary Cards
+      document.getElementById('summaryCeremonyTitle').textContent = ceremonyTitle;
+      document.getElementById('summaryCeremonyTime').textContent = ceremonyTime;
+
+      // Styling if time is empty ("Waktu akan diinformasikan")
+      if (ceremonyTime === 'Waktu akan diinformasikan') {
+        document.getElementById('summaryCeremonyTime').className = 'text-xs italic font-medium text-brand-burgundy';
+      } else {
+        document.getElementById('summaryCeremonyTime').className = 'text-xs font-mono font-bold text-brand-burgundy';
+      }
+
+      document.getElementById('summaryReceptionTitle').textContent = receptionTitle;
+      document.getElementById('summaryReceptionTime').textContent = receptionTime;
+      if (receptionTime === 'Waktu akan diinformasikan') {
+        document.getElementById('summaryReceptionTime').className = 'text-xs italic font-medium text-brand-burgundy';
+      } else {
+        document.getElementById('summaryReceptionTime').className = 'text-xs font-mono font-bold text-brand-burgundy';
+      }
+
+      document.getElementById('summaryCountdownTime').textContent = countdownTime + ' WIB';
+
+      // 3. Update Honest Map Preview
+      const previewContainer = document.getElementById('mapPreviewContainer');
+      const previewTag = document.getElementById('previewTag');
+      const previewTitle = document.getElementById('previewMapTitle');
+      const previewSubtitle = document.getElementById('previewMapSubtitle');
+
+      if (!mapEmbedUrl) {
+        // Belum ada embed state
+        previewTag.textContent = 'Belum ada embed';
+        previewTag.className = 'text-[11px] font-medium text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200';
+        previewTitle.textContent = 'Belum ada embed';
+        previewSubtitle.textContent = 'Tempelkan URL embed Google Maps pada kolom di samping untuk mengaktifkan peta.';
+      } else {
+        // Valid embed state
+        previewTag.textContent = 'Google Maps Siap';
+        previewTag.className = 'text-[11px] font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200';
+        previewTitle.textContent = 'Google Maps';
+        previewSubtitle.textContent = 'Arjuna Ballroom Alam Indah Resto';
+      }
+    }
+
+    function handleSaveAction() {
+      const alertBox = document.getElementById('statusAlert');
+      const statusTitle = document.getElementById('statusTitle');
+      const statusMsg = document.getElementById('statusMsg');
+      const statusIcon = document.getElementById('statusIcon');
+
+      // Validate embed url if provided
+      const mapUrl = document.getElementById('mapEmbedUrlInput').value.trim();
+
+      alertBox.classList.remove('hidden');
+      alertBox.className = 'transition-all duration-300 rounded-xl p-4 border flex items-start gap-3 shadow-sm bg-brand-success-bg border-emerald-300 text-brand-success';
+      statusIcon.textContent = 'check_circle';
+      statusTitle.textContent = 'Detail Acara Berhasil Disimpan';
+      statusMsg.textContent = 'Seluruh 6 konfigurasi acara (nama & waktu dua sesi, jam countdown, dan embed peta) telah diperbarui ke server weddinvita.';
+
+      // Scroll to alert smoothly
+      alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function closeStatusAlert() {
+      document.getElementById('statusAlert').classList.add('hidden');
+    }
+
+    function setExampleEmbed() {
+      document.getElementById('mapEmbedUrlInput').value = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3955.1432!2d110.824!3d-7.558!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zN8KwMzMnMjguOCJTIDExMMKwNDknMjYuNCJF!5e0!3m2!1sid!2sid!4v1700000000000';
+      updatePreview();
+    }
+
+    function resetFormToDefaults() {
+      document.getElementById('ceremonyTitleInput').value = 'Prosesi Pernikahan';
+      document.getElementById('ceremonyTimeInput').value = '09.00 WIB';
+      document.getElementById('receptionTitleInput').value = 'Resepsi';
+      document.getElementById('receptionTimeInput').value = '11.00 WIB';
+      document.getElementById('countdownTimeInput').value = '00:00';
+      setExampleEmbed();
+      updatePreview();
+
+      const alertBox = document.getElementById('statusAlert');
+      alertBox.classList.remove('hidden');
+      alertBox.className = 'transition-all duration-300 rounded-xl p-4 border flex items-start gap-3 shadow-sm bg-brand-cream border-brand-border text-brand-umber';
+      document.getElementById('statusIcon').textContent = 'restore';
+      document.getElementById('statusTitle').textContent = 'Formulir Dikembalikan ke Nilai Bawaan';
+      document.getElementById('statusMsg').textContent = 'Nilai draf telah disetel ulang ke konfigurasi standar.';
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', updatePreview);
+  </script>
+</body>
+</html>

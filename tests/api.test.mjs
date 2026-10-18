@@ -41,6 +41,17 @@ test('Neon-backed CMS and guest access end to end',async t => {
     return request('/api/access/verify',{method:'POST',data:{challenge:c.challenge,eventId:id},jar:c.jar});
   }
   try {
+    await t.test('CMS page and its browser modules are served before login',async () => {
+      const page = await request('/admin');
+      assert.equal(page.response.status,200);assert.match(page.value,/<title>weddinvita/);
+      const script = await request('/admin.js');
+      assert.equal(script.response.status,200);
+      for (const [,module] of script.value.matchAll(/from '\.\/([^']+)'/g)) {
+        const dependency = await request(`/${module}`);
+        assert.equal(dependency.response.status,200,`${module} must load for the CMS to start`);
+        assert.match(dependency.response.headers.get('content-type'),/text\/javascript/);
+      }
+    });
     await t.test('database health, admin auth, private content and CSRF',async () => {
       assert.equal((await request('/healthz')).response.status,200);
       const config = await request('/api/identification/config');

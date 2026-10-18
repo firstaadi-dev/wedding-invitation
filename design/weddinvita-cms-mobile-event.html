@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>weddinvita — Detail acara (Mobile 390px)</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'cream-base': '#FAF7F2',
+            'cream-card': '#FFFFFF',
+            'cream-subtle': '#F3EDE4',
+            'brand-burgundy': '#6E2435',
+            'brand-burgundy-dark': '#551C29',
+            'brand-green': '#183D32',
+            'brand-umber': '#30271F',
+            'brand-border': '#D7C5AB',
+            'brand-border-light': '#E9DFCE',
+            'brand-muted': '#7A6B5C'
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+            serif: ['"Cormorant Garamond"', 'Georgia', 'serif']
+          },
+          boxShadow: {
+            'subtle': '0 2px 8px rgba(48, 39, 31, 0.05)',
+            'card': '0 4px 16px rgba(48, 39, 31, 0.06)',
+            'sticky': '0 -4px 20px rgba(48, 39, 31, 0.08)'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Mobile-first touch & accessibility rules */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #FAF7F2;
+      color: #30271F;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    input, textarea, button, select {
+      font-size: 16px; /* Prevents auto-zoom on iOS */
+    }
+    /* Safe area padding for bottom sticky bar on notched devices */
+    .pb-safe {
+      padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+    }
+    /* Drawer toggle logic using pure CSS checkbox */
+    #nav-drawer-toggle:checked ~ #nav-drawer-backdrop {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #nav-drawer-toggle:checked ~ #nav-drawer-content {
+      transform: translateX(0);
+    }
+    /* Collapsible summary logic */
+    #summary-toggle:checked ~ #summary-content {
+      display: block;
+    }
+    #summary-toggle:checked ~ label #summary-chevron {
+      transform: rotate(180deg);
+    }
+    /* Focus styles */
+    input:focus, textarea:focus, button:focus-visible, a:focus-visible {
+      outline: 2px solid #6E2435;
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body class="flex justify-center bg-[#ECE6DC] min-h-screen">
+
+  <!-- Mobile Screen Container (Standard 390px, fluid down to 320px) -->
+  <div class="w-full max-w-[390px] min-w-[320px] bg-cream-base flex flex-col relative shadow-2xl min-h-screen">
+
+    <!-- HIDDEN CONTROLLER: Nav Drawer Toggle -->
+    <input type="checkbox" id="nav-drawer-toggle" class="sr-only" aria-hidden="true">
+
+    <!-- 1. TOP APP BAR (Compact Mobile Header) -->
+    <header class="sticky top-0 z-30 bg-cream-base/95 backdrop-blur-md border-b border-brand-border-light px-4 py-3 flex items-center justify-between">
+      <!-- Brand Logo weddinvita lowercase -->
+      <div class="flex items-center gap-2">
+        <a href="#" class="flex items-center gap-1.5 focus:outline-none" title="weddinvita beranda">
+          <span class="text-xl font-bold tracking-tight text-brand-burgundy font-sans">weddinvita</span>
+          <span class="w-2 h-2 rounded-full bg-brand-burgundy mb-1" aria-hidden="true"></span>
+        </a>
+      </div>
+
+      <!-- Right Action: Menu Button -->
+      <div class="flex items-center gap-2">
+        <span class="px-2 py-0.5 text-[11px] font-semibold text-brand-muted bg-cream-subtle border border-brand-border/60 rounded-full">
+          Data demo
+        </span>
+        <label for="nav-drawer-toggle" class="min-h-[44px] min-w-[44px] flex items-center justify-center px-3 py-2 text-xs font-semibold text-brand-umber bg-white border border-brand-border rounded-xl shadow-sm hover:bg-cream-subtle active:scale-95 transition cursor-pointer" aria-label="Buka menu navigasi" role="button">
+          <svg class="w-4 h-4 mr-1 text-brand-burgundy" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+          Menu
+        </label>
+      </div>
+    </header>
+
+    <!-- Sub-header Context Bar: Pasangan & Tanggal -->
+    <div class="bg-cream-subtle/80 border-b border-brand-border-light px-4 py-2 flex items-center justify-between text-xs text-brand-muted">
+      <div class="flex items-center gap-1.5 truncate">
+        <svg class="w-3.5 h-3.5 text-brand-burgundy shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+        <span class="font-medium text-brand-umber truncate">Firsta & Talitha</span>
+        <span>•</span>
+        <span class="shrink-0">22 Nov 2026</span>
+      </div>
+      <span class="text-[10px] font-medium tracking-wide uppercase px-1.5 py-0.5 bg-brand-border-light/60 text-brand-umber rounded">
+        CMS Pengelola
+      </span>
+    </div>
+
+    <!-- MAIN SCROLLABLE CONTENT (Vertikal penuh, nyaman di 390px dan 320px) -->
+    <main class="flex-1 px-4 pt-5 pb-36 space-y-5">
+
+      <!-- Page Heading & Short Description -->
+      <div class="space-y-1">
+        <div class="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-burgundy uppercase tracking-wider">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          Pengaturan Waktu & Lokasi
+        </div>
+        <h1 class="text-2xl font-bold font-serif text-brand-umber tracking-tight">Detail acara</h1>
+        <p class="text-xs text-brand-muted leading-relaxed">
+          Atur nama dan waktu 2 prosesi utama, hitung mundur, serta sematan peta penunjuk arah tamu.
+        </p>
+      </div>
+
+      <!-- FEEDBACK BANNER (Status informasi lokal ramah pengguna) -->
+      <div class="p-3 bg-amber-50/80 border border-amber-200/90 rounded-2xl flex items-start gap-2.5 text-xs text-amber-900 leading-normal">
+        <svg class="w-4 h-4 text-amber-700 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <div>
+          Bila kolom jam dikosongkan, kartu undangan tamu otomatis menampilkan label <span class="font-semibold text-amber-950">"Waktu akan diinformasikan"</span>.
+        </div>
+      </div>
+
+      <!-- CARD 1: KONTEKS TETAP (Read-Only Event Summary - Collapsible) -->
+      <section class="bg-white border border-brand-border-light rounded-2xl shadow-subtle overflow-hidden">
+        <input type="checkbox" id="summary-toggle" class="sr-only" checked aria-hidden="true">
+        <label for="summary-toggle" class="w-full px-4 py-3.5 flex items-center justify-between bg-cream-subtle/50 cursor-pointer select-none">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-brand-burgundy/10 text-brand-burgundy flex items-center justify-center text-xs font-bold">
+              ℹ
+            </span>
+            <span class="text-xs font-bold text-brand-umber uppercase tracking-wider">Konteks Acara (Tetap)</span>
+          </div>
+          <div class="flex items-center gap-1.5 text-xs text-brand-muted">
+            <span class="text-[11px] bg-white px-2 py-0.5 rounded border border-brand-border-light">Read-only</span>
+            <svg id="summary-chevron" class="w-4 h-4 transition-transform duration-200 text-brand-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </div>
+        </label>
+
+        <div id="summary-content" class="px-4 py-3 text-xs space-y-2.5 border-t border-brand-border-light/60 bg-white">
+          <div class="flex justify-between items-baseline py-1 border-b border-dashed border-brand-border-light">
+            <span class="text-brand-muted">Mempelai</span>
+            <span class="font-semibold text-brand-umber text-right">Firsta & Talitha</span>
+          </div>
+          <div class="flex justify-between items-baseline py-1 border-b border-dashed border-brand-border-light">
+            <span class="text-brand-muted">Tanggal Acara</span>
+            <span class="font-semibold text-brand-umber text-right">Minggu, 22 November 2026</span>
+          </div>
+          <div class="flex justify-between items-start py-1">
+            <span class="text-brand-muted shrink-0">Venue Acara</span>
+            <span class="font-semibold text-brand-umber text-right leading-tight max-w-[200px]">Arjuna Ballroom Alam Indah Resto</span>
+          </div>
+          <p class="text-[11px] text-brand-muted/90 italic pt-1 text-center bg-cream-subtle/40 rounded-lg py-1.5 px-2">
+            Tradisi adat Jawa Solo • Tanggal & venue dikunci oleh koordinator
+          </p>
+        </div>
+      </section>
+
+      <!-- CARD 2: FORM 6 FIELD SAJA (1 Kolom Vertikal, Input Font 16px, Target Min 44px) -->
+      <form id="form-detail-acara" class="space-y-4" onsubmit="event.preventDefault();">
+
+        <!-- BAGIAN A: DUA MATA ACARA (Fields 1 s.d. 4) -->
+        <div class="bg-white border border-brand-border-light rounded-2xl p-4 shadow-subtle space-y-4">
+          <div class="flex items-center justify-between pb-2 border-b border-brand-border-light">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-brand-burgundy" aria-hidden="true"></span>
+              <h2 class="text-sm font-bold text-brand-umber">Nama & Waktu Acara</h2>
+            </div>
+            <span class="text-[11px] font-medium text-brand-muted bg-cream-subtle px-2 py-0.5 rounded-md">
+              2 Sesi Acara
+            </span>
+          </div>
+
+          <!-- SESI 1: AKAD / IJAB QOBUL -->
+          <div class="p-3 bg-cream-subtle/40 border border-brand-border-light rounded-xl space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-brand-burgundy uppercase tracking-wider">Sesi 1 • Utama / Akad</span>
+              <span class="text-[10px] text-brand-muted">Maks. 80 karakter</span>
+            </div>
+
+            <!-- FIELD 1: Nama acara pertama -->
+            <div>
+              <label for="nama-acara-pertama" class="block text-xs font-semibold text-brand-umber mb-1">
+                Nama acara pertama <span class="text-brand-burgundy">*</span>
+              </label>
+              <input
+                type="text"
+                id="nama-acara-pertama"
+                name="nama_acara_pertama"
+                maxlength="80"
+                value="Prosesi Pernikahan"
+                placeholder="Contoh: Prosesi Pernikahan"
+                class="w-full min-h-[44px] px-3.5 py-2.5 bg-white border border-brand-border rounded-xl text-base text-brand-umber placeholder-brand-muted/50 focus:border-brand-burgundy transition shadow-sm"
+                required>
+              <p class="text-[11px] text-brand-muted mt-1">Bawaan: Prosesi Pernikahan</p>
+            </div>
+
+            <!-- FIELD 2: Waktu pertama (Teks fleksibel) -->
+            <div>
+              <label for="waktu-pertama" class="block text-xs font-semibold text-brand-umber mb-1">
+                Waktu pertama
+              </label>
+              <input
+                type="text"
+                id="waktu-pertama"
+                name="waktu_pertama"
+                maxlength="80"
+                value="09.00 WIB"
+                placeholder="Contoh: 09.00 WIB atau Pagi hari"
+                class="w-full min-h-[44px] px-3.5 py-2.5 bg-white border border-brand-border rounded-xl text-base text-brand-umber placeholder-brand-muted/50 focus:border-brand-burgundy transition shadow-sm">
+              <p class="text-[11px] text-brand-muted mt-1">Kosongkan jika ingin menampilkan label otomatis "Waktu akan diinformasikan"</p>
+            </div>
+          </div>
+
+          <!-- SESI 2: RESEPSI / RAMAH TAMAH -->
+          <div class="p-3 bg-cream-subtle/40 border border-brand-border-light rounded-xl space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-brand-burgundy uppercase tracking-wider">Sesi 2 • Resepsi</span>
+              <span class="text-[10px] text-brand-muted">Maks. 80 karakter</span>
+            </div>
+
+            <!-- FIELD 3: Nama acara kedua -->
+            <div>
+              <label for="nama-acara-kedua" class="block text-xs font-semibold text-brand-umber mb-1">
+                Nama acara kedua <span class="text-brand-burgundy">*</span>
+              </label>
+              <input
+                type="text"
+                id="nama-acara-kedua"
+                name="nama_acara_kedua"
+                maxlength="80"
+                value="Resepsi Pernikahan"
+                placeholder="Contoh: Resepsi Pernikahan"
+                class="w-full min-h-[44px] px-3.5 py-2.5 bg-white border border-brand-border rounded-xl text-base text-brand-umber placeholder-brand-muted/50 focus:border-brand-burgundy transition shadow-sm"
+                required>
+              <p class="text-[11px] text-brand-muted mt-1">Bawaan: Resepsi Pernikahan</p>
+            </div>
+
+            <!-- FIELD 4: Waktu kedua (Teks fleksibel) -->
+            <div>
+              <label for="waktu-kedua" class="block text-xs font-semibold text-brand-umber mb-1">
+                Waktu kedua
+              </label>
+              <input
+                type="text"
+                id="waktu-kedua"
+                name="waktu_kedua"
+                maxlength="80"
+                value="11.00 WIB"
+                placeholder="Contoh: 11.00 WIB atau Siang hari"
+                class="w-full min-h-[44px] px-3.5 py-2.5 bg-white border border-brand-border rounded-xl text-base text-brand-umber placeholder-brand-muted/50 focus:border-brand-burgundy transition shadow-sm">
+              <p class="text-[11px] text-brand-muted mt-1">Kosongkan bila waktu belum final</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- BAGIAN B: HITUNG MUNDUR (Field 5: Jam mulai countdown WIB) -->
+        <div class="bg-white border border-brand-border-light rounded-2xl p-4 shadow-subtle space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-brand-border-light">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-brand-burgundy" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                <polyline points="12 6 12 12 16 14" stroke-width="2"/>
+              </svg>
+              <h2 class="text-sm font-bold text-brand-umber">Hitung mundur</h2>
+            </div>
+            <span class="text-[11px] font-medium text-brand-muted bg-cream-subtle px-2 py-0.5 rounded-md">
+              WIB (GMT+7)
+            </span>
+          </div>
+
+          <!-- FIELD 5: Jam mulai countdown (WIB) -->
+          <div>
+            <label for="jam-countdown" class="block text-xs font-semibold text-brand-umber mb-1">
+              Jam mulai countdown (WIB)
+            </label>
+            <input
+              type="time"
+              id="jam-countdown"
+              name="jam_countdown"
+              value="00:00"
+              class="w-full min-h-[44px] px-3.5 py-2.5 bg-white border border-brand-border rounded-xl text-base text-brand-umber focus:border-brand-burgundy transition shadow-sm">
+            <div class="mt-2 text-xs text-brand-muted bg-cream-subtle/50 p-2.5 rounded-xl border border-brand-border-light/60 flex items-start gap-2">
+              <span class="text-brand-burgundy font-bold text-xs mt-0.5">⏱</span>
+              <span>Waktu acuan hitung mundur otomatis dihitung menuju tanggal <strong>22 November 2026</strong> pukul <strong>00.00 WIB</strong> (bawaan sistem).</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- BAGIAN C: PETA LOKASI & SEMATAN (Field 6: URL embed Google Maps) -->
+        <div class="bg-white border border-brand-border-light rounded-2xl p-4 shadow-subtle space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-brand-border-light">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-brand-burgundy" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <h2 class="text-sm font-bold text-brand-umber">Lokasi & sematan peta</h2>
+            </div>
+            <span class="text-[11px] font-medium text-brand-muted bg-cream-subtle px-2 py-0.5 rounded-md">
+              Google Maps
+            </span>
+          </div>
+
+          <!-- FIELD 6: URL embed Google Maps -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label for="url-embed-map" class="text-xs font-semibold text-brand-umber">
+                URL embed Google Maps
+              </label>
+              <span class="text-[10px] text-brand-muted">Hanya tautan src iframe</span>
+            </div>
+
+            <textarea
+              id="url-embed-map"
+              name="url_embed_map"
+              rows="3"
+              placeholder="https://www.google.com/maps/embed?pb=..."
+              class="w-full px-3.5 py-2.5 bg-white border border-brand-border rounded-xl text-xs font-mono text-brand-umber placeholder-brand-muted/40 focus:border-brand-burgundy transition shadow-sm leading-relaxed">https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3955.1432!2d110.824!3d-7.558!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zN8KwMzMnMjguOCJTIDExMMKwNDknMjYuNCJF!5e0!3m2!1sid!2sid!4v170000000</textarea>
+
+            <!-- Helper Teks Panduan yang Jujur & Praktis -->
+            <div class="mt-2 text-[11px] text-brand-muted leading-relaxed space-y-1">
+              <p class="flex items-start gap-1.5">
+                <svg class="w-3.5 h-3.5 text-brand-burgundy shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>Buka Google Maps lokasi venue &rarr; Pilih menu <strong>Bagikan</strong> &rarr; Klik <strong>Sematkan peta</strong> &rarr; Salin hanya isi teks di dalam <code>src="..."</code>.</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- PRATINJAU PETA: Placeholder Jujur (Bukan Peta Rekaan) -->
+          <div class="pt-2">
+            <span class="block text-xs font-semibold text-brand-umber mb-1.5">Pratinjau di layar tamu:</span>
+
+            <div class="w-full bg-cream-subtle border border-brand-border-light rounded-xl p-4 text-center space-y-2">
+              <div class="w-10 h-10 rounded-full bg-brand-burgundy/10 text-brand-burgundy flex items-center justify-center mx-auto">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                </svg>
+              </div>
+              <div class="space-y-0.5">
+                <p class="text-xs font-bold text-brand-umber">Peta belum ditambahkan</p>
+                <p class="text-[11px] text-brand-muted max-w-[260px] mx-auto">
+                  Sematan peta interaktif resmi dari Google Maps akan tampil otomatis setelah URL src disimpan.
+                </p>
+              </div>
+              <div class="pt-1">
+                <a href="https://maps.app.goo.gl/dpHfUEkyYunb17L58" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-brand-border rounded-lg text-xs font-semibold text-brand-burgundy shadow-sm hover:bg-cream-subtle transition">
+                  <span>Buka Google Maps</span>
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- COMPONENT STATE: ERROR PREVIEW (Hidden by default / Accordion) -->
+        <details class="text-xs bg-white border border-brand-border-light rounded-xl overflow-hidden group">
+          <summary class="px-3.5 py-2.5 font-semibold text-brand-muted cursor-pointer hover:text-brand-umber flex items-center justify-between bg-cream-subtle/30">
+            <span>Pratinjau respon validasi (State error demo)</span>
+            <span class="text-[10px] text-brand-burgundy font-mono group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="p-3 border-t border-brand-border-light space-y-2">
+            <div class="p-2.5 bg-red-50 border border-red-200 rounded-lg text-[11px] text-red-800 flex items-start gap-2">
+              <svg class="w-4 h-4 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                <line x1="12" y1="8" x2="12" y2="12" stroke-width="2"/>
+                <line x1="12" y1="16" x2="12.01" y2="16" stroke-width="2"/>
+              </svg>
+              <div>
+                <strong>Format URL belum sesuai:</strong> Pastikan hanya menyalin nilai di dalam parameter <code>src="https://..."</code> dari kode sematan Google Maps.
+              </div>
+            </div>
+          </div>
+        </details>
+
+      </form>
+
+      <!-- FOOTER SEDERHANA & DATA DEMO (Tanpa klaim sinkronisasi palsu) -->
+      <footer class="pt-4 pb-2 text-center text-xs text-brand-muted space-y-1">
+        <p class="font-medium">weddinvita • Data demo</p>
+        <p class="text-[11px] text-brand-muted/80">Sistem Manajemen Undangan Pernikahan Adat</p>
+      </footer>
+
+    </main>
+
+    <!-- 3. STICKY BOTTOM BAR (Aman di safe area, tidak menutupi konten / padding-bottom 36) -->
+    <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] min-w-[320px] z-20 bg-white/95 backdrop-blur-md border-t border-brand-border p-3.5 pb-safe shadow-sticky flex items-center gap-3">
+      <button
+        type="submit"
+        form="form-detail-acara"
+        class="w-full min-h-[44px] px-5 py-3 bg-brand-burgundy hover:bg-brand-burgundy-dark active:scale-[0.99] text-white font-semibold text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer focus:ring-2 focus:ring-brand-burgundy focus:ring-offset-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+        </svg>
+        <span>Simpan detail</span>
+      </button>
+    </div>
+
+    <!-- 4. NAVIGATION DRAWER (Slide-in mobile menu sesuai spec) -->
+    <!-- Backdrop -->
+    <label
+      id="nav-drawer-backdrop"
+      for="nav-drawer-toggle"
+      class="fixed inset-0 bg-brand-umber/50 z-40 opacity-0 pointer-events-none transition-opacity duration-300"
+      aria-label="Tutup navigasi">
+    </label>
+
+    <!-- Drawer Panel -->
+    <div
+      id="nav-drawer-content"
+      class="fixed top-0 right-0 h-full w-[290px] max-w-[80vw] bg-cream-base z-50 shadow-2xl transition-transform duration-300 transform translate-x-full flex flex-col justify-between border-l border-brand-border">
+
+      <!-- Drawer Header -->
+      <div class="p-4 border-b border-brand-border-light flex items-center justify-between bg-white">
+        <div class="flex items-center gap-2">
+          <span class="text-lg font-bold text-brand-burgundy tracking-tight">weddinvita</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-brand-burgundy mb-1" aria-hidden="true"></span>
+        </div>
+        <label for="nav-drawer-toggle" class="min-h-[44px] min-w-[44px] flex items-center justify-center text-brand-muted hover:text-brand-umber rounded-lg cursor-pointer" aria-label="Tutup menu">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </label>
+      </div>
+
+      <!-- Drawer Context Info -->
+      <div class="px-4 py-3 bg-cream-subtle/80 border-b border-brand-border-light text-xs text-brand-muted">
+        <p class="font-bold text-brand-umber">Firsta & Talitha</p>
+        <p class="text-[11px]">22 November 2026 • Pawiwahan Solo</p>
+      </div>
+
+      <!-- Navigation Links (4 Fitur Inti + 2 Aksi Pengguna) -->
+      <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <a href="#" class="min-h-[44px] px-3.5 py-2.5 rounded-xl flex items-center gap-3 text-sm font-medium text-brand-umber hover:bg-cream-subtle transition">
+          <svg class="w-4 h-4 text-brand-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+          <span>Tamu undangan</span>
+        </a>
+
+        <a href="#" class="min-h-[44px] px-3.5 py-2.5 rounded-xl flex items-center gap-3 text-sm font-medium text-brand-umber hover:bg-cream-subtle transition">
+          <svg class="w-4 h-4 text-brand-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+          </svg>
+          <span>Pesan & preview</span>
+        </a>
+
+        <a href="#" class="min-h-[44px] px-3.5 py-2.5 rounded-xl flex items-center gap-3 text-sm font-medium text-brand-umber hover:bg-cream-subtle transition">
+          <svg class="w-4 h-4 text-brand-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <span>Foto & lagu</span>
+        </a>
+
+        <!-- Active Page: Detail Acara -->
+        <a href="#" class="min-h-[44px] px-3.5 py-2.5 rounded-xl flex items-center justify-between text-sm font-bold bg-white text-brand-burgundy border border-brand-border-light shadow-sm transition">
+          <div class="flex items-center gap-3">
+            <svg class="w-4 h-4 text-brand-burgundy" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <span>Detail acara</span>
+          </div>
+          <span class="w-2 h-2 rounded-full bg-brand-burgundy" aria-hidden="true"></span>
+        </a>
+
+        <div class="pt-3 pb-1 border-t border-brand-border-light my-2"></div>
+
+        <a href="#" class="min-h-[44px] px-3.5 py-2.5 rounded-xl flex items-center gap-3 text-sm font-medium text-brand-umber hover:bg-cream-subtle transition">
+          <svg class="w-4 h-4 text-brand-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+          </svg>
+          <span>Lihat undangan</span>
+        </a>
+      </nav>
+
+      <!-- Drawer Footer -->
+      <div class="p-4 border-t border-brand-border-light bg-cream-subtle/50">
+        <a href="#" class="min-h-[44px] px-3.5 py-2.5 rounded-xl flex items-center gap-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+          </svg>
+          <span>Keluar</span>
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>
