@@ -37,6 +37,9 @@
 .gift-details .gift-paper {width:min(100%,380px);margin-top:16px;padding:20px;box-shadow:inset 0 1px 0 #fff,0 12px 32px #020c0859;}
 .gift-details .gift-paper:before {display:none;}
 .gift-bank {display:grid;gap:8px;}
+.gift-bank h3 {font:600 14px/1.5 'Plus Jakarta Sans',system-ui,sans-serif;color:var(--forest);}
+.gift-bank>p {font-size:13px;line-height:1.6;color:var(--wood);}
+.gift-bank .gift-address {white-space:pre-line;overflow-wrap:anywhere;}
 .gift-bank + .gift-bank {margin-top:16px;padding-top:16px;border-top:1px solid #d7c5ab;}
 .gift-bank-logo {display:block;width:48px;max-width:100%;height:24px;object-fit:contain;object-position:left center;}
 .gift-bank-logo[src$="bank-mandiri.webp"] {width:76px;}

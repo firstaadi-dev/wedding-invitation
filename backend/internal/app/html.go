@@ -76,7 +76,14 @@ func (a *App) html(w http.ResponseWriter, r *http.Request) {
 	settings := s["value"].(map[string]any)
 	title, description := text(settings["linkPreviewTitle"]), text(settings["linkPreviewDescription"])
 	if title == "" {
-		title = "Firsta & Talitha — Undangan"
+		first, second := text(settings["partnerOneName"]), text(settings["partnerTwoName"])
+		if first == "" {
+			first = "Firsta Adi Pradana"
+		}
+		if second == "" {
+			second = "Talitha Syahda Arundatie"
+		}
+		title = strings.Fields(first)[0] + " & " + strings.Fields(second)[0] + " — Undangan"
 	}
 	if description == "" {
 		description = "22 November 2026 · Arjuna Ballroom Alam Indah Resto."

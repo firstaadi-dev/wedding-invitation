@@ -20,8 +20,11 @@ export type Guest = {
     updatedAt: string;
   };
 };
+export type GiftOption =
+  | { type: "account"; bank: string; number: string; owner: string }
+  | { type: "address"; recipient: string; address: string; phone: string };
 export type Content = {
-  settings: Record<string, string>;
+  settings: Record<string, string | GiftOption[]>;
   media: Record<string, string>;
 };
 export type API = <T>(

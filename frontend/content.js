@@ -14,6 +14,21 @@ async function load() {
   scope.set('tenant',invitationId || tenantSlug);
   document.querySelector('#guest-name').textContent = guestName;
   document.querySelector('#response-guest').textContent = guestName;
+  const partners = [settings.partnerOneName || 'Firsta Adi Pradana', settings.partnerTwoName || 'Talitha Syahda Arundatie'];
+  document.querySelector('#partner-one-name').textContent = partners[0];
+  document.querySelector('#partner-two-name').textContent = partners[1];
+  document.querySelector('#partner-one-short').textContent = partners[0].split(/\s+/)[0];
+  document.querySelector('#partner-two-short').textContent = partners[1].split(/\s+/)[0];
+  for (const [id, key, fallback] of [
+    ['partner-one-father', 'partnerOneFather', 'Bapak Nugroho Andang Hapsoro'],
+    ['partner-one-mother', 'partnerOneMother', 'Ibu Arieta Rahmasari'],
+    ['partner-two-father', 'partnerTwoFather', 'Bapak Sudaryatno'],
+    ['partner-two-mother', 'partnerTwoMother', 'Ibu Wuri Wahyuningsih'],
+  ]) {
+    const role = fallback.match(/^(Bapak|Ibu)/)[0];
+    document.querySelector(`#${id}`).textContent = `${role} ${settings[key] || fallback.slice(role.length).trim()}`;
+  }
+  document.querySelector('#page-title').textContent = `${partners[0].split(/\s+/)[0]} & ${partners[1].split(/\s+/)[0]} — 22 November 2026`;
   if (guestResponse) {
     for (const key of ['attendance','message']) responseForm.elements[key].value = guestResponse[key];
     responseForm.elements.guestCount.value = guestResponse.guestCount || 1;
@@ -29,10 +44,36 @@ async function load() {
   times[0].textContent = settings.ceremonyTime || 'Waktu akan diinformasikan';
   times[1].textContent = settings.receptionTime || 'Waktu akan diinformasikan';
   startCountdown(settings.countdownTime || '00:00');
+  const gifts = document.querySelector('.gift-details');
+  const accounts = settings.giftAccounts || [
+    {bank:'blu by BCA Digital',number:'0033 1600 0000',owner:'Firsta Adi Pradana'},
+    {bank:'Bank Mandiri',number:'1350018340537',owner:'TALITHA SYAHDA ARUND'},
+  ];
+  gifts.hidden = settings.giftEnabled === 'false' || !accounts.length;
+  const giftContainer = document.querySelector('#gift-accounts');
+  giftContainer.replaceChildren(...accounts.map(account => {
+    const card = document.createElement('div');card.className = 'gift-bank';
+    if (account.type === 'address') {
+      const title = document.createElement('h3');title.textContent = 'Alamat Rumah';
+      const recipient = document.createElement('p');recipient.textContent = `Penerima: ${account.recipient}`;
+      const address = document.createElement('p');address.className = 'gift-address';address.textContent = account.address;
+      card.append(title,recipient,address);
+      if (account.phone) {const phone = document.createElement('p');phone.textContent = `Kontak: ${account.phone}`;card.append(phone);}
+      return card;
+    }
+    const bank = document.createElement('h3');bank.textContent = account.bank;
+    const row = document.createElement('div');row.className = 'gift-account-row';
+    const input = document.createElement('input');input.className = 'gift-account';input.value = account.number;input.readOnly = true;input.setAttribute('aria-label',`Nomor rekening ${account.bank}`);
+    const button = document.createElement('button');button.className = 'guest-button';button.type = 'button';button.textContent = 'Salin';
+    const owner = document.createElement('p');owner.textContent = `a.n. ${account.owner}`;
+    const status = document.createElement('p');status.className = 'form-status';status.setAttribute('role','status');
+    button.addEventListener('click',async () => {try {await navigator.clipboard.writeText(input.value.replace(/\s/g,''));status.textContent = 'Nomor rekening disalin.';} catch {input.focus();input.select();status.textContent = 'Salin nomor rekening yang sudah dipilih.';}});
+    row.append(input,button);card.append(bank,row,owner,status);return card;
+  }));
   const frames = document.querySelectorAll('.couple-grid .photo-placeholder');
   ['groom','bride'].forEach((slot,index) => {
     if (!media[slot]) return;
-    frames[index].replaceChildren(photo(media[slot],['Firsta Adi Pradana','Talitha Syahda Arundatie'][index]));
+    frames[index].replaceChildren(photo(media[slot],partners[index]));
     frames[index].classList.add('has-photo');
   });
   renderGallery(media);
@@ -159,13 +200,6 @@ async function loadWishes(reset = false) {
   finally {if (request === wishesRequest) moreWishes.disabled = false;}
 }
 moreWishes.addEventListener('click',() => loadWishes());
-for (const card of document.querySelectorAll('.gift-bank')) {
-  card.querySelector('button').addEventListener('click',async () => {
-    const input = card.querySelector('.gift-account');const status = card.querySelector('.form-status');
-    try {await navigator.clipboard.writeText(input.value.replace(/\s/g,''));status.textContent = 'Nomor rekening disalin.';}
-    catch {input.focus();input.select();status.textContent = 'Salin nomor rekening yang sudah dipilih.';}
-  });
-}
 music.addEventListener('click',() => {if (audio) audio.paused ? audio.play().catch(() => label(false)) : audio.pause();});
 document.querySelector('#open-invitation').addEventListener('click',() => {audio?.play().catch(() => label(false));});
 load().catch(error => {

@@ -1,8 +1,10 @@
 import { createRoot } from "react-dom/client";
+import { createPortal } from "react-dom";
 import {
   useCallback,
   useEffect,
   useRef,
+  useMemo,
   useState,
   type FormEvent,
   type ReactNode,
@@ -12,8 +14,16 @@ import {
   invitationMessage,
   whatsappUrl,
 } from "../whatsapp.js";
-import { guestSummary, findGuests, mediaType } from "../admin-data.js";
-import type { Account, Session, Guest, Content, API, Confirm } from "./types";
+import { guestSummary, queryGuests, mediaType } from "../admin-data.js";
+import type {
+  Account,
+  Session,
+  Guest,
+  Content,
+  GiftOption,
+  API,
+  Confirm,
+} from "./types";
 import "../admin.css";
 
 const pages = {
@@ -71,9 +81,55 @@ const NavIcon = ({ index }: { index: number }) =>
   ][index];
 const Brand = () => (
   <a className="brand" href="/">
-    weddinvita<span aria-hidden="true">•</span>
+    <span className="brand-mark" aria-hidden="true">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" />
+      </svg>
+    </span>
+    <span className="brand-name">weddinvita</span>
+    <span className="brand-caption">Portal Undangan</span>
   </a>
 );
+function ActionIcon({
+  kind,
+}: {
+  kind: "copy" | "send" | "edit" | "filter" | "search";
+}) {
+  const paths = {
+    copy: (
+      <>
+        <rect x="8" y="8" width="12" height="13" rx="2" />
+        <path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3" />
+      </>
+    ),
+    send: <path d="m21 3-7 18-4-7-7-4L21 3ZM10 14 21 3" />,
+    edit: <path d="m16 3 5 5M4 15 16 3l5 5L9 20l-6 1 1-6Z" />,
+    filter: <path d="M3 4h18l-7 8v7l-4 2v-9L3 4Z" />,
+    search: (
+      <>
+        <circle cx="10" cy="10" r="7" />
+        <path d="m15 15 6 6" />
+      </>
+    ),
+  };
+  return (
+    <svg
+      className="action-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      aria-hidden="true"
+    >
+      {paths[kind]}
+    </svg>
+  );
+}
 function Navigation({
   page,
   close = () => {},
@@ -121,7 +177,7 @@ function Modal({
     dialog.querySelector("input")?.focus();
     return () => dialog.close();
   }, []);
-  return (
+  return createPortal(
     <dialog
       id={className === "navigation-dialog" ? "navigation" : undefined}
       ref={ref}
@@ -134,7 +190,8 @@ function Modal({
       }}
     >
       {children}
-    </dialog>
+    </dialog>,
+    document.body,
   );
 }
 function Login({
@@ -152,13 +209,13 @@ function Login({
     setBusy(true);
     setError("");
     try {
-      const s = await api<Session>(
+      const session = await api<Session>(
         "/api/admin/login",
         "POST",
         Object.fromEntries(new FormData(form)),
       );
       form.reset();
-      await onLogin(s);
+      await onLogin(session);
     } catch (e) {
       setError(errorMessage(e));
     } finally {
@@ -166,71 +223,78 @@ function Login({
     }
   }
   return (
-    <section
+    <main
       id="login-screen"
       className="login-screen"
       aria-labelledby="login-title"
     >
-      <div className="login-story">
-        <Brand />
-        <div>
-          <p className="eyebrow">Setiap undangan, sebuah cerita</p>
-          <h2>
+      <section className="login-story" aria-labelledby="login-story-title">
+        <a href="/" className="login-wordmark">
+          weddinvita<span aria-hidden="true">.</span>
+        </a>
+        <div className="login-statement">
+          <p className="login-eyebrow">Setiap undangan, sebuah cerita</p>
+          <h1 id="login-story-title">
             Hari Istimewa.
             <br />
             Lebih Tertata.
-          </h2>
+          </h1>
           <p>
             Satu ruang untuk merangkai undangan dan menyambut orang-orang
             tersayang.
           </p>
-          <div className="event-signature">weddinvita</div>
+          <span className="login-signature">weddinvita</span>
         </div>
-        <p className="story-footer">Dibuat untuk momen yang berarti.</p>
-      </div>
-      <div className="login-content">
-        <div className="mobile-brand">
-          <Brand />
+        <p className="login-story-footer">Dibuat untuk momen yang berarti.</p>
+        <span className="login-watermark" aria-hidden="true">
+          W
+        </span>
+      </section>
+      <section className="login-form-side">
+        <div className="login-panel">
+          <p className="login-eyebrow">Portal Undangan</p>
+          <h2 id="login-title">Selamat Datang Kembali.</h2>
+          <p>Masuk untuk menyiapkan dan memantau undangan pernikahan Anda.</p>
+          <form id="login" onSubmit={submit} aria-busy={busy}>
+            {error && (
+              <p id="login-error" className="form-error" role="alert">
+                {error}
+              </p>
+            )}
+            <label>
+              Email
+              <input
+                name="email"
+                type="email"
+                autoComplete="username"
+                required
+                maxLength={254}
+                placeholder="nama@email.com"
+                disabled={busy}
+              />
+            </label>
+            <label>
+              Password
+              <input
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                maxLength={1024}
+                placeholder="Masukkan password"
+                disabled={busy}
+              />
+            </label>
+            <button className="primary" type="submit" disabled={busy}>
+              {busy ? "Memeriksa…" : "Masuk ke Akun"}
+              <span aria-hidden="true">→</span>
+            </button>
+          </form>
+          <p className="login-help">Akses khusus untuk pasangan pengantin.</p>
         </div>
-        <form id="login" className="login-panel" onSubmit={submit}>
-          <p className="eyebrow">CMS pengelola undangan</p>
-          <h1 id="login-title">Selamat Datang Kembali.</h1>
-          <p>Masuk untuk mengelola undangan Anda.</p>
-          <label>
-            Email
-            <input
-              name="email"
-              type="email"
-              autoComplete="username"
-              required
-              maxLength={254}
-              placeholder="nama@email.com"
-            />
-          </label>
-          <label>
-            Password
-            <input
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              maxLength={1024}
-              placeholder="Masukkan password"
-            />
-          </label>
-          <button className="primary" type="submit" disabled={busy}>
-            {busy ? "Memeriksa…" : "Masuk ke dasbor →"}
-          </button>
-          {error && (
-            <p id="login-error" className="form-error" role="alert">
-              {error}
-            </p>
-          )}
-          <p className="login-help">Akses khusus pengelola undangan.</p>
-        </form>
         <p className="login-footer">weddinvita</p>
-      </div>
-    </section>
+      </section>
+    </main>
   );
 }
 function GuestEditor({
@@ -345,6 +409,9 @@ function GuestRow({
   copy,
   showLink,
   notice,
+  selected,
+  onSelect,
+  bulkBusy,
 }: {
   guest: Guest;
   template: string;
@@ -355,11 +422,15 @@ function GuestRow({
   copy: (s: string) => Promise<void>;
   showLink: (s: string) => void;
   notice: (s: string, error?: boolean) => void;
+  selected: boolean;
+  onSelect: () => void;
+  bulkBusy: boolean;
 }) {
-  const [busy, setBusy] = useState(false);
-  const menu = useRef<HTMLDetailsElement>(null);
+  const [busy, setBusy] = useState(false),
+    [menuOpen, setMenuOpen] = useState(false),
+    [wishOpen, setWishOpen] = useState(false);
   async function action(kind: "active" | "link" | "devices" | "delete") {
-    menu.current?.removeAttribute("open");
+    setMenuOpen(false);
     setBusy(true);
     const descriptions = {
       active: [
@@ -413,111 +484,747 @@ function GuestRow({
   const attendance = guest.response?.attendance;
   const label = attendance
     ? {
-        attending: `Hadir · ${guest.response!.guestCount} orang`,
+        attending: "Hadir",
         not_attending: "Tidak hadir",
         unsure: "Belum pasti",
       }[attendance]
     : "Belum konfirmasi";
+  const disabled = busy || bulkBusy;
   return (
-    <tr>
-      <td>
-        <p className="guest-name">{guest.name}</p>
-        <p className="guest-phone">{guest.phone || "Tanpa WhatsApp"}</p>
-      </td>
-      <td>
-        <span className={`tag ${guest.active ? "active" : "inactive"}`}>
-          ● {guest.active ? "Aktif" : "Nonaktif"}
-        </span>
-      </td>
-      <td>
-        <span className={`tag${guest.deviceCount === 3 ? " device-full" : ""}`}>
-          {guest.deviceCount} / 3{guest.deviceCount === 3 ? " · Penuh" : ""}
-        </span>
-      </td>
-      <td>
-        <span className={`tag ${attendance || ""}`}>{label}</span>
-      </td>
-      <td>
-        {guest.response?.message ? (
-          <details className="guest-wish">
-            <summary aria-label={`Baca ucapan ${guest.name}`}>
-              <span className="wish-excerpt">{guest.response.message}</span>
-              <span className="wish-action">Baca ucapan</span>
-            </summary>
-            <p className="wish-full">{guest.response.message}</p>
-          </details>
-        ) : (
-          <p className="guest-wish">Belum ada ucapan</p>
-        )}
-      </td>
-      <td>
-        <div className="row-actions">
+    <>
+      <tr className={selected ? "selected" : ""} aria-busy={busy}>
+        <td>
+          <label className="row-select">
+            <input
+              type="checkbox"
+              checked={selected}
+              onChange={onSelect}
+              disabled={disabled}
+              aria-label={`Pilih ${guest.name}`}
+            />
+          </label>
+        </td>
+        <th scope="row">
+          <span className="guest-name">{guest.name}</span>
+        </th>
+        <td className="guest-phone">
+          {guest.phone || <span className="muted">—</span>}
+        </td>
+        <td>
+          <span className={`tag ${guest.active ? "active" : "inactive"}`}>
+            {guest.active ? "Aktif" : "Nonaktif"}
+          </span>
+        </td>
+        <td>
+          <span className={`tag ${attendance || "pending"}`}>{label}</span>
+        </td>
+        <td>
+          <span
+            className={`device-count${guest.deviceCount === 3 ? " full" : ""}`}
+            title={`${guest.deviceCount} dari 3 slot perangkat terpakai`}
+          >
+            {guest.deviceCount} / 3
+          </span>
+        </td>
+        <td>
+          {guest.response?.message ? (
+            <button
+              className="read-wish"
+              type="button"
+              onClick={() => setWishOpen(true)}
+              aria-label={`Baca ucapan ${guest.name}`}
+            >
+              Baca
+            </button>
+          ) : (
+            <span className="muted">—</span>
+          )}
+        </td>
+        <td>
+          <div className="row-actions">
+            <button
+              className="copy-link"
+              type="button"
+              disabled={!guest.link || disabled}
+              aria-label={`Salin tautan ${guest.name}`}
+              onClick={() => copy(guest.link!)}
+            >
+              <ActionIcon kind="copy" />
+              <span>Salin link</span>
+            </button>
+            {guest.phone && guest.link && guest.active && !disabled ? (
+              <a
+                className="send-link secondary"
+                href={whatsappUrl(template, guest)}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Kirim undangan ${guest.name} melalui WhatsApp`}
+              >
+                <ActionIcon kind="send" />
+                <span>Kirim</span>
+              </a>
+            ) : (
+              <button
+                className="send-link"
+                type="button"
+                disabled
+                title="Isi nomor WhatsApp, gunakan tautan tersimpan, dan aktifkan tamu untuk mengirim."
+              >
+                <ActionIcon kind="send" />
+                <span>Kirim</span>
+              </button>
+            )}
+            <button
+              className="icon-button quiet"
+              type="button"
+              disabled={disabled}
+              onClick={edit}
+              title="Edit tamu"
+              aria-label={`Edit ${guest.name}`}
+            >
+              <ActionIcon kind="edit" />
+            </button>
+            <button
+              className="icon-button quiet"
+              type="button"
+              disabled={disabled}
+              onClick={() => setMenuOpen(true)}
+              aria-haspopup="dialog"
+              aria-label={`Menu tindakan ${guest.name}`}
+            >
+              ⋯
+            </button>
+          </div>
+        </td>
+      </tr>
+      {menuOpen && (
+        <Modal
+          label={`actions-${guest.id}`}
+          onClose={() => setMenuOpen(false)}
+          busy={busy}
+        >
+          <div className="section-heading">
+            <h2 id={`actions-${guest.id}`}>Aksi undangan</h2>
+            <button
+              className="icon-button quiet"
+              type="button"
+              onClick={() => setMenuOpen(false)}
+              aria-label="Tutup aksi undangan"
+            >
+              ×
+            </button>
+          </div>
+          <p>{guest.name}</p>
+          {!guest.link && (
+            <p className="info-note">
+              Tautan lama belum tersimpan. Buat tautan baru jika tautan asli
+              hilang.
+            </p>
+          )}
+          <div className="menu-actions">
+            <button onClick={() => action("active")} disabled={busy}>
+              {guest.active ? "Nonaktifkan undangan" : "Aktifkan undangan"}
+            </button>
+            <button onClick={() => action("link")} disabled={busy}>
+              Buat tautan baru
+            </button>
+            <button onClick={() => action("devices")} disabled={busy}>
+              Reset perangkat
+            </button>
+            <button
+              onClick={() => action("delete")}
+              className="danger"
+              disabled={busy}
+            >
+              Hapus tamu
+            </button>
+          </div>
+        </Modal>
+      )}
+      {wishOpen && (
+        <Modal label={`wish-${guest.id}`} onClose={() => setWishOpen(false)}>
+          <div className="section-heading">
+            <h2 id={`wish-${guest.id}`}>Ucapan &amp; doa</h2>
+            <button
+              className="icon-button quiet"
+              type="button"
+              onClick={() => setWishOpen(false)}
+              aria-label="Tutup ucapan"
+            >
+              ×
+            </button>
+          </div>
+          <p>
+            <strong>{guest.name}</strong>
+          </p>
+          <p className="wish-full">{guest.response?.message}</p>
+        </Modal>
+      )}
+    </>
+  );
+}
+function GuestsPage({
+  guests,
+  template,
+  api,
+  refresh,
+  confirm,
+  copy,
+  showLink,
+  newLink,
+  dismissLink,
+  edit,
+  add,
+  notice,
+}: {
+  guests: Guest[];
+  template: string;
+  api: API;
+  refresh: () => Promise<void>;
+  confirm: Confirm;
+  copy: (value: string) => Promise<void>;
+  showLink: (value: string) => void;
+  newLink: string;
+  dismissLink: () => void;
+  edit: (guest: Guest) => void;
+  add: () => void;
+  notice: (message: string, error?: boolean) => void;
+}) {
+  const [search, setSearch] = useState(""),
+    [status, setStatus] = useState("all"),
+    [attendance, setAttendance] = useState("all"),
+    [devices, setDevices] = useState("all"),
+    [sort, setSort] = useState("name-asc");
+  const [page, setPage] = useState(1),
+    [pageSize, setPageSize] = useState(25),
+    [selected, setSelected] = useState<string[]>([]),
+    [filtersOpen, setFiltersOpen] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState(false),
+    [bulkProgress, setBulkProgress] = useState(0);
+  const scroller = useRef<HTMLDivElement>(null),
+    selectAll = useRef<HTMLInputElement>(null);
+  const filtered = useMemo(
+    () =>
+      queryGuests(guests, {
+        query: search,
+        status,
+        attendance,
+        devices,
+        sort,
+      }) as Guest[],
+    [guests, search, status, attendance, devices, sort],
+  );
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize)),
+    currentPage = Math.min(page, totalPages);
+  const visible = filtered.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
+  const summary = guestSummary(guests);
+  useEffect(() => {
+    setSelected([]);
+  }, [guests, search, status, attendance, devices, sort, page, pageSize]);
+  useEffect(() => {
+    if (selectAll.current)
+      selectAll.current.indeterminate =
+        selected.length > 0 && selected.length < visible.length;
+  }, [selected.length, visible.length]);
+  function resetPage() {
+    setPage(1);
+    setSelected([]);
+    if (scroller.current) scroller.current.scrollTop = 0;
+  }
+  function changePage(value: number) {
+    const next = Math.max(1, Math.min(totalPages, Math.trunc(value) || 1));
+    setPage(next);
+    setSelected([]);
+    if (scroller.current) scroller.current.scrollTop = 0;
+    return next;
+  }
+  function sortBy(key: string) {
+    setSort(sort === `${key}-asc` ? `${key}-desc` : `${key}-asc`);
+    resetPage();
+  }
+  function reset() {
+    setSearch("");
+    setStatus("all");
+    setAttendance("all");
+    setDevices("all");
+    setSort("name-asc");
+    resetPage();
+  }
+  async function setActive(active: boolean) {
+    if (!selected.length) return;
+    const ids = [...selected];
+    setBulkBusy(true);
+    setBulkProgress(0);
+    try {
+      if (
+        !(await confirm(
+          active
+            ? `${ids.length} undangan yang dipilih dapat kembali dibuka.`
+            : `${ids.length} undangan yang dipilih tidak dapat dibuka dan seluruh sesinya dicabut. Data tetap tersimpan.`,
+          `${active ? "Aktifkan" : "Nonaktifkan"} ${ids.length} undangan?`,
+        ))
+      )
+        return;
+      let done = 0,
+        failed = "";
+      for (let i = 0; i < ids.length; i += 4) {
+        const results = await Promise.allSettled(
+          ids
+            .slice(i, i + 4)
+            .map((id) => api(`/api/admin/guests/${id}`, "PATCH", { active })),
+        );
+        done += results.filter(
+          (result) => result.status === "fulfilled",
+        ).length;
+        setBulkProgress(done);
+        const failure = results.find((result) => result.status === "rejected");
+        if (failure?.status === "rejected") {
+          failed = errorMessage(failure.reason);
+          break;
+        }
+      }
+      try {
+        await refresh();
+      } catch (e) {
+        failed = failed || errorMessage(e);
+      }
+      setSelected([]);
+      notice(
+        failed
+          ? `${done} dari ${ids.length} undangan diperbarui. ${failed}`
+          : `Status ${done} undangan disimpan.`,
+        Boolean(failed),
+      );
+    } catch (e) {
+      notice(errorMessage(e), true);
+    } finally {
+      setBulkBusy(false);
+    }
+  }
+  const sortHeader = (key: string, label: string) => (
+    <button type="button" disabled={bulkBusy} onClick={() => sortBy(key)}>
+      {label}
+      <span aria-hidden="true">
+        {sort === `${key}-asc` ? "↑" : sort === `${key}-desc` ? "↓" : "↕"}
+      </span>
+    </button>
+  );
+  return (
+    <section
+      id="page-tamu"
+      className="page guest-page"
+      aria-labelledby="guests-title"
+    >
+      <div className="guest-workspace">
+        <header className="page-heading">
+          <div>
+            <h1 id="guests-title" tabIndex={-1}>
+              Tamu Undangan
+            </h1>
+            <p>Kelola tautan undangan dan konfirmasi tamu.</p>
+          </div>
+          <button
+            id="add-guest"
+            className="primary"
+            type="button"
+            onClick={add}
+            disabled={bulkBusy}
+          >
+            + Tambah tamu
+          </button>
+        </header>
+        <div className="guest-toolbar">
+          <label className="search-label">
+            <span className="sr-only">Cari nama atau nomor WhatsApp</span>
+            <ActionIcon kind="search" />
+            <input
+              id="search"
+              type="search"
+              placeholder="Cari nama atau WhatsApp…"
+              value={search}
+              disabled={bulkBusy}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                resetPage();
+              }}
+            />
+          </label>
+          <label>
+            <span className="sr-only">Status undangan</span>
+            <select
+              value={status}
+              disabled={bulkBusy}
+              onChange={(e) => {
+                setStatus(e.target.value);
+                resetPage();
+              }}
+              aria-label="Status undangan"
+            >
+              <option value="all">Semua status</option>
+              <option value="active">Aktif</option>
+              <option value="inactive">Nonaktif</option>
+            </select>
+          </label>
+          <label>
+            <span className="sr-only">Konfirmasi kehadiran</span>
+            <select
+              value={attendance}
+              disabled={bulkBusy}
+              onChange={(e) => {
+                setAttendance(e.target.value);
+                resetPage();
+              }}
+              aria-label="Konfirmasi kehadiran"
+            >
+              <option value="all">Semua konfirmasi</option>
+              <option value="attending">Hadir</option>
+              <option value="pending">Belum konfirmasi</option>
+              <option value="not_attending">Tidak hadir</option>
+              <option value="unsure">Belum pasti</option>
+            </select>
+          </label>
           <button
             type="button"
-            disabled={!guest.link}
-            aria-label={`Salin tautan ${guest.name}`}
-            onClick={() => copy(guest.link!)}
+            onClick={() => setFiltersOpen(true)}
+            disabled={bulkBusy}
+            aria-haspopup="dialog"
           >
-            Salin
+            <ActionIcon kind="filter" />
+            Filter{devices !== "all" && <span className="filter-count">1</span>}
           </button>
-          {guest.phone && guest.link && guest.active ? (
-            <a
-              className="send-link secondary"
-              href={whatsappUrl(template, guest)}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`Kirim undangan ${guest.name} melalui WhatsApp`}
-            >
-              Kirim
-            </a>
-          ) : (
-            <button
-              type="button"
-              disabled
-              title="Isi nomor WhatsApp, gunakan tautan tersimpan, dan aktifkan tamu untuk mengirim."
-            >
-              Kirim
-            </button>
-          )}
-          <details className="guest-menu" name="guest-actions" ref={menu}>
-            <summary aria-label={`Menu tindakan ${guest.name}`}>⋯</summary>
-            <div className="menu-actions">
+          <button
+            className="quiet"
+            type="button"
+            onClick={reset}
+            disabled={bulkBusy}
+          >
+            Reset
+          </button>
+        </div>
+        <div className="metrics" aria-label="Ringkasan undangan">
+          {[
+            ["Total undangan", summary.total, "total"],
+            ["Hadir", summary.attending, "attending"],
+            ["Belum konfirmasi", summary.pending, "pending"],
+            ["Nonaktif", summary.inactive, "inactive"],
+          ].map(([label, value, key]) => (
+            <article className={`metric ${key}`} key={key}>
+              <h2>{label}</h2>
+              <strong>{Number(value).toLocaleString("id-ID")}</strong>
+            </article>
+          ))}
+        </div>
+        {newLink && (
+          <div id="new-link" className="new-link">
+            <div className="section-heading">
+              <h2>Tautan undangan siap</h2>
               <button
-                onClick={() => {
-                  menu.current?.removeAttribute("open");
-                  edit();
-                }}
-                disabled={busy}
+                type="button"
+                className="icon-button quiet"
+                aria-label="Tutup tautan baru"
+                onClick={dismissLink}
               >
-                Edit tamu
-              </button>
-              <button onClick={() => action("active")} disabled={busy}>
-                {guest.active ? "Nonaktifkan" : "Aktifkan"}
-              </button>
-              <button onClick={() => action("link")} disabled={busy}>
-                Tautan baru
-              </button>
-              <button onClick={() => action("devices")} disabled={busy}>
-                Reset perangkat
-              </button>
-              <button
-                onClick={() => action("delete")}
-                className="danger"
-                disabled={busy}
-              >
-                Hapus tamu
+                ×
               </button>
             </div>
-          </details>
-        </div>
-        {!guest.link && (
-          <p className="legacy-link">
-            Tautan lama belum tersimpan. Buat tautan baru jika tautan asli
-            hilang.
-          </p>
+            <label>
+              Tautan sudah tersimpan di daftar tamu
+              <input readOnly value={newLink} />
+            </label>
+            <button type="button" onClick={() => copy(newLink)}>
+              <ActionIcon kind="copy" />
+              Salin tautan
+            </button>
+            <p>Kirim tautan pengganti jika tautan lama telah dicabut.</p>
+          </div>
         )}
-      </td>
-    </tr>
+        <div className="selection-bar">
+          <span role="status">
+            {selected.length ? (
+              <strong>{selected.length} tamu dipilih pada halaman ini</strong>
+            ) : (
+              <>
+                <strong id="guest-count">
+                  {filtered.length.toLocaleString("id-ID")}
+                </strong>{" "}
+                tamu
+                {filtered.length !== guests.length &&
+                  ` dari ${guests.length.toLocaleString("id-ID")}`}
+              </>
+            )}
+          </span>
+          {selected.length ? (
+            <div>
+              <button
+                type="button"
+                disabled={bulkBusy}
+                onClick={() => setActive(true)}
+              >
+                Aktifkan
+              </button>
+              <button
+                type="button"
+                disabled={bulkBusy}
+                onClick={() => setActive(false)}
+              >
+                Nonaktifkan
+              </button>
+              <button
+                className="quiet"
+                type="button"
+                disabled={bulkBusy}
+                onClick={() => setSelected([])}
+              >
+                Batal pilihan
+              </button>
+              {bulkBusy && (
+                <span role="status">
+                  Menyimpan {bulkProgress}/{selected.length}…
+                </span>
+              )}
+            </div>
+          ) : (
+            <span className="muted">
+              Pilih baris pada halaman ini · 3 slot perangkat per tautan
+            </span>
+          )}
+        </div>
+        <p className="table-hint">
+          Geser tabel untuk melihat kolom dan aksi lainnya.
+        </p>
+        <div
+          className="table-wrap"
+          ref={scroller}
+          tabIndex={0}
+          role="region"
+          aria-label="Tabel tamu, dapat digulir untuk melihat seluruh kolom dan baris"
+        >
+          <table>
+            <caption className="sr-only">
+              Daftar tamu, WhatsApp, status, konfirmasi, perangkat, ucapan, dan
+              aksi
+            </caption>
+            <colgroup>
+              <col className="select-col" />
+              <col className="name-col" />
+              <col className="phone-col" />
+              <col className="status-col" />
+              <col className="attendance-col" />
+              <col className="devices-col" />
+              <col className="wish-col" />
+              <col className="actions-col" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th scope="col">
+                  <label className="row-select">
+                    <input
+                      type="checkbox"
+                      ref={selectAll}
+                      checked={
+                        Boolean(visible.length) &&
+                        selected.length === visible.length
+                      }
+                      disabled={!visible.length || bulkBusy}
+                      onChange={(e) =>
+                        setSelected(
+                          e.target.checked ? visible.map((g) => g.id) : [],
+                        )
+                      }
+                      aria-label={`Pilih semua ${visible.length} tamu pada halaman ini`}
+                    />
+                  </label>
+                </th>
+                <th
+                  scope="col"
+                  aria-sort={
+                    sort.startsWith("name-")
+                      ? sort.endsWith("asc")
+                        ? "ascending"
+                        : "descending"
+                      : undefined
+                  }
+                >
+                  {sortHeader("name", "Nama tamu")}
+                </th>
+                <th scope="col">WhatsApp</th>
+                <th scope="col">Status</th>
+                <th
+                  scope="col"
+                  aria-sort={
+                    sort.startsWith("attendance-")
+                      ? sort.endsWith("asc")
+                        ? "ascending"
+                        : "descending"
+                      : undefined
+                  }
+                >
+                  {sortHeader("attendance", "Konfirmasi")}
+                </th>
+                <th scope="col">Perangkat</th>
+                <th scope="col">Ucapan</th>
+                <th scope="col">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="guests">
+              {visible.map((guest) => (
+                <GuestRow
+                  key={guest.id}
+                  guest={guest}
+                  template={template}
+                  api={api}
+                  refresh={refresh}
+                  confirm={confirm}
+                  edit={() => edit(guest)}
+                  copy={copy}
+                  showLink={showLink}
+                  notice={notice}
+                  selected={selected.includes(guest.id)}
+                  onSelect={() =>
+                    setSelected(
+                      selected.includes(guest.id)
+                        ? selected.filter((id) => id !== guest.id)
+                        : [...selected, guest.id],
+                    )
+                  }
+                  bulkBusy={bulkBusy}
+                />
+              ))}
+            </tbody>
+          </table>
+          {!visible.length && (
+            <p className="empty">
+              {guests.length
+                ? "Tidak ada tamu yang cocok. Ubah pencarian atau reset filter."
+                : "Belum ada tamu. Tambahkan tamu untuk membuat tautan pertama."}
+            </p>
+          )}
+        </div>
+        <footer className="table-footer">
+          <p role="status">
+            {filtered.length
+              ? ((currentPage - 1) * pageSize + 1).toLocaleString("id-ID")
+              : 0}
+            –
+            {Math.min(currentPage * pageSize, filtered.length).toLocaleString(
+              "id-ID",
+            )}{" "}
+            dari <strong>{filtered.length.toLocaleString("id-ID")}</strong>{" "}
+            hasil
+          </p>
+          <div className="pagination">
+            <label>
+              Baris per halaman
+              <select
+                value={pageSize}
+                disabled={bulkBusy}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  resetPage();
+                }}
+              >
+                {[25, 50, 100].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <nav aria-label="Halaman tabel tamu">
+              <button
+                type="button"
+                disabled={currentPage === 1 || bulkBusy}
+                onClick={() => changePage(currentPage - 1)}
+                aria-label="Halaman sebelumnya"
+              >
+                ‹
+              </button>
+              <label>
+                Halaman
+                <input
+                  key={`${currentPage}-${totalPages}`}
+                  type="number"
+                  min={1}
+                  max={totalPages}
+                  defaultValue={currentPage}
+                  disabled={bulkBusy}
+                  aria-label="Nomor halaman"
+                  onBlur={(e) => {
+                    e.currentTarget.value = String(
+                      changePage(Number(e.currentTarget.value)),
+                    );
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      e.currentTarget.value = String(
+                        changePage(Number(e.currentTarget.value)),
+                      );
+                    }
+                  }}
+                />
+                dari {totalPages.toLocaleString("id-ID")}
+              </label>
+              <button
+                type="button"
+                disabled={currentPage === totalPages || bulkBusy}
+                onClick={() => changePage(currentPage + 1)}
+                aria-label="Halaman berikutnya"
+              >
+                ›
+              </button>
+            </nav>
+          </div>
+        </footer>
+      </div>
+      {filtersOpen && (
+        <Modal
+          label="guest-filters-title"
+          onClose={() => setFiltersOpen(false)}
+        >
+          <div className="section-heading">
+            <h2 id="guest-filters-title">Filter tamu</h2>
+            <button
+              className="icon-button quiet"
+              type="button"
+              onClick={() => setFiltersOpen(false)}
+              aria-label="Tutup filter"
+            >
+              ×
+            </button>
+          </div>
+          <label>
+            Perangkat
+            <select
+              value={devices}
+              onChange={(e) => {
+                setDevices(e.target.value);
+                resetPage();
+              }}
+            >
+              <option value="all">Semua perangkat</option>
+              <option value="full">Slot penuh (3/3)</option>
+              <option value="unused">0 slot terpakai</option>
+            </select>
+          </label>
+          <p className="help">
+            Setiap tautan memiliki maksimal 3 slot browser/perangkat.
+          </p>
+          <div className="dialog-actions">
+            <button
+              className="primary"
+              type="button"
+              onClick={() => setFiltersOpen(false)}
+            >
+              Selesai
+            </button>
+          </div>
+        </Modal>
+      )}
+    </section>
   );
 }
 function MediaCard({
@@ -620,8 +1327,8 @@ function MediaCard({
           <span>{music ? "Lengkapi suasana" : "Bingkai cerita Anda"}</span>
         </div>
       )}
-      <label>
-        {music ? "Pilih MP3" : "Pilih foto"}
+      <label className="file-picker">
+        <span>{music ? "Pilih MP3" : "Pilih foto"}</span>
         <input
           type="file"
           ref={input}
@@ -667,20 +1374,62 @@ function SettingsForm({
   onContent,
   notice,
   account,
+  confirm,
+  previewMedia,
 }: {
   kind: "messages" | "event";
   content: Content;
   api: API;
-  onContent: (c: Content) => void;
-  notice: (s: string, error?: boolean) => void;
+  onContent: (content: Content) => void;
+  notice: (message: string, error?: boolean) => void;
   account: Account;
+  confirm: Confirm;
+  previewMedia?: ReactNode;
 }) {
+  const textSetting = (key: string, fallback: string) =>
+    typeof content.settings[key] === "string"
+      ? (content.settings[key] as string)
+      : fallback;
   const [values, setValues] = useState<Record<string, string>>(() => ({
-      ...content.settings,
-      whatsappTemplate:
-        content.settings.whatsappTemplate ?? defaultWhatsappTemplate,
-    })),
-    [busy, setBusy] = useState(false);
+    ...(Object.fromEntries(
+      Object.entries(content.settings).filter(
+        ([, value]) => typeof value === "string",
+      ),
+    ) as Record<string, string>),
+    whatsappTemplate: textSetting("whatsappTemplate", defaultWhatsappTemplate),
+    partnerOneName: textSetting("partnerOneName", "Firsta Adi Pradana"),
+    partnerTwoName: textSetting("partnerTwoName", "Talitha Syahda Arundatie"),
+    partnerOneFather: textSetting("partnerOneFather", "Nugroho Andang Hapsoro"),
+    partnerOneMother: textSetting("partnerOneMother", "Arieta Rahmasari"),
+    partnerTwoFather: textSetting("partnerTwoFather", "Sudaryatno"),
+    partnerTwoMother: textSetting("partnerTwoMother", "Wuri Wahyuningsih"),
+  }));
+  const [busy, setBusy] = useState(false),
+    [dirty, setDirty] = useState(false);
+  const templateInput = useRef<HTMLTextAreaElement>(null);
+  const [giftEnabled, setGiftEnabled] = useState(
+    content.settings.giftEnabled !== "false",
+  );
+  const [giftAccounts, setGiftAccounts] = useState<GiftOption[]>(() =>
+    Array.isArray(content.settings.giftAccounts)
+      ? (content.settings.giftAccounts.map((item) =>
+          item.type === "address" ? item : { ...item, type: "account" },
+        ) as GiftOption[])
+      : [
+          {
+            type: "account",
+            bank: "blu by BCA Digital",
+            number: "0033 1600 0000",
+            owner: "Firsta Adi Pradana",
+          },
+          {
+            type: "account",
+            bank: "Bank Mandiri",
+            number: "1350018340537",
+            owner: "TALITHA SYAHDA ARUND",
+          },
+        ],
+  );
   const field = (
     name: string,
     label: string,
@@ -690,13 +1439,27 @@ function SettingsForm({
     type = "text",
   ) => (
     <label>
-      {label}
+      <span className="field-label">
+        <span>{label}</span>
+        {kind === "messages" && (
+          <span className="character-count">
+            {(values[name] || "").length}/{maxLength}
+          </span>
+        )}
+      </span>
       {textarea ? (
         <textarea
+          ref={name === "whatsappTemplate" ? templateInput : undefined}
           name={name}
           value={values[name] || ""}
           maxLength={maxLength}
-          rows={name === "whatsappTemplate" ? 10 : 4}
+          rows={
+            name === "whatsappTemplate"
+              ? 11
+              : name === "linkPreviewDescription"
+                ? 3
+                : 4
+          }
           placeholder={placeholder}
           required={name === "whatsappTemplate"}
           onChange={(e) => {
@@ -706,6 +1469,7 @@ function SettingsForm({
                 : "",
             );
             setValues({ ...values, [name]: e.target.value });
+            setDirty(true);
           }}
         />
       ) : (
@@ -715,17 +1479,79 @@ function SettingsForm({
           value={values[name] || ""}
           maxLength={maxLength}
           placeholder={placeholder}
-          onChange={(e) => setValues({ ...values, [name]: e.target.value })}
+          onChange={(e) => {
+            setValues({ ...values, [name]: e.target.value });
+            setDirty(true);
+          }}
         />
       )}
     </label>
   );
+  function insertToken(token: string) {
+    const input = templateInput.current;
+    if (!input) return;
+    const start = input.selectionStart,
+      end = input.selectionEnd;
+    const text =
+      values.whatsappTemplate.slice(0, start) +
+      token +
+      values.whatsappTemplate.slice(end);
+    if (text.length > 4000) {
+      notice("Template pesan maksimal 4000 karakter.", true);
+      return;
+    }
+    input.setCustomValidity(
+      text.includes("{link}")
+        ? ""
+        : "Sertakan {link} agar tamu menerima tautan undangannya.",
+    );
+    setValues({ ...values, whatsappTemplate: text });
+    setDirty(true);
+    requestAnimationFrame(() => {
+      input.focus();
+      input.setSelectionRange(start + token.length, start + token.length);
+    });
+  }
+  function updateGift(index: number, item: GiftOption) {
+    setGiftAccounts((accounts) =>
+      accounts.map((value, i) => (i === index ? item : value)),
+    );
+    setDirty(true);
+  }
+  async function changeGiftType(index: number, type: string) {
+    const item = giftAccounts[index];
+    const populated =
+      item.type === "account"
+        ? item.bank || item.number || item.owner
+        : item.recipient || item.address || item.phone;
+    if (
+      populated &&
+      !(await confirm(
+        "Isian pada informasi hadiah ini akan dikosongkan untuk jenis yang baru.",
+        "Ganti jenis informasi?",
+      ))
+    )
+      return;
+    updateGift(
+      index,
+      type === "address"
+        ? { type: "address", recipient: "", address: "", phone: "" }
+        : { type: "account", bank: "", number: "", owner: "" },
+    );
+  }
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const value = Object.fromEntries(new FormData(e.currentTarget));
+    const payload: Record<string, unknown> = Object.fromEntries(
+      new FormData(e.currentTarget),
+    );
+    if (kind === "event") {
+      payload.giftEnabled = String(giftEnabled);
+      payload.giftAccounts = giftAccounts;
+    }
     setBusy(true);
     try {
-      onContent(await api<Content>("/api/admin/content", "PUT", value));
+      onContent(await api<Content>("/api/admin/content", "PUT", payload));
+      setDirty(false);
       notice(
         kind === "messages"
           ? "Pesan WhatsApp dan preview tautan disimpan."
@@ -737,120 +1563,495 @@ function SettingsForm({
       setBusy(false);
     }
   }
+  let mapPreview = "";
+  try {
+    const url = new URL(values.mapEmbedUrl || "");
+    if (
+      url.origin === "https://www.google.com" &&
+      !url.username &&
+      !url.password &&
+      url.pathname.startsWith("/maps/embed")
+    )
+      mapPreview = url.href;
+  } catch {}
+  const previewTitle =
+    values.linkPreviewTitle?.trim() ||
+    `${textSetting("partnerOneName", values.partnerOneName).trim().split(/\s+/)[0]} & ${textSetting("partnerTwoName", values.partnerTwoName).trim().split(/\s+/)[0]} — Undangan`;
+  const previewDescription =
+    values.linkPreviewDescription?.trim() ||
+    "22 November 2026 · Arjuna Ballroom Alam Indah Resto.";
+  const exampleLink = `${account.invitationOrigin}/${account.tenant.publicId}#contoh-tautan`;
   return (
     <form
       id={kind === "messages" ? "whatsapp-settings" : "settings"}
-      className="panel"
+      className={`settings-form ${kind === "messages" ? "messages-form" : "event-form"}`}
       onSubmit={submit}
+      aria-busy={busy}
     >
       {kind === "messages" ? (
         <>
-          <h2>Pesan WhatsApp</h2>
-          <p>Pesan yang sama, dengan nama dan tautan setiap tamu.</p>
-          {field("whatsappTemplate", "Template pesan global", 4000, "", true)}
-          <p id="template-help" className="help">
-            Gunakan {"{nama}"} untuk nama tamu dan {"{link}"} untuk tautannya.{" "}
-            {"{link}"} wajib ada.
-          </p>
-          <details className="message-example" open>
-            <summary>Contoh Pesan</summary>
-            <pre id="message-preview" className="message-preview">
-              {invitationMessage(values.whatsappTemplate, {
-                name: "Bapak/Ibu Tamu Undangan",
-                link: `${account.invitationOrigin}/${account.tenant.publicId}#contoh-tautan`,
-              })}
-            </pre>
-          </details>
-          <div className="panel-divider">
-            <h2>Preview Tautan</h2>
-            {field(
-              "linkPreviewTitle",
-              "Judul preview",
-              120,
-              "Firsta & Talitha — Undangan",
-            )}
-            {field(
-              "linkPreviewDescription",
-              "Deskripsi preview",
-              300,
-              "22 November 2026 · Arjuna Ballroom Alam Indah Resto.",
-              true,
-            )}
-            <p className="help">
-              Kosongkan judul atau deskripsi untuk memakai teks bawaan. Simpan
-              sebelum menggunakan tombol Kirim.
-            </p>
+          <header className="page-heading">
+            <div>
+              <h1 id="whatsapp-title" tabIndex={-1}>
+                Pesan &amp; Preview
+              </h1>
+              <p>
+                Atur template pesan WhatsApp dan tampilan pratinjau tautan
+                undangan.
+              </p>
+            </div>
+            <div className="settings-actions">
+              <span className="save-state" role="status">
+                {busy
+                  ? "Menyimpan…"
+                  : dirty
+                    ? "Perubahan belum disimpan"
+                    : "Pengaturan tersimpan"}
+              </span>
+              <button className="primary" disabled={busy}>
+                {busy ? "Menyimpan…" : "Simpan pesan & preview"}
+              </button>
+            </div>
+          </header>
+          <div className="messages-layout">
+            <fieldset disabled={busy} className="message-edit">
+              <section className="panel">
+                <div className="section-heading">
+                  <h2>Template pesan</h2>
+                  <span className="tag">Wajib {"{link}"}</span>
+                </div>
+                <p>
+                  Gunakan {"{nama}"} untuk nama tamu dan {"{link}"} untuk tautan
+                  undangan. Token {"{link}"} wajib ada.
+                </p>
+                <div className="token-list">
+                  <span>Sisipkan token:</span>
+                  {["{nama}", "{link}"].map((token) => (
+                    <button
+                      type="button"
+                      key={token}
+                      onClick={() => insertToken(token)}
+                      aria-label={`Sisipkan ${token}`}
+                    >
+                      + <code>{token}</code>
+                    </button>
+                  ))}
+                </div>
+                {field(
+                  "whatsappTemplate",
+                  "Template pesan global",
+                  4000,
+                  "",
+                  true,
+                )}
+                <p className="help">
+                  Pesan yang sama akan memakai nama dan tautan pribadi setiap
+                  tamu.
+                </p>
+              </section>
+              <section className="panel">
+                <div className="section-heading">
+                  <h2>Preview tautan</h2>
+                </div>
+                <p>
+                  Judul dan deskripsi saat dibagikan di WhatsApp. Kosongkan
+                  untuk memakai bawaan.
+                </p>
+                <div className="field-stack">
+                  {field(
+                    "linkPreviewTitle",
+                    "Judul preview",
+                    120,
+                    "Nama pasangan — Undangan",
+                  )}
+                  {field(
+                    "linkPreviewDescription",
+                    "Deskripsi preview",
+                    300,
+                    "Deskripsi undangan",
+                    true,
+                  )}
+                </div>
+              </section>
+              <section className="panel">
+                <div className="section-heading">
+                  <h2>Thumbnail WhatsApp</h2>
+                </div>
+                <p>
+                  JPG, PNG, WebP maksimal 12 MB. Dipotong otomatis menjadi 1200
+                  × 630 piksel dan dapat diakses publik untuk preview WhatsApp.
+                </p>
+                {previewMedia}
+              </section>
+            </fieldset>
+            <aside
+              className="panel preview-panel"
+              aria-labelledby="message-preview-title"
+            >
+              <h2 id="message-preview-title">Pratinjau Pesan WhatsApp</h2>
+              <p>Simulasi untuk Bapak/Ibu Tamu Undangan.</p>
+              <div className="whatsapp-preview">
+                <div className="wa-bubble">
+                  <div className="link-preview">
+                    <div className="link-image">
+                      {content.media.preview ? (
+                        <img
+                          src={content.media.preview}
+                          alt="Thumbnail tautan WhatsApp"
+                        />
+                      ) : (
+                        <span>Thumbnail belum diunggah</span>
+                      )}
+                    </div>
+                    <div className="link-description">
+                      <strong>{previewTitle}</strong>
+                      <p>{previewDescription}</p>
+                      <span>{new URL(account.invitationOrigin).host}</span>
+                    </div>
+                  </div>
+                  <pre id="message-preview" className="message-preview">
+                    {invitationMessage(values.whatsappTemplate, {
+                      name: "Bapak/Ibu Tamu Undangan",
+                      link: exampleLink,
+                    })}
+                  </pre>
+                </div>
+              </div>
+              <p className="info-note">
+                Pengiriman dilakukan secara manual melalui tombol Kirim pada
+                halaman Tamu Undangan.
+              </p>
+            </aside>
           </div>
         </>
       ) : (
         <>
-          <h2>Rangkaian Acara</h2>
-          <div className="two-columns">
-            {field(
-              "ceremonyTitle",
-              "Nama acara pertama",
-              80,
-              "Prosesi Pernikahan",
-            )}
-            {field("receptionTitle", "Nama acara kedua", 80, "Resepsi")}
-          </div>
-          <div className="two-columns">
-            {field(
-              "ceremonyTime",
-              "Waktu acara pertama",
-              80,
-              "Contoh: 09.00 WIB",
-            )}
-            {field(
-              "receptionTime",
-              "Waktu acara kedua",
-              80,
-              "Contoh: 11.00–13.00 WIB",
-            )}
-          </div>
-          <p className="help">
-            Waktu yang kosong ditampilkan sebagai “Waktu akan diinformasikan”.
-          </p>
-          <div className="panel-divider">
-            <h2>Hitung Mundur</h2>
-            {field(
-              "countdownTime",
-              "Jam mulai countdown (WIB)",
-              5,
-              "",
-              false,
-              "time",
-            )}
-            <p className="help">
-              Menuju 22 November 2026. Jika kosong, memakai pukul 00.00 WIB.
-            </p>
-          </div>
-          <div className="panel-divider">
-            <h2>Lokasi Acara</h2>
-            {field(
-              "mapEmbedUrl",
-              "URL embed Google Maps",
-              4096,
-              "https://www.google.com/maps/embed?pb=…",
-              true,
-            )}
-            <p className="help">
-              Google Maps → Bagikan → Sematkan peta. Salin URL pada atribut src,
-              bukan seluruh kode iframe. Tamu membuka Google Maps melalui tombol
-              di peta embed.
+          <fieldset disabled={busy} className="event-fields">
+            <section className="panel">
+              <div className="section-heading">
+                <h2>Mempelai</h2>
+              </div>
+              <div className="two-columns">
+                {field(
+                  "partnerOneName",
+                  "Nama mempelai pertama",
+                  120,
+                  "Nama lengkap mempelai pertama",
+                )}
+                {field(
+                  "partnerTwoName",
+                  "Nama mempelai kedua",
+                  120,
+                  "Nama lengkap mempelai kedua",
+                )}
+              </div>
+              <p className="help">
+                Gelar akademik atau kehormatan dapat ditulis langsung pada nama.
+              </p>
+            </section>
+            <section className="panel">
+              <div className="section-heading">
+                <h2>Keluarga &amp; Orang Tua</h2>
+              </div>
+              <div className="two-columns">
+                <div className="family-group">
+                  <h3>Keluarga mempelai pertama</h3>
+                  {field("partnerOneFather", "Nama ayah", 120, "Nama ayah")}
+                  {field("partnerOneMother", "Nama ibu", 120, "Nama ibu")}
+                </div>
+                <div className="family-group">
+                  <h3>Keluarga mempelai kedua</h3>
+                  {field("partnerTwoFather", "Nama ayah", 120, "Nama ayah")}
+                  {field("partnerTwoMother", "Nama ibu", 120, "Nama ibu")}
+                </div>
+              </div>
+            </section>
+            <section className="panel">
+              <div className="section-heading">
+                <h2>Rangkaian Acara</h2>
+              </div>
+              <div className="event-group">
+                <h3>
+                  <span>1</span>Acara pertama
+                </h3>
+                <div className="two-columns">
+                  {field("ceremonyTitle", "Nama acara", 80, "Akad Nikah")}
+                  {field(
+                    "ceremonyTime",
+                    "Waktu acara",
+                    80,
+                    "Contoh: 09.00 WIB",
+                  )}
+                </div>
+              </div>
+              <div className="event-group">
+                <h3>
+                  <span>2</span>Acara kedua
+                </h3>
+                <div className="two-columns">
+                  {field("receptionTitle", "Nama acara", 80, "Resepsi")}
+                  {field(
+                    "receptionTime",
+                    "Waktu acara",
+                    80,
+                    "Contoh: 11.00–13.00 WIB",
+                  )}
+                </div>
+              </div>
+              <p className="help">
+                Waktu kosong ditampilkan sebagai “Waktu akan diinformasikan”.
+              </p>
+            </section>
+            <section className="panel">
+              <div className="section-heading">
+                <h2>Hitung Mundur</h2>
+              </div>
+              <div className="countdown-field">
+                {field(
+                  "countdownTime",
+                  "Jam mulai hitung mundur (WIB)",
+                  5,
+                  "",
+                  false,
+                  "time",
+                )}
+              </div>
+              <p className="help">
+                Menuju 22 November 2026. Jika kosong, memakai pukul 00.00 WIB.
+              </p>
+            </section>
+            <section className="panel">
+              <div className="section-heading">
+                <h2>Lokasi Acara</h2>
+              </div>
+              {field(
+                "mapEmbedUrl",
+                "URL embed Google Maps",
+                4096,
+                "https://www.google.com/maps/embed?pb=…",
+                true,
+              )}
+              <p className="help">
+                Google Maps → Bagikan → Sematkan peta. Salin URL pada atribut
+                src, bukan seluruh kode iframe.
+              </p>
+              <div className="map-preview">
+                {mapPreview ? (
+                  <iframe
+                    src={mapPreview}
+                    title="Pratinjau peta lokasi acara"
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <p>
+                    Tambahkan URL embed Google Maps untuk melihat pratinjau
+                    peta.
+                  </p>
+                )}
+              </div>
+            </section>
+            <section className="panel gift-panel">
+              <div className="section-heading">
+                <div>
+                  <h2>Informasi Hadiah</h2>
+                  <p>
+                    Tampilkan rekening atau alamat pengiriman hadiah pada
+                    undangan.
+                  </p>
+                </div>
+                <div className="gift-controls">
+                  <span className="tag">
+                    {giftAccounts.length}/10 informasi
+                  </span>
+                  <button
+                    className={`gift-switch${giftEnabled ? " is-on" : ""}`}
+                    type="button"
+                    role="switch"
+                    aria-checked={giftEnabled}
+                    aria-label="Tampilkan bagian hadiah"
+                    onClick={() => {
+                      setGiftEnabled(!giftEnabled);
+                      setDirty(true);
+                    }}
+                  >
+                    <span>{giftEnabled ? "ON" : "OFF"}</span>
+                    <i aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+              {!giftEnabled && (
+                <p className="info-note">
+                  Bagian hadiah disembunyikan pada undangan. Data tetap
+                  tersedia; aktifkan untuk mengubah isian.
+                </p>
+              )}
+              <fieldset disabled={!giftEnabled} className="gift-fields">
+                {giftAccounts.map((item, index) => (
+                  <article className="gift-card" key={index}>
+                    <div className="gift-card-heading">
+                      <div>
+                        <span className="tag">Informasi {index + 1}</span>
+                        <label>
+                          Jenis informasi
+                          <select
+                            value={item.type}
+                            onChange={(e) =>
+                              changeGiftType(index, e.target.value)
+                            }
+                            aria-label={`Jenis informasi hadiah ${index + 1}`}
+                          >
+                            <option value="account">Rekening</option>
+                            <option value="address">Alamat rumah</option>
+                          </select>
+                        </label>
+                      </div>
+                      <button
+                        type="button"
+                        className="quiet danger"
+                        onClick={() => {
+                          setGiftAccounts(
+                            giftAccounts.filter((_, i) => i !== index),
+                          );
+                          setDirty(true);
+                        }}
+                        aria-label={`Hapus informasi hadiah ${index + 1}`}
+                      >
+                        Hapus
+                      </button>
+                    </div>
+                    {item.type === "account" ? (
+                      <div className="account-fields">
+                        <label>
+                          Nama bank
+                          <input
+                            required
+                            value={item.bank}
+                            maxLength={80}
+                            onChange={(e) =>
+                              updateGift(index, {
+                                ...item,
+                                bank: e.target.value,
+                              })
+                            }
+                          />
+                        </label>
+                        <label>
+                          Nomor rekening
+                          <input
+                            required
+                            value={item.number}
+                            maxLength={40}
+                            pattern="[0-9 ]+"
+                            inputMode="numeric"
+                            onChange={(e) =>
+                              updateGift(index, {
+                                ...item,
+                                number: e.target.value,
+                              })
+                            }
+                          />
+                        </label>
+                        <label>
+                          Nama pemilik rekening
+                          <input
+                            required
+                            value={item.owner}
+                            maxLength={120}
+                            onChange={(e) =>
+                              updateGift(index, {
+                                ...item,
+                                owner: e.target.value,
+                              })
+                            }
+                          />
+                        </label>
+                      </div>
+                    ) : (
+                      <div className="address-fields">
+                        <div className="two-columns">
+                          <label>
+                            Nama penerima
+                            <input
+                              required
+                              value={item.recipient}
+                              maxLength={120}
+                              onChange={(e) =>
+                                updateGift(index, {
+                                  ...item,
+                                  recipient: e.target.value,
+                                })
+                              }
+                            />
+                          </label>
+                          <label>
+                            Nomor kontak (opsional)
+                            <input
+                              type="tel"
+                              value={item.phone}
+                              maxLength={40}
+                              onChange={(e) =>
+                                updateGift(index, {
+                                  ...item,
+                                  phone: e.target.value,
+                                })
+                              }
+                            />
+                          </label>
+                        </div>
+                        <label>
+                          Alamat lengkap pengiriman
+                          <textarea
+                            required
+                            value={item.address}
+                            maxLength={1000}
+                            rows={3}
+                            onChange={(e) =>
+                              updateGift(index, {
+                                ...item,
+                                address: e.target.value,
+                              })
+                            }
+                          />
+                        </label>
+                      </div>
+                    )}
+                  </article>
+                ))}
+                {!giftAccounts.length && (
+                  <p className="empty">Belum ada informasi hadiah.</p>
+                )}
+                <button
+                  className="add-gift"
+                  type="button"
+                  disabled={giftAccounts.length >= 10}
+                  onClick={() => {
+                    setGiftAccounts([
+                      ...giftAccounts,
+                      { type: "account", bank: "", number: "", owner: "" },
+                    ]);
+                    setDirty(true);
+                  }}
+                >
+                  + Tambah informasi hadiah
+                </button>
+              </fieldset>
+            </section>
+          </fieldset>
+          <div className="form-footer">
+            <button className="primary" disabled={busy}>
+              {busy ? "Menyimpan…" : "Simpan detail acara"}
+            </button>
+            <p className="save-state" role="status">
+              {busy
+                ? "Menyimpan…"
+                : dirty
+                  ? "Perubahan belum disimpan"
+                  : "Pengaturan tersimpan"}
             </p>
           </div>
         </>
       )}
-      <div className="form-footer">
-        <button className="primary" disabled={busy}>
-          {busy
-            ? "Menyimpan…"
-            : kind === "messages"
-              ? "Simpan pesan & preview"
-              : "Simpan detail acara"}
-        </button>
-      </div>
     </form>
   );
 }
@@ -860,7 +2061,6 @@ function App() {
     [guests, setGuests] = useState<Guest[]>([]),
     [content, setContent] = useState<Content>(),
     [page, setPage] = useState<Page>(currentPage),
-    [search, setSearch] = useState(""),
     [status, setStatus] = useState<{ message: string; error: boolean }>(),
     [navigation, setNavigation] = useState(false),
     [editor, setEditor] = useState<{ guest: Guest | null }>(),
@@ -887,7 +2087,6 @@ function App() {
     setSession(undefined);
     setGuests([]);
     setContent(undefined);
-    setSearch("");
     setNavigation(false);
     setEditor(undefined);
     setNewLink("");
@@ -939,6 +2138,7 @@ function App() {
     },
     [clearSession],
   );
+  // shortcut: guests load in one request; move paging to the API if loading the full list becomes slow.
   const refreshGuests = async () =>
     setGuests(await api<Guest[]>("/api/admin/guests"));
   const signedIn = async (s: Session) => {
@@ -977,30 +2177,8 @@ function App() {
   useEffect(() => {
     document.title = session
       ? `weddinvita — ${pages[page]}`
-      : "weddinvita — Masuk CMS";
+      : "weddinvita — Masuk ke Akun";
   }, [session, page]);
-  useEffect(() => {
-    const close = (e: MouseEvent | KeyboardEvent) => {
-      document
-        .querySelectorAll<HTMLDetailsElement>(".guest-menu[open]")
-        .forEach((menu) => {
-          if (e instanceof KeyboardEvent) {
-            if (e.key === "Escape") {
-              menu.open = false;
-              menu.querySelector("summary")?.focus();
-            }
-          } else if (!menu.contains(e.target as Node)) {
-            menu.open = false;
-          }
-        });
-    };
-    document.addEventListener("click", close);
-    document.addEventListener("keydown", close);
-    return () => {
-      document.removeEventListener("click", close);
-      document.removeEventListener("keydown", close);
-    };
-  }, []);
   const confirm: Confirm = (message, title) =>
     new Promise((resolve) => {
       pendingConfirmation.current = resolve;
@@ -1035,18 +2213,14 @@ function App() {
   function showLink(value: string) {
     setNewLink(value);
     requestAnimationFrame(() =>
-      document
-        .querySelector("#new-link")
-        ?.scrollIntoView({
-          behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
-            ? "instant"
-            : "smooth",
-          block: "center",
-        }),
+      document.querySelector("#new-link")?.scrollIntoView({
+        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "instant"
+          : "smooth",
+        block: "center",
+      }),
     );
   }
-  const summary = guestSummary(guests);
-  const filtered = findGuests(guests, search) as Guest[];
   const mediaCard = (slot: string, title: string) => (
     <MediaCard
       key={slot}
@@ -1077,7 +2251,6 @@ function App() {
       >
         Keluar <span aria-hidden="true">↪</span>
       </button>
-      <p>CMS Pengelola · weddinvita</p>
     </div>
   );
   return (
@@ -1091,12 +2264,9 @@ function App() {
       ) : (
         content && (
           <div id="dashboard" className="dashboard">
-            <aside className="sidebar" aria-label="Navigasi CMS">
-              <div>
-                <Brand />
-                <p className="event-chip">{session.account.tenant.name}</p>
-                <Navigation page={page} />
-              </div>
+            <aside className="sidebar" aria-label="Navigasi portal undangan">
+              <Brand />
+              <Navigation page={page} />
               {footer}
             </aside>
             <div className="workspace">
@@ -1111,222 +2281,49 @@ function App() {
                   ☰ Menu
                 </button>
               </header>
-              <div className="mobile-context">
-                {session.account.tenant.name}
+              <div className="account-context">
+                <span>Undangan pernikahan</span>
+                <span title={session.account.tenant.name}>
+                  {session.account.tenant.name}
+                </span>
               </div>
               <main id="main-content">
-                <section
-                  id="page-tamu"
-                  className="page"
-                  aria-labelledby="guests-title"
-                  hidden={page !== "tamu"}
-                >
-                  <header className="page-heading">
-                    <div>
-                      <div className="title-line">
-                        <h1 id="guests-title" tabIndex={-1}>
-                          Tamu Undangan
-                        </h1>
-                        <span id="guest-count" className="badge">
-                          {summary.total} undangan
-                        </span>
-                      </div>
-                      <p>Kelola penerima undangan dan konfirmasi kehadiran.</p>
-                    </div>
-                    <button
-                      id="add-guest"
-                      className="primary"
-                      type="button"
-                      onClick={() => setEditor({ guest: null })}
-                    >
-                      + Tambah Tamu
-                    </button>
-                  </header>
-                  <div className="page-body">
-                    <div className="metrics" aria-label="Ringkasan undangan">
-                      {(
-                        [
-                          [
-                            "Total Undangan",
-                            summary.total,
-                            "undangan",
-                            `${summary.active} aktif · ${summary.inactive} nonaktif`,
-                          ],
-                          [
-                            "Undangan Hadir",
-                            summary.attending,
-                            "undangan",
-                            "Dari undangan aktif",
-                          ],
-                          [
-                            "Jumlah Orang Hadir",
-                            summary.people,
-                            "orang",
-                            "Termasuk penerima undangan",
-                          ],
-                          [
-                            "Belum Konfirmasi",
-                            summary.pending,
-                            "undangan",
-                            "Menunggu jawaban tamu aktif",
-                          ],
-                        ] as const
-                      ).map(([title, value, unit, help]) => (
-                        <article className="metric" key={title}>
-                          <h2>{title}</h2>
-                          <strong>{value}</strong>
-                          <span> {unit}</span>
-                          <p>{help}</p>
-                        </article>
-                      ))}
-                    </div>
-                    <p className="attendance-summary">
-                      {summary.declined} undangan tidak hadir · {summary.unsure}{" "}
-                      belum pasti · Rekap kehadiran hanya dari undangan aktif.
-                    </p>
-                    <p className="info-note">
-                      <span aria-hidden="true">ⓘ</span> Setiap tautan memiliki
-                      maksimal 3 slot browser/perangkat. Browser baru dapat
-                      memakai slot baru.
-                    </p>
-                    {newLink && (
-                      <div id="new-link" className="new-link">
-                        <div className="section-heading">
-                          <h2>Tautan Undangan Siap</h2>
-                          <button
-                            type="button"
-                            className="quiet"
-                            aria-label="Tutup tautan baru"
-                            onClick={() => setNewLink("")}
-                          >
-                            ×
-                          </button>
-                        </div>
-                        <label>
-                          Tautan sudah tersimpan di daftar tamu
-                          <input readOnly value={newLink} />
-                        </label>
-                        <button type="button" onClick={() => copy(newLink)}>
-                          Salin tautan
-                        </button>
-                        <p>
-                          Kirim tautan pengganti jika tautan lama telah dicabut.
-                        </p>
-                      </div>
-                    )}
-                    <div className="search-bar">
-                      <label className="search-label">
-                        <span className="sr-only">
-                          Cari tamu berdasarkan nama atau nomor WhatsApp
-                        </span>
-                        <input
-                          id="search"
-                          type="search"
-                          value={search}
-                          onChange={(e) => setSearch(e.target.value)}
-                          placeholder="Cari nama atau nomor WhatsApp…"
-                        />
-                      </label>
-                      <span role="status">
-                        Menampilkan {filtered.length} dari {guests.length}
-                      </span>
-                    </div>
-                    <div className="table-wrap">
-                      <table>
-                        <caption className="sr-only">
-                          Daftar tamu undangan, perangkat, konfirmasi, dan
-                          tindakan
-                        </caption>
-                        <thead>
-                          <tr>
-                            {[
-                              "Nama & WhatsApp",
-                              "Status",
-                              "Perangkat",
-                              "Konfirmasi",
-                              "Ucapan & Doa",
-                              "Aksi",
-                            ].map((title) => (
-                              <th scope="col" key={title}>
-                                {title}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody id="guests">
-                          {filtered.map((guest) => (
-                            <GuestRow
-                              key={guest.id}
-                              guest={guest}
-                              template={
-                                content.settings.whatsappTemplate ??
-                                defaultWhatsappTemplate
-                              }
-                              api={api}
-                              refresh={refreshGuests}
-                              confirm={confirm}
-                              edit={() => setEditor({ guest })}
-                              copy={copy}
-                              showLink={showLink}
-                              notice={notice}
-                            />
-                          ))}
-                        </tbody>
-                      </table>
-                      {!filtered.length && (
-                        <p className="empty">
-                          {guests.length
-                            ? "Tidak ada tamu yang cocok. Coba nama atau nomor lain."
-                            : "Belum ada tamu. Tambahkan tamu untuk membuat tautan pertama."}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </section>
+                <div hidden={page !== "tamu"}>
+                  <GuestsPage
+                    guests={guests}
+                    template={
+                      typeof content.settings.whatsappTemplate === "string"
+                        ? content.settings.whatsappTemplate
+                        : defaultWhatsappTemplate
+                    }
+                    api={api}
+                    refresh={refreshGuests}
+                    confirm={confirm}
+                    copy={copy}
+                    showLink={showLink}
+                    newLink={newLink}
+                    dismissLink={() => setNewLink("")}
+                    edit={(guest) => setEditor({ guest })}
+                    add={() => setEditor({ guest: null })}
+                    notice={notice}
+                  />
+                </div>
                 <section
                   id="page-pesan"
                   className="page"
                   aria-labelledby="whatsapp-title"
                   hidden={page !== "pesan"}
                 >
-                  <header className="page-heading">
-                    <div>
-                      <p className="eyebrow">Kesan pertama yang hangat</p>
-                      <h1 id="whatsapp-title" tabIndex={-1}>
-                        Pesan &amp; Preview
-                      </h1>
-                      <p>Atur sapaan dan tampilan tautan saat dibagikan.</p>
-                    </div>
-                  </header>
-                  <div className="page-body messages-layout">
-                    <SettingsForm
-                      kind="messages"
-                      content={content}
-                      api={api}
-                      onContent={setContent}
-                      notice={notice}
-                      account={session.account}
-                    />
-                    <aside
-                      className="panel preview-panel"
-                      aria-labelledby="thumbnail-title"
-                    >
-                      <h2 id="thumbnail-title">Thumbnail Tautan</h2>
-                      <p>Gambar pertama yang menyambut tamu di WhatsApp.</p>
-                      <div id="preview-media">
-                        {mediaCard("preview", "Thumbnail WhatsApp")}
-                      </div>
-                      <p className="help">
-                        JPG, PNG, WebP · maksimal 12 MB. Dipotong otomatis
-                        menjadi 1200 × 630 piksel. Thumbnail dapat diakses
-                        publik agar WhatsApp bisa membacanya.
-                      </p>
-                      <p className="info-note">
-                        Kirim membuka WhatsApp dengan pesan terisi. Tekan kirim
-                        di WhatsApp untuk mengirimnya.
-                      </p>
-                    </aside>
-                  </div>
+                  <SettingsForm
+                    kind="messages"
+                    content={content}
+                    api={api}
+                    onContent={setContent}
+                    notice={notice}
+                    account={session.account}
+                    confirm={confirm}
+                    previewMedia={mediaCard("preview", "Thumbnail WhatsApp")}
+                  />
                 </section>
                 <section
                   id="page-media"
@@ -1336,61 +2333,65 @@ function App() {
                 >
                   <header className="page-heading">
                     <div>
-                      <p className="eyebrow">Cerita dalam setiap bingkai</p>
                       <h1 id="media-title" tabIndex={-1}>
                         Foto &amp; Lagu
                       </h1>
-                      <p>Lengkapi undangan dengan kenangan dan lagu pilihan.</p>
+                      <p>
+                        Kelola foto mempelai, galeri kenangan, dan musik latar
+                        undangan.
+                      </p>
                     </div>
                   </header>
-                  <div className="page-body">
-                    <p className="info-note">
-                      Foto JPG, PNG, WebP maksimal 12 MB diperkecil otomatis.
-                      Lagu MP3 maksimal 25 MB. Pilih berkas, lalu tekan Unggah.
-                    </p>
-                    <section
-                      className="media-section"
-                      aria-labelledby="couple-title"
-                    >
-                      <div className="section-heading">
-                        <h2 id="couple-title">Foto Pasangan</h2>
-                        <span className="muted">Dua sosok, satu cerita</span>
-                      </div>
-                      <div id="couple-media" className="media-grid couple-grid">
-                        {mediaCard("groom", "Foto Mempelai Pria")}
-                        {mediaCard("bride", "Foto Mempelai Wanita")}
-                      </div>
-                    </section>
-                    <section
-                      className="media-section"
-                      aria-labelledby="gallery-title"
-                    >
-                      <div className="section-heading">
-                        <h2 id="gallery-title">Galeri Kenangan</h2>
-                        <span className="badge">9 slot foto</span>
-                      </div>
-                      <div
-                        id="gallery-media"
-                        className="media-grid gallery-grid"
-                      >
-                        {Array.from({ length: 9 }, (_, i) =>
-                          mediaCard(
-                            `gallery${i + 1}`,
-                            `Galeri · Foto ${i + 1}`,
-                          ),
-                        )}
-                      </div>
-                    </section>
-                    <section
-                      className="media-section"
-                      aria-labelledby="music-title"
-                    >
-                      <h2 id="music-title">Lagu Undangan</h2>
-                      <div id="music-media">
-                        {mediaCard("music", "Lagu Pilihan")}
-                      </div>
-                    </section>
-                  </div>
+                  <p className="info-note">
+                    Foto JPG, PNG, WebP maksimal 12 MB diperkecil otomatis. Lagu
+                    MP3 maksimal 25 MB. Pilih berkas, lalu tekan Unggah.
+                  </p>
+                  <section
+                    className="media-section"
+                    aria-labelledby="couple-title"
+                  >
+                    <div className="section-heading">
+                      <h2 id="couple-title">Foto Mempelai</h2>
+                      <span className="muted">2 slot foto</span>
+                    </div>
+                    <div id="couple-media" className="media-grid couple-grid">
+                      {mediaCard("groom", "Foto mempelai pertama")}
+                      {mediaCard("bride", "Foto mempelai kedua")}
+                    </div>
+                  </section>
+                  <section
+                    className="media-section"
+                    aria-labelledby="gallery-title"
+                  >
+                    <div className="section-heading">
+                      <h2 id="gallery-title">Galeri Foto Undangan</h2>
+                      <span className="tag">
+                        {
+                          Array.from(
+                            { length: 9 },
+                            (_, i) => content.media[`gallery${i + 1}`],
+                          ).filter(Boolean).length
+                        }
+                        /9 terpasang
+                      </span>
+                    </div>
+                    <div id="gallery-media" className="media-grid gallery-grid">
+                      {Array.from({ length: 9 }, (_, i) =>
+                        mediaCard(`gallery${i + 1}`, `Galeri ${i + 1}`),
+                      )}
+                    </div>
+                  </section>
+                  <section
+                    className="media-section"
+                    aria-labelledby="music-title"
+                  >
+                    <div className="section-heading">
+                      <h2 id="music-title">Musik Latar Belakang (MP3)</h2>
+                    </div>
+                    <div id="music-media">
+                      {mediaCard("music", "Lagu undangan")}
+                    </div>
+                  </section>
                 </section>
                 <section
                   id="page-acara"
@@ -1400,37 +2401,27 @@ function App() {
                 >
                   <header className="page-heading">
                     <div>
-                      <p className="eyebrow">Menuju hari bahagia</p>
                       <h1 id="event-settings-title" tabIndex={-1}>
                         Detail Acara
                       </h1>
-                      <p>Pastikan waktu dan lokasi tersampaikan dengan baik.</p>
+                      <p>
+                        Kelola informasi mempelai, keluarga, waktu rangkaian
+                        acara, lokasi, dan hadiah.
+                      </p>
                     </div>
                   </header>
-                  <div className="page-body event-layout">
-                    <SettingsForm
-                      kind="event"
-                      content={content}
-                      api={api}
-                      onContent={setContent}
-                      notice={notice}
-                      account={session.account}
-                    />
-                    <aside className="event-context panel">
-                      <p className="eyebrow">Undangan Pernikahan</p>
-                      <h2>{session.account.tenant.name}</h2>
-                      <p className="help">
-                        Pengaturan dan media hanya berlaku untuk undangan akun
-                        ini.
-                      </p>
-                    </aside>
-                  </div>
+                  <SettingsForm
+                    kind="event"
+                    content={content}
+                    api={api}
+                    onContent={setContent}
+                    notice={notice}
+                    account={session.account}
+                    confirm={confirm}
+                  />
                 </section>
               </main>
-              <footer className="workspace-footer">
-                weddinvita<span aria-hidden="true">•</span>{" "}
-                <span>Merangkai momen, menyambut cerita.</span>
-              </footer>
+              <footer className="workspace-footer">weddinvita</footer>
             </div>
           </div>
         )
@@ -1438,7 +2429,7 @@ function App() {
       {status && (
         <div
           id="status"
-          role="status"
+          role={status.error ? "alert" : "status"}
           className={`status${status.error ? " error" : ""}`}
         >
           <span>{status.message}</span>
@@ -1457,23 +2448,19 @@ function App() {
           className="navigation-dialog"
           onClose={() => setNavigation(false)}
         >
-          <div>
-            <div className="section-heading">
-              <h2 id="navigation-title" className="brand">
-                weddinvita<span aria-hidden="true">•</span>
-              </h2>
-              <button
-                type="button"
-                aria-label="Tutup menu"
-                onClick={() => setNavigation(false)}
-              >
-                ×
-              </button>
-            </div>
-            <p className="event-chip">{session.account.tenant.name}</p>
-            <Navigation page={page} close={() => setNavigation(false)} />
-            {footer}
+          <div className="section-heading">
+            <h2 id="navigation-title">Menu Undangan</h2>
+            <button
+              className="icon-button quiet"
+              type="button"
+              aria-label="Tutup menu"
+              onClick={() => setNavigation(false)}
+            >
+              ×
+            </button>
           </div>
+          <Navigation page={page} close={() => setNavigation(false)} />
+          {footer}
         </Modal>
       )}
       {editor && (
@@ -1505,7 +2492,6 @@ function App() {
               );
             }}
           >
-            <p className="eyebrow">Konfirmasi Perubahan</p>
             <h2 id="confirm-title">{confirmation.title}</h2>
             <p id="confirm-message">{confirmation.message}</p>
             <div className="dialog-actions">
@@ -1528,7 +2514,7 @@ function App() {
               setManualLink("");
             }}
           >
-            <h2 id="copy-title">Salin Tautan Undangan</h2>
+            <h2 id="copy-title">Salin tautan undangan</h2>
             <p>
               Clipboard tidak tersedia. Salin tautan yang sudah dipilih di
               bawah.
@@ -1551,4 +2537,5 @@ function App() {
     </>
   );
 }
+
 createRoot(document.getElementById("root")!).render(<App />);

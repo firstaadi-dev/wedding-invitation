@@ -1551,8 +1551,8 @@
       },
       "put": {
         "operationId": "setContent",
-        "summary": "Save event names, times, countdown time and official map embed URL",
-        "description": "Merge editable event names, displayed times, WIB countdown start and official map embed URL. Omitted fields keep their stored values; empty names use the invitation defaults. All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
+        "summary": "Save couple and parent names, gift information, event times and location",
+        "description": "Merge editable couple and parent names, gift-section visibility and up to 10 gift entries (bank accounts or offline delivery addresses), event names and times, WIB countdown start, and official map embed URL. Omitted fields keep their stored values; empty names use invitation defaults. All resources are scoped to the authenticated account tenant.",
         "tags": [
           "Admin"
         ],
@@ -3090,6 +3090,114 @@
       "Settings": {
         "type": "object",
         "properties": {
+          "partnerOneName": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "First partner full name."
+          },
+          "partnerTwoName": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Second partner full name."
+          },
+          "partnerOneFather": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "partnerOneMother": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "partnerTwoFather": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "partnerTwoMother": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "giftEnabled": {
+            "type": "string",
+            "enum": [
+              "true",
+              "false"
+            ],
+            "description": "Whether to show the gift-account section to guests."
+          },
+          "giftAccounts": {
+            "type": "array",
+            "maxItems": 10,
+            "description": "Gift information entries, each a bank account or an offline delivery address. An empty array removes all entries.",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "type",
+                    "bank",
+                    "number",
+                    "owner"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "account"
+                      ]
+                    },
+                    "bank": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "number": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 40,
+                      "pattern": "^[0-9 ]+$"
+                    },
+                    "owner": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "type",
+                    "recipient",
+                    "address"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "address"
+                      ]
+                    },
+                    "recipient": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "address": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    },
+                    "phone": {
+                      "type": "string",
+                      "maxLength": 40
+                    }
+                  }
+                }
+              ]
+            }
+          },
           "ceremonyTime": {
             "type": "string",
             "maxLength": 80
@@ -3127,7 +3235,7 @@
           "linkPreviewTitle": {
             "type": "string",
             "maxLength": 120,
-            "description": "Public page and Open Graph title; empty uses Firsta & Talitha — Undangan."
+            "description": "Public page and Open Graph title; empty derives from configured couple names."
           },
           "linkPreviewDescription": {
             "type": "string",

@@ -1,5 +1,7 @@
 # Redesign CMS weddinvita
 
+> Arsip brief awal. Desain dan cakupan terbaru tersedia di [hasil desain CMS](weddinvita-cms-results.md) dan [catatan implementasi](weddinvita-cms-implementation.md).
+
 Brand produk CMS dipilih pengguna: **weddinvita** (lowercase). Rimba Jawa tetap nama tema undangan, bukan nama CMS. Desain diminta melalui MCP Stitch; implementasi CMS aktif belum diubah pada tahap ini.
 
 ## Arah visual

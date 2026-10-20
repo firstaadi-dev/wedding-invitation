@@ -1,0 +1,500 @@
+<!DOCTYPE html><html class="light" lang="id"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Detail Acara — weddinvita CMS</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Inter & JetBrains Mono Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-secondary-fixed": "#131b2e",
+            "on-tertiary": "#ffffff",
+            "surface-dim": "#cbdbf5",
+            "on-secondary-container": "#5c647a",
+            "on-error-container": "#93000a",
+            "inverse-surface": "#213145",
+            "surface-container-lowest": "#ffffff",
+            "on-primary-fixed-variant": "#0d512f",
+            "surface-container": "#e5eeff",
+            "error-container": "#ffdad6",
+            "surface-tint": "#2b6a45",
+            "on-error": "#ffffff",
+            "surface-bright": "#f8f9ff",
+            "secondary-fixed": "#dae2fd",
+            "error": "#ba1a1a",
+            "tertiary-fixed": "#89f5e7",
+            "on-primary-container": "#94d5a8",
+            "tertiary-fixed-dim": "#6bd8cb",
+            "on-surface": "#0b1c30",
+            "on-primary-fixed": "#00210f",
+            "secondary": "#565e74",
+            "tertiary-container": "#005e56",
+            "on-tertiary-fixed": "#00201d",
+            "outline-variant": "#c0c9bf",
+            "primary-container": "#1e5e3a",
+            "secondary-fixed-dim": "#bec6e0",
+            "primary": "#004625",
+            "on-secondary-fixed-variant": "#3f465c",
+            "primary-fixed": "#aff2c2",
+            "inverse-primary": "#94d5a7",
+            "surface-variant": "#d3e4fe",
+            "on-tertiary-fixed-variant": "#005049",
+            "inverse-on-surface": "#eaf1ff",
+            "on-surface-variant": "#404941",
+            "surface-container-high": "#dce9ff",
+            "on-secondary": "#ffffff",
+            "tertiary": "#00443e",
+            "on-tertiary-container": "#6cd9cb",
+            "on-background": "#0b1c30",
+            "surface": "#f8f9ff",
+            "secondary-container": "#dae2fd",
+            "primary-fixed-dim": "#94d5a7",
+            "on-primary": "#ffffff",
+            "outline": "#707971",
+            "surface-container-low": "#eff4ff",
+            "background": "#f8f9ff",
+            "surface-container-highest": "#d3e4fe"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-xl": "1.5rem",
+            "margin-desktop": "2rem",
+            "space-md": "0.75rem",
+            "space-xs": "0.25rem",
+            "gutter": "1rem",
+            "margin": "1rem",
+            "space-sm": "0.5rem",
+            "space-lg": "1rem",
+            "gutter-desktop": "1.5rem"
+          },
+          "fontFamily": {
+            "headline-sm": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-lg-mobile": ["Inter"],
+            "headline-lg": ["Inter"],
+            "data-mono": ["JetBrains Mono"],
+            "body-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "label-sm": ["Inter"],
+            "data-mono-sm": ["JetBrains Mono"],
+            "label-lg": ["Inter"],
+            "headline-md": ["Inter"]
+          },
+          "fontSize": {
+            "headline-sm": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+            "headline-lg-mobile": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "data-mono": ["12px", { "lineHeight": "16px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+            "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+            "body-md": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "500" }],
+            "data-mono-sm": ["11px", { "lineHeight": "14px", "fontWeight": "400" }],
+            "label-lg": ["13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen">
+<div class="flex min-h-screen w-[1440px] mx-auto overflow-x-hidden">
+<!-- Left Navigation Rail: exactly 100px fixed dark rail with 4 items + Keluar at bottom -->
+<aside class="fixed left-0 top-0 bottom-0 w-[100px] flex flex-col justify-between items-center py-6 z-40 bg-on-secondary-fixed border-r border-outline-variant/20">
+<!-- Top Rail Brand & Nav -->
+<div class="flex flex-col items-center w-full gap-6">
+<!-- Logo Header -->
+<div class="flex flex-col items-center text-center px-1">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary mb-1 shadow-sm">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+</div>
+<span class="text-label-md font-label-md uppercase tracking-wider text-outline-variant">weddinvita</span>
+<span class="text-label-sm font-label-sm text-outline-variant/60">Portal Undangan</span>
+</div>
+<!-- 4 Items Navigation List -->
+<nav aria-label="Menu Navigasi" class="flex flex-col gap-2 w-full px-2">
+<!-- 1. Tamu Undangan -->
+<a class="flex flex-col items-center justify-center py-3 px-1 text-outline-variant hover:text-surface hover:bg-on-surface-variant/20 rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out text-center" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="group">group</span>
+<span class="text-[11px] leading-tight">Tamu Undangan</span>
+</a>
+<!-- 2. Pesan & Preview -->
+<a class="flex flex-col items-center justify-center py-3 px-1 text-outline-variant hover:text-surface hover:bg-on-surface-variant/20 rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out text-center" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="chat_bubble">chat_bubble</span>
+<span class="text-[11px] leading-tight">Pesan &amp; Preview</span>
+</a>
+<!-- 3. Foto & Lagu -->
+<a class="flex flex-col items-center justify-center py-3 px-1 text-outline-variant hover:text-surface hover:bg-on-surface-variant/20 rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out text-center" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="photo_library">photo_library</span>
+<span class="text-[11px] leading-tight">Foto &amp; Lagu</span>
+</a>
+<!-- 4. Detail Acara (ACTIVE HIGHLIGHTED) -->
+<a aria-current="page" class="flex flex-col items-center justify-center py-3 px-1 text-on-primary bg-primary-container rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out text-center" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="event" style="font-variation-settings: 'FILL' 1;">event</span>
+<span class="text-[11px] leading-tight font-semibold">Detail Acara</span>
+</a>
+</nav>
+</div>
+<!-- Bottom of Rail: ONLY Keluar (logout icon) -->
+<div class="w-full px-2">
+<a class="flex flex-col items-center justify-center py-3 px-1 text-outline-variant hover:text-surface hover:bg-on-surface-variant/20 rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out text-center" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="logout">logout</span>
+<span class="text-[11px] leading-tight">Keluar</span>
+</a>
+</div>
+</aside>
+<!-- Main Workspace Area (100px left offset for fixed sidebar rail) -->
+<main class="ml-[100px] flex-1 min-h-screen px-8 py-8">
+<!-- Top Context Header Area -->
+<header class="mb-8 flex justify-between items-start border-b border-outline-variant/30 pb-6">
+<div>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-secondary-container/50 text-on-secondary-fixed text-label-sm font-label-sm uppercase tracking-wide mb-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="verified">verified</span>
+            Undangan pernikahan
+          </div>
+<h1 class="font-headline-lg text-headline-lg text-slate-900">Detail Acara</h1>
+<p class="font-body-lg text-body-lg text-slate-500 mt-1">
+            Kelola informasi mempelai, keluarga, waktu rangkaian acara, lokasi, dan informasi hadiah.
+          </p>
+</div>
+<!-- Status Badge Header Indicator -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/40 text-on-surface">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="text-label-md font-label-md text-slate-700">Draf tersimpan</span>
+</div>
+</div>
+</header>
+<!-- Unified Form Cards Container (24px/32px vertical rhythm) -->
+<form class="space-y-8 max-w-5xl" onsubmit="event.preventDefault();">
+<!-- GROUP 1: Mempelai Card -->
+<section class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-6 shadow-sm">
+<div class="flex items-center gap-2.5 mb-6 pb-3 border-b border-outline-variant/20">
+<span class="material-symbols-outlined text-primary-container" data-icon="person_heart">person_heart</span>
+<h2 class="font-headline-md text-headline-md text-slate-900">Mempelai</h2>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<!-- Mempelai Pertama -->
+<div>
+<label class="block font-label-lg text-label-lg text-slate-800 mb-2" for="mempelai_pertama">
+                Nama mempelai pertama
+              </label>
+<input class="w-full h-[46px] px-3.5 bg-surface-bright border border-outline-variant rounded-lg text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="mempelai_pertama" maxlength="120" placeholder="Contoh: Nadia Saraswati, S.Farm." type="text" value="Nadia Saraswati, S.Farm.">
+</div>
+<!-- Mempelai Kedua -->
+<div>
+<label class="block font-label-lg text-label-lg text-slate-800 mb-2" for="mempelai_kedua">
+                Nama mempelai kedua
+              </label>
+<input class="w-full h-[46px] px-3.5 bg-surface-bright border border-outline-variant rounded-lg text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="mempelai_kedua" maxlength="120" placeholder="Contoh: Raka Pratama, S.T." type="text" value="Raka Pratama, S.T.">
+</div>
+</div>
+<p class="font-body-md text-body-md text-slate-500 mt-3 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-slate-400" data-icon="info">info</span>
+            Gelar akademik atau kehormatan dapat ditulis langsung pada nama.
+          </p>
+</section>
+<!-- GROUP 2: Orang Tua Card -->
+<section class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-6 shadow-sm">
+<div class="flex items-center gap-2.5 mb-6 pb-3 border-b border-outline-variant/20">
+<span class="material-symbols-outlined text-primary-container" data-icon="diversity_3">diversity_3</span>
+<h2 class="font-headline-md text-headline-md text-slate-900">Keluarga &amp; Orang Tua</h2>
+</div>
+<div class="grid grid-cols-2 gap-8">
+<!-- Sub-panel 1: Keluarga Mempelai Pertama -->
+<div class="bg-surface border border-outline-variant/30 rounded-lg p-5">
+<div class="flex items-center gap-2 mb-4 pb-2 border-b border-outline-variant/20">
+<span class="text-label-lg font-label-lg text-primary-container font-semibold">Keluarga Mempelai Pertama</span>
+</div>
+<div class="space-y-4">
+<div>
+<label class="block font-label-lg text-label-lg text-slate-800 mb-1.5" for="ayah_mempelai_1">
+                    Nama Ayah
+                  </label>
+<input class="w-full h-[46px] px-3.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="ayah_mempelai_1" maxlength="120" placeholder="Contoh: H. Bambang Soediro" type="text" value="H. Bambang Soediro">
+</div>
+<div>
+<label class="block font-label-lg text-label-lg text-slate-800 mb-1.5" for="ibu_mempelai_1">
+                    Nama Ibu
+                  </label>
+<input class="w-full h-[46px] px-3.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="ibu_mempelai_1" maxlength="120" placeholder="Contoh: Hj. Larasati Soediro" type="text" value="Hj. Larasati Soediro">
+</div>
+</div>
+</div>
+<!-- Sub-panel 2: Keluarga Mempelai Kedua -->
+<div class="bg-surface border border-outline-variant/30 rounded-lg p-5">
+<div class="flex items-center gap-2 mb-4 pb-2 border-b border-outline-variant/20">
+<span class="text-label-lg font-label-lg text-primary-container font-semibold">Keluarga Mempelai Kedua</span>
+</div>
+<div class="space-y-4">
+<div>
+<label class="block font-label-lg text-label-lg text-slate-800 mb-1.5" for="ayah_mempelai_2">
+                    Nama Ayah
+                  </label>
+<input class="w-full h-[46px] px-3.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="ayah_mempelai_2" maxlength="120" placeholder="Contoh: Drs. Hendra Gunawan" type="text" value="Drs. Hendra Gunawan">
+</div>
+<div>
+<label class="block font-label-lg text-label-lg text-slate-800 mb-1.5" for="ibu_mempelai_2">
+                    Nama Ibu
+                  </label>
+<input class="w-full h-[46px] px-3.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="ibu_mempelai_2" maxlength="120" placeholder="Contoh: Sri Rahayu, M.Pd." type="text" value="Sri Rahayu, M.Pd.">
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- GROUP 3: Rangkaian Acara Card (Exactly 2 events: Akad Nikah & Resepsi) -->
+<section class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-6 shadow-sm">
+<div class="flex items-center gap-2.5 mb-6 pb-3 border-b border-outline-variant/20">
+<span class="material-symbols-outlined text-primary-container" data-icon="calendar_month">calendar_month</span>
+<h2 class="font-headline-md text-headline-md text-slate-900">Rangkaian Acara</h2>
+</div>
+<div class="space-y-4">
+<!-- Acara 1: Akad Nikah -->
+<div class="border border-outline-variant/40 rounded-lg p-4 bg-surface-bright flex flex-col gap-3">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-primary-container/10 text-primary-container flex items-center justify-center font-label-md text-label-md font-bold">1</span>
+<span class="font-label-lg text-label-lg text-slate-700">Acara Pertama</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block font-label-lg text-label-lg text-slate-800 mb-1.5" for="acara_1_nama">Nama acara</label>
+<input class="w-full h-[46px] px-3.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="acara_1_nama" maxlength="80" type="text" value="Akad Nikah">
+</div>
+<div>
+<label class="block font-label-lg text-label-lg text-slate-800 mb-1.5" for="acara_1_waktu">Waktu acara</label>
+<input class="w-full h-[46px] px-3.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="acara_1_waktu" maxlength="80" type="text" value="Pukul 08:00 - 10:00 WIB">
+</div>
+</div>
+</div>
+<!-- Acara 2: Resepsi -->
+<div class="border border-outline-variant/40 rounded-lg p-4 bg-surface-bright flex flex-col gap-3">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-primary-container/10 text-primary-container flex items-center justify-center font-label-md text-label-md font-bold">2</span>
+<span class="font-label-lg text-label-lg text-slate-700">Acara Kedua</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block font-label-lg text-label-lg text-slate-800 mb-1.5" for="acara_2_nama">Nama acara</label>
+<input class="w-full h-[46px] px-3.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="acara_2_nama" maxlength="80" type="text" value="Resepsi">
+</div>
+<div>
+<label class="block font-label-lg text-label-lg text-slate-800 mb-1.5" for="acara_2_waktu">Waktu acara</label>
+<input class="w-full h-[46px] px-3.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="acara_2_waktu" maxlength="80" type="text" value="Pukul 11:00 - 13:00 WIB">
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- GROUP 4: Hitung Mundur Card -->
+<section class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-6 shadow-sm">
+<div class="flex items-center gap-2.5 mb-6 pb-3 border-b border-outline-variant/20">
+<span class="material-symbols-outlined text-primary-container" data-icon="timer">timer</span>
+<h2 class="font-headline-md text-headline-md text-slate-900">Hitung Mundur</h2>
+</div>
+<div class="max-w-md">
+<label class="block font-label-lg text-label-lg text-slate-800 mb-2" for="hitung_mundur_jam">
+              Jam mulai hitung mundur
+            </label>
+<div class="relative">
+<input class="w-full h-[46px] pl-3.5 pr-14 bg-surface-bright border border-outline-variant rounded-lg text-body-lg text-on-surface font-data-mono focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="hitung_mundur_jam" type="time" value="08:00">
+<span class="absolute right-3 top-3 text-slate-500 font-label-md text-label-md pointer-events-none select-none font-semibold">WIB</span>
+</div>
+<p class="font-body-md text-body-md text-slate-500 mt-2.5 leading-relaxed">
+              Tanggal acara tetap: <strong class="text-slate-700">22 November 2026</strong>. Hitung mundur akan mengacu pada tanggal tersebut dan jam mulai di atas.
+            </p>
+</div>
+</section>
+<!-- GROUP 5: Lokasi Card -->
+<section class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-6 shadow-sm">
+<div class="flex items-center gap-2.5 mb-6 pb-3 border-b border-outline-variant/20">
+<span class="material-symbols-outlined text-primary-container" data-icon="location_on">location_on</span>
+<h2 class="font-headline-md text-headline-md text-slate-900">Lokasi Acara</h2>
+</div>
+<div class="space-y-4">
+<div>
+<label class="block font-label-lg text-label-lg text-slate-800 mb-2" for="maps_embed_url">
+                URL Embed Google Maps
+              </label>
+<textarea class="w-full p-3.5 bg-surface-bright border border-outline-variant rounded-lg font-data-mono text-body-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="maps_embed_url" maxlength="4096" rows="3">https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.291771891963!2d106.82862411529517!3d-6.225219995493649!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f3fb71650b29%3A0x6b307d0f1a941a50!2sBalai%20Kartini!5e0!3m2!1sid!2sid!4v1680000000000!5m2!1id!2sid</textarea>
+<p class="font-body-md text-body-md text-slate-500 mt-2">
+                Salin nilai src dari kode iframe sematan Google Maps (Buka Google Maps &gt; Bagikan &gt; Sematkan peta &gt; Salin HTML src).
+              </p>
+</div>
+<!-- Preview Card / Simulator Container -->
+<div class="mt-4 border border-outline-variant/40 rounded-lg p-4 bg-surface">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-md text-label-md text-slate-600 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary-container" data-icon="map">map</span>
+                  Pratinjau Sematan Peta
+                </span>
+<span class="text-label-sm font-label-sm text-slate-400">Balai Kartini, Jakarta Selatan</span>
+</div>
+<div class="w-full h-44 rounded-lg bg-slate-200 border border-outline-variant/30 relative overflow-hidden flex flex-col items-center justify-center text-slate-500">
+<!-- Map Simulation Texture & Marker -->
+<div class="absolute inset-0 opacity-40 bg-[radial-gradient(#94a3b8_1px,transparent_1px)] [background-size:16px_16px]"></div>
+<div class="relative z-10 flex flex-col items-center text-center p-4">
+<div class="w-10 h-10 rounded-full bg-error-container text-error flex items-center justify-center mb-2 shadow-sm">
+<span class="material-symbols-outlined text-[24px]" data-icon="pin_drop">pin_drop</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-slate-800">Balai Kartini Jakarta</span>
+<span class="text-body-sm text-slate-600 mt-0.5">Jl. Gatot Subroto No.Kav. 37, Kuningan Timur, Setiabudi</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- GROUP 6: Informasi Hadiah (Tanda Kasih) Card -->
+<section class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-6 shadow-sm">
+<!-- Card Header With Pill Switch Toggle -->
+<div class="flex items-center justify-between pb-4 border-b border-outline-variant/20 mb-6">
+<div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container" data-icon="redeem">redeem</span>
+<h2 class="font-headline-md text-headline-md text-slate-900">Informasi Hadiah (Tanda Kasih)</h2>
+</div>
+<p class="font-body-md text-body-md text-slate-500 mt-1">
+                Tampilkan rekening atau alamat pengiriman kado untuk tamu yang ingin mengirimkan tanda kasih.
+              </p>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-label-md text-label-md text-slate-600 font-data-mono bg-surface px-2.5 py-1 rounded border border-outline-variant/30">
+                2 / 10 informasi terpasang
+              </span>
+<!-- 72x34px Pill Switch (Green ON) -->
+<div class="flex items-center">
+<button aria-checked="true" aria-label="Tampilkan bagian hadiah" class="w-[72px] h-[34px] rounded-full bg-primary-container p-1 flex items-center justify-between transition-colors duration-200 cursor-pointer shadow-inner relative" role="switch" type="button">
+<span class="text-[10px] font-bold text-white tracking-wider pl-2 z-10 select-none">ON</span>
+<span class="w-[26px] h-[26px] rounded-full bg-white shadow-md transform translate-x-0 transition-transform"></span>
+</button>
+</div>
+<script>window.updateGiftCount = function() { const cards = document.querySelectorAll('div.space-y-5 > div.rounded-lg'); const badge = document.querySelector('section:nth-of-type(6) span.font-data-mono'); if (badge) { badge.textContent = `${cards.length} / 10 informasi terpasang`; } };</script></div>
+</div>
+<!-- 2 Gift Cards Inside -->
+<div class="space-y-5">
+<!-- Card A: Rekening Bank -->
+<div class="border border-outline-variant/40 rounded-lg p-5 bg-surface-bright">
+<div class="flex items-center justify-between pb-3 mb-4 border-b border-outline-variant/20">
+<div class="flex items-center gap-3">
+<span class="px-2.5 py-1 rounded bg-secondary-container text-on-secondary-fixed text-label-sm font-label-sm font-semibold">
+                    Rekening Bank
+                  </span>
+<div class="flex items-center gap-1.5">
+<label class="text-label-sm text-slate-500 font-label-sm text-[14px]" for="tipe_hadiah_1">Jenis informasi:</label>
+<select class="px-3 py-1.5 text-[14px] bg-surface-container-lowest border border-outline-variant rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="tipe_hadiah_1" style="height:44px;min-height:44px;max-height:44px;font-size:14px;box-sizing:border-box;"><option selected="">Rekening</option><option>Alamat rumah</option></select>
+</div>
+</div>
+<button class="text-error hover:bg-error-container/40 px-2.5 py-1 rounded text-label-md font-label-md flex items-center gap-1 transition-colors" type="button" onclick="this.closest('div.border-outline-variant\/40').remove(); if(window.updateGiftCount) window.updateGiftCount();">
+<span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span>
+                  Hapus
+                </button>
+</div>
+<div class="grid grid-cols-3 gap-4">
+<div>
+<label class="block font-label-lg text-label-lg text-slate-800 mb-1.5" for="rek_nama_bank">Nama bank</label>
+<input class="w-full h-[46px] px-3.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="rek_nama_bank" maxlength="80" type="text" value="Bank Central Asia (BCA)">
+</div>
+<div>
+<label class="block font-label-lg text-label-lg text-slate-800 mb-1.5" for="rek_nomor">Nomor rekening</label>
+<input class="w-full h-[46px] px-3.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-data-mono text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="rek_nomor" inputmode="numeric" maxlength="40" type="text" value="8830192841">
+</div>
+<div>
+<label class="block font-label-lg text-label-lg text-slate-800 mb-1.5" for="rek_pemilik">Nama pemilik rekening</label>
+<input class="w-full h-[46px] px-3.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="rek_pemilik" maxlength="120" type="text" value="Nadia Saraswati">
+</div>
+</div>
+</div>
+<!-- Card B: Alamat Rumah -->
+<div class="border border-outline-variant/40 rounded-lg p-5 bg-surface-bright">
+<div class="flex items-center justify-between pb-3 mb-4 border-b border-outline-variant/20">
+<div class="flex items-center gap-3">
+<span class="px-2.5 py-1 rounded bg-secondary-container text-on-secondary-fixed text-label-sm font-label-sm font-semibold">
+                    Alamat Pengiriman Kado
+                  </span>
+<div class="flex items-center gap-1.5">
+<label class="text-label-sm text-slate-500 font-label-sm text-[14px]" for="tipe_hadiah_2">Jenis informasi:</label>
+<select class="px-3 py-1.5 text-[14px] bg-surface-container-lowest border border-outline-variant rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="tipe_hadiah_2" style="height:44px;min-height:44px;max-height:44px;font-size:14px;box-sizing:border-box;"><option>Rekening</option><option selected="">Alamat rumah</option></select>
+</div>
+</div>
+<button class="text-error hover:bg-error-container/40 px-2.5 py-1 rounded text-label-md font-label-md flex items-center gap-1 transition-colors" type="button" onclick="this.closest('div.border-outline-variant\/40').remove(); if(window.updateGiftCount) window.updateGiftCount();">
+<span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span>
+                  Hapus
+                </button>
+</div>
+<div class="space-y-4">
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block font-label-lg text-label-lg text-slate-800 mb-1.5" for="kado_penerima">Nama penerima</label>
+<input class="w-full h-[46px] px-3.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="kado_penerima" maxlength="120" type="text" value="Nadia Saraswati / Raka Pratama">
+</div>
+<div>
+<label class="block font-label-lg text-label-lg text-slate-800 mb-1.5" for="kado_kontak">Nomor kontak (opsional)</label>
+<input class="w-full h-[46px] px-3.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-data-mono text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="kado_kontak" maxlength="40" type="tel" value="0812-8921-0001">
+</div>
+</div>
+<div>
+<label class="block font-label-lg text-label-lg text-slate-800 mb-1.5" for="kado_alamat">Alamat lengkap pengiriman</label>
+<textarea class="w-full p-3.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" id="kado_alamat" maxlength="1000" rows="2">Jl. Dahlia No. 14, RT 02/RW 05, Menteng, Jakarta Pusat 10310</textarea>
+</div>
+</div>
+</div>
+<!-- Add Info Button -->
+<button class="w-full h-[46px] border border-dashed border-outline hover:border-primary-container text-primary-container hover:bg-primary-container/5 rounded-lg flex items-center justify-center gap-2 font-label-lg text-label-lg transition-colors" type="button" onclick="const container = this.previousElementSibling ? this.parentElement : null; if (!container) return; const countSpan = document.querySelector('span.font-data-mono'); const newCard = document.createElement('div'); newCard.className = 'border border-outline-variant/40 rounded-lg p-5 bg-surface-bright gift-card-item transition-all'; newCard.innerHTML = `&lt;div class=&quot;flex items-center justify-between pb-3 mb-4 border-b border-outline-variant/20&quot;&gt;&lt;div class=&quot;flex items-center gap-3&quot;&gt;&lt;span class=&quot;px-2.5 py-1 rounded bg-secondary-container text-on-secondary-fixed text-label-sm font-label-sm font-semibold&quot;&gt;Rekening Bank&lt;/span&gt;&lt;div class=&quot;flex items-center gap-1.5&quot;&gt;&lt;label class=&quot;text-label-sm text-slate-500 font-label-sm text-[14px]&quot;&gt;Jenis informasi:&lt;/label&gt;&lt;select class=&quot;px-3 py-1.5 text-[14px] bg-surface-container-lowest border border-outline-variant rounded-lg text-slate-700&quot; style=&quot;height:44px;&quot;&gt;&lt;option selected&gt;Rekening&lt;/option&gt;&lt;option&gt;Alamat rumah&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;&lt;/div&gt;&lt;button class=&quot;text-error hover:bg-error-container/40 px-2.5 py-1 rounded text-label-md font-label-md flex items-center gap-1 transition-colors delete-btn&quot; type=&quot;button&quot; onclick=&quot;this.closest('.gift-card-item').remove(); updateGiftCount();&quot;&gt;&lt;span class=&quot;material-symbols-outlined text-[16px]&quot;&gt;delete&lt;/span&gt; Hapus&lt;/button&gt;&lt;/div&gt;&lt;div class=&quot;grid grid-cols-3 gap-4&quot;&gt;&lt;div&gt;&lt;label class=&quot;block font-label-lg text-label-lg text-slate-800 mb-1.5&quot;&gt;Nama bank&lt;/label&gt;&lt;input class=&quot;w-full h-[46px] px-3.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-lg text-on-surface&quot; placeholder=&quot;Contoh: Bank BCA&quot; type=&quot;text&quot;/&gt;&lt;/div&gt;&lt;div&gt;&lt;label class=&quot;block font-label-lg text-label-lg text-slate-800 mb-1.5&quot;&gt;Nomor rekening&lt;/label&gt;&lt;input class=&quot;w-full h-[46px] px-3.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-data-mono text-body-lg text-on-surface&quot; placeholder=&quot;1234567890&quot; type=&quot;text&quot;/&gt;&lt;/div&gt;&lt;div&gt;&lt;label class=&quot;block font-label-lg text-label-lg text-slate-800 mb-1.5&quot;&gt;Nama pemilik&lt;/label&gt;&lt;input class=&quot;w-full h-[46px] px-3.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-lg text-on-surface&quot; placeholder=&quot;Nama pemilik rekening&quot; type=&quot;text&quot;/&gt;&lt;/div&gt;&lt;/div&gt;`; this.parentNode.insertBefore(newCard, this); window.updateGiftCount &amp;&amp; window.updateGiftCount();">
+<span class="material-symbols-outlined text-[18px]" data-icon="add_circle">add_circle</span>
+              + Tambah informasi hadiah
+            </button>
+</div>
+</section>
+<!-- Bottom Action Bar -->
+<div class="pt-4 pb-12 flex flex-col items-start gap-3 border-t border-outline-variant/30">
+<div class="flex items-center gap-4">
+<button class="h-[48px] min-w-[220px] px-6 bg-primary-container hover:bg-primary text-on-primary font-label-lg text-label-lg rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-container" type="submit">
+<span class="material-symbols-outlined text-[20px]" data-icon="check_circle">check_circle</span>
+              Simpan detail acara
+            </button>
+<span class="text-body-md font-body-md text-slate-500">
+              Perubahan akan diterapkan langsung ke undangan digital setelah disimpan.
+            </span>
+</div>
+</div>
+</form>
+<div id="toast-notification" class="fixed bottom-8 right-8 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2.5 px-5 py-3.5 bg-slate-900 text-white rounded-lg shadow-xl border border-slate-700"><span class="material-symbols-outlined text-[#aff2c2]">check_circle</span><span class="font-label-lg text-body-md">Detail acara berhasil diperbarui!</span></div><script>function showToast(msg) { const t = document.getElementById('toast-notification'); if (!t) return; if (msg) t.querySelector('span:last-child').textContent = msg; t.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none'); t.classList.add('translate-y-0', 'opacity-100'); setTimeout(() => { t.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none'); t.classList.remove('translate-y-0', 'opacity-100'); }, 3000); } document.addEventListener('DOMContentLoaded', () => { const form = document.querySelector('form'); if (form) { form.addEventListener('submit', (e) => { e.preventDefault(); showToast('Detail acara berhasil diperbarui!'); }); } const toggleBtn = document.querySelector('button[role="switch"]'); if (toggleBtn) { toggleBtn.addEventListener('click', () => { const checked = toggleBtn.getAttribute('aria-checked') === 'true'; toggleBtn.setAttribute('aria-checked', String(!checked)); const textSpan = toggleBtn.querySelector('span:first-child'); const thumb = toggleBtn.querySelector('span:last-child'); if (checked) { toggleBtn.classList.remove('bg-primary-container'); toggleBtn.classList.add('bg-slate-300'); textSpan.textContent = 'OFF'; textSpan.classList.remove('text-white', 'pl-2'); textSpan.classList.add('text-slate-600', 'pr-2', 'order-2'); thumb.classList.add('order-1'); } else { toggleBtn.classList.add('bg-primary-container'); toggleBtn.classList.remove('bg-slate-300'); textSpan.textContent = 'ON'; textSpan.classList.add('text-white', 'pl-2'); textSpan.classList.remove('text-slate-600', 'pr-2', 'order-2'); thumb.classList.remove('order-1'); } }); } });</script></main>
+</div>
+
+
+</body></html>

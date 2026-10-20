@@ -1,0 +1,803 @@
+<!DOCTYPE html><html class="h-full bg-surface" lang="id"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Weddinvita - Tamu Undangan</title>
+<!-- Google Fonts: Inter & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-variant": "#d3e4fe",
+            "on-primary": "#ffffff",
+            "outline-variant": "#c0c9bf",
+            "primary-container": "#1e5e3a",
+            "secondary-fixed-dim": "#bec6e0",
+            "tertiary-fixed-dim": "#6bd8cb",
+            "primary-fixed": "#aff2c2",
+            "on-secondary-fixed": "#131b2e",
+            "error-container": "#ffdad6",
+            "inverse-on-surface": "#eaf1ff",
+            "on-secondary-container": "#5c647a",
+            "surface-container-highest": "#d3e4fe",
+            "surface-dim": "#cbdbf5",
+            "surface-container": "#e5eeff",
+            "on-primary-fixed-variant": "#0d512f",
+            "surface-container-low": "#eff4ff",
+            "tertiary": "#00443e",
+            "on-surface": "#0b1c30",
+            "inverse-surface": "#213145",
+            "tertiary-container": "#005e56",
+            "secondary-fixed": "#dae2fd",
+            "on-secondary-fixed-variant": "#3f465c",
+            "surface-tint": "#2b6a45",
+            "surface": "#f8f9ff",
+            "on-surface-variant": "#404941",
+            "on-tertiary-container": "#6cd9cb",
+            "tertiary-fixed": "#89f5e7",
+            "on-primary-container": "#94d5a8",
+            "inverse-primary": "#94d5a7",
+            "error": "#ba1a1a",
+            "on-primary-fixed": "#00210f",
+            "outline": "#707971",
+            "surface-container-lowest": "#ffffff",
+            "primary": "#004625",
+            "secondary": "#565e74",
+            "on-secondary": "#ffffff",
+            "on-error-container": "#93000a",
+            "background": "#f8f9ff",
+            "on-tertiary-fixed": "#00201d",
+            "secondary-container": "#dae2fd",
+            "on-tertiary-fixed-variant": "#005049",
+            "surface-container-high": "#dce9ff",
+            "on-error": "#ffffff",
+            "primary-fixed-dim": "#94d5a7",
+            "on-tertiary": "#ffffff",
+            "on-background": "#0b1c30",
+            "surface-bright": "#f8f9ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "margin-desktop": "2rem",
+            "space-xl": "1.5rem",
+            "gutter": "1rem",
+            "space-sm": "0.5rem",
+            "margin": "1rem",
+            "space-xs": "0.25rem",
+            "space-md": "0.75rem",
+            "gutter-desktop": "1.5rem",
+            "space-lg": "1rem"
+          },
+          "fontFamily": {
+            "headline-lg-mobile": ["Inter"],
+            "body-md": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-sm": ["Inter"],
+            "label-sm": ["Inter"],
+            "label-md": ["Inter"],
+            "body-sm": ["Inter"],
+            "data-mono": ["JetBrains Mono"],
+            "headline-md": ["Inter"],
+            "data-mono-sm": ["JetBrains Mono"],
+            "label-lg": ["Inter"]
+          },
+          "fontSize": {
+            "headline-lg-mobile": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "body-md": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+            "headline-sm": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "500" }],
+            "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+            "data-mono": ["12px", { "lineHeight": "16px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "data-mono-sm": ["11px", { "lineHeight": "14px", "fontWeight": "400" }],
+            "label-lg": ["13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      display: inline-block;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* Custom scrollbar for dense tables */
+    ::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F5F9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+  </style>
+</head>
+<body class="h-full bg-slate-100 text-slate-800 antialiased overflow-x-hidden">
+<!-- ==================== SHARED COMPONENT: SideNavBar (Fixed 100px Rail) ==================== -->
+<aside class="fixed left-0 top-0 bottom-0 w-[100px] flex flex-col justify-between items-center py-6 z-40 bg-on-secondary-fixed border-r border-outline-variant/20 select-none">
+<!-- Top Branding Anchor -->
+<div class="flex flex-col items-center gap-2 w-full px-2">
+<div class="w-11 h-11 rounded-xl bg-primary-container flex items-center justify-center text-primary-fixed shadow-sm">
+<span class="material-symbols-outlined text-[24px]">mark_email_read</span>
+</div>
+<div class="text-center"><span class="text-label-md font-label-md uppercase tracking-wider text-outline-variant block font-bold">WEDDINVITA</span><span class="text-[10px] text-slate-400 font-medium">Portal Undangan</span></div>
+</div>
+<!-- Navigation List (Strict Mapping to JSON Anchor) -->
+<nav class="flex flex-col gap-2 w-full px-2 my-auto">
+<!-- Item 1: Tamu Undangan (ACTIVE) -->
+<a class="flex flex-col items-center justify-center py-3 px-1 text-on-primary bg-primary-container rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out group shadow-sm" href="#" title="Tamu Undangan">
+<span class="material-symbols-outlined text-[22px] mb-1">group</span>
+<span class="text-[11px] font-medium text-center leading-tight">Tamu Undangan</span>
+</a>
+<!-- Item 2: Pesan & Preview -->
+<a class="flex flex-col items-center justify-center py-3 px-1 text-outline-variant hover:text-surface hover:bg-on-surface-variant/20 rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out group" href="#" title="Pesan &amp; Preview">
+<span class="material-symbols-outlined text-[22px] mb-1">chat_bubble</span>
+<span class="text-[11px] font-medium text-center leading-tight text-slate-400 group-hover:text-white">Pesan &amp; Preview</span>
+</a>
+<!-- Item 3: Foto & Lagu -->
+<a class="flex flex-col items-center justify-center py-3 px-1 text-outline-variant hover:text-surface hover:bg-on-surface-variant/20 rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out group" href="#" title="Foto &amp; Lagu">
+<span class="material-symbols-outlined text-[22px] mb-1">photo_library</span>
+<span class="text-[11px] font-medium text-center leading-tight text-slate-400 group-hover:text-white">Foto &amp; Lagu</span>
+</a>
+<!-- Item 4: Detail Acara -->
+<a class="flex flex-col items-center justify-center py-3 px-1 text-outline-variant hover:text-surface hover:bg-on-surface-variant/20 rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out group" href="#" title="Detail Acara">
+<span class="material-symbols-outlined text-[22px] mb-1">event</span>
+<span class="text-[11px] font-medium text-center leading-tight text-slate-400 group-hover:text-white">Detail Acara</span>
+</a>
+</nav>
+<!-- Rail Footer Actions -->
+<div class="flex flex-col gap-2 w-full px-2 pt-4 border-t border-slate-700/60">
+<a class="flex flex-col items-center justify-center py-2 px-1 text-outline-variant hover:text-surface hover:bg-on-surface-variant/20 rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out" href="#" title="Pengaturan">
+<span class="material-symbols-outlined text-[20px] mb-0.5">settings</span>
+<span class="text-[10px] text-slate-400 font-medium">Pengaturan</span>
+</a>
+<a class="flex flex-col items-center justify-center py-2 px-1 text-outline-variant hover:text-surface hover:bg-on-surface-variant/20 rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out" href="#" title="Keluar">
+<span class="material-symbols-outlined text-[20px] mb-0.5">logout</span>
+<span class="text-[10px] text-slate-400 font-medium">Keluar</span>
+</a>
+</div>
+</aside>
+<!-- ==================== MAIN WORKSPACE AREA ==================== -->
+<main class="ml-[100px] min-h-screen p-8 max-w-[1520px]">
+<!-- Master Surface Container Card -->
+<div class="bg-surface-container-lowest border border-slate-200 rounded-xl shadow-sm p-8 flex flex-col gap-6">
+<!-- Surface Top Header -->
+<header class="flex items-center justify-between pb-6 border-b border-slate-200">
+<div>
+<h1 class="text-2xl font-bold text-slate-900 tracking-tight">Tamu Undangan</h1>
+<p class="text-sm text-slate-500 mt-1">Kelola tautan undangan dan konfirmasi tamu</p>
+</div>
+<div class="flex items-center gap-3">
+<!-- Secondary Batch Export -->
+<button class="h-[44px] px-4 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition flex items-center gap-2 bg-white" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span class="">Ekspor Data</span>
+</button>
+<!-- Primary CTA Button (44px Rule) -->
+<button class="h-[44px] px-5 bg-primary-container hover:bg-[#15803D] text-white rounded-lg font-medium text-sm transition flex items-center gap-2 shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">person_add</span>
+<span class="">+ Tambah tamu</span>
+</button>
+</div>
+</header>
+<!-- Unified 44px Horizontal Filter Toolbar -->
+<section class="flex flex-wrap items-center gap-3">
+<!-- 1. Search input -->
+<div class="relative w-80">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="h-[44px] w-full pl-10 pr-4 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-emerald-700 bg-white" placeholder="Cari nama atau WhatsApp..." type="text">
+</div>
+<!-- 2. Outlined select 'Semua status' -->
+<div class="relative">
+<select class="h-[44px] appearance-none border border-slate-300 rounded-lg pl-3.5 pr-9 text-sm text-slate-700 bg-white hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-700 cursor-pointer">
+<option value="">Semua status</option>
+<option value="aktif">Aktif</option>
+<option value="nonaktif">Nonaktif</option>
+</select>
+<div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-slate-400">
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- 3. Outlined select 'Semua konfirmasi' -->
+<div class="relative">
+<select class="h-[44px] appearance-none border border-slate-300 rounded-lg pl-3.5 pr-9 text-sm text-slate-700 bg-white hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-700 cursor-pointer">
+<option value="">Semua konfirmasi</option>
+<option value="hadir">Hadir</option>
+<option value="belum">Belum konfirmasi</option>
+<option value="tidak_hadir">Tidak hadir</option>
+</select>
+<div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-slate-400">
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- 4. Secondary button 'Filter' with funnel icon -->
+<button class="h-[44px] border border-slate-300 rounded-lg px-4 text-sm font-medium text-slate-700 hover:bg-slate-50 bg-white flex items-center gap-2 transition" type="button">
+<span class="material-symbols-outlined text-[18px]">filter_alt</span>
+<span class="">Filter</span>
+</button>
+<!-- Right utility summary: Direct Dispatch Info -->
+<div class="ml-auto hidden xl:flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200">
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+<span class="">Sesi Aktif: <strong>Akad &amp; Resepsi (Gelombang 1-2)</strong></span>
+</div>
+</section>
+<!-- 4 Compact Summary Tiles (Business Reporting Style, 3px Colored Bottom Accent) -->
+<section class="grid grid-cols-4 gap-4 my-2">
+<!-- Tile 1: Total Undangan -->
+<div class="bg-white border border-slate-200 p-4 rounded-lg relative overflow-hidden flex flex-col justify-between">
+<div>
+<span class="text-xs uppercase tracking-wider text-slate-500 font-semibold block mb-1">Total undangan</span>
+<span class="text-2xl font-bold text-slate-900 tracking-tight">2.500</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-[3px] bg-slate-400"></div>
+</div>
+<!-- Tile 2: Hadir -->
+<div class="bg-white border border-slate-200 p-4 rounded-lg relative overflow-hidden flex flex-col justify-between">
+<div>
+<span class="text-xs uppercase tracking-wider text-slate-500 font-semibold block mb-1">Hadir</span>
+<span class="text-2xl font-bold text-emerald-700 tracking-tight">927</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-[3px] bg-emerald-600"></div>
+</div>
+<!-- Tile 3: Belum konfirmasi -->
+<div class="bg-white border border-slate-200 p-4 rounded-lg relative overflow-hidden flex flex-col justify-between">
+<div>
+<span class="text-xs uppercase tracking-wider text-slate-500 font-semibold block mb-1">Belum konfirmasi</span>
+<span class="text-2xl font-bold text-amber-700 tracking-tight">461</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-[3px] bg-amber-500"></div>
+</div>
+<!-- Tile 4: Nonaktif -->
+<div class="bg-white border border-slate-200 p-4 rounded-lg relative overflow-hidden flex flex-col justify-between">
+<div>
+<span class="text-xs uppercase tracking-wider text-slate-500 font-semibold block mb-1">Nonaktif</span>
+<span class="text-2xl font-bold text-slate-600 tracking-tight">193</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-[3px] bg-slate-300"></div>
+</div>
+</section>
+<!-- Selection & Status Bar Strip -->
+<section class="flex items-center justify-between px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-600">
+<div class="flex items-center gap-3">
+<span class="font-medium text-slate-700">0 tamu dipilih</span>
+<span class="text-slate-300">|</span>
+<button class="text-emerald-700 hover:text-emerald-800 font-medium hover:underline" type="button">
+            Pilih semua 2.500 tamu di filter ini
+          </button>
+</div>
+<div class="flex items-center gap-4 text-slate-500">
+<span class="">Kapasitas Kursi: <strong class="text-slate-700">927 / 2.500 Kuota</strong></span>
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-emerald-600">sync_saved_locally</span>
+            Sinkronisasi WA API Aktif
+          </span>
+</div>
+</section>
+<!-- Precision Dense Data Table (8 Specified Columns) -->
+<section class="border border-slate-200 rounded-lg overflow-x-auto bg-white">
+<table class="w-full text-left border-collapse table-fixed min-w-[1150px]">
+<thead>
+<tr class="bg-slate-50 border-b border-slate-200">
+<!-- 1. Checkbox: 40px -->
+<th class="w-[40px] px-3.5 py-3.5 text-center" scope="col">
+<input class="w-4 h-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-700 cursor-pointer" type="checkbox">
+</th>
+<!-- 2. NAMA TAMU: 280px -->
+<th class="w-[280px] px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-600" scope="col">
+                Nama Tamu
+              </th>
+<!-- 3. WHATSAPP: 165px -->
+<th class="w-[165px] px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-600" scope="col">
+                WhatsApp
+              </th>
+<!-- 4. STATUS: 95px -->
+<th class="w-[95px] px-3 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-600" scope="col">
+                Status
+              </th>
+<!-- 5. KONFIRMASI: 145px -->
+<th class="w-[145px] px-3 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-600" scope="col">
+                Konfirmasi
+              </th>
+<!-- 6. PERANGKAT: 90px -->
+<th class="w-[90px] px-3 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-600" scope="col">
+                Perangkat
+              </th>
+<!-- 7. UCAPAN: 75px -->
+<th class="w-[75px] px-3 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-600 text-center" scope="col">
+                Ucapan
+              </th>
+<!-- 8. AKSI: 250px -->
+<th class="w-[250px] px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-600 text-right pr-6" scope="col">
+                Aksi Cepat
+              </th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 text-sm">
+<!-- Row 1: Bapak Budi & Ibu Rini -->
+<tr class="h-[64px] hover:bg-slate-50/70 transition-colors">
+<td class="px-3.5 py-2 text-center">
+<input class="w-4 h-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-700 cursor-pointer" type="checkbox">
+</td>
+<td class="px-4 py-2 font-medium text-slate-900 truncate">
+                Bapak Budi &amp; Ibu Rini
+              </td>
+<td class="px-4 py-2 font-mono text-slate-700 text-xs">
+                0812-8921-0001
+              </td>
+<td class="px-3 py-2">
+<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2.5 py-0.5 rounded-full font-medium inline-block">
+                  Aktif
+                </span>
+</td>
+<td class="px-3 py-2">
+<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2 py-0.5 rounded-md font-medium flex items-center gap-1.5 w-fit">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                  Hadir
+                </span>
+</td>
+<td class="px-3 py-2 font-mono text-xs text-slate-600">
+                2/3
+              </td>
+<td class="px-3 py-2 text-center">
+<button class="text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer text-xs font-medium" type="button">Baca</button>
+</td>
+<td class="px-4 py-2 text-right pr-6">
+<div class="inline-flex items-center gap-2 justify-end">
+<button class="border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-2.5 py-1.5 rounded-md text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap shadow-2xs" type="button">
+<span class="material-symbols-outlined text-[14px] text-slate-500">link</span>
+<span class="">Salin link</span>
+</button>
+<button class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-md text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap shadow-2xs" type="button">
+<span class="material-symbols-outlined text-[14px]">send</span>
+<span class="">Kirim</span>
+</button>
+<button class="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-800 transition" title="Edit Tamu" type="button">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+<button class="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-800 transition" title="Opsi Lanjutan" type="button">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Keluarga Besar Hapsoro -->
+<tr class="h-[64px] bg-slate-50/30 hover:bg-slate-50/70 transition-colors">
+<td class="px-3.5 py-2 text-center">
+<input class="w-4 h-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-700 cursor-pointer" type="checkbox">
+</td>
+<td class="px-4 py-2 font-medium text-slate-900 truncate">
+                Keluarga Besar Hapsoro
+              </td>
+<td class="px-4 py-2 font-mono text-slate-700 text-xs">
+                0811-9872-0002
+              </td>
+<td class="px-3 py-2">
+<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2.5 py-0.5 rounded-full font-medium inline-block">
+                  Aktif
+                </span>
+</td>
+<td class="px-3 py-2">
+<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2 py-0.5 rounded-md font-medium flex items-center gap-1.5 w-fit">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                  Hadir
+                </span>
+</td>
+<td class="px-3 py-2 font-mono text-xs text-slate-600">
+                3/3
+              </td>
+<td class="px-3 py-2 text-center">
+<button class="text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer text-xs font-medium" type="button">Baca</button>
+</td>
+<td class="px-4 py-2 text-right pr-6">
+<div class="inline-flex items-center gap-2 justify-end">
+<button class="border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-2.5 py-1.5 rounded-md text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap shadow-2xs" type="button">
+<span class="material-symbols-outlined text-[14px] text-slate-500">link</span>
+<span class="">Salin link</span>
+</button>
+<button class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-md text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap shadow-2xs" type="button">
+<span class="material-symbols-outlined text-[14px]">send</span>
+<span class="">Kirim</span>
+</button>
+<button class="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-800 transition" title="Edit Tamu" type="button">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+<button class="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-800 transition" title="Opsi Lanjutan" type="button">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Ibu Laras Pratama -->
+<tr class="h-[64px] hover:bg-slate-50/70 transition-colors">
+<td class="px-3.5 py-2 text-center">
+<input class="w-4 h-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-700 cursor-pointer" type="checkbox">
+</td>
+<td class="px-4 py-2 font-medium text-slate-900 truncate">
+                Ibu Laras Pratama
+              </td>
+<td class="px-4 py-2 font-mono text-slate-700 text-xs">
+                0813-7721-0003
+              </td>
+<td class="px-3 py-2">
+<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2.5 py-0.5 rounded-full font-medium inline-block">
+                  Aktif
+                </span>
+</td>
+<td class="px-3 py-2">
+<span class="bg-amber-50 text-amber-700 border border-amber-200 text-xs px-2 py-0.5 rounded-md font-medium flex items-center gap-1.5 w-fit">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+                  Belum konfirmasi
+                </span>
+</td>
+<td class="px-3 py-2 font-mono text-xs text-slate-600">
+                1/3
+              </td>
+<td class="px-3 py-2 text-center text-slate-400 font-mono">
+                —
+              </td>
+<td class="px-4 py-2 text-right pr-6">
+<div class="inline-flex items-center gap-2 justify-end">
+<button class="border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-2.5 py-1.5 rounded-md text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap shadow-2xs" type="button">
+<span class="material-symbols-outlined text-[14px] text-slate-500">link</span>
+<span class="">Salin link</span>
+</button>
+<button class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-md text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap shadow-2xs" type="button">
+<span class="material-symbols-outlined text-[14px]">send</span>
+<span class="">Kirim</span>
+</button>
+<button class="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-800 transition" title="Edit Tamu" type="button">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+<button class="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-800 transition" title="Opsi Lanjutan" type="button">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: Aditya Pratama -->
+<tr class="h-[64px] bg-slate-50/30 hover:bg-slate-50/70 transition-colors">
+<td class="px-3.5 py-2 text-center">
+<input class="w-4 h-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-700 cursor-pointer" type="checkbox">
+</td>
+<td class="px-4 py-2 font-medium text-slate-900 truncate">
+                Aditya Pratama
+              </td>
+<td class="px-4 py-2 font-mono text-slate-700 text-xs">
+                0856-4432-0004
+              </td>
+<td class="px-3 py-2">
+<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2.5 py-0.5 rounded-full font-medium inline-block">
+                  Aktif
+                </span>
+</td>
+<td class="px-3 py-2">
+<span class="bg-amber-50 text-amber-700 border border-amber-200 text-xs px-2 py-0.5 rounded-md font-medium flex items-center gap-1.5 w-fit">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+                  Belum konfirmasi
+                </span>
+</td>
+<td class="px-3 py-2 font-mono text-xs text-slate-600">
+                0/3
+              </td>
+<td class="px-3 py-2 text-center text-slate-400 font-mono">
+                —
+              </td>
+<td class="px-4 py-2 text-right pr-6">
+<div class="inline-flex items-center gap-2 justify-end">
+<button class="border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-2.5 py-1.5 rounded-md text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap shadow-2xs" type="button">
+<span class="material-symbols-outlined text-[14px] text-slate-500">link</span>
+<span class="">Salin link</span>
+</button>
+<button class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-md text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap shadow-2xs" type="button">
+<span class="material-symbols-outlined text-[14px]">send</span>
+<span class="">Kirim</span>
+</button>
+<button class="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-800 transition" title="Edit Tamu" type="button">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+<button class="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-800 transition" title="Opsi Lanjutan" type="button">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 5: Dr. Hendra Gunawan & Kel. -->
+<tr class="h-[64px] hover:bg-slate-50/70 transition-colors">
+<td class="px-3.5 py-2 text-center">
+<input class="w-4 h-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-700 cursor-pointer" type="checkbox">
+</td>
+<td class="px-4 py-2 font-medium text-slate-900 truncate">
+                Dr. Hendra Gunawan &amp; Kel.
+              </td>
+<td class="px-4 py-2 font-mono text-slate-700 text-xs">
+                0815-1234-0005
+              </td>
+<td class="px-3 py-2">
+<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2.5 py-0.5 rounded-full font-medium inline-block">
+                  Aktif
+                </span>
+</td>
+<td class="px-3 py-2">
+<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2 py-0.5 rounded-md font-medium flex items-center gap-1.5 w-fit">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                  Hadir
+                </span>
+</td>
+<td class="px-3 py-2 font-mono text-xs text-slate-600">
+                2/3
+              </td>
+<td class="px-3 py-2 text-center">
+<button class="text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer text-xs font-medium" type="button">Baca</button>
+</td>
+<td class="px-4 py-2 text-right pr-6">
+<div class="inline-flex items-center gap-2 justify-end">
+<button class="border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-2.5 py-1.5 rounded-md text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap shadow-2xs" type="button">
+<span class="material-symbols-outlined text-[14px] text-slate-500">link</span>
+<span class="">Salin link</span>
+</button>
+<button class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-md text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap shadow-2xs" type="button">
+<span class="material-symbols-outlined text-[14px]">send</span>
+<span class="">Kirim</span>
+</button>
+<button class="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-800 transition" title="Edit Tamu" type="button">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+<button class="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-800 transition" title="Opsi Lanjutan" type="button">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 6: Siti Nurhaliza & Pendamping -->
+<tr class="h-[64px] bg-slate-50/30 hover:bg-slate-50/70 transition-colors">
+<td class="px-3.5 py-2 text-center">
+<input class="w-4 h-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-700 cursor-pointer" type="checkbox">
+</td>
+<td class="px-4 py-2 font-medium text-slate-900 truncate">
+                Siti Nurhaliza &amp; Pendamping
+              </td>
+<td class="px-4 py-2 font-mono text-slate-700 text-xs">
+                0878-5541-0006
+              </td>
+<td class="px-3 py-2">
+<span class="bg-slate-100 text-slate-600 border border-slate-200 text-xs px-2.5 py-0.5 rounded-full font-medium inline-block">
+                  Nonaktif
+                </span>
+</td>
+<td class="px-3 py-2">
+<span class="bg-amber-50 text-amber-700 border border-amber-200 text-xs px-2 py-0.5 rounded-md font-medium flex items-center gap-1.5 w-fit">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+                  Belum konfirmasi
+                </span>
+</td>
+<td class="px-3 py-2 font-mono text-xs text-slate-600">
+                0/3
+              </td>
+<td class="px-3 py-2 text-center text-slate-400 font-mono">
+                —
+              </td>
+<td class="px-4 py-2 text-right pr-6">
+<div class="inline-flex items-center gap-2 justify-end">
+<button class="border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-2.5 py-1.5 rounded-md text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap shadow-2xs" type="button">
+<span class="material-symbols-outlined text-[14px] text-slate-500">link</span>
+<span class="">Salin link</span>
+</button>
+<button class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-md text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap shadow-2xs" type="button">
+<span class="material-symbols-outlined text-[14px]">send</span>
+<span class="">Kirim</span>
+</button>
+<button class="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-800 transition" title="Edit Tamu" type="button">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+<button class="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-800 transition" title="Opsi Lanjutan" type="button">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 7: Ir. Bambang Soediro -->
+<tr class="h-[64px] hover:bg-slate-50/70 transition-colors">
+<td class="px-3.5 py-2 text-center">
+<input class="w-4 h-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-700 cursor-pointer" type="checkbox">
+</td>
+<td class="px-4 py-2 font-medium text-slate-900 truncate">
+                Ir. Bambang Soediro
+              </td>
+<td class="px-4 py-2 font-mono text-slate-700 text-xs">
+                0812-3344-0007
+              </td>
+<td class="px-3 py-2">
+<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2.5 py-0.5 rounded-full font-medium inline-block">
+                  Aktif
+                </span>
+</td>
+<td class="px-3 py-2">
+<span class="bg-rose-50 text-rose-700 border border-rose-200 text-xs px-2 py-0.5 rounded-md font-medium flex items-center gap-1.5 w-fit">
+<span class="material-symbols-outlined text-[14px]">cancel</span>
+                  Tidak hadir
+                </span>
+</td>
+<td class="px-3 py-2 font-mono text-xs text-slate-600">
+                1/3
+              </td>
+<td class="px-3 py-2 text-center">
+<button class="text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer text-xs font-medium" type="button">Baca</button>
+</td>
+<td class="px-4 py-2 text-right pr-6">
+<div class="inline-flex items-center gap-2 justify-end">
+<button class="border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-2.5 py-1.5 rounded-md text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap shadow-2xs" type="button">
+<span class="material-symbols-outlined text-[14px] text-slate-500">link</span>
+<span class="">Salin link</span>
+</button>
+<button class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-md text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap shadow-2xs" type="button">
+<span class="material-symbols-outlined text-[14px]">send</span>
+<span class="">Kirim</span>
+</button>
+<button class="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-800 transition" title="Edit Tamu" type="button">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+<button class="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-800 transition" title="Opsi Lanjutan" type="button">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 8: Anindya Kusuma -->
+<tr class="h-[64px] bg-slate-50/30 hover:bg-slate-50/70 transition-colors">
+<td class="px-3.5 py-2 text-center">
+<input class="w-4 h-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-700 cursor-pointer" type="checkbox">
+</td>
+<td class="px-4 py-2 font-medium text-slate-900 truncate">
+                Anindya Kusuma
+              </td>
+<td class="px-4 py-2 font-mono text-slate-700 text-xs">
+                0818-9900-0008
+              </td>
+<td class="px-3 py-2">
+<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2.5 py-0.5 rounded-full font-medium inline-block">
+                  Aktif
+                </span>
+</td>
+<td class="px-3 py-2">
+<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2 py-0.5 rounded-md font-medium flex items-center gap-1.5 w-fit">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                  Hadir
+                </span>
+</td>
+<td class="px-3 py-2 font-mono text-xs text-slate-600">
+                2/3
+              </td>
+<td class="px-3 py-2 text-center">
+<button class="text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer text-xs font-medium" type="button">Baca</button>
+</td>
+<td class="px-4 py-2 text-right pr-6">
+<div class="inline-flex items-center gap-2 justify-end">
+<button class="border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-2.5 py-1.5 rounded-md text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap shadow-2xs" type="button">
+<span class="material-symbols-outlined text-[14px] text-slate-500">link</span>
+<span class="">Salin link</span>
+</button>
+<button class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-md text-xs font-medium inline-flex items-center gap-1.5 whitespace-nowrap shadow-2xs" type="button">
+<span class="material-symbols-outlined text-[14px]">send</span>
+<span class="">Kirim</span>
+</button>
+<button class="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-800 transition" title="Edit Tamu" type="button">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+<button class="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-800 transition" title="Opsi Lanjutan" type="button">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+<!-- Table Footer: Pagination & Per-Page Controls -->
+<footer class="flex flex-wrap items-center justify-between gap-4 pt-2 text-xs text-slate-600">
+<!-- Left: Record Counters -->
+<div class="flex items-center gap-4">
+<span class="text-slate-500">Menampilkan <strong class="text-slate-800">1-8</strong> dari <strong class="text-slate-800">2.500</strong> tamu</span>
+<!-- Rows per page selector -->
+<div class="relative">
+<select class="appearance-none border border-slate-200 rounded px-2.5 py-1.5 pr-7 text-xs text-slate-700 bg-white hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-700 cursor-pointer">
+<option value="8">8 baris per halaman</option>
+<option selected="" value="25">25 baris per halaman</option>
+<option value="50">50 baris per halaman</option>
+<option value="100">100 baris per halaman</option>
+</select>
+<div class="absolute inset-y-0 right-0 pr-1.5 flex items-center pointer-events-none text-slate-400">
+<span class="material-symbols-outlined text-[15px]">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Center / Right: Pagination Stepper & Direct Page Jumper -->
+<div class="flex items-center gap-6">
+<!-- Page Jumper -->
+<div class="flex items-center gap-1.5 text-slate-500">
+<span class="">Ke halaman</span>
+<input class="w-10 h-7 text-center border border-slate-200 rounded text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-700" type="text" value="1">
+</div>
+<!-- Stepper Buttons -->
+<div class="inline-flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white shadow-2xs">
+<!-- Prev -->
+<button class="px-2.5 py-1.5 text-slate-400 hover:bg-slate-50 border-r border-slate-200 flex items-center disabled:opacity-40" disabled="" type="button">
+<span class="material-symbols-outlined text-[16px]">chevron_left</span>
+</button>
+<!-- Page Numbers -->
+<button class="px-3 py-1.5 text-xs font-semibold bg-primary-container text-white" type="button">1</button>
+<button class="px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 border-l border-slate-200" type="button">2</button>
+<button class="px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 border-l border-slate-200" type="button">3</button>
+<span class="px-2 py-1.5 text-xs text-slate-400 border-l border-slate-200">...</span>
+<button class="px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 border-l border-slate-200" type="button">100</button>
+<!-- Next -->
+<button class="px-2.5 py-1.5 text-slate-600 hover:bg-slate-50 border-l border-slate-200 flex items-center" type="button">
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</footer>
+</div>
+</main>
+<script>
+    // Lightweight toast/feedback micro-interaction for rapid operational actions
+    document.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const text = btn.innerText.trim();
+        if (text.includes('Salin link')) {
+          const original = btn.innerHTML;
+          btn.innerHTML = `<span class="material-symbols-outlined text-[14px] text-emerald-600">done</span><span class="text-emerald-700">Tersalin!</span>`;
+          setTimeout(() => {
+            btn.innerHTML = original;
+          }, 1800);
+        } else if (text.includes('Kirim')) {
+          const original = btn.innerHTML;
+          btn.innerHTML = `<span class="material-symbols-outlined text-[14px]">check</span><span>Terkirim</span>`;
+          btn.classList.add('bg-emerald-800');
+          setTimeout(() => {
+            btn.innerHTML = original;
+            btn.classList.remove('bg-emerald-800');
+          }, 2000);
+        }
+      });
+    });
+  </script>
+
+
+<div id="interactive-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 hidden"><div class="bg-white rounded-xl shadow-lg border border-slate-200 max-w-md w-full p-6 mx-4 relative"><div class="flex items-center justify-between pb-3 border-b border-slate-100"><h3 id="modal-title" class="text-base font-semibold text-slate-900">Pesan Ucapan Tamu</h3><button id="close-modal" type="button" class="text-slate-400 hover:text-slate-600"><span class="material-symbols-outlined text-[20px]">close</span></button></div><div id="modal-body" class="py-4 text-sm text-slate-600"></div><div class="flex justify-end gap-2 pt-3 border-t border-slate-100"><button id="modal-action-btn" type="button" class="px-4 py-2 bg-primary-container text-white text-xs font-medium rounded-lg hover:bg-emerald-700 transition">Tutup</button></div></div></div></body></html>

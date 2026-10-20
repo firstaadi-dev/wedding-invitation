@@ -1,32 +1,40 @@
-# Implementasi CMS weddinvita
+# Penerapan desain CMS — 21 Oktober 2026
 
-Implementasi aktif berada di `/admin`. Branding **weddinvita** dan empat halaman pengelolaan mengikuti [brief desktop](weddinvita-cms-prompt.md) serta [arahan mobile](weddinvita-cms-mobile.md). Rimba Jawa tetap nama tema undangan. Mockup Stitch tetap menjadi referensi desain; data contoh pada mockup tidak dimasukkan ke produksi.
+Status: diterapkan ke kode frontend, berjalan pada http://dashboard.localhost:5173/.
+
+Acuan: [project Stitch baru](https://stitch.withgoogle.com/projects/13790839548463083405), [manifest snapshot terbaru](../design/cms/manifest.json). Login memakai revisi split editorial terakhir; dashboard memakai rail gelap, Inter, panel putih, dan aksen hijau. HTML Stitch menjadi referensi tampilan, bukan sumber JavaScript produksi.
 
 ## Cakupan yang diterapkan
 
-| Area | Implementasi |
+| Halaman | Implementasi dan bukti |
 | --- | --- |
-| Login | Satu password, feedback saat memeriksa, pesan kesalahan, pemulihan sesi, keluar. |
-| Navigasi | Sidebar desktop, drawer modal mobile, halaman melalui `#tamu`, `#pesan`, `#media`, dan `#acara`; tautan langsung dan navigasi kembali browser didukung. |
-| Tamu | Tabel desktop dan kartu mobile, cari nama/nomor, tambah/edit dalam drawer desktop atau sheet mobile, salin tautan dan fallback manual, kirim ke WhatsApp, status, perangkat, konfirmasi dan ucapan yang dapat dibuka. |
-| Perubahan akses | Konfirmasi dampak nonaktifkan, ganti tautan, reset tiga slot dan hapus tamu; API serta pencabutan akses tetap memakai implementasi yang tersedia. |
-| Rekap | Total undangan, aktif/nonaktif, undangan hadir, jumlah orang hadir, belum konfirmasi, tidak hadir dan belum pasti. Kehadiran hanya dihitung dari undangan aktif. |
-| Pesan & preview | Template `{nama}` / `{link}`, contoh dengan tautan contoh, judul/deskripsi, satu aksi simpan; unggahan thumbnail publik tersendiri. |
-| Foto & lagu | Dua foto pasangan, sembilan slot galeri, MP3 dan preview; pilih berkas lalu unggah/ganti, hapus dengan konfirmasi. Validasi format, berkas kosong dan batas ukuran sebelum unggah. |
-| Detail acara | Dua nama acara, dua waktu, jam countdown WIB dan URL embed peta; pasangan/tanggal/venue tetap menjadi konteks. |
+| Login | Split hero/form, dua field dengan autocomplete dan batas panjang; status memeriksa, error aksesibel, dan alur login/sesi yang sudah ada. Komponen tampil di desktop dan viewport390px; callback kegagalan menampilkan pesan error. CMS asli juga memuat layar login saat sesi tidak tersedia. |
+| Tamu Undangan | Tabel delapan kolom pada desktop/mobile: pilihan, nama, WhatsApp, status, konfirmasi, perangkat numerik, ucapan, aksi. Nama berupa teks; Salin link/Kirim selalu ada di baris. Pencarian/filter status/kehadiran/perangkat, sort,25/50/100 baris, nomor halaman dibatasi, pilihan hanya halaman saat ini. Aksi status memakai endpoint PATCH yang ada, konfirmasi, batas empat request bersamaan, pelaporan hasil parsial, refresh. Dialog editor, ucapan, tautan, reset, hapus tetap tersedia. |
+| Pesan & Preview | Tiga field dengan batas4000/120/300, token nama/link di posisi kursor, validasi link wajib, satu aksi simpan, preview teks dan metadata langsung, thumbnail memakai MediaCard yang sama. Preview bawaan mengambil nama tersimpan; metadata disimpan terpisah dari unggah gambar. |
+| Foto & Lagu | Dua foto mempelai, sembilan galeri, satu MP3. Pilih berkas tetap terpisah dari Unggah/Ganti; Hapus dengan konfirmasi, status/error dan pemutar audio dipertahankan. Pemilih berkas ringkas dan dapat diakses lewat keyboard. Tidak ada nama/ukuran berkas tersimpan rekaan. |
+| Detail Acara | Dua nama mempelai, empat orang tua, nama/waktu dua acara, jam countdown WIB, URL embed Google Maps, rekening/alamat, tambah/hapus maksimal10 dan pill72×34 ON/OFF. Perubahan jenis berisi data meminta konfirmasi sebelum isian dikosongkan. OFF menonaktifkan kontrol dan mempertahankan array hadiah pada payload. Gelar langsung dalam nama. |
 
-Formulir tetap terisi ketika validasi gagal. Perubahan tamu tidak mereset draft pengaturan; pembaruan satu slot media tidak menghapus pemilihan berkas di slot lain. Saat sesi berakhir atau pengguna keluar, dialog ditutup dan data tamu, tautan, media serta formulir dibersihkan dari halaman. Tidak ada endpoint, skema database, dependensi atau layanan baru. Server menambahkan modul browser `admin-data.js` pada daftar aset yang dilayani.
+Form/API tetap memakai endpoint, CSRF, penanganan401, validasi panjang/tipe/ukuran, konfirmasi tindakan berisiko dan pesan kegagalan yang sudah ada. Modal menggunakan portal agar dialog tidak berada di dalam struktur tabel. Nama konteks berasal dari akun tenant, bukan nama pasangan yang diulang dalam header.
 
-## Verifikasi — 18 Oktober 2026
+Tidak ada penambahan ekspor data/pengaturan baru meskipun revisi mentah Stitch memunculkan tombol contoh tersebut. Tidak ada publish, tema, WhatsApp API, jumlah orang/pax, signup/reset password, tanggal acara baru, atau galeri tanpa batas.
 
-- `npm run build`: syntax browser/server, tipe konfigurasi Neon, dan aset undangan lulus.
-- `npm test`: pemeriksaan undangan serta lima tes Node lulus. Tes CMS mencakup rekap tamu aktif, pemisahan undangan/orang, pencarian nama/nomor, dan batas validasi unggahan.
-- `npm run test:integration`: pengujian database Neon terpisah mencakup aset/modul CMS, autentikasi/CSRF, CRUD tamu, pencabutan akses, RSVP, metadata WhatsApp, unggah/hapus media dan Range audio. Koleksi Postman di dalam pengujian menjalankan tiga request dengan tujuh assertion, tanpa kegagalan.
+## Pemeriksaan yang selesai
 
-Pengujian interaktif memakai Chrome Guest dan aplikasi Node yang sama pada `127.0.0.1:5178`, dengan `TEST_DATABASE_URL` dari branch pengujian. Password dan semua tamu/media yang digunakan adalah fixture pengujian. Produksi tidak diubah.
+- `npm run build --prefix frontend`: TypeScript dan build Vite berhasil setelah perubahan terakhir.
+- `git diff --check`: bersih.
+- Assert query pada2.500 data:36 kombinasi status/kehadiran/perangkat, pencarian nama dan nomor, sort numerik dua arah, hasil kosong, dan sumber tidak termutasi: lulus.
+- Assert media: JPG/PNG dan MP3, batas tepat12/25MB, berkas melebihi batas, berkas kosong, dan audio ditolak pada slot foto: lulus.
+- Browser Chrome: semua lima halaman ditinjau; dashboard desktop1920px dan mobile390×844. Form/panel menjadi satu kolom pada mobile, toolbar filter diberi satu baris penuh agar label tidak terpotong, tabel digulir di dalam wadahnya. Sticky nama/aksi desktop dilepas sesuai ruang layar agar tidak menutupi kolom lain.
+- Komponen asli dengan callback lokal dan2.500 tamu contoh: pencarian menghasilkan satu tamu, halaman berikutnya, pilihan baris, dialog ucapan, konfirmasi dan perubahan status,100 baris per halaman, serta lompat di luar batas ke halaman terakhir berjalan.
+- Pesan: token disisipkan di posisi kursor, preview mengikuti input, status kembali tersimpan sesudah callback simpan.
+- Hadiah: OFF mengenali switch aksesibel, field tetap bernilai tetapi disabled, ON mengaktifkan kembali; simpan OFF berhasil pada callback; tambah, ubah item kosong menjadi alamat, dan hapus bekerja.
+- Media: tombol Pilih foto membuka dialog OS. Berkas MP3 ditolak untuk foto dan Unggah tetap disabled. Gambar PNG mengaktifkan Unggah; kegagalan callback mempertahankan nama/berkas untuk dicoba kembali.
+- CMS asli: sesi dan data tamu berhasil dimuat; navigasi drawer mobile serta form acara dengan data server tampil. Pemeriksaan tidak menyimpan perubahan pada data undangan asli.
 
-Alur yang diperiksa di browser: password salah dan benar; tambah tamu; nomor tidak valid tanpa kehilangan isian; simpan menggunakan Enter; edit; pencarian tanpa hasil; salin tautan; nonaktifkan beserta konfirmasi dan rekap; template tanpa `{link}`; simpan pesan/metadata; unggah thumbnail; validasi URL peta; simpan detail acara; unggah serta pemutaran fixture MP3; drawer navigasi, pemulihan sesi setelah reload, logout, serta sesi kedaluwarsa saat formulir tamu terbuka. Pengiriman saat sesi kedaluwarsa ditolak dan tidak membuat data tamu. Setelah logout/kedaluwarsa, pemeriksaan DOM memastikan nol baris tamu, nol preview media, nol dialog terbuka, dan tautan baru kosong. Tautan Kirim ditinjau dari URL drafnya, tanpa mengirim pesan WhatsApp.
+Fixture callback dibuat sementara dari source komponen aktual, tanpa server API tiruan atau perubahan autentikasi. Entry HTML/TSX sementara sudah dihapus sebelum build akhir dan tidak termasuk build produksi.
 
-Keempat halaman pengelolaan diperiksa melalui DOM pada lebar 1440, 390, dan 320 piksel: `overflow: false` dan tinggi kontrol terlihat minimal 44 piksel. Halaman login juga diperiksa pada 320 dan 393 piksel tanpa overflow. Galeri memiliki sembilan slot dan halaman media memiliki dua belas input berkas; kolom galeri terukur dua pada 390/393 piksel dan satu pada 320 piksel. Layout desktop ditinjau pada 1440 × 900, serta login desktop pada 1440 × 844. Input teks mobile berukuran 16 piksel; fokus keyboard terlihat dan animasi menghormati reduced motion.
+## Batas pemeriksaan
 
-Ponsel fisik, keyboard virtual, serta deployment produksi belum diuji dalam pekerjaan ini. Koleksi Postman dijalankan lokal tanpa publikasi ke cloud.
+Penyimpanan/unggah server tidak dijalankan ulang secara menyeluruh; interaksi mutasi diperiksa lewat callback lokal untuk menghindari perubahan data asli. Tidak mengirim WhatsApp, menyalin tautan pribadi, atau mengunggah media contoh ke server. Tidak menjalankan suite backend/deploy. Pemeriksaan visual dilakukan pada ukuran yang disebutkan, bukan seluruh perangkat.
+
+Pagination membatasi baris yang dirender. Endpoint lama tetap mengirim seluruh daftar tamu; memindahkan filter/pagination ke server diperlukan jika pemuatan awal daftar menjadi lambat. Tidak ada klaim load test backend.

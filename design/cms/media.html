@@ -1,0 +1,649 @@
+<!DOCTYPE html><html class="h-full bg-background" lang="id"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Foto &amp; Lagu — weddinvita CMS</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Inter & JetBrains Mono Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-variant": "#d3e4fe",
+            "primary-container": "#1e5e3a",
+            "primary-fixed": "#aff2c2",
+            "surface-container": "#e5eeff",
+            "on-tertiary-fixed-variant": "#005049",
+            "on-secondary": "#ffffff",
+            "surface-dim": "#cbdbf5",
+            "surface-tint": "#2b6a45",
+            "on-error": "#ffffff",
+            "tertiary": "#00443e",
+            "error": "#ba1a1a",
+            "on-primary": "#ffffff",
+            "on-error-container": "#93000a",
+            "on-tertiary-container": "#6cd9cb",
+            "on-tertiary": "#ffffff",
+            "primary": "#004625",
+            "surface-container-highest": "#d3e4fe",
+            "secondary-fixed": "#dae2fd",
+            "surface-bright": "#f8f9ff",
+            "on-secondary-fixed": "#131b2e",
+            "secondary-container": "#dae2fd",
+            "on-surface": "#0b1c30",
+            "surface-container-high": "#dce9ff",
+            "on-tertiary-fixed": "#00201d",
+            "tertiary-fixed-dim": "#6bd8cb",
+            "tertiary-fixed": "#89f5e7",
+            "surface": "#f8f9ff",
+            "on-background": "#0b1c30",
+            "error-container": "#ffdad6",
+            "background": "#f8f9ff",
+            "tertiary-container": "#005e56",
+            "outline-variant": "#c0c9bf",
+            "on-primary-fixed-variant": "#0d512f",
+            "secondary": "#565e74",
+            "on-surface-variant": "#404941",
+            "on-primary-fixed": "#00210f",
+            "inverse-primary": "#94d5a7",
+            "on-secondary-container": "#5c647a",
+            "primary-fixed-dim": "#94d5a7",
+            "inverse-surface": "#213145",
+            "inverse-on-surface": "#eaf1ff",
+            "surface-container-low": "#eff4ff",
+            "surface-container-lowest": "#ffffff",
+            "secondary-fixed-dim": "#bec6e0",
+            "outline": "#707971",
+            "on-primary-container": "#94d5a8",
+            "on-secondary-fixed-variant": "#3f465c"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-md": "0.75rem",
+            "margin-desktop": "2rem",
+            "margin": "1rem",
+            "space-xs": "0.25rem",
+            "space-xl": "1.5rem",
+            "space-sm": "0.5rem",
+            "space-lg": "1rem",
+            "gutter-desktop": "1.5rem",
+            "gutter": "1rem"
+          },
+          "fontFamily": {
+            "label-md": ["Inter"],
+            "data-mono-sm": ["JetBrains Mono"],
+            "body-lg": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-md": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-lg-mobile": ["Inter"],
+            "label-sm": ["Inter"],
+            "headline-lg": ["Inter"],
+            "data-mono": ["JetBrains Mono"],
+            "label-lg": ["Inter"],
+            "headline-md": ["Inter"]
+          },
+          "fontSize": {
+            "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+            "data-mono-sm": ["11px", { "lineHeight": "14px", "fontWeight": "400" }],
+            "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+            "body-md": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-sm": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "headline-lg-mobile": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "500" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "data-mono": ["12px", { "lineHeight": "16px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "label-lg": ["13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="h-full bg-background font-body-md text-on-surface antialiased flex">
+<!-- ========================================== -->
+<!-- LEFT NAVIGATIONAL RAIL (Fixed 100px)       -->
+<!-- ========================================== -->
+<aside class="fixed left-0 top-0 bottom-0 w-[100px] flex flex-col justify-between items-center py-6 z-40 bg-on-secondary-fixed border-r border-outline-variant/20 select-none">
+<!-- Top Branding -->
+<div class="flex flex-col items-center w-full px-2 text-center">
+<div class="w-10 h-10 rounded-lg bg-primary-container text-primary-fixed flex items-center justify-center font-bold font-headline-sm text-headline-sm mb-2 shadow-sm">
+        W
+      </div>
+<span class="text-label-md font-label-md tracking-wider text-outline-variant uppercase">weddinvita</span>
+<span class="text-[10px] font-label-sm text-outline-variant/70 mt-0.5">Portal Undangan</span>
+</div>
+<!-- Navigation Items (Exactly 4, Slot 3 Active) -->
+<nav class="flex flex-col space-y-2 w-full px-2 my-auto">
+<!-- Item 1: Tamu Undangan -->
+<a class="flex flex-col items-center justify-center py-3 px-1 text-outline-variant hover:text-surface hover:bg-on-surface-variant/20 rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out text-center" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">group</span>
+<span class="text-[11px] leading-tight text-center">Tamu Undangan</span>
+</a>
+<!-- Item 2: Pesan & Preview -->
+<a class="flex flex-col items-center justify-center py-3 px-1 text-outline-variant hover:text-surface hover:bg-on-surface-variant/20 rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out text-center" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">chat_bubble</span>
+<span class="text-[11px] leading-tight text-center">Pesan &amp; Preview</span>
+</a>
+<!-- Item 3: Foto & Lagu (ACTIVE) -->
+<a aria-current="page" class="flex flex-col items-center justify-center py-3 px-1 text-on-primary bg-primary-container rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out text-center shadow-inner" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1" style="font-variation-settings: 'FILL' 1;">photo_library</span>
+<span class="text-[11px] font-semibold leading-tight text-center">Foto &amp; Lagu</span>
+</a>
+<!-- Item 4: Detail Acara -->
+<a class="flex flex-col items-center justify-center py-3 px-1 text-outline-variant hover:text-surface hover:bg-on-surface-variant/20 rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out text-center" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">event</span>
+<span class="text-[11px] leading-tight text-center">Detail Acara</span>
+</a>
+</nav>
+<!-- Bottom Nav Items (Keluar only) -->
+<div class="flex flex-col w-full px-2">
+<a class="flex flex-col items-center justify-center py-3 px-1 text-outline-variant hover:text-error hover:bg-on-surface-variant/20 rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out text-center" href="#">
+<span class="material-symbols-outlined text-[22px] mb-1">logout</span>
+<span class="text-[11px]">Keluar</span>
+</a>
+</div>
+</aside>
+<!-- ========================================== -->
+<!-- MAIN WORKSPACE SURFACE (Edge-to-Edge Canvas)-->
+<!-- ========================================== -->
+<main class="ml-[100px] flex-1 min-h-screen bg-background flex flex-col">
+<!-- Workspace Container -->
+<div class="max-w-[1340px] w-full mx-auto px-8 py-8 flex flex-col space-y-8">
+<!-- Top Context Header Area -->
+<header class="flex flex-col space-y-2">
+<div class="flex items-center">
+<span class="inline-flex items-center px-2.5 py-1 rounded bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold tracking-wide border border-outline-variant/30">
+<span class="material-symbols-outlined text-[14px] mr-1">bookmark</span>
+            Undangan pernikahan
+          </span>
+</div>
+<div class="pt-1">
+<h1 class="text-headline-lg font-headline-lg text-on-surface text-[28px] leading-[36px]">Foto &amp; Lagu</h1>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1 text-[14px] leading-[20px]">
+            Kelola foto profil mempelai, foto galeri undangan, dan musik latar belakang (MP3).
+          </p>
+</div>
+</header>
+<!-- ========================================== -->
+<!-- SECTION 1: FOTO MEMPELAI (2 COLUMNS)       -->
+<!-- ========================================== -->
+<section class="flex flex-col space-y-3">
+<div class="flex items-center justify-between border-b border-outline-variant/30 pb-2">
+<h2 class="text-headline-sm font-headline-sm text-on-surface flex items-center">
+<span class="material-symbols-outlined text-[20px] mr-2 text-primary-container">face</span>
+            Foto Mempelai
+          </h2>
+<span class="text-label-sm font-label-sm text-on-surface-variant">2 slot profil tetap</span>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<!-- Slot 1: Foto mempelai pertama (Terpasang) -->
+<article class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-5 flex flex-col justify-between shadow-sm">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-lg text-label-lg text-on-surface font-semibold">Foto mempelai pertama</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#DCFCE7] text-[#15803D] border border-[#BBF7D0]">
+<span class="material-symbols-outlined text-[13px] mr-1" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                  Tersimpan
+                </span>
+</div>
+<!-- Content Row -->
+<div class="flex gap-4 items-start">
+<!-- Preview Thumbnail Container -->
+<div class="w-32 h-40 bg-surface-container-high rounded border border-outline-variant/40 overflow-hidden flex-shrink-0 relative">
+<img class="w-full h-full object-cover" data-alt="An elegant, minimalist professional portrait photo of an Indonesian groom dressed in a tailored neutral dark sage suit against a clean, soft cream studio backdrop. Natural diffuse lighting creates a modern, editorial aesthetic with pristine clarity and refined warmth." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBY6hERYBCoKxdcUdCpT4hqGjbqSnlruo9dJjrw64F0DebCYvDXtEt3HQBPWGZcOPNY6RfCUTwS_yAToAVESeSRrHSxFxpPpeFs2emqt6MtGzRE_ybmCYYKNb6ExFhgkhvS4EQC29JpUMEgCIZOIS-4MUG_auT0pZrU1ysc8CfSRs0cRwVLbzbEpJBRmIRRjSRVcy78wXUfnf72NCSPaAYow_ljg0BzBZSZJt1B8Mx1nBLXV0TOE9hvkWkliEKgb18gO0kr25abBOm3">
+<div class="absolute bottom-1 right-1 bg-on-secondary-fixed/80 text-white rounded px-1.5 py-0.5 text-[10px] font-data-mono">
+                    1:1.25
+                  </div>
+</div>
+<!-- File Specs & Info -->
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex items-center text-on-surface font-medium text-body-md">
+<span class="material-symbols-outlined text-[18px] mr-1.5 text-outline">description</span>
+<span class="font-data-mono text-data-mono truncate">mempelai-pria.jpg</span>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-1">Ukuran berkas: 2.4 MB</p>
+<p class="text-[12px] text-on-surface-variant/80 mt-2 bg-surface-container-low p-2 rounded border border-outline-variant/20">
+                      Format JPG, PNG, WebP maks. 12MB. Disarankan foto portrait rasio 3:4 atau 4:5.
+                    </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Controls (Uniform Height 40-44px) -->
+<div class="mt-5 pt-4 border-t border-outline-variant/20 flex items-center justify-between gap-3">
+<div class="flex items-center gap-2">
+<button class="h-11 px-4 bg-surface-container-lowest border border-outline-variant hover:border-outline text-on-surface font-label-md text-label-md rounded flex items-center justify-center transition-colors" type="button" onclick="(function(){ const toast = document.getElementById('toast-notification'); document.getElementById('toast-title').textContent = 'Pilih Berkas Foto'; document.getElementById('toast-desc').textContent = 'Membuka peramban berkas untuk foto profil mempelai...'; document.getElementById('toast-icon').textContent = 'folder_open'; document.getElementById('toast-icon').className = 'material-symbols-outlined text-secondary-fixed text-[22px]'; toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none'); setTimeout(() =&gt; { toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none'); }, 3000); })()">
+<span class="material-symbols-outlined text-[18px] mr-1.5">folder_open</span>
+                  Pilih foto
+                </button>
+<button class="h-11 px-4 bg-primary-container hover:bg-[#15803d] active:bg-[#14532d] text-on-primary font-label-md text-label-md rounded flex items-center justify-center font-semibold transition-colors shadow-sm" type="button" onclick="(function(){ const toast = document.getElementById('toast-notification'); document.getElementById('toast-title').textContent = 'Perbarui Foto Profil'; document.getElementById('toast-desc').textContent = 'Silakan pilih berkas foto baru untuk menggantikan mempelai-pria.jpg'; document.getElementById('toast-icon').textContent = 'sync'; document.getElementById('toast-icon').className = 'material-symbols-outlined text-[#15803D] text-[22px]'; toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none'); setTimeout(() =&gt; { toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none'); }, 3000); })()">
+<span class="material-symbols-outlined text-[18px] mr-1.5">sync</span>
+                  Ganti foto
+                </button>
+</div>
+<button class="h-11 px-3 text-error hover:bg-error-container/40 rounded flex items-center justify-center font-label-md text-label-md transition-colors border border-transparent hover:border-error-container" type="button" onclick="(function(){ const toast = document.getElementById('toast-notification'); document.getElementById('toast-title').textContent = 'Konfirmasi Hapus'; document.getElementById('toast-desc').textContent = 'Foto mempelai pertama ditandai untuk dihapus.'; document.getElementById('toast-icon').textContent = 'delete'; document.getElementById('toast-icon').className = 'material-symbols-outlined text-error text-[22px]'; toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none'); setTimeout(() =&gt; { toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none'); }, 3000); })()">
+<span class="material-symbols-outlined text-[18px] mr-1">delete</span>
+                Hapus
+              </button>
+</div>
+</article>
+<!-- Slot 2: Foto mempelai kedua (Belum Diunggah) -->
+<article class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-5 flex flex-col justify-between shadow-sm">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-lg text-label-lg text-on-surface font-semibold">Foto mempelai kedua</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A]">
+<span class="material-symbols-outlined text-[13px] mr-1">hourglass_empty</span>
+                  Belum diunggah
+                </span>
+</div>
+<!-- Content Row -->
+<div class="flex gap-4 items-start">
+<!-- Empty Placeholder Thumbnail -->
+<div class="w-32 h-40 border-2 border-dashed border-outline-variant/60 rounded bg-surface-container-low flex flex-col items-center justify-center text-outline flex-shrink-0">
+<span class="material-symbols-outlined text-[32px] mb-1">add_a_photo</span>
+<span class="text-[11px] font-label-sm text-center px-2">Kosong</span>
+</div>
+<!-- Info & Staged File Notification -->
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex items-center text-on-surface font-medium text-body-md">
+<span class="material-symbols-outlined text-[18px] mr-1.5 text-primary-container">attachment</span>
+<span class="font-data-mono text-data-mono text-on-surface">nadia-formal.png</span>
+<span class="ml-2 text-[11px] px-1.5 py-0.2 bg-surface-container text-on-surface-variant rounded">(siap diunggah)</span>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-1">Ukuran berkas: 3.1 MB</p>
+<div class="mt-2 text-[12px] text-on-surface-variant bg-surface-container-low p-2 rounded border border-outline-variant/20 flex items-start">
+<span class="material-symbols-outlined text-[16px] text-outline mr-1.5 flex-shrink-0 mt-0.5">info</span>
+<span class="">Format JPG, PNG, WebP maks. 12MB. Klik tombol 'Unggah foto' untuk memproses slot ini.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Controls (Uniform Height 40-44px) -->
+<div class="mt-5 pt-4 border-t border-outline-variant/20 flex items-center justify-between gap-3">
+<div class="flex items-center gap-2">
+<button class="h-11 px-4 bg-surface-container-lowest border border-outline-variant hover:border-outline text-on-surface font-label-md text-label-md rounded flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px] mr-1.5">folder_open</span>
+                  Pilih foto
+                </button>
+<button class="h-11 px-4 bg-primary-container hover:bg-[#15803d] active:bg-[#14532d] text-on-primary font-label-md text-label-md rounded flex items-center justify-center font-semibold transition-colors shadow-sm" type="button" onclick="(function(){ const toast = document.getElementById('toast-notification'); document.getElementById('toast-title').textContent = 'Foto Berhasil Diunggah'; document.getElementById('toast-desc').textContent = 'nadia-formal.png siap ditampilkan pada undangan.'; document.getElementById('toast-icon').textContent = 'check_circle'; document.getElementById('toast-icon').className = 'material-symbols-outlined text-[#15803D] text-[22px]'; toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none'); setTimeout(() =&gt; { toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none'); }, 3500); const badge = document.querySelector('section:nth-of-type(1) article:nth-child(2) span.bg-\\[#FEF3C7\\]'); if(badge){ badge.className = 'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#DCFCE7] text-[#15803D] border border-[#BBF7D0]'; badge.innerHTML = '&lt;span class=&quot;material-symbols-outlined text-[13px] mr-1&quot; style=&quot;font-variation-settings: \'FILL\' 1;&quot;&gt;check_circle&lt;/span&gt; Tersimpan'; } const statusSub = document.querySelector('section:nth-of-type(1) article:nth-child(2) span.italic'); if(statusSub){ statusSub.textContent = 'Tersimpan otomatis'; statusSub.className = 'text-label-sm font-label-sm text-[#15803D] font-medium'; } })()">
+<span class="material-symbols-outlined text-[18px] mr-1.5">upload</span>
+                  Unggah foto
+                </button>
+</div>
+<span class="text-label-sm font-label-sm text-outline italic">Belum tersimpan</span>
+</div>
+</article>
+</div>
+</section>
+<!-- ========================================== -->
+<!-- SECTION 2: GALERI FOTO UNDANGAN (9 SLOTS)  -->
+<!-- ========================================== -->
+<section class="flex flex-col space-y-3">
+<div class="flex items-center justify-between border-b border-outline-variant/30 pb-2">
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface flex items-center">
+<span class="material-symbols-outlined text-[20px] mr-2 text-primary-container">collections</span>
+              Galeri Foto Undangan
+            </h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">
+              Tepat 9 slot foto tetap untuk tampilan korsel dan grid album pada undangan digital.
+            </p>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface font-semibold bg-surface-container-high px-2.5 py-1 rounded">
+            5 / 9 Terpasang
+          </span>
+</div>
+<!-- 3-Column Grid for exactly 9 slots -->
+<div class="grid grid-cols-3 gap-6">
+<!-- Slot 1 (Installed) -->
+<article class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-4 flex flex-col justify-between shadow-sm">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-lg text-label-lg text-on-surface font-semibold">Galeri 1</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#DCFCE7] text-[#15803D] border border-[#BBF7D0]">
+                  Tersimpan
+                </span>
+</div>
+<div class="w-full h-44 bg-surface-container-high rounded border border-outline-variant/30 overflow-hidden mb-3">
+<img class="w-full h-full object-cover" data-alt="Exquisite Indonesian botanical wedding floral centerpiece decoration with neutral white orchids, eucalyptus greenery, and artisan ceramics arranged over light wooden banquet table in natural midday light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBN6qnMfF9ULSqlUesPTzSAxkxC9MHCM5QsmHxuxrNzZqNztGZuqvrifaVYYn4XXU9jKWfs6VJ5MDutYyOQAyLY1ABZSOikOfOL76tIMjm_drecGFxf73cGh-VvCVLZ2du4tkioioqMT7Jxz-b5D1al7l7iq1OaU2Mnd1uAelifwC-2ne2_GFk2bTABlJ81vNfJWGm3S8bslyZQW4MJahvA03rmsti8uH1LN2OlvI4eSwqNT94QNo6I9vvvWC3SD8c6X1ixGPc5F15q">
+</div>
+<p class="font-data-mono text-data-mono text-on-surface truncate">galeri-01-dekorasi.jpg</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant">1.8 MB • 1920×1080</p>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<button class="h-10 px-3 bg-surface-container-lowest border border-outline-variant hover:border-outline text-on-surface font-label-sm text-label-sm rounded flex items-center transition-colors" type="button">
+                  Pilih foto
+                </button>
+<button class="h-10 px-3 bg-primary-container hover:bg-[#15803d] text-on-primary font-label-sm text-label-sm rounded flex items-center font-medium transition-colors" type="button">
+                  Ganti
+                </button>
+</div>
+<button class="h-10 px-2.5 text-error hover:bg-error-container/40 rounded flex items-center font-label-sm text-label-sm transition-colors" title="Hapus foto" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</article>
+<!-- Slot 2 (Installed) -->
+<article class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-4 flex flex-col justify-between shadow-sm">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-lg text-label-lg text-on-surface font-semibold">Galeri 2</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#DCFCE7] text-[#15803D] border border-[#BBF7D0]">
+                  Tersimpan
+                </span>
+</div>
+<div class="w-full h-44 bg-surface-container-high rounded border border-outline-variant/30 overflow-hidden mb-3">
+<img class="w-full h-full object-cover" data-alt="Macro close-up shot of two platinum wedding bands resting on a textured raw linen surface beside dried jasmine buds, photographed in soft diffused light emphasizing disciplined clean craft." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCpnd1GxigbOaNq9jvpL8W21k-pZH9OhKacsN5bWK8EUowKseBTVZNHrF2UaBcdiEWtuhHVH4SBTwRtSs7p35zGdR4RZwjjflRn49i7zZ15TJEtytnTKdf9lthWqfqXovtiqRy_oXVyWTw_xjYi3gD-UUMBDBPAuu0FQpNQDCd06LGiuxTbv19ZwlT2DmuC2uNlLh1dOpJu4DfWqQSkjnr3a-AS4BNoamxhbb2DTU6CIp0vLJKPs7Ef5EUNSj1Bw8S2MHOgtXczP1A">
+</div>
+<p class="font-data-mono text-data-mono text-on-surface truncate">galeri-02-cincin.jpg</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant">2.1 MB • 2048×1365</p>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<button class="h-10 px-3 bg-surface-container-lowest border border-outline-variant hover:border-outline text-on-surface font-label-sm text-label-sm rounded flex items-center transition-colors" type="button">
+                  Pilih foto
+                </button>
+<button class="h-10 px-3 bg-primary-container hover:bg-[#15803d] text-on-primary font-label-sm text-label-sm rounded flex items-center font-medium transition-colors" type="button">
+                  Ganti
+                </button>
+</div>
+<button class="h-10 px-2.5 text-error hover:bg-error-container/40 rounded flex items-center font-label-sm text-label-sm transition-colors" title="Hapus foto" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</article>
+<!-- Slot 3 (Installed) -->
+<article class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-4 flex flex-col justify-between shadow-sm">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-lg text-label-lg text-on-surface font-semibold">Galeri 3</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#DCFCE7] text-[#15803D] border border-[#BBF7D0]">
+                  Tersimpan
+                </span>
+</div>
+<div class="w-full h-44 bg-surface-container-high rounded border border-outline-variant/30 overflow-hidden mb-3">
+<img class="w-full h-full object-cover" data-alt="Editorial flatlay of luxury bespoke wedding stationery suite with emerald-accented calligraphic typography, wax seal, and handmade off-white deckled paper on a stone tabletop." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3Kyiynt-HlC63jN06_M3acTufwSjG_Y7THY-gcSDuaGkgp9G6mB7TbpXlkqFfPbokuk3bmJWMhTltN9KrsN4pvhT5faJU7jhfU_OozNsBuxZrMPtBBkNTS9JK58Gm3-jTtn6kDrYBGbGUjXkyqCzgzzXOAdA3_dPsGoV8DwOPxgjnnQ13gx5eCViw5pCUWyMPzwonH87Fs8S-_U1mXMe5GZEVLNGOCGFsU8eWl-WnFJAwbLrU8DxESIQXGM8IQL-i1O7l_K-yfjGA">
+</div>
+<p class="font-data-mono text-data-mono text-on-surface truncate">galeri-03-undangan-cetak.jpg</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant">3.4 MB • 2400×1600</p>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<button class="h-10 px-3 bg-surface-container-lowest border border-outline-variant hover:border-outline text-on-surface font-label-sm text-label-sm rounded flex items-center transition-colors" type="button">
+                  Pilih foto
+                </button>
+<button class="h-10 px-3 bg-primary-container hover:bg-[#15803d] text-on-primary font-label-sm text-label-sm rounded flex items-center font-medium transition-colors" type="button">
+                  Ganti
+                </button>
+</div>
+<button class="h-10 px-2.5 text-error hover:bg-error-container/40 rounded flex items-center font-label-sm text-label-sm transition-colors" title="Hapus foto" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</article>
+<!-- Slot 4 (Installed) -->
+<article class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-4 flex flex-col justify-between shadow-sm">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-lg text-label-lg text-on-surface font-semibold">Galeri 4</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#DCFCE7] text-[#15803D] border border-[#BBF7D0]">
+                  Tersimpan
+                </span>
+</div>
+<div class="w-full h-44 bg-surface-container-high rounded border border-outline-variant/30 overflow-hidden mb-3">
+<img class="w-full h-full object-cover" data-alt="Wide-angle architectural perspective of a contemporary glass conservatory wedding pavilion in Bandung surrounded by pine trees under overcast gentle daylight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBigDoZukitwxbqcxXQGl5gExqMbKro4PhjHUcexmP28b4wJmTVBICcAuQi_xi4GIeJhkZRjxhDJra5oDXjoGszj9a1G0f4d7Yjn0VtQfEsKZsaAMTKNtXpP6sljIJDscQz0vLg3EgyLQ_FSegc_KZYsaxeqLAY9BwqO8HztRSrh8qbAzpjz6im9DC8FB7ZzDxlOklppPAk96MMcUZUhl2s_dPhhdnIUyC9RZbipNmUvJpbOegTxrUsY0JMr6Gq0oQ8nkZL6pUWV51J">
+</div>
+<p class="font-data-mono text-data-mono text-on-surface truncate">galeri-04-gedung-akad.jpg</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant">4.2 MB • 2560×1440</p>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<button class="h-10 px-3 bg-surface-container-lowest border border-outline-variant hover:border-outline text-on-surface font-label-sm text-label-sm rounded flex items-center transition-colors" type="button">
+                  Pilih foto
+                </button>
+<button class="h-10 px-3 bg-primary-container hover:bg-[#15803d] text-on-primary font-label-sm text-label-sm rounded flex items-center font-medium transition-colors" type="button">
+                  Ganti
+                </button>
+</div>
+<button class="h-10 px-2.5 text-error hover:bg-error-container/40 rounded flex items-center font-label-sm text-label-sm transition-colors" title="Hapus foto" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</article>
+<!-- Slot 5 (Installed) -->
+<article class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-4 flex flex-col justify-between shadow-sm">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-lg text-label-lg text-on-surface font-semibold">Galeri 5</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#DCFCE7] text-[#15803D] border border-[#BBF7D0]">
+                  Tersimpan
+                </span>
+</div>
+<div class="w-full h-44 bg-surface-container-high rounded border border-outline-variant/30 overflow-hidden mb-3">
+<img class="w-full h-full object-cover" data-alt="Artisan tiered wedding cake with subtle olive leaves and white fondant frosting displayed on a marble plinth in high-key natural illumination." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjUUcXOSHmORyECGdof31xm_wF_ZnnoiuEDhDKnl9ViZj_vEU5ddaF-fGM-PcDIjgOKYZ4f4W9e2ys9mhDP_kN3jQBGTHES0QffSRSyEgbklxqmwSb4DNKcAsh-ytnS7al_lO0VTVJ_X-3RcigCgyNg3IhlJS9qddaNkgRuKk3UcQWD2-uLrZJpzCLZjdZ2pGnKsD4ewjxBOEfEopqUmUJnc1Nir5Oa17L5jrKtzXfbNuh7lPOsw6R86N7vpWEPSItj8Q6GAD3QgFR">
+</div>
+<p class="font-data-mono text-data-mono text-on-surface truncate">galeri-05-kue-resepsi.jpg</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant">2.8 MB • 1920×1280</p>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<button class="h-10 px-3 bg-surface-container-lowest border border-outline-variant hover:border-outline text-on-surface font-label-sm text-label-sm rounded flex items-center transition-colors" type="button">
+                  Pilih foto
+                </button>
+<button class="h-10 px-3 bg-primary-container hover:bg-[#15803d] text-on-primary font-label-sm text-label-sm rounded flex items-center font-medium transition-colors" type="button">
+                  Ganti
+                </button>
+</div>
+<button class="h-10 px-2.5 text-error hover:bg-error-container/40 rounded flex items-center font-label-sm text-label-sm transition-colors" title="Hapus foto" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</article>
+<!-- Slot 6 (Empty) -->
+<article class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-4 flex flex-col justify-between shadow-sm">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-lg text-label-lg text-on-surface font-semibold">Galeri 6</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A]">
+                  Belum diunggah
+                </span>
+</div>
+<div class="w-full h-44 border-2 border-dashed border-outline-variant/60 rounded bg-surface-container-low flex flex-col items-center justify-center text-outline mb-3">
+<span class="material-symbols-outlined text-[28px] mb-1">image</span>
+<span class="text-[11px] font-label-sm">Slot Galeri Kosong</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant italic">Belum ada berkas yang dipilih</p>
+<p class="text-[11px] text-outline mt-0.5">JPG/PNG/WebP maks. 12MB (otomatis disesuaikan oleh sistem)</p>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<button class="h-10 px-3 bg-surface-container-lowest border border-outline-variant hover:border-outline text-on-surface font-label-sm text-label-sm rounded flex items-center transition-colors" type="button">
+                  Pilih foto
+                </button>
+<button class="h-10 px-3 bg-surface-container-high text-outline font-label-sm text-label-sm rounded flex items-center cursor-not-allowed" disabled="" type="button">
+                  Unggah
+                </button>
+</div>
+<span class="text-[11px] text-outline font-label-sm">—</span>
+</div>
+</article>
+<!-- Slot 7 (Empty) -->
+<article class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-4 flex flex-col justify-between shadow-sm">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-lg text-label-lg text-on-surface font-semibold">Galeri 7</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A]">
+                  Belum diunggah
+                </span>
+</div>
+<div class="w-full h-44 border-2 border-dashed border-outline-variant/60 rounded bg-surface-container-low flex flex-col items-center justify-center text-outline mb-3">
+<span class="material-symbols-outlined text-[28px] mb-1">image</span>
+<span class="text-[11px] font-label-sm">Slot Galeri Kosong</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant italic">Belum ada berkas yang dipilih</p>
+<p class="text-[11px] text-outline mt-0.5">JPG/PNG/WebP maks. 12MB (otomatis disesuaikan oleh sistem)</p>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<button class="h-10 px-3 bg-surface-container-lowest border border-outline-variant hover:border-outline text-on-surface font-label-sm text-label-sm rounded flex items-center transition-colors" type="button">
+                  Pilih foto
+                </button>
+<button class="h-10 px-3 bg-surface-container-high text-outline font-label-sm text-label-sm rounded flex items-center cursor-not-allowed" disabled="" type="button">
+                  Unggah
+                </button>
+</div>
+<span class="text-[11px] text-outline font-label-sm">—</span>
+</div>
+</article>
+<!-- Slot 8 (Empty) -->
+<article class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-4 flex flex-col justify-between shadow-sm">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-lg text-label-lg text-on-surface font-semibold">Galeri 8</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A]">
+                  Belum diunggah
+                </span>
+</div>
+<div class="w-full h-44 border-2 border-dashed border-outline-variant/60 rounded bg-surface-container-low flex flex-col items-center justify-center text-outline mb-3">
+<span class="material-symbols-outlined text-[28px] mb-1">image</span>
+<span class="text-[11px] font-label-sm">Slot Galeri Kosong</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant italic">Belum ada berkas yang dipilih</p>
+<p class="text-[11px] text-outline mt-0.5">JPG/PNG/WebP maks. 12MB (otomatis disesuaikan oleh sistem)</p>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<button class="h-10 px-3 bg-surface-container-lowest border border-outline-variant hover:border-outline text-on-surface font-label-sm text-label-sm rounded flex items-center transition-colors" type="button">
+                  Pilih foto
+                </button>
+<button class="h-10 px-3 bg-surface-container-high text-outline font-label-sm text-label-sm rounded flex items-center cursor-not-allowed" disabled="" type="button">
+                  Unggah
+                </button>
+</div>
+<span class="text-[11px] text-outline font-label-sm">—</span>
+</div>
+</article>
+<!-- Slot 9 (Empty) -->
+<article class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-4 flex flex-col justify-between shadow-sm">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-lg text-label-lg text-on-surface font-semibold">Galeri 9</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A]">
+                  Belum diunggah
+                </span>
+</div>
+<div class="w-full h-44 border-2 border-dashed border-outline-variant/60 rounded bg-surface-container-low flex flex-col items-center justify-center text-outline mb-3">
+<span class="material-symbols-outlined text-[28px] mb-1">image</span>
+<span class="text-[11px] font-label-sm">Slot Galeri Kosong</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant italic">Belum ada berkas yang dipilih</p>
+<p class="text-[11px] text-outline mt-0.5">JPG/PNG/WebP maks. 12MB (otomatis disesuaikan oleh sistem)</p>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<button class="h-10 px-3 bg-surface-container-lowest border border-outline-variant hover:border-outline text-on-surface font-label-sm text-label-sm rounded flex items-center transition-colors" type="button">
+                  Pilih foto
+                </button>
+<button class="h-10 px-3 bg-surface-container-high text-outline font-label-sm text-label-sm rounded flex items-center cursor-not-allowed" disabled="" type="button">
+                  Unggah
+                </button>
+</div>
+<span class="text-[11px] text-outline font-label-sm">—</span>
+</div>
+</article>
+</div>
+</section>
+<!-- ========================================== -->
+<!-- SECTION 3: MUSIK LATAR BELAKANG (MP3)      -->
+<!-- ========================================== -->
+<section class="flex flex-col space-y-3 pb-12">
+<div class="flex items-center justify-between border-b border-outline-variant/30 pb-2">
+<h2 class="text-headline-sm font-headline-sm text-on-surface flex items-center">
+<span class="material-symbols-outlined text-[20px] mr-2 text-primary-container">music_note</span>
+            Musik Latar Belakang (MP3)
+          </h2>
+<span class="text-label-sm font-label-sm text-on-surface-variant">1 slot audio otomatis</span>
+</div>
+<article class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-6 shadow-sm">
+<div class="flex items-start justify-between">
+<div class="max-w-2xl">
+<div class="flex items-center gap-3">
+<h3 class="font-label-lg text-label-lg text-on-surface font-semibold text-[15px]">Pemutar Musik Undangan</h3>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#DCFCE7] text-[#15803D] border border-[#BBF7D0]">
+<span class="material-symbols-outlined text-[13px] mr-1" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                  Tersimpan
+                </span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1 text-[13px]">
+                File audio berformat MP3 (maksimal 25MB) yang diputar saat tamu membuka undangan.
+              </p>
+</div>
+<div class="text-right">
+<span class="text-label-sm font-label-sm text-on-surface-variant">Status Audio</span>
+<p class="font-data-mono text-data-mono text-on-surface font-medium">Autoplay Siap</p>
+</div>
+</div>
+<!-- Audio Waveform / Native Player Interface -->
+<div class="mt-5 p-4 bg-surface-container-low border border-outline-variant/30 rounded flex flex-col md:flex-row items-center justify-between gap-4">
+<div class="flex items-center space-x-3 w-full md:w-auto">
+<div class="w-11 h-11 rounded bg-primary-container text-on-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">graphic_eq</span>
+</div>
+<div class="min-w-0">
+<p class="font-data-mono text-data-mono text-on-surface font-semibold truncate">instrumental-romantic-acoustic.mp3</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Ukuran: 6.8 MB • Durasi: 03:42 • 320 kbps</p>
+</div>
+</div>
+<!-- Native Audio Control Bar -->
+<div class="w-full md:w-80">
+<audio class="w-full h-10 accent-primary-container" controls="">
+<source src="" type="audio/mpeg">
+                Browser Anda tidak mendukung elemen pemutar audio.
+              </audio>
+</div>
+</div>
+<!-- Bottom Action Buttons for Audio -->
+<div class="mt-6 pt-4 border-t border-outline-variant/20 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<button class="h-11 px-4 bg-surface-container-lowest border border-outline-variant hover:border-outline text-on-surface font-label-md text-label-md rounded flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px] mr-1.5">audio_file</span>
+                Pilih MP3
+              </button>
+<button class="h-11 px-4 bg-primary-container hover:bg-[#15803d] active:bg-[#14532d] text-on-primary font-label-md text-label-md rounded flex items-center justify-center font-semibold transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px] mr-1.5">sync</span>
+                Ganti musik
+              </button>
+</div>
+<button class="h-11 px-4 text-error hover:bg-error-container/40 rounded flex items-center justify-center font-label-md text-label-md transition-colors border border-transparent hover:border-error-container" type="button">
+<span class="material-symbols-outlined text-[18px] mr-1.5">delete_forever</span>
+              Hapus musik
+            </button>
+</div>
+</article>
+</section>
+</div>
+</main>
+
+
+<div id="toast-notification" class="fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-20 opacity-0 pointer-events-none flex items-center gap-3 bg-on-surface text-surface px-4 py-3 rounded-lg shadow-xl border border-outline-variant/30 max-w-sm"><span id="toast-icon" class="material-symbols-outlined text-[#15803D] text-[22px]">check_circle</span><div><p id="toast-title" class="font-label-md font-semibold text-[13px] text-surface">Berhasil</p><p id="toast-desc" class="text-body-sm text-[12px] text-surface-dim">Perubahan telah disimpan ke server.</p></div></div></body></html>

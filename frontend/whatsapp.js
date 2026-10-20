@@ -1,6 +1,6 @@
 export const defaultWhatsappTemplate = `Yth. {nama},
 
-Dengan bahagia kami mengundang Bapak/Ibu/Sdr/Sdri untuk hadir di pernikahan Firsta & Talitha pada 22 November 2026 di Arjuna Ballroom Alam Indah Resto.
+Dengan bahagia kami mengundang Bapak/Ibu/Sdr/Sdri untuk hadir di pernikahan kami pada 22 November 2026 di Arjuna Ballroom Alam Indah Resto.
 
 Undangan lengkap:
 {link}

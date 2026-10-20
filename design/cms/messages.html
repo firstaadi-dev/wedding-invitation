@@ -1,0 +1,363 @@
+<!DOCTYPE html><html lang="id"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Pesan &amp; Preview — weddinvita CMS</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Google Fonts: Inter & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS CDN with forms container-queries plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-fixed": "#89f5e7",
+            "on-tertiary-fixed": "#00201d",
+            "on-surface": "#0b1c30",
+            "surface-bright": "#f8f9ff",
+            "outline": "#707971",
+            "inverse-primary": "#94d5a7",
+            "surface-container-highest": "#d3e4fe",
+            "surface-tint": "#2b6a45",
+            "secondary-fixed": "#dae2fd",
+            "on-tertiary-container": "#6cd9cb",
+            "primary": "#004625",
+            "secondary-container": "#dae2fd",
+            "outline-variant": "#c0c9bf",
+            "background": "#f8f9ff",
+            "surface-container-high": "#dce9ff",
+            "surface-container-lowest": "#ffffff",
+            "on-tertiary-fixed-variant": "#005049",
+            "surface-variant": "#d3e4fe",
+            "on-error": "#ffffff",
+            "surface-container": "#e5eeff",
+            "on-tertiary": "#ffffff",
+            "on-primary-fixed-variant": "#0d512f",
+            "on-secondary-fixed": "#131b2e",
+            "inverse-surface": "#213145",
+            "tertiary-container": "#005e56",
+            "on-primary-container": "#94d5a8",
+            "on-error-container": "#93000a",
+            "primary-fixed-dim": "#94d5a7",
+            "on-secondary": "#ffffff",
+            "primary-container": "#1e5e3a",
+            "on-primary-fixed": "#00210f",
+            "inverse-on-surface": "#eaf1ff",
+            "surface": "#f8f9ff",
+            "on-secondary-container": "#5c647a",
+            "error": "#ba1a1a",
+            "tertiary-fixed-dim": "#6bd8cb",
+            "on-surface-variant": "#404941",
+            "on-primary": "#ffffff",
+            "on-background": "#0b1c30",
+            "error-container": "#ffdad6",
+            "primary-fixed": "#aff2c2",
+            "on-secondary-fixed-variant": "#3f465c",
+            "tertiary": "#00443e",
+            "surface-dim": "#cbdbf5",
+            "secondary-fixed-dim": "#bec6e0",
+            "surface-container-low": "#eff4ff",
+            "secondary": "#565e74"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-xl": "1.5rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "gutter": "1rem",
+            "space-lg": "1rem",
+            "margin": "1rem",
+            "gutter-desktop": "1.5rem",
+            "margin-desktop": "2rem",
+            "space-md": "0.75rem"
+          },
+          "fontFamily": {
+            "label-md": ["Inter"],
+            "label-lg": ["Inter"],
+            "data-mono-sm": ["JetBrains Mono"],
+            "headline-sm": ["Inter"],
+            "headline-lg-mobile": ["Inter"],
+            "body-lg": ["Inter"],
+            "data-mono": ["JetBrains Mono"],
+            "body-md": ["Inter"],
+            "label-sm": ["Inter"],
+            "body-sm": ["Inter"],
+            "headline-md": ["Inter"],
+            "headline-lg": ["Inter"]
+          },
+          "fontSize": {
+            "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+            "label-lg": ["13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+            "data-mono-sm": ["11px", { "lineHeight": "14px", "fontWeight": "400" }],
+            "headline-sm": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "headline-lg-mobile": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+            "data-mono": ["12px", { "lineHeight": "16px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "body-md": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "500" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .wa-pattern-bg {
+      background-color: #efeae2;
+      background-image: radial-gradient(#d5cdc4 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md antialiased min-h-screen overflow-x-hidden flex">
+<!-- ================= LEFT SIDEBAR RAIL (100px FIXED) ================= -->
+<aside class="fixed left-0 top-0 bottom-0 w-[100px] h-screen bg-on-secondary-fixed flex flex-col justify-between items-center py-6 z-40 border-r border-outline-variant/20 select-none">
+<!-- Brand Logo Anchor -->
+<div class="flex flex-col items-center text-center px-1">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary shadow-sm mb-2">
+<span class="material-symbols-outlined text-2xl" data-icon="favorite" data-weight="fill" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+<span class="text-[11px] font-bold tracking-wider text-surface-bright font-headline-sm uppercase leading-tight">WEDDINVITA</span>
+<span class="text-[10px] text-outline-variant tracking-normal font-label-sm mt-0.5">Portal Undangan</span>
+</div>
+<!-- Strictly 4 Navigation Items Vertically Centered -->
+<nav class="flex flex-col gap-3 w-full px-2 my-auto">
+<!-- 1. Tamu Undangan (inactive) -->
+<a class="flex flex-col items-center justify-center py-3 px-1 text-outline-variant hover:text-surface hover:bg-on-surface-variant/20 rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out text-center group" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1 text-outline-variant group-hover:text-surface" data-icon="group">group</span>
+<span class="text-center leading-tight">Tamu Undangan</span>
+</a>
+<!-- 2. Pesan & Preview (ACTIVE highlighted with forest green background rounded rect) -->
+<a class="flex flex-col items-center justify-center py-3 px-1 text-on-primary bg-primary-container rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out text-center shadow-sm" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1 text-on-primary" data-icon="chat_bubble" data-weight="fill" style="font-variation-settings: 'FILL' 1;">chat_bubble</span>
+<span class="text-center leading-tight font-semibold">Pesan &amp; Preview</span>
+</a>
+<!-- 3. Foto & Lagu (inactive) -->
+<a class="flex flex-col items-center justify-center py-3 px-1 text-outline-variant hover:text-surface hover:bg-on-surface-variant/20 rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out text-center group" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1 text-outline-variant group-hover:text-surface" data-icon="photo_library">photo_library</span>
+<span class="text-center leading-tight">Foto &amp; Lagu</span>
+</a>
+<!-- 4. Detail Acara (inactive) -->
+<a class="flex flex-col items-center justify-center py-3 px-1 text-outline-variant hover:text-surface hover:bg-on-surface-variant/20 rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out text-center group" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1 text-outline-variant group-hover:text-surface" data-icon="event">event</span>
+<span class="text-center leading-tight">Detail Acara</span>
+</a>
+</nav>
+<!-- Bottom Navigation Item: Keluar -->
+<div class="w-full px-2">
+<a class="flex flex-col items-center justify-center py-3 px-1 text-outline-variant hover:text-error hover:bg-on-surface-variant/20 rounded-lg font-label-md text-label-md transition-colors duration-150 ease-in-out text-center group" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1 text-outline-variant group-hover:text-error" data-icon="logout">logout</span>
+<span class="text-center leading-tight">Keluar</span>
+</a>
+</div>
+</aside>
+<!-- ================= MAIN CONTENT WORKSPACE ================= -->
+<main class="ml-[100px] flex-1 min-h-screen bg-surface px-8 py-8 flex flex-col">
+<!-- Top Header Area -->
+<header class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-outline-variant/30">
+<div>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container text-on-secondary-container font-label-sm text-label-sm font-medium mb-1.5 border border-outline-variant/20">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+          Undangan pernikahan
+        </div>
+<h1 class="text-headline-lg font-headline-lg text-on-surface tracking-tight">Pesan &amp; Preview</h1>
+<p class="text-body-md font-body-md text-secondary mt-0.5">Atur template teks pesan WhatsApp dan tampilan pratinjau tautan (link preview) undangan.</p>
+</div>
+<!-- Header Right Action Container -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5 text-secondary font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+<span class="">Perubahan belum disimpan</span>
+</div>
+<button class="h-[44px] px-5 bg-primary-container hover:bg-primary text-on-primary font-label-lg text-label-lg font-semibold rounded-lg shadow-sm transition-colors duration-150 flex items-center gap-2" type="button" onclick="saveMessageTemplate()">
+<span class="material-symbols-outlined text-[18px]" data-icon="save">save</span>
+<span class="">Simpan pesan &amp; preview</span>
+</button>
+</div>
+</header>
+<!-- Two-Column Workspace Layout (1440px optimized grid) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6 items-start">
+<!-- ================= LEFT COLUMN: Editor Settings ================= -->
+<div class="lg:col-span-7 flex flex-col gap-6">
+<!-- SECTION 1: Template Pesan Card -->
+<section class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-6 shadow-sm">
+<div class="flex items-center justify-between mb-1.5">
+<h2 class="text-headline-sm font-headline-sm text-on-surface">Template pesan</h2>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary bg-surface-container-low px-2 py-0.5 rounded border border-outline-variant/20">Wajib {link}</span>
+</div>
+<p class="text-body-md font-body-md text-secondary mb-3">
+            Gunakan token <code class="font-data-mono-sm text-primary font-semibold">{nama}</code> untuk nama tamu dan <code class="font-data-mono-sm text-primary font-semibold">{link}</code> untuk tautan undangan. Token {link} wajib ada.
+          </p>
+<!-- Available Token Chips -->
+<div class="flex items-center gap-2 mb-3"><span class="text-label-sm font-label-sm text-secondary">Token dinamis:</span><button type="button" onclick="insertToken('{nama}')" class="inline-flex items-center px-2 py-1 rounded bg-surface-container hover:bg-surface-container-high active:scale-95 text-on-surface font-data-mono-sm text-data-mono-sm border border-outline-variant/30 font-medium transition-colors cursor-pointer" title="Klik untuk sisipkan {nama}">+ {nama}</button><button type="button" onclick="insertToken('{link}')" class="inline-flex items-center px-2 py-1 rounded bg-surface-container hover:bg-surface-container-high active:scale-95 text-on-surface font-data-mono-sm text-data-mono-sm border border-outline-variant/30 font-medium transition-colors cursor-pointer" title="Klik untuk sisipkan {link}">+ {link}</button><span class="text-label-sm text-secondary ml-1">(klik untuk menyisipkan)</span></div>
+<!-- Textarea Field -->
+<div class="relative">
+<textarea class="w-full rounded-lg border border-outline-variant/60 focus:border-primary-container focus:ring-1 focus:ring-primary-container font-body-md text-on-surface text-[14px] leading-relaxed p-4 transition-colors resize-y" id="messageTemplate" rows="10">Kepada Yth. {nama},
+
+Tanpa mengurangi rasa hormat, perkenankan kami mengundang Anda untuk hadir pada acara pernikahan kami:
+
+Raka &amp; Nadia
+
+Detail acara dan konfirmasi kehadiran dapat diakses melalui tautan berikut:
+{link}
+
+Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Anda berkenan hadir dan memberikan doa restu.
+
+Terima kasih.</textarea>
+</div>
+<!-- Character Counter -->
+<div class="flex justify-between items-center mt-2 text-label-sm font-label-sm text-secondary">
+<span class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[16px]" data-icon="check_circle">check_circle</span>
+              Token {link} terdeteksi
+            </span>
+<span class="font-data-mono-sm text-data-mono-sm">348 / 4000 karakter</span>
+</div>
+</section>
+<!-- SECTION 2: Preview Tautan (OpenGraph Meta Preview) Card -->
+<section class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-6 shadow-sm">
+<div class="mb-4">
+<h2 class="text-headline-sm font-headline-sm text-on-surface">Preview tautan</h2>
+<p class="text-body-md font-body-md text-secondary mt-0.5">
+              Tampilan judul dan deskripsi yang muncul saat tautan dibagikan di WhatsApp. Kosongkan jika ingin memakai bawaan.
+            </p>
+</div>
+<div class="flex flex-col gap-4">
+<!-- Judul preview -->
+<div>
+<div class="flex justify-between items-center mb-1.5">
+<label class="text-label-lg font-label-lg text-on-surface" for="previewTitle">Judul preview</label>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary">27 / 120 karakter</span>
+</div>
+<input class="w-full h-[44px] px-3.5 rounded-lg border border-outline-variant/60 focus:border-primary-container focus:ring-1 focus:ring-primary-container font-body-md text-on-surface text-[14px] transition-colors" id="previewTitle" maxlength="120" placeholder="The Wedding of Raka &amp; Nadia" type="text" value="The Wedding of Raka &amp; Nadia">
+</div>
+<!-- Deskripsi preview -->
+<div>
+<div class="flex justify-between items-center mb-1.5">
+<label class="text-label-lg font-label-lg text-on-surface" for="previewDescription">Deskripsi preview</label>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary">84 / 300 karakter</span>
+</div>
+<textarea class="w-full rounded-lg border border-outline-variant/60 focus:border-primary-container focus:ring-1 focus:ring-primary-container font-body-md text-on-surface text-[14px] leading-relaxed p-3 transition-colors resize-none" id="previewDescription" maxlength="300" placeholder="Undangan pernikahan online resmi Raka &amp; Nadia..." rows="3">Kami mengundang Bapak/Ibu/Saudara/i untuk hadir pada acara resepsi pernikahan kami.</textarea>
+</div>
+</div>
+</section>
+<!-- SECTION 3: Thumbnail WhatsApp Card -->
+<section class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-6 shadow-sm">
+<div class="mb-4">
+<h2 class="text-headline-sm font-headline-sm text-on-surface">Thumbnail WhatsApp</h2>
+<p class="text-body-md font-body-md text-secondary mt-0.5">
+              Ukuran rasio rekomendasi 1200×630 piksel (JPG, PNG, WebP maks 12MB). Thumbnail ini dapat diakses publik oleh WhatsApp untuk pratinjau tautan.
+            </p>
+</div>
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-5 p-4 rounded-lg bg-surface-container-low border border-outline-variant/30">
+<!-- Thumbnail Visual Box (~240x126px ratio 1200x630) -->
+<div class="relative w-[240px] h-[126px] rounded-lg overflow-hidden border border-outline-variant/50 shadow-xs flex-shrink-0 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="An elegant wedding invitation card and romantic portrait of bride Nadia and groom Raka, featuring soft natural morning light, subtle botanical foliage accents, deep forest green and warm cream background palette. Modern minimalist Indonesian wedding stationery aesthetic, crisp editorial quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0ZxMIPDc4xACoGiPG8YerguCki1Ukeq6gh4ik5ZxVxWvttbR0x8Mx5jLMv2wfrevwfzFr9LzOs9Wj7S2kJOpK94gVmas1gdWZHC9xViypFlKOXeeL_v2L3iLgDEHyd41pCOh2GP74Ow3Qhlrwan8GNtCTmXAsJ2XOTWrRUf1GeDkaTgwOMuUWYVraVD0EOkYU3K9jCxiVJOBLL7j1Vx9ZqVapUFmpwuiOU1IF5pnbbDu2Rdc_KbI2nBhOX7GFLhbBqaI-LG3SlrB2">
+<span class="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 bg-on-secondary-fixed/80 backdrop-blur-xs text-surface font-data-mono-sm text-[10px] rounded">1200×630</span>
+</div>
+<!-- Thumbnail Actions & Helper info -->
+<div class="flex flex-col justify-between self-stretch py-1">
+<div>
+<p class="font-label-lg text-label-lg text-on-surface font-semibold">raka-nadia-og-cover.jpg</p>
+<p class="text-label-sm font-label-sm text-secondary mt-0.5">Format didukung: JPG, PNG, WebP. Maksimal 12MB.</p>
+</div>
+<div class="flex items-center gap-2.5 mt-3"><button onclick="changePhoto()" class="h-[40px] px-4 rounded-lg border border-outline-variant text-on-surface font-label-md text-label-md hover:bg-surface-container active:scale-95 transition-all flex items-center gap-1.5 bg-surface-container-lowest cursor-pointer" type="button"><span class="material-symbols-outlined text-[18px]" data-icon="upload">upload</span><span class="">Ganti foto</span></button><button onclick="removePhoto()" class="h-[40px] px-3.5 rounded-lg border border-error/30 text-error hover:bg-error-container/40 active:scale-95 font-label-md text-label-md transition-all flex items-center gap-1 cursor-pointer" type="button"><span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span><span class="">Hapus</span></button></div>
+</div>
+</div>
+</section>
+<!-- Explicit Save Action Bar at bottom -->
+<div class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+<div class="flex items-center gap-2 text-secondary text-body-sm font-body-sm">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="verified">verified</span>
+<span class="">Semua perubahan tersimpan rapi sebagai draf aktif.</span>
+</div>
+<button class="h-[44px] px-6 bg-primary-container hover:bg-primary text-on-primary font-label-lg text-label-lg font-semibold rounded-lg shadow-sm transition-colors duration-150 flex items-center gap-2 w-full sm:w-auto justify-center" type="button" onclick="saveMessageTemplate()">
+<span class="material-symbols-outlined text-[18px]" data-icon="save">save</span>
+<span class="">Simpan pesan &amp; preview</span>
+</button>
+</div>
+</div>
+<!-- ================= RIGHT COLUMN: Live WhatsApp Simulation ================= -->
+<div class="lg:col-span-5 sticky top-8 flex flex-col gap-3">
+<div class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-5 shadow-sm">
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant/20 mb-4">
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface">Pratinjau Pesan WhatsApp</h2>
+<p class="text-body-sm font-body-sm text-secondary mt-0.5">
+                Simulasi tampilan pesan yang akan diterima oleh tamu (contoh: <span class="text-on-surface font-medium">Bapak Budi &amp; Ibu Rini</span>)
+              </p>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]" data-icon="phone_iphone">phone_iphone</span>
+</div>
+</div>
+<!-- WhatsApp Chat Container -->
+<div class="wa-pattern-bg rounded-xl p-4 border border-outline-variant/30 flex flex-col items-center min-h-[580px] shadow-inner">
+<!-- Date Chip -->
+<div class="px-3 py-1 bg-surface-container-lowest/90 backdrop-blur-xs text-secondary font-label-sm text-[11px] font-semibold rounded-full shadow-xs mb-4 uppercase tracking-wider">
+              HARI INI
+            </div>
+<!-- Outgoing Chat Bubble (WhatsApp Green Tone) -->
+<div class="w-full max-w-[420px] bg-[#d9fdd3] text-[#111b21] rounded-lg shadow-sm border border-[#c1e9be] overflow-hidden self-end">
+<!-- Link Preview Card Inside Bubble -->
+<div class="m-1.5 rounded-md overflow-hidden bg-[#e9fedb] border border-[#b8e2b5]">
+<div class="w-full h-[155px] overflow-hidden bg-[#d1edcd] relative">
+<img class="w-full h-full object-cover" data-alt="Close-up detail of wedding invitation cover of Raka &amp; Nadia, featuring stylized calligraphy, delicate emerald green foliage borders, and romantic textured natural paper tone under bright balanced studio light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZHAsCHrvuMd3VgC8IpBPY3cUR1stVlZOPpRgmkYfkmpPUwW8UmZHtrj6wPdxPVD5hdwyVeZlIUYjPUH3JirJTm6yVjAAjoZ_Fg8K8BsXTeiIM8jnJ2JLoKjrX5gZCjgi876jtGTtAY7UTq6mqbj1kjs5Ds0yDV7SLL0fSspOnkpzXHGF8pNDZK8VQzHetHAxPfxG1SNmjOUEPYjwRNyIbVgCnrdkTtDyQokvZWoMHrESUlXv3SsKjIgDMVOi6MocX_NTdwMgBml3T">
+</div>
+<div class="p-3 bg-[#e4fad6]"><h4 id="waPreviewTitle" class="font-semibold text-[13px] text-gray-900 leading-tight">The Wedding of Raka &amp; Nadia</h4><p id="waPreviewDesc" class="text-[12px] text-gray-600 line-clamp-2 mt-1 leading-snug">Kami mengundang Bapak/Ibu/Saudara/i untuk hadir pada acara resepsi pernikahan kami.</p><p class="text-[11px] text-gray-500 font-data-mono-sm mt-1.5 flex items-center gap-1"><span class="material-symbols-outlined text-[13px]" data-icon="link">link</span> example.invalid</p></div>
+</div>
+<!-- Message Body Text with Resolved Dynamic Tokens -->
+<div class="p-3 pt-1 text-[13px] leading-relaxed text-[#111b21] whitespace-pre-line font-body-md select-text" id="waMessageBody">
+Kepada Yth. <span class="font-semibold text-gray-950">Bapak Budi &amp; Ibu Rini</span>,
+
+Tanpa mengurangi rasa hormat, perkenankan kami mengundang Anda untuk hadir pada acara pernikahan kami:
+
+<span class="font-semibold">Raka &amp; Nadia</span>
+
+Detail acara dan konfirmasi kehadiran dapat diakses melalui tautan berikut:
+<span class="text-[#027eb5] hover:underline underline font-medium">https://example.invalid/u/budi-rini</span>
+
+Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Anda berkenan hadir dan memberikan doa restu.
+
+Terima kasih.
+              </div>
+<!-- Timestamp & Status Checkmark -->
+<div class="flex justify-end items-center gap-1 px-3 pb-2 text-[11px] text-[#667781] font-data-mono-sm">
+<span class="">10:42</span>
+<span class="material-symbols-outlined text-[15px] text-[#53bdeb]" data-icon="done_all" data-weight="fill" style="font-variation-settings: 'FILL' 1;">done_all</span>
+</div>
+</div>
+</div>
+<!-- Bottom Context Note -->
+<div class="mt-4 flex items-start gap-2 p-3 bg-surface-container-low rounded-lg border border-outline-variant/30 text-secondary text-body-sm font-body-sm">
+<span class="material-symbols-outlined text-[18px] text-primary flex-shrink-0 mt-0.5" data-icon="info">info</span>
+<p class="">
+<strong class="text-on-surface">Catatan:</strong> Pengiriman pesan dilakukan secara manual dari tombol Kirim pada halaman <span class="text-primary font-medium">Tamu Undangan</span>.
+            </p>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+
+<div id="toastAlert" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2.5 px-4 py-3 bg-[#004625] text-white rounded-lg shadow-lg border border-[#94d5a8]/30 font-body-md text-[13px]"><span class="material-symbols-outlined text-[20px] text-[#aff2c2]">check_circle</span><span id="toastMessage" class="">Template pesan berhasil disimpan</span></div><script>function showToast(msg) { const t = document.getElementById('toastAlert'); const m = document.getElementById('toastMessage'); if(t && m) { m.textContent = msg; t.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none'); setTimeout(() => { t.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none'); }, 3000); } } function saveMessageTemplate() { showToast('Template pesan berhasil disimpan'); } function changePhoto() { showToast('Pilih foto thumbnail baru siap diunggah'); } function removePhoto() { showToast('Thumbnail dikembalikan ke gambar standar'); } function insertToken(token) { const textarea = document.getElementById('messageTemplate'); if (!textarea) return; const start = textarea.selectionStart; const end = textarea.selectionEnd; const text = textarea.value; textarea.value = text.substring(0, start) + token + text.substring(end); textarea.selectionStart = textarea.selectionEnd = start + token.length; textarea.focus(); updatePreview(); } function updatePreview() { const textarea = document.getElementById('messageTemplate'); const waBody = document.getElementById('waMessageBody'); const pTitle = document.getElementById('previewTitle'); const pDesc = document.getElementById('previewDescription'); const waTitle = document.getElementById('waPreviewTitle'); const waDesc = document.getElementById('waPreviewDesc'); if (pTitle && waTitle) { waTitle.textContent = pTitle.value || 'The Wedding of Raka & Nadia'; } if (pDesc && waDesc) { waDesc.textContent = pDesc.value || 'Undangan pernikahan resmi'; } if (textarea && waBody) { let text = textarea.value; let formatted = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\{nama\}/g, '<span class="font-semibold text-gray-950">Bapak Budi & Ibu Rini</span>').replace(/\{link\}/g, '<span class="text-[#027eb5] hover:underline underline font-medium">https://example.invalid/u/budi-rini</span>'); waBody.innerHTML = formatted; } } const msgEl = document.getElementById('messageTemplate'); if(msgEl) msgEl.addEventListener('input', updatePreview); const titleEl = document.getElementById('previewTitle'); if(titleEl) titleEl.addEventListener('input', updatePreview); const descEl = document.getElementById('previewDescription'); if(descEl) descEl.addEventListener('input', updatePreview);</script></body></html>

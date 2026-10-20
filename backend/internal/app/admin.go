@@ -16,7 +16,7 @@ const guestSelect = `SELECT g.id,g.name,g.phone,g.invitation_link AS link,g.acti
 // Keep this copy equal to frontend/whatsapp.js; the compatibility test checks both.
 const DefaultWhatsappTemplate = `Yth. {nama},
 
-Dengan bahagia kami mengundang Bapak/Ibu/Sdr/Sdri untuk hadir di pernikahan Firsta & Talitha pada 22 November 2026 di Arjuna Ballroom Alam Indah Resto.
+Dengan bahagia kami mengundang Bapak/Ibu/Sdr/Sdri untuk hadir di pernikahan kami pada 22 November 2026 di Arjuna Ballroom Alam Indah Resto.
 
 Undangan lengkap:
 {link}
@@ -120,7 +120,7 @@ func validMap(v any) bool {
 	return err == nil && u.Scheme == "https" && u.Host == "www.google.com" && u.User == nil && strings.HasPrefix(u.Path, "/maps/embed")
 }
 func validateSettings(v map[string]any) {
-	only(v, "ceremonyTitle", "receptionTitle", "ceremonyTime", "receptionTime", "countdownTime", "mapEmbedUrl", "whatsappTemplate", "linkPreviewTitle", "linkPreviewDescription")
+	only(v, "partnerOneName", "partnerTwoName", "partnerOneFather", "partnerOneMother", "partnerTwoFather", "partnerTwoMother", "giftEnabled", "giftAccounts", "ceremonyTitle", "receptionTitle", "ceremonyTime", "receptionTime", "countdownTime", "mapEmbedUrl", "whatsappTemplate", "linkPreviewTitle", "linkPreviewDescription")
 	if raw, exists := v["whatsappTemplate"]; exists {
 		s, ok := raw.(string)
 		unknown := regexp.MustCompile(`\{(?:nama|link)\}`).ReplaceAllString(s, "")
@@ -153,6 +153,81 @@ func validateSettings(v map[string]any) {
 			}
 			v[key] = strings.TrimSpace(s)
 		}
+	}
+	for _, key := range []string{"partnerOneName", "partnerTwoName", "partnerOneFather", "partnerOneMother", "partnerTwoFather", "partnerTwoMother"} {
+		if raw, exists := v[key]; exists {
+			s, ok := raw.(string)
+			if !ok || length(strings.TrimSpace(s)) > 120 || match(`[\x00-\x1f]`, s) {
+				fail(400, "partner_name", "Nama maksimal 120 karakter.")
+			}
+			v[key] = strings.TrimSpace(s)
+		}
+	}
+	if raw, exists := v["giftEnabled"]; exists {
+		if raw != "true" && raw != "false" {
+			fail(400, "gift_enabled", "Pengaturan rekening tidak valid.")
+		}
+	}
+	if raw, exists := v["giftAccounts"]; exists {
+		accounts, ok := raw.([]any)
+		if !ok || len(accounts) > 10 {
+			fail(400, "gift_accounts", "Maksimal 10 rekening dengan format yang valid.")
+		}
+		for i, rawAccount := range accounts {
+			account, ok := rawAccount.(map[string]any)
+			if !ok {
+				fail(400, "gift_accounts", "Nama bank, nomor rekening, atau nama pemilik tidak valid.")
+			}
+			kind, hasType := account["type"].(string)
+			if _, exists := account["type"]; exists && !hasType {
+				fail(400, "gift_accounts", "Pilih rekening atau alamat rumah.")
+			}
+			if _, exists := account["type"]; !exists { // Existing account entries predate the type field.
+				kind = "account"
+			}
+			switch kind {
+			case "account":
+				for key := range account {
+					if key != "type" && key != "bank" && key != "number" && key != "owner" {
+						fail(400, "gift_accounts", "Data rekening tidak valid.")
+					}
+				}
+				bank, bankOK := account["bank"].(string)
+				number, numberOK := account["number"].(string)
+				owner, ownerOK := account["owner"].(string)
+				if (len(account) != 3 && len(account) != 4) || !bankOK || !numberOK || !ownerOK {
+					fail(400, "gift_accounts", "Nama bank, nomor rekening, atau nama pemilik tidak valid.")
+				}
+				bank, number, owner = strings.TrimSpace(bank), strings.TrimSpace(number), strings.TrimSpace(owner)
+				if bank == "" || length(bank) > 80 || number == "" || length(number) > 40 || !match(`^[0-9 ]+$`, number) || strings.ReplaceAll(number, " ", "") == "" || owner == "" || length(owner) > 120 || match(`[\x00-\x1f]`, bank+number+owner) {
+					fail(400, "gift_accounts", "Nama bank, nomor rekening, atau nama pemilik tidak valid.")
+				}
+				accounts[i] = map[string]any{"type": "account", "bank": bank, "number": number, "owner": owner}
+			case "address":
+				for key := range account {
+					if key != "type" && key != "recipient" && key != "address" && key != "phone" {
+						fail(400, "gift_accounts", "Data alamat tidak valid.")
+					}
+				}
+				recipient, recipientOK := account["recipient"].(string)
+				address, addressOK := account["address"].(string)
+				phone, phoneOK := account["phone"].(string)
+				if !phoneOK && account["phone"] == nil {
+					phone, phoneOK = "", true
+				}
+				if (len(account) != 3 && len(account) != 4) || !recipientOK || !addressOK || !phoneOK {
+					fail(400, "gift_accounts", "Penerima dan alamat rumah wajib diisi.")
+				}
+				recipient, address, phone = strings.TrimSpace(recipient), strings.TrimSpace(address), strings.TrimSpace(phone)
+				if recipient == "" || length(recipient) > 120 || address == "" || length(address) > 1000 || match(`[\x00-\x08\x0b\x0c\x0e-\x1f]`, recipient+address+phone) || length(phone) > 40 {
+					fail(400, "gift_accounts", "Penerima, alamat rumah, atau nomor kontak tidak valid.")
+				}
+				accounts[i] = map[string]any{"type": "address", "recipient": recipient, "address": address, "phone": phone}
+			default:
+				fail(400, "gift_accounts", "Pilih rekening atau alamat rumah.")
+			}
+		}
+		v["giftAccounts"] = accounts
 	}
 	if raw, exists := v["countdownTime"]; exists {
 		s, ok := raw.(string)

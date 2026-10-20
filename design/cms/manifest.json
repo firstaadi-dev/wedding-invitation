@@ -1,0 +1,32 @@
+{
+  "projectUrl": "https://stitch.withgoogle.com/projects/13790839548463083405",
+  "designSystem": "assets/350c1713f5c94e59a65c0d9e2d610532",
+  "status": "Implemented in frontend; snapshots are design references, not executable production code",
+  "pages": [
+    {
+      "key": "login",
+      "screen": "7f64952d57f84ca2b961b5acb14fe9c2",
+      "html": "login.html"
+    },
+    {
+      "key": "guests",
+      "screen": "818da233036c49cea4cd7c5948696f51",
+      "html": "guests.html"
+    },
+    {
+      "key": "messages",
+      "screen": "6d224ac3416d4473b0ece07678be0998",
+      "html": "messages.html"
+    },
+    {
+      "key": "media",
+      "screen": "b8f6757a854d4ecd8a04434b38948793",
+      "html": "media.html"
+    },
+    {
+      "key": "event",
+      "screen": "1988b225bc2047dab031efedc668a27e",
+      "html": "event.html"
+    }
+  ]
+}

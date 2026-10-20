@@ -1,0 +1,191 @@
+<!DOCTYPE html><html class="h-full" lang="id"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Masuk ke Akun - Portal Undangan | weddinvita</title>
+<!-- Tailwind CSS v3 with forms plugin -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Cormorant Garamond & Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<!-- Custom Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            forest: {
+              DEFAULT: '#1b3b32',
+              deep: '#15332a',
+              darker: '#0f241e',
+              light: '#254e42'
+            },
+            burgundy: {
+              DEFAULT: '#6b2537',
+              hover: '#571c2b',
+              accent: '#823145'
+            },
+            cream: {
+              DEFAULT: '#fbf9f5',
+              surface: '#f6f3ee',
+              dark: '#ede8df'
+            },
+            sand: '#d2b99b'
+          },
+          fontFamily: {
+            serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: Custom Styles -->
+<style data-purpose="typography-and-effects">
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #fbf9f5;
+    }
+    .font-editorial {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+    }
+    .watermark-letter {
+      user-select: none;
+      pointer-events: none;
+      line-height: 0.8;
+      font-size: clamp(22rem, 36vw, 38rem);
+    }
+    /* Subtle focus ring style */
+    .custom-input:focus {
+      outline: none;
+      border-color: #1b3b32;
+      box-shadow: 0 0 0 1px #1b3b32;
+    }
+  </style>
+<!-- END: Custom Styles -->
+</head>
+<body class="h-full flex flex-col m-0 p-0 text-slate-800 antialiased selection:bg-burgundy selection:text-white">
+<!-- BEGIN: MainContainer -->
+<main class="min-h-screen w-full flex flex-col lg:flex-row relative overflow-hidden" data-purpose="split-screen-auth-layout">
+<!-- BEGIN: LeftBrandShowcaseSection -->
+<section class="w-full lg:w-1/2 bg-[#1b3b32] text-white flex flex-col justify-between p-8 sm:p-14 lg:p-20 relative overflow-hidden z-10 shrink-0" data-purpose="brand-statement-side">
+<!-- Background giant decorative watermark 'W' -->
+<div aria-hidden="true" class="absolute -bottom-16 -right-12 text-[#16332b] font-editorial watermark-letter font-normal opacity-60 z-0 transition-opacity duration-700 select-none">
+        W
+      </div>
+<!-- Top brand wordmark -->
+<header class="relative z-10">
+<a class="inline-flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-sand rounded group" href="#">
+<span class="text-2xl font-bold tracking-tight text-white group-hover:text-amber-100 transition-colors">
+            weddinvita
+          </span>
+<span class="inline-block w-2 h-2 rounded-full bg-white ml-0.5 mt-0.5"></span>
+</a>
+</header>
+<!-- Middle editorial headline & quote -->
+<div class="relative z-10 max-w-lg my-16 lg:my-auto">
+<!-- Eyebrow tagline -->
+<p class="text-xs sm:text-[13px] font-medium tracking-[0.22em] text-[#cbb69d] uppercase mb-6 sm:mb-8">
+          SETIAP UNDANGAN, SEBUAH CERITA
+        </p>
+<!-- Main Display Headline -->
+<h1 class="font-editorial text-5xl sm:text-6xl xl:text-7xl font-normal leading-[1.08] tracking-tight text-white mb-8">
+          Hari Istimewa.<br>Lebih Tertata.
+        </h1>
+<!-- Short Subtitle Description -->
+<p class="text-emerald-100/80 text-base sm:text-lg font-light leading-relaxed max-w-md mb-12">
+          Satu ruang untuk merangkai undangan dan menyambut orang-orang tersayang.
+        </p>
+<!-- Stylized brand italic script -->
+<div class="pt-2">
+<span class="font-editorial italic text-3xl sm:text-4xl tracking-wide text-white/95 font-medium">
+            weddinvita
+          </span>
+</div>
+</div>
+<!-- Bottom metadata footer -->
+<footer class="relative z-10">
+<p class="text-xs sm:text-sm text-emerald-200/60 font-light tracking-wide">
+          Dibuat untuk momen yang berarti.
+        </p>
+</footer>
+</section>
+<!-- END: LeftBrandShowcaseSection -->
+<!-- BEGIN: RightLoginFormSection -->
+<section class="w-full lg:w-1/2 bg-[#fbf9f5] flex flex-col justify-between items-center p-8 sm:p-14 lg:p-20 relative z-20" data-purpose="login-form-container">
+<!-- Spacer for top balance in large screens -->
+<div aria-hidden="true" class="hidden lg:block w-full h-8"></div>
+<!-- Form Card Area -->
+<div class="w-full max-w-[430px] my-auto py-8">
+<!-- Header: Category & Main Welcome Title -->
+<div class="mb-9">
+<span class="text-[11px] sm:text-xs font-semibold tracking-[0.18em] text-[#1e5e3a] uppercase block mb-3.5">PORTAL UNDANGAN</span>
+<h2 class="font-editorial text-4xl sm:text-[46px] font-normal tracking-tight text-[#17382f] leading-tight mb-3">
+            Selamat Datang Kembali.
+          </h2>
+<p class="text-slate-500 text-sm sm:text-[15px] font-normal leading-relaxed">Masuk untuk menyiapkan dan memantau undangan pernikahan Anda.</p>
+</div>
+<!-- Authentication Form -->
+<form action="#" class="space-y-5" data-purpose="credential-form" method="POST" onsubmit="event.preventDefault();">
+<!-- Email Field -->
+<div class="space-y-1.5">
+<label class="block text-xs sm:text-[13px] font-medium text-slate-700" for="email">
+              Email
+            </label>
+<input class="w-full px-4 py-3 bg-white border border-stone-300 rounded-lg text-slate-800 placeholder-stone-400 text-sm transition-all duration-200 custom-input" id="email" name="email" placeholder="nama@email.com" required="" type="email">
+</div>
+<!-- Password Field -->
+<div class="space-y-1.5 pt-1">
+<label class="block text-xs sm:text-[13px] font-medium text-slate-700" for="password">
+              Password
+            </label>
+<input class="w-full px-4 py-3 bg-white border border-stone-300 rounded-lg text-slate-800 placeholder-stone-400 text-sm transition-all duration-200 custom-input" id="password" name="password" placeholder="Masukkan password" required="" type="password">
+</div>
+<!-- Submit Button -->
+<div class="pt-2">
+<button class="w-full bg-[#1e5e3a] hover:bg-[#16462c] active:bg-[#113823] text-white py-3.5 px-6 rounded-lg text-sm font-medium tracking-wide transition-all duration-200 flex items-center justify-center gap-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1e5e3a]" type="submit">
+<span class="">Masuk ke Akun</span>
+<svg class="h-4 w-4 transform transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+<!-- Helper reassurance notice -->
+<div class="pt-4 text-center">
+<p class="text-xs text-stone-500 font-light">Akses khusus untuk pasangan pengantin.</p>
+</div>
+</form>
+</div>
+<!-- Right Column Footer: Subtle wordmark -->
+<footer class="w-full text-center pb-2">
+<span class="text-xs tracking-wider text-stone-400 font-light select-none">
+          weddinvita
+        </span>
+</footer>
+</section>
+<!-- END: RightLoginFormSection -->
+<!-- BEGIN: FloatingStatusNotification -->
+<!-- Status toast matched to reference: "Anda sudah keluar. [x]" positioned at screen bottom seam -->
+
+<!-- END: FloatingStatusNotification -->
+</main>
+<!-- END: MainContainer -->
+<!-- BEGIN: InteractiveScripts -->
+<script data-purpose="toast-auto-dismiss">
+    // Automatically close status banner after user interaction or timeout
+    document.addEventListener('DOMContentLoaded', () => {
+      const toast = document.getElementById('status-toast');
+      if (toast) {
+        setTimeout(() => {
+          toast.classList.add('opacity-0', 'pointer-events-none');
+          setTimeout(() => toast.remove(), 400);
+        }, 7000);
+      }
+    });
+  </script>
+<!-- END: InteractiveScripts -->
+
+
+
+
+</body></html>
