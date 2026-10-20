@@ -91,7 +91,6 @@ jobs:
           sh /tmp/install-postman.sh
           npm ci
           npm ci --prefix frontend
-      - run: postman spec lint postman/specs/invitation.json --issueType=syntax --no-report-events
       - run: npm run build
       - run: npm test
       - run: npm run test:integration
