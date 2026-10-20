@@ -1,4 +1,4 @@
-# Firsta & Talitha — Undangan Rimba Jawa
+# weddinvita — Undangan Firsta & Talitha
 
 Undangan satu halaman tanpa navigasi: amplop burgundy, segel pembuka, transisi joglo, hutan berlapis, QS. Ar-Rum 30:21, dan orang tua terkonfirmasi. Tanggal 22 November 2026. Foto dan lagu tetap placeholder sampai diunggah melalui CMS.
 
@@ -30,7 +30,7 @@ Saat setup ini password admin acak dan hash disimpan di `.env.local` sebagai `AD
 
 ## CMS dan akses tamu
 
-CMS `/admin` memakai branding **weddinvita** dengan halaman Tamu undangan, Pesan & preview, Foto & lagu, dan Detail acara. Sidebar desktop beralih menjadi drawer navigasi di ponsel; daftar tamu menjadi kartu pada layar kecil. Formulir tambah/edit memakai drawer desktop dan sheet mobile. [Cakupan implementasi dan bukti pengujian](docs/weddinvita-cms-implementation.md).
+CMS `/admin` memakai branding **weddinvita** dengan halaman Tamu Undangan, Pesan & Preview, Foto & Lagu, dan Detail Acara. Sidebar desktop beralih menjadi drawer navigasi di ponsel; daftar tamu menjadi kartu pada layar kecil. Formulir tambah/edit memakai drawer desktop dan sheet mobile. [Cakupan implementasi dan bukti pengujian](docs/weddinvita-cms-implementation.md).
 
 CMS mengelola tambah/edit/hapus/aktif/nonaktif tamu, tautan pengganti, reset perangkat, foto pasangan, hingga sembilan foto galeri dengan foto utama, thumbnail dan pembesaran, lagu MP3, nama serta jam acara, jam countdown (WIB), dan URL embed resmi Google Maps. Tautan rahasia yang baru dibuat/diganti tersimpan di database bersama nomor telepon opsional dan dapat disalin kembali dari daftar tamu. Hash tetap digunakan untuk memverifikasi akses; URL asli kini juga tersimpan dan hanya diberikan kepada admin. Link tamu lama tetap berlaku, tetapi tidak dapat dipulihkan dari hash: jika link asli sudah hilang, gunakan Tautan baru dan kirim ulang. Nomor 08… otomatis diubah ke 62…; format internasional +kode negara juga diterima. Tombol Kirim membuka wa.me dengan pesan terisi; admin menekan kirim dari WhatsApp. Template global mendukung {nama} dan {link} (wajib), dapat diedit di bagian Pesan WhatsApp & preview tautan. Judul dan deskripsi preview di bagian yang sama menghasilkan metadata HTML/Open Graph pada halaman publik; nama domain tetap mengikuti PUBLIC_ORIGIN. Template dan nomor telepon tidak diberikan melalui API undangan tamu. Thumbnail preview dapat diunggah/diganti/dihapus di bagian yang sama, terpisah dari galeri. JPG/PNG/WebP maksimal 12 MiB dikonversi menjadi JPEG 1200 × 630 dengan crop tengah. Thumbnail saja tersedia tanpa login di /preview-image/{id}, sehingga crawler WhatsApp dapat membacanya; galeri, foto pasangan, dan musik tetap memakai sesi. Penggantian atau penghapusan thumbnail mencabut URL gambar lama. Mengganti tautan mencabut tautan lama dan seluruh sesi/perangkat. Menonaktifkan tamu langsung mencabut sesi.
 

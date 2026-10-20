@@ -8,7 +8,7 @@ const dashboard = $('#dashboard');
 const guestDialog = $('#guest-editor');
 const guestForm = $('#guest-form');
 const navigation = $('#navigation');
-const pages = {tamu:'Tamu undangan',pesan:'Pesan & preview',media:'Foto & lagu',acara:'Detail acara'};
+const pages = {tamu:'Tamu Undangan',pesan:'Pesan & Preview',media:'Foto & Lagu',acara:'Detail Acara'};
 
 function notice(message,error = false) {
   $('#status-message').textContent = message;$('#status').hidden = false;$('#status').classList.toggle('error',error);
@@ -95,7 +95,7 @@ function renderMessagePreview() {
 }
 function editGuest(guest = null) {
   editingGuest = guest;guestForm.reset();$('#guest-error').hidden = true;
-  $('#guest-editor-title').textContent = guest ? 'Edit tamu' : 'Tambah tamu';$('#save-guest').textContent = guest ? 'Simpan perubahan' : 'Tambah tamu';
+  $('#guest-editor-title').textContent = guest ? 'Edit Tamu' : 'Tambah Tamu';$('#save-guest').textContent = guest ? 'Simpan perubahan' : 'Tambah Tamu';
   if (guest) {guestForm.elements.name.value = guest.name;guestForm.elements.phone.value = guest.phone || '';}
   guestDialog.showModal();guestForm.elements.name.focus();
 }
@@ -138,19 +138,19 @@ function renderGuests() {
     const menuActions = element('div',undefined,'menu-actions');
     menuActions.append(action('Edit tamu',() => editGuest(guest)));
     menuActions.append(action(guest.active ? 'Nonaktifkan' : 'Aktifkan',async () => {
-      if (guest.active && !await confirm(`Undangan ${guest.name} tidak bisa dibuka, seluruh sesi dicabut, dan ucapannya disembunyikan. Data tetap tersimpan dan tamu bisa diaktifkan kembali.`,'Nonaktifkan undangan?')) return;
+      if (guest.active && !await confirm(`Undangan ${guest.name} tidak bisa dibuka, seluruh sesi dicabut, dan ucapannya disembunyikan. Data tetap tersimpan dan tamu bisa diaktifkan kembali.`,'Nonaktifkan Undangan?')) return;
       await api(`/api/admin/guests/${guest.id}`,'PATCH',{active:!guest.active});await refreshGuests();notice('Status tamu disimpan.');
     }));
     menuActions.append(action('Tautan baru',async () => {
-      if (!await confirm(`Tautan lama ${guest.name}, seluruh sesi, dan slot perangkat akan dicabut. Kirim tautan pengganti kepada tamu.`,'Ganti tautan undangan?')) return;
+      if (!await confirm(`Tautan lama ${guest.name}, seluruh sesi, dan slot perangkat akan dicabut. Kirim tautan pengganti kepada tamu.`,'Ganti Tautan Undangan?')) return;
       const result = await api(`/api/admin/guests/${guest.id}/link`,'POST',{});await refreshGuests();showLink(result.link);notice('Tautan pengganti dibuat.');
     }));
     menuActions.append(action('Reset perangkat',async () => {
-      if (!await confirm(`Seluruh sesi ${guest.name} akan dicabut dan ketiga slot dikosongkan. Tautan yang sama dapat dipakai untuk mendaftarkan perangkat kembali.`,'Reset slot perangkat?')) return;
+      if (!await confirm(`Seluruh sesi ${guest.name} akan dicabut dan ketiga slot dikosongkan. Tautan yang sama dapat dipakai untuk mendaftarkan perangkat kembali.`,'Reset Slot Perangkat?')) return;
       await api(`/api/admin/guests/${guest.id}/devices`,'DELETE');await refreshGuests();notice('Slot perangkat direset.');
     }));
     menuActions.append(action('Hapus tamu',async () => {
-      if (!await confirm(`Hapus ${guest.name} beserta tautan, seluruh akses, konfirmasi, dan ucapannya? Data tidak dapat dipulihkan.`,'Hapus tamu?')) return;
+      if (!await confirm(`Hapus ${guest.name} beserta tautan, seluruh akses, konfirmasi, dan ucapannya? Data tidak dapat dipulihkan.`,'Hapus Tamu?')) return;
       await api(`/api/admin/guests/${guest.id}`,'DELETE');await refreshGuests();notice('Tamu dihapus.');
     },'danger'));
     menu.append(menuActions);actions.append(menu);cell.append(actions);
@@ -162,7 +162,7 @@ function renderMedia(onlySlot) {
   if (!onlySlot) for (const selector of ['#preview-media','#couple-media','#gallery-media','#music-media']) {
     $(selector).querySelectorAll('audio').forEach(audio => audio.pause());$(selector).replaceChildren();
   }
-  const slots = {preview:'Thumbnail WhatsApp',groom:'Firsta Adi Pradana',bride:'Talitha Syahda Arundatie',...Object.fromEntries(Array.from({length:9},(_,i) => [`gallery${i+1}`,`Galeri · Foto ${i+1}`])),music:'Lagu pilihan'};
+  const slots = {preview:'Thumbnail WhatsApp',groom:'Firsta Adi Pradana',bride:'Talitha Syahda Arundatie',...Object.fromEntries(Array.from({length:9},(_,i) => [`gallery${i+1}`,`Galeri · Foto ${i+1}`])),music:'Lagu Pilihan'};
   for (const [slot,title] of Object.entries(slots)) {
     if (onlySlot && slot !== onlySlot) continue;
     const music = slot === 'music';const hasMedia = Boolean(content.media[slot]);
@@ -185,7 +185,7 @@ function renderMedia(onlySlot) {
       try {mediaType(file,music);upload.disabled = false;} catch(error) {upload.disabled = true;if (file) tell(error.message,true);}
     });
     async function update(method) {
-      if (method === 'DELETE' && !await confirm(slot === 'preview' ? 'Thumbnail publik dan URL gambar lama akan dicabut dari preview tautan.' : `${title} akan dihapus. Undangan kembali menampilkan bingkai kosong untuk media ini.`,'Hapus media?')) return;
+      if (method === 'DELETE' && !await confirm(slot === 'preview' ? 'Thumbnail publik dan URL gambar lama akan dicabut dari preview tautan.' : `${title} akan dihapus. Undangan kembali menampilkan bingkai kosong untuk media ini.`,'Hapus Media?')) return;
       const file = input.files[0];
       try {
         const type = method === 'PUT' ? mediaType(file,music) : undefined;
@@ -233,7 +233,7 @@ guestForm.addEventListener('submit',async event => {
     guestDialog.close();await refreshGuests();if (!guest) showLink(result.link);notice(guest ? 'Data tamu disimpan.' : 'Tamu ditambahkan.');
   } catch(error) {
     if (session === csrf && guestDialog.open) {$('#guest-error').textContent = error.message;$('#guest-error').hidden = false;}else notice(error.message,true);
-  } finally {guestForm.querySelectorAll('input,button').forEach(control => {control.disabled = false;});button.textContent = guest ? 'Simpan perubahan' : 'Tambah tamu';}
+  } finally {guestForm.querySelectorAll('input,button').forEach(control => {control.disabled = false;});button.textContent = guest ? 'Simpan perubahan' : 'Tambah Tamu';}
 });
 for (const [selector,message] of [['#settings','Detail acara disimpan.'],['#whatsapp-settings','Pesan WhatsApp dan preview tautan disimpan.']]) {
   $(selector).addEventListener('submit',async event => {
