@@ -9,6 +9,7 @@ request:
     type: json
     content: |-
       {
+        "email": "owner@example.com",
         "password": "string"
       }
 response:

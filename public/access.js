@@ -2,12 +2,13 @@ import {identify} from './identification.js';
 const message = document.querySelector('#access-message');
 const retry = document.querySelector('#retry');
 // Remove the secret fragment before the third-party agent can collect the page URL.
+const tokenKey = location.pathname === '/' ? 'invitation-token' : `invitation-token:${location.pathname}`;
 let token = location.hash.slice(1);
 if (token) {
   history.replaceState(null,'',location.pathname);
-  try {sessionStorage.setItem('invitation-token',token);} catch {}
+  try {sessionStorage.setItem(tokenKey,token);} catch {}
 } else {
-  try {token = sessionStorage.getItem('invitation-token') || '';} catch {}
+  try {token = sessionStorage.getItem(tokenKey) || '';} catch {}
 }
 async function request(path,data) {
   const response = await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
@@ -30,8 +31,8 @@ async function open() {
     const challenge = await request('/api/access/challenge',{token});
     const result = await identify(challenge.challenge);
     await request('/api/access/verify',{challenge:challenge.challenge,eventId:result.event_id});
-    try {sessionStorage.removeItem('invitation-token');} catch {}
-    location.replace('/');
+    try {sessionStorage.removeItem(tokenKey);} catch {}
+    location.replace(location.pathname);
   } catch (error) {
     message.textContent = error.message || 'Undangan belum dapat dibuka. Silakan coba kembali.';
     retry.hidden = false;

@@ -1,9 +1,9 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Firsta & Talitha Invitation API",
-    "version": "1.0.0",
-    "description": "Authoritative local contract. Same-origin cookies; no public admin credentials or visitor IDs accepted from browser."
+    "title": "weddinvita API",
+    "version": "2.0.0",
+    "description": "Same-origin multi-tenant API. Admin tenant is derived from the account session; guest tenant from the verified invitation. Account provisioning is migration-only; no public registration endpoint."
   },
   "servers": [
     {
@@ -145,7 +145,7 @@
       "post": {
         "operationId": "login",
         "summary": "Login administrator",
-        "description": "Same-origin JSON only. Password verified using scrypt hash. Sets HttpOnly SameSite=Strict cookie, Secure in production. Rate limited.",
+        "description": "Same-origin email and password login for an account provisioned by migration. No public registration. Scrypt verification; generic failure for unknown email and wrong password; HttpOnly SameSite=Strict cookie, Secure in production.",
         "tags": [
           "Admin"
         ],
@@ -268,7 +268,7 @@
       "get": {
         "operationId": "adminSession",
         "summary": "Read admin session",
-        "description": "Read admin session",
+        "description": "Current account and tenant plus CSRF token. Tenant scope cannot be chosen by the client. All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
         "tags": [
           "Admin"
         ],
@@ -385,7 +385,7 @@
       "post": {
         "operationId": "logout",
         "summary": "Revoke admin session",
-        "description": "Revoke admin session",
+        "description": "Revoke admin session All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
         "tags": [
           "Admin"
         ],
@@ -531,7 +531,7 @@
       "get": {
         "operationId": "listGuests",
         "summary": "List guests and device counts",
-        "description": "List guest contact numbers and stored invitation URLs. Admin authentication required. Includes private attendance, headcount, and wish in response (null before submission).",
+        "description": "List guest contact numbers and stored invitation URLs. Admin authentication required. Includes private attendance, headcount, and wish in response (null before submission). All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
         "tags": [
           "Admin"
         ],
@@ -649,7 +649,7 @@
       "post": {
         "operationId": "createGuest",
         "summary": "Create guest and secret link",
-        "description": "Create guest and secret link",
+        "description": "Create guest and secret link All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
         "tags": [
           "Admin"
         ],
@@ -787,7 +787,7 @@
       "patch": {
         "operationId": "updateGuest",
         "summary": "Edit guest name, phone or active status",
-        "description": "Deactivation immediately revokes sessions and challenges. Device slots remain until explicit reset.",
+        "description": "Deactivation immediately revokes sessions and challenges. Device slots remain until explicit reset. All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
         "tags": [
           "Admin"
         ],
@@ -931,7 +931,7 @@
       "delete": {
         "operationId": "deleteGuest",
         "summary": "Delete guest and all their access records",
-        "description": "Delete guest and all their access records",
+        "description": "Delete guest and all their access records All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
         "tags": [
           "Admin"
         ],
@@ -1073,7 +1073,7 @@
       "post": {
         "operationId": "reissueLink",
         "summary": "Replace guest link; revoke old link/sessions/devices",
-        "description": "Replace guest link; revoke old link/sessions/devices",
+        "description": "Replace guest link; revoke old link/sessions/devices All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
         "tags": [
           "Admin"
         ],
@@ -1221,7 +1221,7 @@
       "delete": {
         "operationId": "resetDevices",
         "summary": "Clear three device slots and revoke sessions/challenges",
-        "description": "Clear three device slots and revoke sessions/challenges",
+        "description": "Clear three device slots and revoke sessions/challenges All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
         "tags": [
           "Admin"
         ],
@@ -1363,7 +1363,7 @@
       "get": {
         "operationId": "getContent",
         "summary": "Read settings and selected media",
-        "description": "Read settings and selected media",
+        "description": "Read settings and selected media All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
         "tags": [
           "Admin"
         ],
@@ -1478,7 +1478,7 @@
       "put": {
         "operationId": "setContent",
         "summary": "Save event names, times, countdown time and official map embed URL",
-        "description": "Merge editable event names, displayed times, WIB countdown start and official map embed URL. Omitted fields keep their stored values; empty names use the invitation defaults.",
+        "description": "Merge editable event names, displayed times, WIB countdown start and official map embed URL. Omitted fields keep their stored values; empty names use the invitation defaults. All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
         "tags": [
           "Admin"
         ],
@@ -1616,7 +1616,7 @@
       "put": {
         "operationId": "uploadMedia",
         "summary": "Upload/replaces a photo or MP3 music slot",
-        "description": "Raw binary body, no multipart. Photos up to 12 MiB, decoded/re-encoded by Sharp; music MP3 up to 25 MiB with frame validation. Old file removed after committed replacement. The preview slot creates a public 1200\u00d7630 JPEG for link thumbnails; other media remains session-protected.",
+        "description": "Raw binary body, no multipart. Photos up to 12 MiB, decoded/re-encoded by Sharp; music MP3 up to 25 MiB with frame validation. Old file removed after committed replacement. The preview slot creates a public 1200\u00d7630 JPEG for link thumbnails; other media remains session-protected. All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
         "tags": [
           "Admin"
         ],
@@ -1794,7 +1794,7 @@
       "delete": {
         "operationId": "deleteMedia",
         "summary": "Remove media from slot",
-        "description": "Remove media from slot",
+        "description": "Remove media from slot All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
         "tags": [
           "Admin"
         ],
@@ -2307,6 +2307,27 @@
           {
             "guestSession": []
           }
+        ],
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional slug guard. Must match the authenticated session tenant; never grants access."
+          },
+          {
+            "name": "preview",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            },
+            "description": "Requires the admin session and uses its tenant, even if a guest cookie is also present."
+          }
         ]
       }
     },
@@ -2477,13 +2498,12 @@
         ],
         "parameters": [
           {
-            "name": "Origin",
-            "in": "header",
-            "required": true,
+            "name": "tenant",
+            "in": "query",
             "schema": {
-              "type": "string",
-              "format": "uri"
-            }
+              "type": "string"
+            },
+            "description": "Optional tenant guard. A stale form with another tenant session is rejected with 401."
           }
         ],
         "requestBody": {
@@ -2606,6 +2626,25 @@
               "maximum": 10000,
               "default": 1
             }
+          },
+          {
+            "name": "tenant",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional slug guard. Must match the authenticated session tenant; never grants access."
+          },
+          {
+            "name": "preview",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            },
+            "description": "Requires the admin session and uses its tenant, even if a guest cookie is also present."
           }
         ],
         "responses": {
@@ -2638,6 +2677,39 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/i/{slug}": {
+      "get": {
+        "operationId": "invitationPage",
+        "summary": "Read tenant invitation landing page",
+        "description": "Public HTML and Open Graph metadata for the slug. The invitation itself requires a matching guest or admin session. The legacy root URL remains valid for Firsta & Talitha.",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "HTML landing page",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown tenant"
           }
         }
       }
@@ -2795,10 +2867,16 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 1024
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
           }
         },
         "additionalProperties": false,
         "required": [
+          "email",
           "password"
         ]
       },
@@ -2807,11 +2885,46 @@
         "properties": {
           "csrf": {
             "type": "string"
+          },
+          "account": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "email",
+              "tenant"
+            ],
+            "properties": {
+              "email": {
+                "type": "string",
+                "format": "email"
+              },
+              "tenant": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "slug",
+                  "name"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "slug": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
           }
         },
         "additionalProperties": false,
         "required": [
-          "csrf"
+          "csrf",
+          "account"
         ]
       },
       "Settings": {
@@ -2943,6 +3056,10 @@
           "canRespond": {
             "type": "boolean",
             "description": "Only a verified active guest can submit. False for admin/development previews."
+          },
+          "tenantSlug": {
+            "type": "string",
+            "description": "Tenant of the authenticated invitation. The browser uses it to guard requests after a cookie changes in another tab."
           }
         },
         "additionalProperties": false,
@@ -2951,7 +3068,8 @@
           "settings",
           "media",
           "response",
-          "canRespond"
+          "canRespond",
+          "tenantSlug"
         ]
       },
       "Challenge": {

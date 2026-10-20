@@ -20,6 +20,7 @@ response:
     type: json
     content: |-
       {
-        "csrf": "string"
+        "csrf": "string",
+        "account": {"email": "owner@example.com", "tenant": {"id": "wedding", "slug": "wedding", "name": "Wedding"}}
       }
 order: 1000

@@ -1,0 +1,16 @@
+$kind: http-request
+method: POST
+url: '{{baseUrl}}/api/signup'
+order: 60000
+headers:
+  Content-Type: application/json
+  Origin: '{{origin}}'
+body:
+  type: json
+  content: |-
+    {"email":"public@example.com","password":"not-a-real-password"}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Public registration is unavailable', () => pm.response.to.have.status(404));

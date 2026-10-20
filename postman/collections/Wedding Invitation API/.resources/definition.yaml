@@ -4,6 +4,9 @@ variables:
   baseUrl: http://127.0.0.1:5174
   apiKey: ""
   adminPassword: ""
+  adminEmail: ""
+  adminCookie: ""
+  foreignGuestId: ""
   csrf: ""
   savedSettings: ""
   origin: http://127.0.0.1:5174

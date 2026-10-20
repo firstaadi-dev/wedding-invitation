@@ -20,7 +20,7 @@ test('rate limiting trusts forwarded IPs only behind an explicitly trusted produ
     let key;
     const server = createApp({query:async (_sql,params) => {
       key = params[0];return {rows:[{hits:9}]};
-    }},{origin:'https://invitation.example',production,trustProxy,passwordHash:`${'a'.repeat(32)}:${'b'.repeat(128)}`});
+    }},{origin:'https://invitation.example',production,trustProxy});
     server.listen(0,'127.0.0.1');await once(server,'listening');
     try {
       const response = await fetch(`http://127.0.0.1:${server.address().port}/api/admin/login`,{

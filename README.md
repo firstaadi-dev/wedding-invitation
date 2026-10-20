@@ -16,7 +16,7 @@ npm start
 
 Neon project `bitter-pond-36732751`, organization `org-shiny-mode-58726130`, branch `production`; `.neon` dan `.env.local` tidak masuk Git. `neon.ts` hanya memakai Postgres. Aplikasi menggunakan `DATABASE_URL` pooled melalui `pg`; migrasi menggunakan `DATABASE_URL_UNPOOLED`. Query menyebut schema `wedding` secara eksplisit karena pool Neon tidak menerima startup `search_path`.
 
-Buka http://127.0.0.1:5174/admin untuk CMS, `/preview` untuk desain lokal, atau tautan tamu yang dibuat CMS. Pada produksi `/preview` membutuhkan sesi admin. Halaman tanpa tautan/sesi meminta pengunjung membuka tautan undangan yang diterima.
+Buka http://127.0.0.1:5174/admin untuk CMS, `/preview` dengan sesi admin, atau tautan tamu yang dibuat CMS. Halaman tanpa tautan/sesi meminta pengunjung membuka tautan undangan yang diterima.
 
 Isi environment mengikuti `.env.example`. Password admin minimal 12 karakter, disimpan sebagai hash scrypt. Untuk membuat hash tanpa menampilkan password di terminal (zsh):
 
@@ -26,7 +26,9 @@ printf '%s' "$taskAdminPassword" | npm run --silent admin:hash
 unset taskAdminPassword
 ```
 
-Saat setup ini password admin acak dan hash disimpan di `.env.local` sebagai `ADMIN_PASSWORD` dan `ADMIN_PASSWORD_HASH`. Hanya hash dikirim ke Render. Jangan kirim password atau secret API ke GitHub. Admin mengganti hash di environment jika ingin mengganti password; sesi lama harus dihapus saat rotasi.
+Login memakai email akun dan password. Migration pertama mengaitkan data lama ke `firstaadip16@gmail.com` / tenant `firsta-talitha` dengan menyalin `ADMIN_PASSWORD_HASH` yang ada; password tetap sama dan admin perlu masuk kembali. Setelah bootstrap, password hash disimpan per akun di database. Mengganti environment bootstrap tidak mereset password akun. Rotasi password memakai migration khusus yang memperbarui hash akun dan menghapus sesi admin akun tersebut dalam satu transaksi. Jangan kirim password atau secret API ke GitHub.
+
+Pendaftaran publik dinonaktifkan. Akun baru hanya dibuat melalui [migration akun](db/accounts/README.md). [Desain multi-tenant, urutan deployment, arah stack Go, dan batas sebelum dikomersialkan](docs/multi-tenant.md). Kode dan schema baru harus dideploy bersama setelah instance lama dihentikan.
 
 ## CMS dan akses tamu
 
@@ -57,7 +59,7 @@ npm test
 npm run test:integration
 ```
 
-Tes integrasi memerlukan Postman CLI, `TEST_DATABASE_URL` dan `TEST_DATABASE_URL_UNPOOLED` pada `.env.test.local`, menunjuk branch terpisah `dev-invitation-verification`. Tes menghapus data pada branch pengujian tersebut; jangan pernah memakai koneksi produksi. Branch test kedaluwarsa 20 Oktober 2026, buat ulang untuk pengujian berikutnya. Pemeriksaan RSVP lokal menjalankan tiga request Postman dengan tujuh assertion (simpan jawaban, baca jawaban sendiri, dan daftar ucapan); hasil lengkap dicetak oleh tes integrasi. Tampilan sumbangan, tombol salin, pengiriman, pengisian ulang setelah reload, dan rekap admin diperiksa di Chrome; layout formulir serta ucapan juga diperiksa pada emulasi 400 piksel.
+Tes integrasi memerlukan Postman CLI, `TEST_DATABASE_URL` dan `TEST_DATABASE_URL_UNPOOLED` pada `.env.test.local`, menunjuk branch terpisah `dev-multitenant-20261020`. Tes menghapus data pada branch pengujian tersebut; jangan pernah memakai koneksi produksi. Branch test kedaluwarsa 27 Oktober 2026, buat ulang untuk pengujian berikutnya. Pemeriksaan RSVP lokal menjalankan tiga request Postman dengan tujuh assertion (simpan jawaban, baca jawaban sendiri, dan daftar ucapan); Postman juga menjalankan empat request autentikasi/isolasi tenant dengan delapan assertion. Hasil lengkap dicetak oleh tes integrasi. Tampilan sumbangan, tombol salin, pengiriman, pengisian ulang setelah reload, dan rekap admin diperiksa di Chrome; layout formulir serta ucapan juga diperiksa pada emulasi 400 piksel.
 
 Kontrak API: `postman/specs/invitation.json`. Koleksi yang dihasilkan: `postman/collections/Wedding Invitation API`. Syntax spec dan lint koleksi lulus. Health dan konfigurasi Fingerprint produksi diuji dengan dua request, lima assertion, nol kegagalan. Governance lint Postman tidak dijalankan karena tidak ada login Postman; file lokal tetap dapat diuji.
 

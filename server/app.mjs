@@ -21,8 +21,8 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
     if (parsed.protocol !== 'https:' || parsed.username || parsed.password || parsed.pathname !== '/' || parsed.search || parsed.hash) throw new Error('Fingerprint endpoint must be an HTTPS origin.');
     endpoint = parsed.origin;
   }
-  if (production && (!/^[a-f0-9]{32}:[a-f0-9]{128}$/.test(config.passwordHash || '') || !origin.startsWith('https://'))) {
-    throw new Error('Production needs HTTPS PUBLIC_ORIGIN and a valid ADMIN_PASSWORD_HASH.');
+  if (production && !origin.startsWith('https://')) {
+    throw new Error('Production needs HTTPS PUBLIC_ORIGIN.');
   }
 
   const server = createServer(async (req, res) => {
@@ -73,9 +73,13 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
     async function session(admin = false) {
       const token = cookies[admin ? 'wedding_admin' : 'wedding_guest'];
       if (!token || !/^[A-Za-z0-9_-]{43}$/.test(token)) return null;
-      const {rows} = await pool.query(`SELECT s.*, g.name FROM wedding.sessions s LEFT JOIN wedding.guests g ON g.id=s.guest_id
+      const {rows} = await pool.query(`SELECT s.*, g.name, COALESCE(g.tenant_id,s.tenant_id) AS tenant_id,t.slug AS tenant_slug,t.name AS tenant_name,a.email
+        FROM wedding.sessions s LEFT JOIN wedding.guests g ON g.id=s.guest_id
+        JOIN wedding.tenants t ON t.id=COALESCE(g.tenant_id,s.tenant_id)
+        JOIN wedding.accounts owner ON owner.id=t.owner_id AND owner.active
+        LEFT JOIN wedding.accounts a ON a.id=s.account_id
         WHERE s.token_hash=$1 AND s.expires_at>now() AND
-        (($2 AND s.guest_id IS NULL) OR (NOT $2 AND g.active=1 AND g.version=s.version))`, [hash(token),admin]);
+        (($2 AND s.guest_id IS NULL AND a.active AND t.owner_id=a.id) OR (NOT $2 AND g.active=1 AND g.version=s.version))`, [hash(token),admin]);
       return rows[0] || null;
     }
     async function authorized(admin = false, mutation = false) {
@@ -99,11 +103,20 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
       catch (error) {await client.query('ROLLBACK'); throw error;}
       finally {client.release();}
     }
-    async function content(client = pool, admin = true) {
-      const settings = (await client.query('SELECT value FROM wedding.settings WHERE id=1')).rows[0].value;
+    function account(current) {
+      return {email:current.email,tenant:{id:current.tenant_id,slug:current.tenant_slug,name:current.tenant_name}};
+    }
+    async function invitationSession(url) {
+      const current = url.searchParams.get('preview') === '1' ? await session(true) : await session() || await session(true);
+      if (!current) fail(401,'unauthorized','Buka tautan undangan yang Bapak/Ibu/Sdr/Sdri terima.');
+      if (url.searchParams.has('tenant') && url.searchParams.get('tenant') !== current.tenant_slug) fail(401,'unauthorized','Silakan buka tautan undangan kembali.');
+      return current;
+    }
+    async function content(tenantId, client = pool, admin = true) {
+      const settings = (await client.query('SELECT value FROM wedding.settings WHERE tenant_id=$1',[tenantId])).rows[0]?.value || {};
       if (admin) settings.whatsappTemplate ??= defaultWhatsappTemplate;
       else delete settings.whatsappTemplate;
-      const media = Object.fromEntries((await client.query('SELECT slot,id FROM wedding.media')).rows.map(row => [row.slot,`/${row.slot === 'preview' ? 'preview-image' : 'media'}/${row.id}`]));
+      const media = Object.fromEntries((await client.query('SELECT slot,id FROM wedding.media WHERE tenant_id=$1',[tenantId])).rows.map(row => [row.slot,`/${row.slot === 'preview' ? 'preview-image' : 'media'}/${row.id}`]));
       return {settings,media};
     }
     const responseSelect = `SELECT attendance,guest_count AS "guestCount",message,updated_at AS "updatedAt" FROM wedding.responses WHERE guest_id=$1`;
@@ -111,8 +124,8 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
       (SELECT count(*)::integer FROM wedding.devices d WHERE d.guest_id=g.id) AS "deviceCount",
       CASE WHEN r.guest_id IS NULL THEN NULL ELSE json_build_object('attendance',r.attendance,'guestCount',r.guest_count,'message',r.message,'updatedAt',r.updated_at) END AS response
       FROM wedding.guests g LEFT JOIN wedding.responses r ON r.guest_id=g.id`;
-    async function guest(id, client = pool) {
-      return (await client.query(`${guestSelect} WHERE g.id=$1`,[id])).rows[0];
+    async function guest(id, tenantId, client = pool) {
+      return (await client.query(`${guestSelect} WHERE g.id=$1 AND g.tenant_id=$2`,[id,tenantId])).rows[0];
     }
     async function revoke(client,id,clearDevices = false) {
       await client.query('UPDATE wedding.guests SET version=version+1 WHERE id=$1',[id]);
@@ -138,39 +151,41 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
       }
       if (path === '/api/admin/login' && method === 'POST') {
         await limited('login',8,900);
-        const value = await body(); only(value,['password']);
-        if (typeof value.password !== 'string' || value.password.length > 1024) fail(400,'password','Password tidak valid.');
-        if (!/^[a-f0-9]{32}:[a-f0-9]{128}$/.test(config.passwordHash || '')) fail(503,'admin_unconfigured','Password admin belum dikonfigurasi.');
-        const [salt, expected] = config.passwordHash.split(':');
+        const value = await body(); only(value,['email','password']);
+        if (typeof value.email !== 'string' || value.email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.email.trim()) || typeof value.password !== 'string' || !value.password || value.password.length > 1024) fail(400,'credentials','Email atau password tidak valid.');
+        const current = (await pool.query(`SELECT a.id,a.email,a.password_hash,t.id AS tenant_id,t.slug AS tenant_slug,t.name AS tenant_name
+          FROM wedding.accounts a JOIN wedding.tenants t ON t.owner_id=a.id WHERE a.email=$1 AND a.active`,[value.email.trim().toLowerCase()])).rows[0];
+        // Perform the same password work for unknown accounts; never reveal whether an email exists.
+        const [salt, expected] = (current?.password_hash || `${'0'.repeat(32)}:${'0'.repeat(128)}`).split(':');
         const actual = await promisify(scrypt)(value.password,salt,64);
-        if (!timingSafeEqual(actual,Buffer.from(expected,'hex'))) fail(401,'invalid_login','Password tidak sesuai.');
+        if (!timingSafeEqual(actual,Buffer.from(expected,'hex')) || !current) fail(401,'invalid_login','Email atau password tidak sesuai.');
         const token = secret(); const csrf = secret();
-        await pool.query(`INSERT INTO wedding.sessions(token_hash,csrf,expires_at) VALUES($1,$2,now()+interval '8 hours')`,[hash(token),csrf]);
-        cookie('wedding_admin',token,28800); return json(200,{csrf});
+        await pool.query(`INSERT INTO wedding.sessions(token_hash,csrf,account_id,tenant_id,expires_at) VALUES($1,$2,$3,$4,now()+interval '8 hours')`,[hash(token),csrf,current.id,current.tenant_id]);
+        cookie('wedding_admin',token,28800); return json(200,{csrf,account:account(current)});
       }
       if (path.startsWith('/api/admin/')) {
         const current = await authorized(true,!['GET','HEAD'].includes(method));
         await limited('admin',120);
-        if (path === '/api/admin/session' && method === 'GET') return json(200,{csrf:current.csrf});
+        if (path === '/api/admin/session' && method === 'GET') return json(200,{csrf:current.csrf,account:account(current)});
         if (path === '/api/admin/logout' && method === 'POST') {
           await pool.query('DELETE FROM wedding.sessions WHERE token_hash=$1',[current.token_hash]);
           cookie('wedding_admin','',0); return json(200,{ok:true});
         }
         if (path === '/api/admin/guests') {
-          if (method === 'GET') return json(200,(await pool.query(`${guestSelect} ORDER BY g.created_at DESC`)).rows);
+          if (method === 'GET') return json(200,(await pool.query(`${guestSelect} WHERE g.tenant_id=$1 ORDER BY g.created_at DESC`,[current.tenant_id])).rows);
           if (method === 'POST') {
             const value = await body(); only(value,['name','phone']);
             const name = validName(value.name); const id = randomUUID(); const token = secret();
-            const link = `${origin}/#${token}`;
-            await pool.query('INSERT INTO wedding.guests(id,name,phone,token_hash,invitation_link) VALUES($1,$2,$3,$4,$5)',[id,name,validPhone(value.phone === undefined ? '' : value.phone),hash(token),link]);
-            return json(201,{guest:await guest(id),link});
+            const link = `${origin}/i/${current.tenant_slug}#${token}`;
+            await pool.query('INSERT INTO wedding.guests(id,name,phone,token_hash,invitation_link,tenant_id) VALUES($1,$2,$3,$4,$5,$6)',[id,name,validPhone(value.phone === undefined ? '' : value.phone),hash(token),link,current.tenant_id]);
+            return json(201,{guest:await guest(id,current.tenant_id),link});
           }
         }
         const match = path.match(/^\/api\/admin\/guests\/([a-f0-9-]{36})(?:\/(link|devices))?$/);
         if (match) {
           const [,id,action] = match;
           const result = await transaction(async client => {
-            if (!(await client.query('SELECT id FROM wedding.guests WHERE id=$1 FOR UPDATE',[id])).rowCount) fail(404,'guest_not_found','Tamu tidak ditemukan.');
+            if (!(await client.query('SELECT id FROM wedding.guests WHERE id=$1 AND tenant_id=$2 FOR UPDATE',[id,current.tenant_id])).rowCount) fail(404,'guest_not_found','Tamu tidak ditemukan.');
             if (!action && method === 'PATCH') {
               const value = await body(); only(value,['name','phone','active']);
               if (!Object.keys(value).length) fail(400,'invalid_field','Isi nama, nomor telepon atau status.');
@@ -181,21 +196,21 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
                 await client.query('UPDATE wedding.guests SET active=$2 WHERE id=$1',[id,Number(value.active)]);
                 if (!value.active) await revoke(client,id);
               }
-              return guest(id,client);
+              return guest(id,current.tenant_id,client);
             }
             if (!action && method === 'DELETE') {await client.query('DELETE FROM wedding.guests WHERE id=$1',[id]);return {ok:true};}
             if (action === 'devices' && method === 'DELETE') {await revoke(client,id,true);return {ok:true};}
             if (action === 'link' && method === 'POST') {
               const token = secret(); await revoke(client,id,true);
-              await client.query('UPDATE wedding.guests SET token_hash=$2,invitation_link=$3 WHERE id=$1',[id,hash(token),`${origin}/#${token}`]);
-              return {guest:await guest(id,client),link:`${origin}/#${token}`};
+              await client.query('UPDATE wedding.guests SET token_hash=$2,invitation_link=$3 WHERE id=$1',[id,hash(token),`${origin}/i/${current.tenant_slug}#${token}`]);
+              return {guest:await guest(id,current.tenant_id,client),link:`${origin}/i/${current.tenant_slug}#${token}`};
             }
             fail(404,'not_found','Halaman tidak ditemukan.');
           });
           return json(200,result);
         }
         if (path === '/api/admin/content') {
-          if (method === 'GET') return json(200,await content());
+          if (method === 'GET') return json(200,await content(current.tenant_id));
           if (method === 'PUT') {
             const value = await body(32768); only(value,['ceremonyTitle','receptionTitle','ceremonyTime','receptionTime','countdownTime','mapEmbedUrl','whatsappTemplate','linkPreviewTitle','linkPreviewDescription']);
             if (value.whatsappTemplate !== undefined && (typeof value.whatsappTemplate !== 'string' || !value.whatsappTemplate.trim() || value.whatsappTemplate.length > 4000 || !value.whatsappTemplate.includes('{link}') || /\{([^{}]+)\}/g.test(value.whatsappTemplate.replace(/\{(?:nama|link)\}/g,'')))) fail(400,'whatsapp_template','Pesan maksimal 4000 karakter, wajib memuat {link}, dan hanya mendukung {nama} serta {link}.');
@@ -212,14 +227,14 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
             }
             if (value.countdownTime !== undefined && (typeof value.countdownTime !== 'string' || !/^(?:|(?:[01]\d|2[0-3]):[0-5]\d)$/.test(value.countdownTime))) fail(400,'countdown_time','Jam countdown tidak valid. Gunakan HH:mm dalam WIB.');
             if (value.mapEmbedUrl !== undefined && !validMap(value.mapEmbedUrl)) fail(400,'map_url','Gunakan URL embed resmi Google Maps.');
-            await pool.query('UPDATE wedding.settings SET value=value || $1::jsonb WHERE id=1',[JSON.stringify(value)]);
-            return json(200,await content());
+            await pool.query('UPDATE wedding.settings SET value=value || $1::jsonb WHERE tenant_id=$2',[JSON.stringify(value),current.tenant_id]);
+            return json(200,await content(current.tenant_id));
           }
         }
         const mediaMatch = path.match(/^\/api\/admin\/media\/(groom|bride|gallery[1-9]|music|preview)$/);
         if (mediaMatch && ['PUT','DELETE'].includes(method)) {
           const slot = mediaMatch[1];
-          if (method === 'DELETE') await pool.query('DELETE FROM wedding.media WHERE slot=$1',[slot]);
+          if (method === 'DELETE') await pool.query('DELETE FROM wedding.media WHERE slot=$1 AND tenant_id=$2',[slot,current.tenant_id]);
           else {
             let data = await body((slot === 'music' ? 25 : 12)*1024*1024,true);
             let mime;
@@ -242,10 +257,10 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
               } catch {fail(415,'invalid_image','Foto tidak dapat dibaca. Gunakan JPG, PNG atau WebP yang valid.');}
             }
             // shortcut: small media slots live in Postgres; move blobs to object storage for a large gallery.
-            await pool.query(`INSERT INTO wedding.media(slot,id,mime,data) VALUES($1,$2,$3,$4)
-              ON CONFLICT(slot) DO UPDATE SET id=EXCLUDED.id,mime=EXCLUDED.mime,data=EXCLUDED.data`,[slot,randomUUID(),mime,data]);
+            await pool.query(`INSERT INTO wedding.media(slot,id,mime,data,tenant_id) VALUES($1,$2,$3,$4,$5)
+              ON CONFLICT(tenant_id,slot) DO UPDATE SET id=EXCLUDED.id,mime=EXCLUDED.mime,data=EXCLUDED.data`,[slot,randomUUID(),mime,data,current.tenant_id]);
           }
-          return json(200,await content());
+          return json(200,await content(current.tenant_id));
         }
         fail(404,'not_found','Halaman tidak ditemukan.');
       }
@@ -291,13 +306,13 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
         cookie('wedding_guest',token,2592000); return json(200,{ok:true});
       }
       if (path === '/api/invitation' && method === 'GET') {
-        const g = await session(); const a = !g && await session(true);
-        if (!g && !a && production) fail(401,'unauthorized','Buka tautan undangan yang Bapak/Ibu/Sdr/Sdri terima.');
-        const response = g ? (await pool.query(responseSelect,[g.guest_id])).rows[0] || null : null;
-        return json(200,{guestName:g?.name || 'Tamu Undangan',canRespond:!!g,response,...await content(pool,false)});
+        const current = await invitationSession(url);
+        const response = current.guest_id ? (await pool.query(responseSelect,[current.guest_id])).rows[0] || null : null;
+        return json(200,{tenantSlug:current.tenant_slug,guestName:current.name || 'Tamu Undangan',canRespond:!!current.guest_id,response,...await content(current.tenant_id,pool,false)});
       }
       if (path === '/api/response' && method === 'PUT') {
         const current = await authorized();
+        if (url.searchParams.has('tenant') && url.searchParams.get('tenant') !== current.tenant_slug) fail(401,'unauthorized','Undangan berubah. Silakan buka undangan kembali.');
         await limited('response',20);
         const value = await body(); only(value,['attendance','guestCount','message']);
         if (!['attending','not_attending','unsure'].includes(value.attendance)) fail(400,'attendance','Pilih konfirmasi kehadiran.');
@@ -315,21 +330,22 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
         return json(200,response);
       }
       if (path === '/api/wishes' && method === 'GET') {
-        if (!await session() && !await session(true) && production) fail(401,'unauthorized','Silakan buka undangan dahulu.');
+        const current = await invitationSession(url);
         const page = url.searchParams.get('page') ?? '1';
         if (!/^[1-9]\d{0,4}$/.test(page) || Number(page) > 10000) fail(400,'page','Halaman ucapan tidak valid.');
         // shortcut: offset pages can shift as wishes change; use a cursor for a busy guestbook.
         const {rows} = await pool.query(`SELECT g.name,r.message,r.updated_at AS "updatedAt" FROM wedding.responses r
-          JOIN wedding.guests g ON g.id=r.guest_id WHERE g.active=1 AND r.message<>''
-          ORDER BY r.updated_at DESC,r.guest_id LIMIT 11 OFFSET $1`,[(Number(page)-1)*10]);
+          JOIN wedding.guests g ON g.id=r.guest_id WHERE g.active=1 AND r.message<>'' AND g.tenant_id=$2
+          ORDER BY r.updated_at DESC,r.guest_id LIMIT 11 OFFSET $1`,[(Number(page)-1)*10,current.tenant_id]);
         return json(200,{wishes:rows.slice(0,10),hasMore:rows.length>10});
       }
       if ((path.startsWith('/media/') || path.startsWith('/preview-image/')) && ['GET','HEAD'].includes(method)) {
         const preview = path.startsWith('/preview-image/');
-        if (!preview && !await session() && !await session(true)) fail(401,'unauthorized','Silakan buka undangan dahulu.');
+        const current = !preview && [await session(),await session(true)].filter(Boolean);
+        if (!preview && !current.length) fail(401,'unauthorized','Silakan buka undangan dahulu.');
         const id = path.slice(preview ? '/preview-image/'.length : '/media/'.length);
         if (!/^[a-f0-9-]{36}$/.test(id)) fail(404,'media_not_found','Media tidak ditemukan.');
-        const media = (await pool.query(`SELECT mime,data FROM wedding.media WHERE id=$1${preview ? " AND slot='preview'" : ''}`,[id])).rows[0];
+        const media = (await pool.query(`SELECT mime,data FROM wedding.media WHERE id=$1${preview ? " AND slot='preview'" : ' AND tenant_id=ANY($2::text[])'}`,preview ? [id] : [id,current.map(session => session.tenant_id)])).rows[0];
         if (!media) fail(404,'media_not_found','Media tidak ditemukan.');
         const size = media.data.length; let start = 0; let end = size-1; let status = 200;
         if (req.headers.range) {
@@ -345,17 +361,30 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
       }
       if (['GET','HEAD'].includes(method)) {
         let filename;
-        if (path === '/' || path === '/index.html') filename = !url.searchParams.has('access') && (await session() || await session(true)) ? 'index.html' : 'access.html';
-        else if (path === '/preview' && (!production || await session(true))) filename = 'index.html';
+        const landing = path.match(/^\/i\/([a-z0-9]+(?:-[a-z0-9]+)*)$/);
+        let tenantId;
+        if (landing) {
+          const tenant = (await pool.query('SELECT id FROM wedding.tenants WHERE slug=$1',[landing[1]])).rows[0];
+          if (!tenant) fail(404,'not_found','Undangan tidak ditemukan.');
+          tenantId = tenant.id;
+          const current = await session() || await session(true);
+          filename = !url.searchParams.has('access') && current?.tenant_id === tenantId ? 'index.html' : 'access.html';
+        }
+        else if (path === '/' || path === '/index.html') {
+          const current = await session() || await session(true);tenantId = current?.tenant_id;
+          filename = !url.searchParams.has('access') && current ? 'index.html' : 'access.html';
+        }
+        else if (path === '/preview' && await session(true)) {filename = 'index.html';tenantId = (await session(true)).tenant_id;}
         else if (path === '/admin') filename = 'admin.html';
         else if (/^\/(?:assets\/[a-zA-Z0-9_-]+\.webp|(?:styles|admin|access)\.css|(?:invitation|content|countdown|admin|admin-data|access|identification|whatsapp)\.js)$/.test(path)) filename = path.slice(1);
         if (filename) {
           let file = await readFile(new URL(filename,publicDirectory));
           if (['access.html','index.html'].includes(filename)) {
-            const {value:settings,previewId} = (await pool.query(`SELECT s.value,m.id AS "previewId" FROM wedding.settings s LEFT JOIN wedding.media m ON m.slot='preview' WHERE s.id=1`)).rows[0];
+            tenantId ??= 'firsta-talitha';
+            const {value:settings,previewId,slug} = (await pool.query(`SELECT s.value,m.id AS "previewId",t.slug FROM wedding.settings s JOIN wedding.tenants t ON t.id=s.tenant_id LEFT JOIN wedding.media m ON m.tenant_id=s.tenant_id AND m.slot='preview' WHERE s.tenant_id=$1`,[tenantId])).rows[0];
             const title = escapeHtml(settings.linkPreviewTitle || 'Firsta & Talitha — Undangan');
             const description = escapeHtml(settings.linkPreviewDescription || '22 November 2026 · Arjuna Ballroom Alam Indah Resto.');
-            let metadata = `<title>${title}</title>\n<meta name="description" content="${description}">\n<meta property="og:title" content="${title}">\n<meta property="og:description" content="${description}">\n<meta property="og:type" content="website">\n<meta property="og:url" content="${escapeHtml(origin)}/">`;
+            let metadata = `<title>${title}</title>\n<meta name="description" content="${description}">\n<meta property="og:title" content="${title}">\n<meta property="og:description" content="${description}">\n<meta property="og:type" content="website">\n<meta property="og:url" content="${escapeHtml(origin)}/i/${slug}">`;
             if (previewId) metadata += `\n<meta property="og:image" content="${escapeHtml(origin)}/preview-image/${previewId}">\n<meta property="og:image:type" content="image/jpeg">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta property="og:image:alt" content="${title}">`;
             file = Buffer.from(file.toString().replace(/<title>.*?<\/title>/,metadata));
           }

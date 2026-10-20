@@ -5,21 +5,53 @@ import {once} from 'node:events';
 import {existsSync,readFileSync} from 'node:fs';
 import sharp from 'sharp';
 import {spawn} from 'node:child_process';
-import {database,migrate} from '../server/db.mjs';
+import {database,migrate,provisionAccount} from '../server/db.mjs';
 import {createApp} from '../server/app.mjs';
 if (existsSync('.env.test.local')) process.loadEnvFile('.env.test.local');
 if (!process.env.TEST_DATABASE_URL || !process.env.TEST_DATABASE_URL_UNPOOLED) throw new Error('Set TEST_DATABASE_URL and TEST_DATABASE_URL_UNPOOLED for an isolated test branch. Never use production.');
 
+test('legacy migration preserves invitation data, guest sessions and password; repeated runs do not reset credentials',async () => {
+  const schema = `migration_${randomBytes(6).toString('hex')}`;
+  const pool = database(process.env.TEST_DATABASE_URL_UNPOOLED);
+  const salt = randomBytes(16).toString('hex');const passwordHash = `${salt}:${scryptSync('legacy-password',salt,64).toString('hex')}`;
+  const client = await pool.connect();
+  try {
+    await client.query(`CREATE SCHEMA ${schema}`);await client.query(`SET search_path TO ${schema}`);
+    await client.query(readFileSync(new URL('../db/schema.sql',import.meta.url),'utf8'));
+    await client.query("INSERT INTO guests(id,name,token_hash,invitation_link) VALUES('legacy','Legacy Guest','old-token-hash','https://invitation.example/#old-link')");
+    await client.query("INSERT INTO devices(guest_id,visitor_hash) VALUES('legacy','old-device')");
+    await client.query("INSERT INTO responses(guest_id,attendance,guest_count,message) VALUES('legacy','attending',2,'Legacy wish')");
+    await client.query("INSERT INTO media(slot,id,mime,data) VALUES('groom','old-media','image/webp',$1)",[Buffer.from('original image bytes')]);
+    await client.query('UPDATE settings SET value=$1 WHERE id=1',[{ceremonyTime:'09:00',whatsappTemplate:'Legacy {link}'}]);
+    await client.query("INSERT INTO sessions(token_hash,guest_id,version,csrf,expires_at) VALUES('guest-session','legacy',1,NULL,now()+interval '1 day'),('admin-session',NULL,NULL,'old-csrf',now()+interval '1 day')");
+    await migrate(process.env.TEST_DATABASE_URL_UNPOOLED,schema,passwordHash);
+    assert.deepEqual((await client.query('SELECT tenant_id,name,token_hash,invitation_link FROM guests')).rows,[{tenant_id:'firsta-talitha',name:'Legacy Guest',token_hash:'old-token-hash',invitation_link:'https://invitation.example/#old-link'}]);
+    assert.equal((await client.query('SELECT visitor_hash FROM devices')).rows[0].visitor_hash,'old-device');
+    assert.equal((await client.query('SELECT message FROM responses')).rows[0].message,'Legacy wish');
+    assert.equal((await client.query('SELECT tenant_id,data FROM media')).rows[0].data.toString(),'original image bytes');
+    assert.deepEqual((await client.query('SELECT value FROM settings')).rows[0].value,{ceremonyTime:'09:00',whatsappTemplate:'Legacy {link}'});
+    assert.deepEqual((await client.query('SELECT token_hash FROM sessions')).rows,[{token_hash:'guest-session'}]);
+    assert.equal((await client.query('SELECT email FROM accounts')).rows[0].email,'firstaadip16@gmail.com');
+    await migrate(process.env.TEST_DATABASE_URL_UNPOOLED,schema,`${'a'.repeat(32)}:${'b'.repeat(128)}`);
+    assert.equal((await client.query('SELECT password_hash FROM accounts')).rows[0].password_hash,passwordHash);
+  } finally {
+    await client.query('SET search_path TO public');await client.query(`DROP SCHEMA IF EXISTS ${schema} CASCADE`);client.release();await pool.end();
+  }
+});
+
 test('Neon-backed CMS and guest access end to end',async t => {
-  await migrate(process.env.TEST_DATABASE_URL_UNPOOLED);
+  const password = 'integration-test-password';const salt = randomBytes(16).toString('hex');
+  const passwordHash = `${salt}:${scryptSync(password,salt,64).toString('hex')}`;
+  await migrate(process.env.TEST_DATABASE_URL_UNPOOLED,'wedding',passwordHash);
   const pool = database(process.env.TEST_DATABASE_URL);
   // Only disposable isolated-branch test data is cleared; production URLs are never used.
   await pool.query('TRUNCATE wedding.guests,wedding.devices,wedding.sessions,wedding.challenges,wedding.used_events,wedding.media,wedding.rate_limits CASCADE');
-  await pool.query("UPDATE wedding.settings SET value='{}' WHERE id=1");
-  const password = 'integration-test-password';const salt = randomBytes(16).toString('hex');
+  await pool.query("UPDATE wedding.settings SET value='{}' WHERE tenant_id='firsta-talitha'");
+  await pool.query('UPDATE wedding.accounts SET password_hash=$1 WHERE id=$2',[passwordHash,'firsta']);
+  const email = 'firstaadip16@gmail.com';
   const events = new Map();const origin = 'https://invitation.example';
   const endpoint = 'https://validator.firsta.my.id';
-  const server = createApp(pool,{origin,production:true,passwordHash:`${salt}:${scryptSync(password,salt,64).toString('hex')}`,publicKey:'test',secretKey:'test',region:'ap',endpoint},async id => events.get(id));
+  const server = createApp(pool,{origin,production:true,publicKey:'test',secretKey:'test',region:'ap',endpoint},async id => events.get(id));
   server.listen(0,'127.0.0.1');await once(server,'listening');
   const base = `http://127.0.0.1:${server.address().port}`;
   const admin = {};
@@ -61,7 +93,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal((await request('/api/admin/guests')).response.status,401);
       assert.equal((await request('/api/invitation')).response.status,401);
       assert.equal((await request('/')).value.includes('access-message'),true);
-      const login = await request('/api/admin/login',{method:'POST',data:{password},jar:admin});
+      const login = await request('/api/admin/login',{method:'POST',data:{email,password},jar:admin});
       assert.equal(login.response.status,200);csrf = login.value.csrf;
       assert.match(login.response.headers.get('set-cookie'),/HttpOnly; SameSite=Strict.*Secure/);
       assert.equal((await request('/api/admin/guests',{method:'POST',data:{name:'Wrong'},jar:admin})).response.status,403);
@@ -94,7 +126,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal((await adminRequest('/api/admin/guests')).value[0].name,'Keluarga Uji');
       // Legacy rows keep their original hash and valid access; migration cannot recover the URL.
       await pool.query('UPDATE wedding.guests SET invitation_link=NULL WHERE id=$1',[guest.id]);
-      await migrate(process.env.TEST_DATABASE_URL_UNPOOLED);
+      await migrate(process.env.TEST_DATABASE_URL_UNPOOLED,'wedding',passwordHash);
       assert.equal((await adminRequest('/api/admin/guests')).value[0].link,null);
       assert.equal((await pool.query('SELECT token_hash FROM wedding.guests WHERE id=$1',[guest.id])).rows[0].token_hash,stored.token_hash);
     });
@@ -140,14 +172,14 @@ test('Neon-backed CMS and guest access end to end',async t => {
       const cleared = await submit({attendance:'not_attending',guestCount:0,message:'   '});assert.equal(cleared.response.status,200);
       assert.equal((await request('/api/wishes',{jar:guestBrowser})).value.wishes.length,0);
       assert.equal((await submit({attendance:'unsure',guestCount:0,message:'Doa terbaik untuk kalian.'})).response.status,200);
-      await migrate(process.env.TEST_DATABASE_URL_UNPOOLED);
+      await migrate(process.env.TEST_DATABASE_URL_UNPOOLED,'wedding',passwordHash);
       assert.equal((await request('/api/invitation',{jar:guestBrowser})).value.response.attendance,'unsure');
       for (const page of ['0','-1','1.5','abc','10001','']) assert.equal((await request(`/api/wishes?page=${page}`,{jar:guestBrowser})).response.status,400);
     });
     await t.test('wishes paginate, exclude inactive guests, and cannot change another invitation',async () => {
       for (let i=0;i<11;i++) {
         const id = `wish-fixture-${i}`;
-        await pool.query('INSERT INTO wedding.guests(id,name,token_hash,active) VALUES($1,$2,$1,$3)',[id,`Tamu ${i}`,i === 10 ? 0 : 1]);
+        await pool.query('INSERT INTO wedding.guests(id,name,token_hash,active,tenant_id) VALUES($1,$2,$1,$3,$4)',[id,`Tamu ${i}`,i === 10 ? 0 : 1,'firsta-talitha']);
         await pool.query("INSERT INTO wedding.responses(guest_id,attendance,guest_count,message,updated_at) VALUES($1,'attending',1,$2,'2026-01-01')",[id,`Ucapan ${i}`]);
       }
       const first = (await request('/api/wishes',{jar:guestBrowser})).value;
@@ -279,7 +311,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal((await fetch(base+privatePath.replace('/media/','/preview-image/'))).status,404);
       assert.equal((await upload('<svg onload="evil()"></svg>')).status,415);
       assert.equal((await adminRequest('/api/admin/content')).value.media.preview,path);
-      await migrate(process.env.TEST_DATABASE_URL_UNPOOLED);
+      await migrate(process.env.TEST_DATABASE_URL_UNPOOLED,'wedding',passwordHash);
       assert.equal((await adminRequest('/api/admin/content')).value.media.groom,privatePath);
       assert.equal((await adminRequest('/api/admin/content')).value.media.preview,path);
       const replaced = await upload(photo);assert.equal(replaced.status,200);
@@ -289,6 +321,73 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal((await fetch(base+newPath)).status,404);
       assert.equal((await request('/')).value.includes('property="og:image"'),false);
       assert.equal((await fetch(base+privatePath)).status,401);
+    });
+    await t.test('two tenants isolate every admin action, settings, media, metadata and guest wishes',async () => {
+      const secondEmail = 'tenant-two@example.com';const secondSlug = 'tenant-two';
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN');await client.query('SET LOCAL search_path TO wedding');
+        await provisionAccount(client,{email:secondEmail,slug:secondSlug,name:'Tenant Two'},passwordHash);
+        await provisionAccount(client,{email:secondEmail,slug:secondSlug,name:'Tenant Two'});
+        await assert.rejects(provisionAccount(client,{email:'another@example.com',slug:secondSlug,name:'Tenant Two'},passwordHash),/different migration/);
+        await client.query('COMMIT');
+      } catch(error) {await client.query('ROLLBACK');throw error;} finally {client.release();}
+      const second = {};const login = await request('/api/admin/login',{method:'POST',data:{email:' TENANT-TWO@example.com ',password},jar:second});
+      assert.equal(login.response.status,200);assert.equal(login.value.account.email,secondEmail);assert.equal(login.value.account.tenant.slug,secondSlug);
+      const secondRequest = (path,options={}) => request(path,{...options,jar:second,headers:{'X-CSRF-Token':login.value.csrf,...options.headers}});
+      assert.deepEqual((await secondRequest('/api/admin/guests')).value,[]);
+      for (const [suffix,method,data] of [['','PATCH',{name:'Stolen'}],['','DELETE',{}],['/link','POST',{}],['/devices','DELETE',{}]]) {
+        assert.equal((await secondRequest(`/api/admin/guests/${guest.id}${suffix}`,{method,data})).response.status,404);
+      }
+      assert.equal((await adminRequest('/api/admin/guests')).value[0].name,'Keluarga Uji');
+      assert.equal((await secondRequest('/api/admin/guests',{method:'POST',data:{name:'Bad',tenant_id:'firsta-talitha'}})).response.status,400);
+      const created = await secondRequest('/api/admin/guests',{method:'POST',data:{name:'Second Tenant Guest'}});
+      assert.equal(created.response.status,201);assert.match(created.value.link,/\/i\/tenant-two#/);
+      assert.equal((await adminRequest('/api/admin/guests')).value.length,1);
+      const original = (await adminRequest('/api/admin/content')).value;
+      const saved = await secondRequest('/api/admin/content',{method:'PUT',data:{ceremonyTitle:'Second Ceremony',linkPreviewTitle:'Tenant Two Preview'}});
+      assert.equal(saved.value.settings.ceremonyTitle,'Second Ceremony');assert.deepEqual(saved.value.media,{});
+      assert.deepEqual((await adminRequest('/api/admin/content')).value,original);
+      const privatePath = original.media.groom;
+      assert.equal((await request(privatePath,{jar:second})).response.status,404);
+      const photo = await sharp({create:{width:10,height:10,channels:3,background:'#ffffff'}}).png().toBuffer();
+      const uploaded = await fetch(base+'/api/admin/media/groom',{method:'PUT',headers:{Origin:origin,Cookie:`wedding_admin=${second.wedding_admin}`,'X-CSRF-Token':login.value.csrf,'Content-Type':'image/png'},body:photo});
+      assert.equal(uploaded.status,200);const secondPath = (await uploaded.json()).media.groom;
+      assert.notEqual(secondPath,privatePath);assert.equal((await request(secondPath,{jar:admin})).response.status,404);
+      assert.equal((await secondRequest('/api/admin/media/groom',{method:'DELETE'})).response.status,200);
+      assert.equal((await adminRequest('/api/admin/content')).value.media.groom,privatePath);
+      const secondGuest = await verify(await challenge(created.value.link.split('#')[1]),'tenant-two-visitor');
+      assert.equal(secondGuest.response.status,200);
+      assert.equal((await request(privatePath,{jar:secondGuest.jar})).response.status,404);
+      assert.deepEqual((await request('/api/wishes',{jar:secondGuest.jar})).value.wishes,[]);
+      assert.equal((await request('/api/invitation?tenant=firsta-talitha',{jar:secondGuest.jar})).response.status,401);
+      assert.equal((await request('/api/invitation?tenant=tenant-two',{jar:guestBrowser})).response.status,401);
+      assert.equal((await request('/api/invitation',{jar:secondGuest.jar})).value.tenantSlug,secondSlug);
+      const stale = await request('/api/response?tenant=firsta-talitha',{method:'PUT',jar:secondGuest.jar,data:{attendance:'attending',guestCount:1,message:'Wrong tab'}});
+      assert.equal(stale.response.status,401);assert.equal((await request('/api/invitation',{jar:secondGuest.jar})).value.response,null);
+
+      assert.equal((await request('/api/invitation',{jar:secondGuest.jar})).value.settings.ceremonyTitle,'Second Ceremony');
+      const landing = await request('/i/tenant-two');assert.equal(landing.response.status,200);assert.match(landing.value,/<title>Tenant Two Preview<\/title>/);assert.match(landing.value,/access-message/);
+      assert.doesNotMatch((await request('/i/firsta-talitha')).value,/<title>Tenant Two Preview/);
+      assert.match((await request('/i/tenant-two',{jar:guestBrowser})).value,/access-message/);
+      assert.match((await request('/i/tenant-two',{jar:secondGuest.jar})).value,/id="response-form"/);
+      assert.equal((await request('/i/unknown-tenant')).response.status,404);
+      assert.match((await request('/',{jar:guestBrowser})).value,/id="response-form"/);
+      for (const path of ['/api/register','/api/signup','/register','/signup']) assert.equal((await request(path,{method:'POST',data:{email:secondEmail,password}})).response.status,404);
+      const unknown = await request('/api/admin/login',{method:'POST',data:{email:'unknown@example.com',password}});
+      const wrong = await request('/api/admin/login',{method:'POST',data:{email,password:'wrong'}});
+      assert.equal(unknown.response.status,401);assert.deepEqual(unknown.value,wrong.value);
+      assert.equal((await request('/api/admin/login',{method:'POST',data:{password}})).response.status,400);
+      const child = spawn('postman',['collection','run','postman/collections/Wedding Invitation API','-i','Login administrator','-i','Read admin session','-i','Reject foreign tenant guest update','-i','Public registration disabled','--env-var',`baseUrl=${base}`,'--env-var',`origin=${origin}`,'--env-var',`adminEmail=${secondEmail}`,'--env-var',`adminPassword=${password}`,'--env-var',`foreignGuestId=${guest.id}`,'--no-report-events'],{stdio:['ignore','pipe','pipe']});
+      let output = '';child.stdout.on('data',chunk => {output += chunk;});child.stderr.on('data',chunk => {output += chunk;});
+      const [code] = await once(child,'close');console.log(output);assert.equal(code,0,output);
+      await pool.query('UPDATE wedding.accounts SET active=false WHERE email=$1',[secondEmail]);
+      assert.equal((await secondRequest('/api/admin/session')).response.status,401);
+      assert.equal((await request('/api/invitation',{jar:secondGuest.jar})).response.status,401);
+      await pool.query('DELETE FROM wedding.guests WHERE tenant_id=$1',[secondSlug]);
+      await pool.query('DELETE FROM wedding.settings WHERE tenant_id=$1',[secondSlug]);
+      await pool.query('DELETE FROM wedding.tenants WHERE id=$1',[secondSlug]);
+      await pool.query('DELETE FROM wedding.accounts WHERE email=$1',[secondEmail]);
     });
     await t.test('reset, deactivate and link rotation revoke sessions immediately',async () => {
       assert.equal((await adminRequest(`/api/admin/guests/${guest.id}/devices`,{method:'DELETE'})).response.status,200);
@@ -316,7 +415,8 @@ test('Neon-backed CMS and guest access end to end',async t => {
   } finally {
     server.close();await once(server,'close');
     await pool.query('TRUNCATE wedding.guests,wedding.sessions,wedding.media,wedding.challenges,wedding.used_events,wedding.rate_limits CASCADE');
-    await pool.query("UPDATE wedding.settings SET value='{}' WHERE id=1");
+    await pool.query("UPDATE wedding.settings SET value='{}' WHERE tenant_id='firsta-talitha'");
+    await pool.query("DELETE FROM wedding.settings WHERE tenant_id='tenant-two'; DELETE FROM wedding.tenants WHERE id='tenant-two'; DELETE FROM wedding.accounts WHERE email='tenant-two@example.com'");
     await pool.end();
   }
 });

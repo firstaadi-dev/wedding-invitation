@@ -1,15 +1,16 @@
 $kind: http-request
-description: Same-origin JSON only. Password verified using scrypt hash. Sets HttpOnly SameSite=Strict cookie, Secure in production. Rate limited.
+description: Same-origin JSON only. Email identifies the tenant account; password verified using its scrypt hash. No public registration. Sets HttpOnly SameSite=Strict cookie, Secure in production. Rate limited.
 url: "{{baseUrl}}/api/admin/login"
 method: POST
 headers:
   Content-Type: application/json
   Accept: application/json
-  Origin: "{{baseUrl}}"
+  Origin: "{{origin}}"
 body:
   type: json
   content: |-
     {
+      "email": "{{adminEmail}}",
       "password": "{{adminPassword}}"
     }
 settings: {}
@@ -21,3 +22,6 @@ scripts:
     code: |-
       pm.test('Admin login succeeds', () => pm.response.to.have.status(200));
       pm.collectionVariables.set('csrf', pm.response.json().csrf);
+      pm.collectionVariables.set('adminCookie', pm.response.headers.get('Set-Cookie').split(';')[0]);
+      pm.test('Session belongs to the requested account', () => pm.expect(pm.response.json().account.email).to.eql(pm.variables.get('adminEmail')));
+      pm.test('Session includes tenant identity', () => pm.expect(pm.response.json().account.tenant.slug).to.be.a('string'));

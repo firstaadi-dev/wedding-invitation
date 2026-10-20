@@ -20,6 +20,7 @@ response:
     type: json
     content: |-
       {
+        "tenantSlug": "firsta-talitha",
         "guestName": "Tamu Undangan",
         "response": null,
         "canRespond": true,

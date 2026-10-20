@@ -4,12 +4,13 @@ url: "{{baseUrl}}/api/admin/session"
 method: GET
 headers:
   Accept: application/json
-auth:
-  type: apikey
-  credentials:
-    key: wedding_admin
-    value: "{{apiKey}}"
-    in: header
+  Cookie: "{{adminCookie}}"
 settings: {}
 examples: ./.resources/Read admin session.resources/examples
 order: 2000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Admin session is restored', () => pm.response.to.have.status(200));
+      pm.test('Restored session belongs to the same account', () => pm.expect(pm.response.json().account.email).to.eql(pm.variables.get('adminEmail')));

@@ -1,0 +1,6 @@
+{
+  "email": "customer@example.com",
+  "slug": "customer-wedding",
+  "name": "Customer Wedding",
+  "passwordHashEnv": "CUSTOMER_PASSWORD_HASH"
+}

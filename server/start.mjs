@@ -7,13 +7,12 @@ const server = createApp(pool,{
   origin:process.env.PUBLIC_ORIGIN || `http://127.0.0.1:${port}`,
   production:process.env.NODE_ENV === 'production',
   trustProxy:process.env.TRUST_PROXY === '1',
-  passwordHash:process.env.ADMIN_PASSWORD_HASH,
   publicKey:process.env.FINGERPRINT_PUBLIC_KEY,
   secretKey:process.env.FINGERPRINT_SECRET_KEY,
   region:process.env.FINGERPRINT_REGION || 'ap',
   endpoint:process.env.FINGERPRINT_ENDPOINT,
 });
-await pool.query('SELECT 1 FROM wedding.settings WHERE id=1');
+await pool.query('SELECT 1 FROM wedding.tenants LIMIT 1');
 server.listen(port,'0.0.0.0',() => console.log(`Invitation server ready on port ${port}; Neon Postgres connected.`));
 const cleanup = setInterval(() => pool.query(`DELETE FROM wedding.sessions WHERE expires_at<now(); DELETE FROM wedding.challenges WHERE expires_at<now();
   DELETE FROM wedding.rate_limits WHERE expires_at<now(); DELETE FROM wedding.used_events WHERE created_at<now()-interval '1 day'`).catch(() => console.error('Session cleanup failed.')),3600000);

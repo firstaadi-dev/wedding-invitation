@@ -1,0 +1,19 @@
+$kind: http-request
+method: PATCH
+url: '{{baseUrl}}/api/admin/guests/{{foreignGuestId}}'
+order: 2500
+headers:
+  Content-Type: application/json
+  Origin: '{{origin}}'
+  Cookie: '{{adminCookie}}'
+  X-CSRF-Token: '{{csrf}}'
+body:
+  type: json
+  content: |-
+    {"name":"Foreign tenant must remain unchanged"}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Foreign tenant resource is not accessible', () => pm.response.to.have.status(404));
+      pm.test('No guest data is returned', () => pm.expect(pm.response.json().code).to.eql('guest_not_found'));

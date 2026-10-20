@@ -1,7 +1,7 @@
 import {defaultWhatsappTemplate, invitationMessage, whatsappUrl} from './whatsapp.js';
 import {guestSummary, findGuests, mediaType} from './admin-data.js';
 
-let csrf = '';let guests = [];let content;let editingGuest = null;
+let csrf = '';let currentAccount;let guests = [];let content;let editingGuest = null;
 const $ = selector => document.querySelector(selector);
 const login = $('#login');
 const dashboard = $('#dashboard');
@@ -31,7 +31,8 @@ async function api(path,method = 'GET',value,type) {
   return result;
 }
 function showLogin() {
-  csrf = '';guests = [];content = undefined;editingGuest = null;
+  csrf = '';currentAccount = undefined;guests = [];content = undefined;editingGuest = null;
+  document.querySelectorAll('[data-tenant-name]').forEach(node => {node.textContent = '';});
   document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
   document.querySelectorAll('audio').forEach(audio => audio.pause());
   $('#login-screen').hidden = false;dashboard.hidden = true;$('#loading').hidden = true;$('#status').hidden = true;
@@ -55,6 +56,7 @@ async function refresh() {
   const values = await Promise.all([api('/api/admin/guests'),api('/api/admin/content')]);
   [guests,content] = values;
   $('#loading').hidden = true;$('#login-screen').hidden = true;dashboard.hidden = false;
+  document.querySelectorAll('[data-tenant-name]').forEach(node => {node.textContent = currentAccount.tenant.name;});
   renderGuests();renderMedia();
   const form = $('#whatsapp-settings');
   form.elements.whatsappTemplate.value = content.settings.whatsappTemplate ?? defaultWhatsappTemplate;
@@ -91,7 +93,7 @@ async function copyLink(value) {
 }
 function renderMessagePreview() {
   // The example never exposes an actual guest's secret link.
-  $('#message-preview').textContent = invitationMessage($('#whatsapp-settings').elements.whatsappTemplate.value,{name:'Bapak/Ibu Tamu Undangan',link:`${location.origin}/#contoh-tautan`});
+  $('#message-preview').textContent = invitationMessage($('#whatsapp-settings').elements.whatsappTemplate.value,{name:'Bapak/Ibu Tamu Undangan',link:`${location.origin}/i/${currentAccount.tenant.slug}#contoh-tautan`});
 }
 function editGuest(guest = null) {
   editingGuest = guest;guestForm.reset();$('#guest-error').hidden = true;
@@ -162,7 +164,7 @@ function renderMedia(onlySlot) {
   if (!onlySlot) for (const selector of ['#preview-media','#couple-media','#gallery-media','#music-media']) {
     $(selector).querySelectorAll('audio').forEach(audio => audio.pause());$(selector).replaceChildren();
   }
-  const slots = {preview:'Thumbnail WhatsApp',groom:'Firsta Adi Pradana',bride:'Talitha Syahda Arundatie',...Object.fromEntries(Array.from({length:9},(_,i) => [`gallery${i+1}`,`Galeri · Foto ${i+1}`])),music:'Lagu Pilihan'};
+  const slots = {preview:'Thumbnail WhatsApp',groom:'Foto Mempelai Pria',bride:'Foto Mempelai Wanita',...Object.fromEntries(Array.from({length:9},(_,i) => [`gallery${i+1}`,`Galeri · Foto ${i+1}`])),music:'Lagu Pilihan'};
   for (const [slot,title] of Object.entries(slots)) {
     if (onlySlot && slot !== onlySlot) continue;
     const music = slot === 'music';const hasMedia = Boolean(content.media[slot]);
@@ -205,7 +207,7 @@ function renderMedia(onlySlot) {
 }
 login.addEventListener('submit',async event => {
   event.preventDefault();const button = login.querySelector('button');button.disabled = true;button.textContent = 'Memeriksa…';$('#login-error').hidden = true;
-  try {const result = await api('/api/admin/login','POST',{password:login.elements.password.value});csrf = result.csrf;login.reset();$('#status').hidden = true;await refresh();}
+  try {const result = await api('/api/admin/login','POST',{email:login.elements.email.value,password:login.elements.password.value});csrf = result.csrf;currentAccount = result.account;login.reset();$('#status').hidden = true;await refresh();}
   catch(error) {$('#login-error').textContent = error.message;$('#login-error').hidden = false;}
   finally {button.disabled = false;button.textContent = 'Masuk ke dasbor →';}
 });
@@ -246,4 +248,4 @@ $('#whatsapp-settings').addEventListener('input',() => {
   const input = $('#whatsapp-settings').elements.whatsappTemplate;
   input.setCustomValidity(input.value.includes('{link}') ? '' : 'Sertakan {link} agar tamu menerima tautan undangannya.');renderMessagePreview();
 });
-api('/api/admin/session').then(result => {csrf = result.csrf;return refresh();}).catch(error => {showLogin();if (error.status !== 401) {$('#login-error').textContent = error.message;$('#login-error').hidden = false;}});
+api('/api/admin/session').then(result => {csrf = result.csrf;currentAccount = result.account;return refresh();}).catch(error => {showLogin();if (error.status !== 401) {$('#login-error').textContent = error.message;$('#login-error').hidden = false;}});

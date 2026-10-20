@@ -1,12 +1,16 @@
 import {countdownParts} from './countdown.js';
 const music = document.querySelector('.music-status');
-if (location.hash) location.replace(`/?access=1${location.hash}`);
+if (location.hash) location.replace(`${location.pathname}?access=1${location.hash}`);
+const scope = new URLSearchParams();
+if (location.pathname === '/preview') scope.set('preview','1');
+if (location.pathname.startsWith('/i/')) scope.set('tenant',location.pathname.slice(3));
 let audio;
 async function load() {
-  const response = await fetch('/api/invitation');
-  if (response.status === 401) {location.replace('/');return;}
+  const response = await fetch(`/api/invitation?${scope}`);
+  if (response.status === 401) {location.replace(location.pathname === '/preview' ? '/admin' : `${location.pathname}?access=1`);return;}
   if (!response.ok) throw new Error('Konten belum dapat dimuat. Muat ulang halaman.');
-  const {guestName,settings,media,response:guestResponse,canRespond} = await response.json();
+  const {tenantSlug,guestName,settings,media,response:guestResponse,canRespond} = await response.json();
+  scope.set('tenant',tenantSlug);
   document.querySelector('#guest-name').textContent = guestName;
   document.querySelector('#response-guest').textContent = guestName;
   if (guestResponse) {
@@ -122,7 +126,7 @@ responseForm.addEventListener('submit',async event => {
   responseStatus.classList.remove('error');responseStatus.textContent = 'Menyimpan…';
   try {
     const attendance = responseForm.elements.attendance.value;
-    const response = await fetch('/api/response',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({attendance,guestCount:attendance === 'attending' ? Number(responseForm.elements.guestCount.value) : 0,message:responseForm.elements.message.value})});
+    const response = await fetch(`/api/response?${scope}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({attendance,guestCount:attendance === 'attending' ? Number(responseForm.elements.guestCount.value) : 0,message:responseForm.elements.message.value})});
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Konfirmasi belum tersimpan. Silakan coba kembali.');
     responseForm.elements.message.value = result.message;
@@ -138,7 +142,7 @@ async function loadWishes(reset = false) {
   moreWishes.disabled = true;status.textContent = 'Memuat ucapan…';
   if (reset) {wishesPage = 0;list.replaceChildren();}
   try {
-    const response = await fetch(`/api/wishes?page=${wishesPage+1}`);
+    const response = await fetch(`/api/wishes?page=${wishesPage+1}&${scope}`);
     const result = await response.json();
     if (request !== wishesRequest) return;
     if (!response.ok) throw new Error(result.error || 'Ucapan belum dapat dimuat.');
