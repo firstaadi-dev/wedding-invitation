@@ -1,7 +1,7 @@
 $kind: http-example
 name: Upstream/configuration unavailable
 request:
-  url: "{{baseUrl}}/api/admin/guests"
+  url: "{{cmsBaseUrl}}/api/admin/guests"
   method: GET
   headers:
     - key: wedding_admin

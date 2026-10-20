@@ -1,0 +1,16 @@
+$kind: http-request
+description: Uses the host-only dashboard admin cookie. Relative API and media URLs stay on the dashboard. No cross-host cookie sharing or CORS is required.
+url: "{{cmsBaseUrl}}/preview"
+method: GET
+headers:
+  Cookie: "{{adminCookie}}"
+settings: {}
+examples: ./.resources/Preview the signed-in admin invitation on the dashboard host.resources/examples
+order: 6000
+
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Preview remains on the dashboard host with the admin session', () => pm.response.to.have.status(200));
+      pm.test('Preview renders invitation HTML', () => pm.expect(pm.response.text()).to.include('id="response-form"'));

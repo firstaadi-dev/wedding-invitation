@@ -1,6 +1,6 @@
 $kind: http-example
 request:
-  url: "{{baseUrl}}/api/admin/logout"
+  url: "{{cmsBaseUrl}}/api/admin/logout"
   method: POST
   headers:
     - key: wedding_admin

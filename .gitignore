@@ -11,3 +11,8 @@ postman/.dependencies/
 *.log
 .smoke.local.json
 .deploy.local.json
+
+.local/
+frontend/dist/
+**/__pycache__/
+!.env.test.example

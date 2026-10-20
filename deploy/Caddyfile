@@ -1,0 +1,35 @@
+(backend) {
+    reverse_proxy 127.0.0.1:5174 {
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Real-IP {remote_host}
+        header_up -Forwarded
+    }
+}
+(frontend) {
+    reverse_proxy 127.0.0.1:5173 {
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Real-IP {remote_host}
+        header_up -Forwarded
+    }
+}
+{$CMS_DOMAIN} {
+    @backend path /api/admin/* /api/invitation /api/wishes /media/* /preview-image/* /preview /healthz
+    handle @backend {
+        import backend
+    }
+    handle {
+        import frontend
+    }
+}
+{$INVITATION_DOMAIN} {
+    @cms path /admin /admin/* /api/admin/* /preview
+    handle @cms {
+        respond "Not found" 404
+    }
+    handle /assets/* {
+        import frontend
+    }
+    handle {
+        import backend
+    }
+}

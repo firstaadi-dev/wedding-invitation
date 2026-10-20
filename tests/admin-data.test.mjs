@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {guestSummary,findGuests,mediaType} from '../public/admin-data.js';
+import {guestSummary,findGuests,mediaType} from '../frontend/admin-data.js';
 
 test('CMS summary counts invitations separately from people, excluding inactive responses',() => {
   const guests = [

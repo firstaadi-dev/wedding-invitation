@@ -21,6 +21,7 @@ response:
     content: |-
       {
         "tenantSlug": "firsta-talitha",
+        "invitationId": "d291b953-df84-463b-8319-80aff739c16a",
         "guestName": "Tamu Undangan",
         "response": null,
         "canRespond": true,

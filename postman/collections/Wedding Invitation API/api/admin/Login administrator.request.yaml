@@ -1,11 +1,11 @@
 $kind: http-request
 description: Same-origin JSON only. Email identifies the tenant account; password verified using its scrypt hash. No public registration. Sets HttpOnly SameSite=Strict cookie, Secure in production. Rate limited.
-url: "{{baseUrl}}/api/admin/login"
+url: "{{cmsBaseUrl}}/api/admin/login"
 method: POST
 headers:
   Content-Type: application/json
   Accept: application/json
-  Origin: "{{origin}}"
+  Origin: "{{cmsOrigin}}"
 body:
   type: json
   content: |-
@@ -25,3 +25,9 @@ scripts:
       pm.collectionVariables.set('adminCookie', pm.response.headers.get('Set-Cookie').split(';')[0]);
       pm.test('Session belongs to the requested account', () => pm.expect(pm.response.json().account.email).to.eql(pm.variables.get('adminEmail')));
       pm.test('Session includes tenant identity', () => pm.expect(pm.response.json().account.tenant.slug).to.be.a('string'));
+
+      pm.test('Session includes an opaque invitation ID and the invitation origin', () => {
+        const account=pm.response.json().account;
+        pm.expect(account.tenant.publicId).to.match(/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);
+        pm.expect(account.invitationOrigin).to.eql(pm.variables.get('origin'));
+      });

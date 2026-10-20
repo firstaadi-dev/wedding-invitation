@@ -1,7 +1,7 @@
 $kind: http-request
 name: Save event names, times, countdown time and official map embed URL
 description: Save editable event names, displayed times, WIB countdown start and official map embed URL
-url: "{{baseUrl}}/api/admin/content"
+url: "{{cmsBaseUrl}}/api/admin/content"
 method: PUT
 headers:
   - key: X-CSRF-Token
@@ -11,7 +11,7 @@ headers:
   - key: Content-Type
     value: application/json
   - key: Origin
-    value: "{{baseUrl}}"
+    value: "{{cmsBaseUrl}}"
   - key: Accept
     value: application/json
 body:

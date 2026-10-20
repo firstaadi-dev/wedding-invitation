@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {countdownParts} from '../public/countdown.js';
+import {countdownParts} from '../frontend/countdown.js';
 
 test('countdown uses the WIB target, rolls over units and stops at zero', () => {
   const target = Date.parse('2026-11-22T09:00:00+07:00');

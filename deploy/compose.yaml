@@ -1,25 +1,37 @@
 name: wedding-invitation
 services:
-  app:
-    image: ${IMAGE:?Set IMAGE to the GHCR image with a commit tag}
+  frontend:
+    image: ${FRONTEND_IMAGE:?Set FRONTEND_IMAGE to a frontend commit image}
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:5173:8080'
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1:8080/healthz-frontend']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: '3'}
+  backend:
+    image: ${BACKEND_IMAGE:?Set BACKEND_IMAGE to a backend commit image}
     restart: unless-stopped
     env_file:
       - path: ./app.env
         format: raw
     environment:
       NODE_ENV: production
+      LISTEN_HOST: 0.0.0.0
       PORT: '5174'
       TRUST_PROXY: '1'
     ports:
       - '127.0.0.1:5174:5174'
     healthcheck:
-      test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:5174/healthz').then(async r=>{if(!r.ok || !(await r.json()).ok)process.exit(1)}).catch(()=>process.exit(1))"]
-      interval: 15s
+      test: ['CMD', 'invitation', 'health']
+      interval: 10s
       timeout: 20s
-      retries: 5
-      start_period: 30s
+      retries: 10
+      start_period: 20s
     logging:
       driver: json-file
-      options:
-        max-size: '10m'
-        max-file: '3'
+      options: {max-size: 10m, max-file: '3'}

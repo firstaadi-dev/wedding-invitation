@@ -1,0 +1,5 @@
+simulation: invitation-verification
+routing: path
+mocks:
+  - routeKey: fingerprint
+    path: ../mocks/fingerprint/config.yaml

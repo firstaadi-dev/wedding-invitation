@@ -1,6 +1,6 @@
 $kind: http-request
 description: Read settings and selected media
-url: "{{baseUrl}}/api/admin/content"
+url: "{{cmsBaseUrl}}/api/admin/content"
 method: GET
 headers:
   Accept: application/json

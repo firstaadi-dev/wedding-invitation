@@ -1,0 +1,19 @@
+$kind: http-request
+description: Public HTML/Open Graph metadata. Private content requires a matching verified guest session. The public UUID alone does not authorize API access.
+url: "{{baseUrl}}/:invitationId"
+method: GET
+headers:
+  Accept: text/html
+pathVariables:
+  - key: invitationId
+    value: "{{invitationId}}"
+settings: {}
+examples: ./.resources/Read invitation by random public UUID.resources/examples
+order: 5000
+
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Opaque public landing page is available', () => pm.response.to.have.status(200));
+      pm.test('Open Graph URL uses the invitation host and public UUID', () => pm.expect(pm.response.text()).to.include('property="og:url" content="'+pm.variables.get('origin')+'/'+pm.variables.get('invitationId')+'"'));

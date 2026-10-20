@@ -1,0 +1,29 @@
+{
+    admin off
+    auto_https off
+}
+:8080 {
+    root * /srv
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy no-referrer
+        X-Frame-Options DENY
+        Cache-Control no-cache
+        Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+    }
+    @admin path / /admin /admin/
+    handle @admin {
+        rewrite * /admin.html
+        file_server
+    }
+    @assets path /assets/*
+    handle @assets {
+        file_server
+    }
+    handle /healthz-frontend {
+        respond "ok"
+    }
+    handle {
+        respond "Not found" 404
+    }
+}

@@ -1,6 +1,6 @@
 # Multi-Tenant Foundation
 
-Tahap pertama mempertahankan frontend `public/`, backend `server/`, driver `pg`, dan PostgreSQL. Pendaftaran publik tidak memiliki halaman atau endpoint. Akun dibuat melalui [migration akun](../db/accounts/README.md).
+Implementasi sekarang memakai frontend `frontend/` (CMS React/TypeScript, undangan HTML/JS, Vite) dan backend `backend/` (Go + Chi + pgx + govips/libvips). PostgreSQL dan media tetap di Neon. Pendaftaran publik tidak memiliki halaman atau endpoint. Akun dibuat melalui [migration akun](../backend/db/accounts/README.md).
 
 ## Kepemilikan Dan Isolasi
 
@@ -8,25 +8,19 @@ Tahap pertama mempertahankan frontend `public/`, backend `server/`, driver `pg`,
 
 Tenant admin ditentukan dari sesi yang diverifikasi server; tenant tamu ditentukan dari token undangan dan sesi tamu. Payload tidak menerima `tenant_id`. Daftar dan perubahan tamu, media privat, pengaturan, dan ucapan dibatasi ke tenant terkait. ID tamu atau media tenant lain menghasilkan 404. Thumbnail preview sengaja publik untuk crawler WhatsApp. Isolasi query diterapkan di aplikasi, bukan PostgreSQL RLS; endpoint baru wajib menerapkan scope dan menjalankan tes lintas tenant.
 
-Link baru berbentuk `/i/{slug}#{secret}`. Fragment dihapus sebelum Fingerprint berjalan. Slug memilih landing page dan metadata publik; slug tidak memberikan akses API. Link lama `/#secret` dan sesi tamu lama tetap valid.
+Link baru berbentuk `https://invitation.domain.id/{publicId}#{secret}`. `publicId` adalah UUIDv4 acak per tenant, terpisah dari ID internal/slug; secret acak berbeda per tamu. Nama pasangan/acara tidak muncul di URL. Fragment dihapus sebelum Fingerprint berjalan. ID publik memilih landing page dan metadata WhatsApp, tanpa memberi akses API. `/i/{slug}` lama mengarahkan ke ID publik dengan fragment tetap diteruskan browser; `/#secret` dan sesi tamu lama tetap valid. CMS mengembalikan link tersimpan dengan origin/ID publik terkini tanpa mengganti secret. Link yang tidak pernah disimpan tidak bisa dipulihkan dari hash.
 
 ## Migration Data Lama
 
-`db/001-multi-tenant.sql` mengaitkan data lama ke tenant `firsta-talitha`, milik `firstaadip16@gmail.com`. `ADMIN_PASSWORD_HASH` hanya dipakai saat bootstrap untuk menyalin hash lama, sehingga password tetap sama. Tidak ada plaintext password di migration. Migration dicatat dan dikunci dalam transaksi; pengulangan tidak mengubah password atau memindahkan data. Sesi admin lama dihapus karena belum memiliki identitas akun; admin masuk kembali dengan email dan password yang sama.
+`backend/db/001-multi-tenant.sql` mengaitkan data lama ke tenant `firsta-talitha`, milik `firstaadip16@gmail.com`. `ADMIN_PASSWORD_HASH` hanya dipakai saat bootstrap untuk menyalin hash lama, sehingga password tetap sama. Tidak ada plaintext password di migration. Migration dicatat dan dikunci dalam transaksi; pengulangan tidak mengubah password atau memindahkan data. Sesi admin lama dihapus karena belum memiliki identitas akun; admin masuk kembali dengan email dan password yang sama.
 
-**Deploy kode dan migration sebagai satu cutover.** Schema baru tidak kompatibel dengan query global versi lama. Hentikan instance lama terlebih dahulu, lalu jalankan image baru; startup Docker menjalankan migration sebelum server mulai. Pastikan `ADMIN_PASSWORD_HASH` lama masih tersedia pada deployment pertama. Jangan jalankan migration produksi sambil instance lama masih melayani request. Siapkan branch/restore point sebelum cutover. Rollback memerlukan kode dan database yang cocok, bukan mengembalikan kode lama saja.
+Migrasi versi 1 adalah cutover schema multi-tenant awal. Pemisahan Go/React mempertahankan SQL versi 1. Migrasi tambahan versi 2 (`002-public-invitation-id.sql`) menambahkan `tenants.public_id` acak dan unik, tanpa mengganti ID internal, hash, sesi, atau data lama. Go mempertahankan advisory lock, transaksi, hash, serta file SQL yang sama. Migrasi dijalankan sekali oleh deployment sebelum mengganti backend; startup service tidak menjalankan migrasi. Lihat [deployment VPS](vps-deploy.md).
 
 Pengujian awal pada salinan produksi mempertahankan 6 tamu, 12 media dan 11 catatan perangkat, serta memastikan hash password pemilik tidak berubah. Branch pengujian `dev-multitenant-20261020` kedaluwarsa 27 Oktober 2026.
 
-## Arah Stack Berikutnya
+## Stack dan deployment
 
-Pilihan backend pengguna: **Go**. Pemindahan framework ditunda sampai fondasi tenant stabil.
-
-- Frontend CMS: rekomendasi React + TypeScript dengan Vite untuk build; formulir, dialog, navigasi dan state UI dapat dikelola sebagai komponen. Lihat [integrasi React bertahap](https://react.dev/learn/add-react-to-an-existing-project).
-- Backend: Go, mulai dengan `net/http` dan query PostgreSQL yang eksplisit. Router standar mendukung method dan parameter path; kebutuhan route saat ini belum memerlukan framework besar. Lihat [dokumentasi ServeMux](https://pkg.go.dev/net/http#ServeMux). Pertahankan schema, kontrak OpenAPI, perilaku cookie/CSRF, dan hash scrypt selama transisi agar akun lama tetap dapat masuk.
-- Tetap satu repo dan origin; `/api` diteruskan ke backend. Deployment terpisah dilakukan saat kebutuhan operasional memerlukannya. Template undangan publik dapat tetap HTML/CSS saat CMS dipindahkan bertahap.
-
-Ini arah arsitektur, belum implementasi Go atau React. ORM, microservices, billing, paket langganan, dan custom domain tidak termasuk tahap ini.
+CMS memakai komponen React, state lokal dan fetch; undangan mempertahankan HTML/CSS/JavaScript. Go melayani API dan template HTML dengan metadata per tenant. Dua image berada dalam satu repository dengan dua host: CMS pada `dashboard.domain.id` dan undangan pada `invitation.domain.id`. Set `CMS_ORIGIN` dan `PUBLIC_ORIGIN` sesuai host tersebut. Cookie tetap host-only; API CMS dan preview memakai host dashboard, API tamu memakai host invitation. Tidak perlu CORS. Deployment memilih service dari perubahan sejak deployment sehat terakhir. [Aturan, routing, dan pemulihan](vps-deploy.md).
 
 ## Batas Sebelum Dijual
 
@@ -34,6 +28,6 @@ Fondasi data multi-tenant belum membuat template menjadi produk siap jual. Nama 
 
 ## Verifikasi
 
-`npm test`, `npm run build`, dan `npm run test:integration`. Tes integrasi memakai `.env.test.local` dengan `TEST_DATABASE_URL` dan `TEST_DATABASE_URL_UNPOOLED` menuju branch disposable. Tes menghapus data branch tersebut; jangan memakai koneksi produksi.
+`npm test`, `npm run build`, dan `npm run test:integration`. Tes integrasi memakai `.env.test.local` dengan `TEST_DATABASE_URL` dan `TEST_DATABASE_URL_UNPOOLED` menuju database disposable, serta `TEST_DATABASE_DISPOSABLE=1`. Tes menghapus data branch tersebut; jangan memakai koneksi produksi.
 
 Tes mencakup migration schema lama, keutuhan link/sesi tamu/media/RSVP, password bootstrap dan pengulangan, login email, cookie/CSRF/logout, provisioning akun idempotent, dua tenant, seluruh mutasi tamu lintas tenant, pengaturan, media privat, metadata publik, ucapan, status akun, serta ketiadaan pendaftaran publik. Postman dijalankan terhadap backend lokal dan database branch nyata. Fingerprint menggunakan event fixture terverifikasi, bukan request ke Fingerprint produksi.

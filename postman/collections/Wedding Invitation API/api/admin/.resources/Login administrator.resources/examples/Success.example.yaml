@@ -1,6 +1,6 @@
 $kind: http-example
 request:
-  url: "{{baseUrl}}/api/admin/login"
+  url: "{{cmsBaseUrl}}/api/admin/login"
   method: POST
   headers:
     Accept: application/json
@@ -21,6 +21,6 @@ response:
     content: |-
       {
         "csrf": "string",
-        "account": {"email": "owner@example.com", "tenant": {"id": "wedding", "slug": "wedding", "name": "Wedding"}}
+        "account": {"email": "owner@example.com", "invitationOrigin": "https://invitation.domain.id", "tenant": {"id": "wedding", "slug": "wedding", "publicId": "d291b953-df84-463b-8319-80aff739c16a", "name": "Wedding"}}
       }
 order: 1000

@@ -1,6 +1,6 @@
 $kind: http-request
 description: Revoke admin session
-url: "{{baseUrl}}/api/admin/logout"
+url: "{{cmsBaseUrl}}/api/admin/logout"
 method: POST
 headers:
   - key: X-CSRF-Token

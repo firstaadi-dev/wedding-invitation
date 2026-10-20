@@ -1,10 +1,10 @@
 $kind: http-request
 method: PATCH
-url: '{{baseUrl}}/api/admin/guests/{{foreignGuestId}}'
+url: '{{cmsBaseUrl}}/api/admin/guests/{{foreignGuestId}}'
 order: 2500
 headers:
   Content-Type: application/json
-  Origin: '{{origin}}'
+  Origin: '{{cmsOrigin}}'
   Cookie: '{{adminCookie}}'
   X-CSRF-Token: '{{csrf}}'
 body:

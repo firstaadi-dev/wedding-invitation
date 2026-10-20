@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {defaultWhatsappTemplate, invitationMessage, whatsappUrl} from '../public/whatsapp.js';
+import {defaultWhatsappTemplate, invitationMessage, whatsappUrl} from '../frontend/whatsapp.js';
 
 test('WhatsApp message substitutes once and preserves names, line breaks and secret fragment URLs', () => {
   const guest = {name:'Keluarga {link} & Éka',phone:'628123456789',link:'https://invitation.example/#private_token'};

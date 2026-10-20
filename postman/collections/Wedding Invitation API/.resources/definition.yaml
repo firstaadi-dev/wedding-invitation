@@ -1,7 +1,10 @@
 $kind: collection
-description: Authoritative local contract. Same-origin cookies; no public admin credentials or visitor IDs accepted from browser.
+description: Authoritative local contract. Host-only dashboard and invitation cookies; no public admin credentials or visitor IDs accepted from browser.
 variables:
-  baseUrl: http://127.0.0.1:5174
+  baseUrl: http://invitation.localhost:5173
+  cmsBaseUrl: http://dashboard.localhost:5173
+  cmsOrigin: http://dashboard.localhost:5173
+  invitationId: ""
   apiKey: ""
   adminPassword: ""
   adminEmail: ""
@@ -9,5 +12,5 @@ variables:
   foreignGuestId: ""
   csrf: ""
   savedSettings: ""
-  origin: http://127.0.0.1:5174
+  origin: http://invitation.localhost:5173
   guestCookie: ''

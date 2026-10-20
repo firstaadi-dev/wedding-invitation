@@ -1,6 +1,6 @@
 $kind: http-request
 description: Read admin session
-url: "{{baseUrl}}/api/admin/session"
+url: "{{cmsBaseUrl}}/api/admin/session"
 method: GET
 headers:
   Accept: application/json
@@ -14,3 +14,9 @@ scripts:
     code: |-
       pm.test('Admin session is restored', () => pm.response.to.have.status(200));
       pm.test('Restored session belongs to the same account', () => pm.expect(pm.response.json().account.email).to.eql(pm.variables.get('adminEmail')));
+
+      pm.test('Session includes an opaque invitation ID and the invitation origin', () => {
+        const account=pm.response.json().account;
+        pm.expect(account.tenant.publicId).to.match(/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);
+        pm.expect(account.invitationOrigin).to.eql(pm.variables.get('origin'));
+      });

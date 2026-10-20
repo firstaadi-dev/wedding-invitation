@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
-import {entranceProgress,sectionProgress} from '../public/invitation.js';
+import {entranceProgress,sectionProgress} from '../frontend/invitation.js';
 
 assert.equal(entranceProgress(100, 1800, 1000), 0);
 assert.equal(entranceProgress(0, 1800, 1000), 0);
@@ -17,7 +17,7 @@ assert.equal(sectionProgress(0, 1000), 1);
 assert.equal(sectionProgress(-2000, 1000), 1);
 assert.equal(sectionProgress(0, 0), 1);
 
-const invitationSource = readFileSync(new URL('../public/invitation.js',import.meta.url),'utf8').replace(/^export /gm,'');
+const invitationSource = readFileSync(new URL('../frontend/invitation.js',import.meta.url),'utf8').replace(/^export /gm,'');
 function revealHarness(supported = true) {
   const cards = Array.from({length:3},() => {
     const classes = new Set();return {classes,classList:{
@@ -56,7 +56,7 @@ observer.callback([{target:cards[1],isIntersecting:true}]);
 assert.equal(cards[1].classes.has('is-revealed'),true,'Reveal repeats across multiple visits');
 assert.ok(revealHarness(false).cards.every(card => card.classes.size === 0),'Cards remain visible without IntersectionObserver');
 
-const page = readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
+const page = readFileSync(new URL('../frontend/index.html', import.meta.url), 'utf8');
 assert.doesNotMatch(page, /<nav\b|hamburger|bottom-nav/i);
 assert.equal((page.match(/class="trees trees-left"/g) || []).length, 8);
 assert.equal((page.match(/class="trees trees-right"/g) || []).length, 8);

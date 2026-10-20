@@ -1,6 +1,6 @@
 $kind: http-example
 request:
-  url: "{{baseUrl}}/api/admin/media/:slot"
+  url: "{{cmsBaseUrl}}/api/admin/media/:slot"
   method: DELETE
   headers:
     - key: wedding_admin

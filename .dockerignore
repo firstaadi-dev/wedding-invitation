@@ -9,3 +9,10 @@ docs
 postman
 .postman
 *.log
+
+**/node_modules
+**/dist
+.local
+**/__pycache__
+
+**/.env*

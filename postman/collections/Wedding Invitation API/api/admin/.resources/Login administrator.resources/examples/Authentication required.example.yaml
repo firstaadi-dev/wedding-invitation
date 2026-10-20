@@ -1,6 +1,6 @@
 $kind: http-example
 request:
-  url: "{{baseUrl}}/api/admin/login"
+  url: "{{cmsBaseUrl}}/api/admin/login"
   method: POST
   headers:
     Accept: application/json

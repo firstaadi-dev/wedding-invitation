@@ -1,6 +1,6 @@
 $kind: http-example
 request:
-  url: "{{baseUrl}}/api/admin/guests/:id/link"
+  url: "{{cmsBaseUrl}}/api/admin/guests/:id/link"
   method: POST
   headers:
     - key: wedding_admin

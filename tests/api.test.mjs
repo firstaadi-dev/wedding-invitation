@@ -1,14 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {randomBytes,scryptSync,createHash} from 'node:crypto';
+import {randomBytes,randomUUID,scryptSync,createHash} from 'node:crypto';
 import {once} from 'node:events';
 import {existsSync,readFileSync} from 'node:fs';
 import sharp from 'sharp';
 import {spawn} from 'node:child_process';
-import {database,migrate,provisionAccount} from '../server/db.mjs';
-import {createApp} from '../server/app.mjs';
+import {database,migrate,provisionAccount} from './support/db.mjs';
+import {startBackend} from './support/server.mjs';
 if (existsSync('.env.test.local')) process.loadEnvFile('.env.test.local');
 if (!process.env.TEST_DATABASE_URL || !process.env.TEST_DATABASE_URL_UNPOOLED) throw new Error('Set TEST_DATABASE_URL and TEST_DATABASE_URL_UNPOOLED for an isolated test branch. Never use production.');
+
+if(process.env.TEST_DATABASE_DISPOSABLE!=='1')throw new Error('Set TEST_DATABASE_DISPOSABLE=1 only for a disposable isolated database. Tests delete their data.');
+for(const key of ['DATABASE_URL','DATABASE_URL_UNPOOLED'])if(process.env[key]&&[process.env.TEST_DATABASE_URL,process.env.TEST_DATABASE_URL_UNPOOLED].includes(process.env[key]))throw new Error('Test and application database URLs must be separate.');
 
 test('legacy migration preserves invitation data, guest sessions and password; repeated runs do not reset credentials',async () => {
   const schema = `migration_${randomBytes(6).toString('hex')}`;
@@ -17,7 +20,7 @@ test('legacy migration preserves invitation data, guest sessions and password; r
   const client = await pool.connect();
   try {
     await client.query(`CREATE SCHEMA ${schema}`);await client.query(`SET search_path TO ${schema}`);
-    await client.query(readFileSync(new URL('../db/schema.sql',import.meta.url),'utf8'));
+    await client.query(readFileSync(new URL('../backend/db/schema.sql',import.meta.url),'utf8'));
     await client.query("INSERT INTO guests(id,name,token_hash,invitation_link) VALUES('legacy','Legacy Guest','old-token-hash','https://invitation.example/#old-link')");
     await client.query("INSERT INTO devices(guest_id,visitor_hash) VALUES('legacy','old-device')");
     await client.query("INSERT INTO responses(guest_id,attendance,guest_count,message) VALUES('legacy','attending',2,'Legacy wish')");
@@ -39,6 +42,29 @@ test('legacy migration preserves invitation data, guest sessions and password; r
   }
 });
 
+test('version-one upgrade assigns stable opaque IDs without changing existing ownership or links',async()=>{
+  const schema=`upgrade_${randomBytes(6).toString('hex')}`;
+  const pool=database(process.env.TEST_DATABASE_URL_UNPOOLED),client=await pool.connect();
+  const passwordHash=`${'a'.repeat(32)}:${'b'.repeat(128)}`;
+  try{
+    await client.query(`CREATE SCHEMA ${schema}`);await client.query(`SET search_path TO ${schema}`);
+    await client.query(readFileSync(new URL('../backend/db/schema.sql',import.meta.url),'utf8'));
+    await client.query("SELECT set_config('weddinvita.legacy_password_hash',$1,false)",[passwordHash]);
+    await client.query(readFileSync(new URL('../backend/db/001-multi-tenant.sql',import.meta.url),'utf8'));
+    await client.query('CREATE TABLE schema_migrations(version integer PRIMARY KEY,applied_at timestamptz NOT NULL DEFAULT now()); INSERT INTO schema_migrations(version) VALUES(1)');
+    await client.query("INSERT INTO guests(id,name,token_hash,invitation_link,tenant_id) VALUES('existing','Existing Guest','hash','https://old.example/i/firsta-talitha#secret','firsta-talitha')");
+    await migrate(process.env.TEST_DATABASE_URL_UNPOOLED,schema);
+    const tenant=(await client.query('SELECT id,owner_id,slug,name,public_id FROM tenants')).rows[0];
+    assert.match(tenant.public_id,/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);
+    assert.deepEqual({...tenant,public_id:undefined},{id:'firsta-talitha',owner_id:'firsta',slug:'firsta-talitha',name:'Firsta & Talitha',public_id:undefined});
+    assert.equal((await client.query('SELECT invitation_link FROM guests')).rows[0].invitation_link,'https://old.example/i/firsta-talitha#secret');
+    assert.equal((await client.query('SELECT password_hash FROM accounts')).rows[0].password_hash,passwordHash);
+    await migrate(process.env.TEST_DATABASE_URL_UNPOOLED,schema);
+    assert.equal((await client.query('SELECT public_id FROM tenants')).rows[0].public_id,tenant.public_id);
+    assert.deepEqual((await client.query('SELECT version FROM schema_migrations ORDER BY version')).rows,[{version:1},{version:2}]);
+  }finally{await client.query('SET search_path TO public');await client.query(`DROP SCHEMA IF EXISTS ${schema} CASCADE`);client.release();await pool.end()}
+});
+
 test('Neon-backed CMS and guest access end to end',async t => {
   const password = 'integration-test-password';const salt = randomBytes(16).toString('hex');
   const passwordHash = `${salt}:${scryptSync(password,salt,64).toString('hex')}`;
@@ -49,15 +75,14 @@ test('Neon-backed CMS and guest access end to end',async t => {
   await pool.query("UPDATE wedding.settings SET value='{}' WHERE tenant_id='firsta-talitha'");
   await pool.query('UPDATE wedding.accounts SET password_hash=$1 WHERE id=$2',[passwordHash,'firsta']);
   const email = 'firstaadip16@gmail.com';
-  const events = new Map();const origin = 'https://invitation.example';
+  const origin = 'https://invitation.example';
+  const cmsOrigin = 'https://dashboard.example';
   const endpoint = 'https://validator.firsta.my.id';
-  const server = createApp(pool,{origin,production:true,publicKey:'test',secretKey:'test',region:'ap',endpoint},async id => events.get(id));
-  server.listen(0,'127.0.0.1');await once(server,'listening');
-  const base = `http://127.0.0.1:${server.address().port}`;
+  const {server,base,events} = await startBackend({origin,cmsOrigin,endpoint});
   const admin = {};
-  let csrf;let guest;let token;let guestBrowser;let guestVisitor;
+  let csrf;let guest;let token;let guestBrowser;let guestVisitor;let invitationId;
   async function request(path,{method='GET',data,jar={},headers={}} = {}) {
-    const response = await fetch(base+path,{method,headers:{Origin:origin,...(Object.keys(jar).length ? {Cookie:Object.entries(jar).map(([k,v])=>`${k}=${v}`).join('; ')} : {}),...(data ? {'Content-Type':'application/json'} : {}),...headers},body:data ? JSON.stringify(data) : undefined});
+    const response = await fetch(base+path,{method,headers:{Origin:path.startsWith('/api/admin/') ? cmsOrigin : origin,...(Object.keys(jar).length ? {Cookie:Object.entries(jar).map(([k,v])=>`${k}=${v}`).join('; ')} : {}),...(data ? {'Content-Type':'application/json'} : {}),...headers},body:data ? JSON.stringify(data) : undefined});
     for (const cookie of response.headers.getSetCookie()) {const [key,value] = cookie.split(';')[0].split('=');jar[key]=value;}
     const type = response.headers.get('content-type');
     const value = type?.includes('json') ? await response.json() : await response.text();
@@ -69,21 +94,10 @@ test('Neon-backed CMS and guest access end to end',async t => {
     assert.equal(result.response.status,200);return {...result.value,jar};
   }
   async function verify(c,visitor,id=randomBytes(12).toString('hex')) {
-    events.set(id,{event_id:id,linked_id:c.challenge,url:origin+'/',timestamp:Date.now(),identification:{visitor_id:visitor}});
+    await events.set(id,{event_id:id,linked_id:c.challenge,url:origin+'/',timestamp:Date.now(),identification:{visitor_id:visitor}});
     return request('/api/access/verify',{method:'POST',data:{challenge:c.challenge,eventId:id},jar:c.jar});
   }
   try {
-    await t.test('CMS page and its browser modules are served before login',async () => {
-      const page = await request('/admin');
-      assert.equal(page.response.status,200);assert.match(page.value,/<title>weddinvita/);
-      const script = await request('/admin.js');
-      assert.equal(script.response.status,200);
-      for (const [,module] of script.value.matchAll(/from '\.\/([^']+)'/g)) {
-        const dependency = await request(`/${module}`);
-        assert.equal(dependency.response.status,200,`${module} must load for the CMS to start`);
-        assert.match(dependency.response.headers.get('content-type'),/text\/javascript/);
-      }
-    });
     await t.test('database health, admin auth, private content and CSRF',async () => {
       assert.equal((await request('/healthz')).response.status,200);
       const config = await request('/api/identification/config');
@@ -94,16 +108,48 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal((await request('/api/invitation')).response.status,401);
       assert.equal((await request('/')).value.includes('access-message'),true);
       const login = await request('/api/admin/login',{method:'POST',data:{email,password},jar:admin});
-      assert.equal(login.response.status,200);csrf = login.value.csrf;
+      assert.equal(login.response.status,200);csrf = login.value.csrf;invitationId=login.value.account.tenant.publicId;
+      assert.match(invitationId,/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);
+      assert.equal(login.value.account.invitationOrigin,origin);
+      assert.doesNotMatch(login.response.headers.get('set-cookie'),/Domain=/i);
+      assert.equal((await request('/api/admin/login',{method:'POST',data:{email,password},headers:{Origin:origin}})).response.status,403);
+      assert.equal((await request('/api/access/challenge',{method:'POST',data:{token:'x'.repeat(43)},headers:{Origin:cmsOrigin}})).response.status,403);
       assert.match(login.response.headers.get('set-cookie'),/HttpOnly; SameSite=Strict.*Secure/);
       assert.equal((await request('/api/admin/guests',{method:'POST',data:{name:'Wrong'},jar:admin})).response.status,403);
       assert.equal((await adminRequest('/api/admin/guests',{method:'POST',data:{name:'Wrong'},headers:{Origin:'https://attacker.example'}})).response.status,403);
       assert.equal((await adminRequest('/api/admin/guests',{method:'POST',data:{name:' '}})).response.status,400);
     });
+    await t.test('legacy root links and existing guest sessions remain usable',async()=>{
+      const id=randomUUID(),legacyToken=randomBytes(32).toString('base64url'),sessionToken=randomBytes(32).toString('base64url');
+      const hash=value=>createHash('sha256').update(value).digest('hex');
+      await pool.query("INSERT INTO wedding.guests(id,name,token_hash,invitation_link,tenant_id) VALUES($1,'Legacy Guest',$2,$3,'firsta-talitha')",[id,hash(legacyToken),`${origin}/#${legacyToken}`]);
+      await pool.query("INSERT INTO wedding.sessions(token_hash,guest_id,version,expires_at) VALUES($1,$2,1,now()+interval '1 day')",[hash(sessionToken),id]);
+      const jar={wedding_guest:sessionToken};
+      assert.equal((await request('/api/invitation',{jar})).value.guestName,'Legacy Guest');
+      assert.match((await request('/',{jar})).value,/id="response-form"/);
+      const c=await challenge(legacyToken);assert.equal((await verify(c,'legacy-visitor')).response.status,200);
+      await pool.query('DELETE FROM wedding.guests WHERE id=$1',[id]);
+    });
+    await t.test('stored readable links are shown canonically without revoking their secret',async()=>{
+      const id=randomUUID(),legacyToken=randomBytes(32).toString('base64url');
+      const legacy=`https://old-domain.example/i/firsta-talitha#${legacyToken}`;
+      await pool.query("INSERT INTO wedding.guests(id,name,token_hash,invitation_link,tenant_id) VALUES($1,'Existing Guest',$2,$3,'firsta-talitha')",[id,createHash('sha256').update(legacyToken).digest('hex'),legacy]);
+      const listed=(await adminRequest('/api/admin/guests')).value.find(g=>g.id===id);
+      assert.equal(listed.link,`${origin}/${invitationId}#${legacyToken}`);
+      assert.equal((await pool.query('SELECT invitation_link FROM wedding.guests WHERE id=$1',[id])).rows[0].invitation_link,legacy);
+      assert.equal((await verify(await challenge(legacyToken),'existing-guest')).response.status,200);
+      await pool.query('DELETE FROM wedding.guests WHERE id=$1',[id]);
+    });
     await t.test('create guest secret link, persist and rename',async () => {
       const created = await adminRequest('/api/admin/guests',{method:'POST',data:{name:'Keluarga Uji <script>',phone:'0812-3456 7890'}});
       assert.equal(created.response.status,201);guest=created.value.guest;token=created.value.link.split('#')[1];
       assert.equal(token.length,43);
+      assert.equal(created.value.link,`${origin}/${invitationId}#${token}`);
+      assert.doesNotMatch(created.value.link,/firsta|talitha|\/i\//);
+      const landing=await request(`/${invitationId}`);assert.equal(landing.response.status,200);assert.match(landing.value,/access-message/);
+      assert.ok(landing.value.includes(`property="og:url" content="${origin}/${invitationId}"`));
+      const alias=await fetch(base+'/i/firsta-talitha?access=1',{redirect:'manual'});
+      assert.equal(alias.status,302);assert.equal(alias.headers.get('location'),`/${invitationId}?access=1`);
       const stored = (await pool.query('SELECT token_hash,invitation_link,phone FROM wedding.guests WHERE id=$1',[guest.id])).rows[0];
       assert.notEqual(stored.token_hash,token);assert.equal(stored.token_hash.length,64);
       assert.equal(stored.invitation_link,created.value.link);assert.equal(stored.phone,'6281234567890');
@@ -129,6 +175,14 @@ test('Neon-backed CMS and guest access end to end',async t => {
       await migrate(process.env.TEST_DATABASE_URL_UNPOOLED,'wedding',passwordHash);
       assert.equal((await adminRequest('/api/admin/guests')).value[0].link,null);
       assert.equal((await pool.query('SELECT token_hash FROM wedding.guests WHERE id=$1',[guest.id])).rows[0].token_hash,stored.token_hash);
+    });
+    await t.test('Fingerprint HTTP failures reject access without consuming device slots',async()=>{
+      const c=await challenge();
+      for(const [eventId,status] of [['not-found',403],['upstream-unavailable',503]]){
+        const result=await request('/api/access/verify',{method:'POST',data:{challenge:c.challenge,eventId},jar:c.jar});
+        assert.equal(result.response.status,status);assert.equal(result.value.code,'verification_failed');
+      }
+      assert.equal(Number((await pool.query('SELECT count(*) FROM wedding.devices')).rows[0].count),0);
     });
     await t.test('atomic max-three limit, repeat visitor and replay rejection',async () => {
       const challenges = [];
@@ -231,9 +285,9 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal(cleared.value.settings.countdownTime,'');
       assert.equal((await adminRequest('/api/admin/content',{method:'PUT',data:{mapEmbedUrl:'https://attacker.example/embed'}})).response.status,400);
       const photo = await sharp({create:{width:20,height:30,channels:3,background:'#183d32'}}).png().toBuffer();
-      const response = await fetch(base+'/api/admin/media/groom',{method:'PUT',headers:{Origin:origin,Cookie:`wedding_admin=${admin.wedding_admin}`,'X-CSRF-Token':csrf,'Content-Type':'image/png'},body:photo});
+      const response = await fetch(base+'/api/admin/media/groom',{method:'PUT',headers:{Origin:cmsOrigin,Cookie:`wedding_admin=${admin.wedding_admin}`,'X-CSRF-Token':csrf,'Content-Type':'image/png'},body:photo});
       for (const slot of ['gallery1','gallery4','gallery9']) {
-        const uploaded = await fetch(base+`/api/admin/media/${slot}`,{method:'PUT',headers:{Origin:origin,Cookie:`wedding_admin=${admin.wedding_admin}`,'X-CSRF-Token':csrf,'Content-Type':'image/png'},body:photo});
+        const uploaded = await fetch(base+`/api/admin/media/${slot}`,{method:'PUT',headers:{Origin:cmsOrigin,Cookie:`wedding_admin=${admin.wedding_admin}`,'X-CSRF-Token':csrf,'Content-Type':'image/png'},body:photo});
         assert.equal(uploaded.status,200);
         const path = (await uploaded.json()).media[slot];
         assert.equal((await request('/api/invitation',{jar:guestBrowser})).value.media[slot],path);
@@ -248,10 +302,10 @@ test('Neon-backed CMS and guest access end to end',async t => {
       const decoded = await sharp(Buffer.from(await media.arrayBuffer())).metadata();assert.equal(decoded.width,20);assert.equal(decoded.height,30);
       const partial = await fetch(base+path,{headers:{Cookie:`wedding_guest=${guestBrowser.wedding_guest}`,Range:'bytes=0-9'}});
       assert.equal(partial.status,206);assert.equal((await partial.arrayBuffer()).byteLength,10);
-      const invalid = await fetch(base+'/api/admin/media/bride',{method:'PUT',headers:{Origin:origin,Cookie:`wedding_admin=${admin.wedding_admin}`,'X-CSRF-Token':csrf,'Content-Type':'image/png'},body:'<svg onload="evil()"></svg>'});
+      const invalid = await fetch(base+'/api/admin/media/bride',{method:'PUT',headers:{Origin:cmsOrigin,Cookie:`wedding_admin=${admin.wedding_admin}`,'X-CSRF-Token':csrf,'Content-Type':'image/png'},body:'<svg onload="evil()"></svg>'});
       assert.equal(invalid.status,415);
       const music = readFileSync(new URL('./fixtures/silence.mp3',import.meta.url));
-      const musicHeaders = {Origin:origin,Cookie:`wedding_admin=${admin.wedding_admin}`,'X-CSRF-Token':csrf,'Content-Type':'audio/mpeg'};
+      const musicHeaders = {Origin:cmsOrigin,Cookie:`wedding_admin=${admin.wedding_admin}`,'X-CSRF-Token':csrf,'Content-Type':'audio/mpeg'};
       const uploaded = await fetch(base+'/api/admin/media/music',{method:'PUT',headers:musicHeaders,body:music});
       assert.equal(uploaded.status,200);const musicPath = (await uploaded.json()).media.music;
       assert.equal((await request(musicPath)).response.status,401);
@@ -291,8 +345,8 @@ test('Neon-backed CMS and guest access end to end',async t => {
     });
     await t.test('preview thumbnails are public JPEGs, replace safely, and cannot expose private media',async () => {
       const photo = await sharp({create:{width:60,height:90,channels:4,background:'#183d32'}}).png().toBuffer();
-      const upload = data => fetch(base+'/api/admin/media/preview',{method:'PUT',headers:{Origin:origin,Cookie:`wedding_admin=${admin.wedding_admin}`,'X-CSRF-Token':csrf,'Content-Type':'image/png'},body:data});
-      assert.equal((await fetch(base+'/api/admin/media/preview',{method:'PUT',headers:{Origin:origin,'Content-Type':'image/png'},body:photo})).status,401);
+      const upload = data => fetch(base+'/api/admin/media/preview',{method:'PUT',headers:{Origin:cmsOrigin,Cookie:`wedding_admin=${admin.wedding_admin}`,'X-CSRF-Token':csrf,'Content-Type':'image/png'},body:data});
+      assert.equal((await fetch(base+'/api/admin/media/preview',{method:'PUT',headers:{Origin:cmsOrigin,'Content-Type':'image/png'},body:photo})).status,401);
       const response = await upload(photo);assert.equal(response.status,200);
       const path = (await response.json()).media.preview;assert.match(path,/^\/preview-image\/[a-f0-9-]{36}$/);
       const image = await fetch(base+path);assert.equal(image.status,200);assert.equal(image.headers.get('content-type'),'image/jpeg');
@@ -342,7 +396,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal((await adminRequest('/api/admin/guests')).value[0].name,'Keluarga Uji');
       assert.equal((await secondRequest('/api/admin/guests',{method:'POST',data:{name:'Bad',tenant_id:'firsta-talitha'}})).response.status,400);
       const created = await secondRequest('/api/admin/guests',{method:'POST',data:{name:'Second Tenant Guest'}});
-      assert.equal(created.response.status,201);assert.match(created.value.link,/\/i\/tenant-two#/);
+      assert.equal(created.response.status,201);assert.match(created.value.link,new RegExp('/'+login.value.account.tenant.publicId+'#'));
       assert.equal((await adminRequest('/api/admin/guests')).value.length,1);
       const original = (await adminRequest('/api/admin/content')).value;
       const saved = await secondRequest('/api/admin/content',{method:'PUT',data:{ceremonyTitle:'Second Ceremony',linkPreviewTitle:'Tenant Two Preview'}});
@@ -351,7 +405,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
       const privatePath = original.media.groom;
       assert.equal((await request(privatePath,{jar:second})).response.status,404);
       const photo = await sharp({create:{width:10,height:10,channels:3,background:'#ffffff'}}).png().toBuffer();
-      const uploaded = await fetch(base+'/api/admin/media/groom',{method:'PUT',headers:{Origin:origin,Cookie:`wedding_admin=${second.wedding_admin}`,'X-CSRF-Token':login.value.csrf,'Content-Type':'image/png'},body:photo});
+      const uploaded = await fetch(base+'/api/admin/media/groom',{method:'PUT',headers:{Origin:cmsOrigin,Cookie:`wedding_admin=${second.wedding_admin}`,'X-CSRF-Token':login.value.csrf,'Content-Type':'image/png'},body:photo});
       assert.equal(uploaded.status,200);const secondPath = (await uploaded.json()).media.groom;
       assert.notEqual(secondPath,privatePath);assert.equal((await request(secondPath,{jar:admin})).response.status,404);
       assert.equal((await secondRequest('/api/admin/media/groom',{method:'DELETE'})).response.status,200);
@@ -361,8 +415,11 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal((await request(privatePath,{jar:secondGuest.jar})).response.status,404);
       assert.deepEqual((await request('/api/wishes',{jar:secondGuest.jar})).value.wishes,[]);
       assert.equal((await request('/api/invitation?tenant=firsta-talitha',{jar:secondGuest.jar})).response.status,401);
+      const wrongScope=await request(`/api/response?tenant=${invitationId}`,{method:'PUT',data:{attendance:'attending',guestCount:1,message:'Wrong opaque scope'},jar:secondGuest.jar});assert.equal(wrongScope.response.status,401);
       assert.equal((await request('/api/invitation?tenant=tenant-two',{jar:guestBrowser})).response.status,401);
       assert.equal((await request('/api/invitation',{jar:secondGuest.jar})).value.tenantSlug,secondSlug);
+      assert.equal((await request(`/api/invitation?tenant=${login.value.account.tenant.publicId}`,{jar:secondGuest.jar})).value.invitationId,login.value.account.tenant.publicId);
+      assert.equal((await request(`/api/invitation?tenant=${login.value.account.tenant.publicId}`,{jar:guestBrowser})).response.status,401);
       const stale = await request('/api/response?tenant=firsta-talitha',{method:'PUT',jar:secondGuest.jar,data:{attendance:'attending',guestCount:1,message:'Wrong tab'}});
       assert.equal(stale.response.status,401);assert.equal((await request('/api/invitation',{jar:secondGuest.jar})).value.response,null);
 
@@ -378,7 +435,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
       const wrong = await request('/api/admin/login',{method:'POST',data:{email,password:'wrong'}});
       assert.equal(unknown.response.status,401);assert.deepEqual(unknown.value,wrong.value);
       assert.equal((await request('/api/admin/login',{method:'POST',data:{password}})).response.status,400);
-      const child = spawn('postman',['collection','run','postman/collections/Wedding Invitation API','-i','Login administrator','-i','Read admin session','-i','Reject foreign tenant guest update','-i','Public registration disabled','--env-var',`baseUrl=${base}`,'--env-var',`origin=${origin}`,'--env-var',`adminEmail=${secondEmail}`,'--env-var',`adminPassword=${password}`,'--env-var',`foreignGuestId=${guest.id}`,'--no-report-events'],{stdio:['ignore','pipe','pipe']});
+      const child = spawn('postman',['collection','run','postman/collections/Wedding Invitation API','-i','Login administrator','-i','Read admin session','-i','Reject foreign tenant guest update','-i','Public registration disabled','-i','Read invitation by random public UUID','-i','Preview the signed-in admin invitation on the dashboard host','--env-var',`baseUrl=${base}`,'--env-var',`cmsBaseUrl=${base}`,'--env-var',`cmsOrigin=${cmsOrigin}`,'--env-var',`origin=${origin}`,'--env-var',`invitationId=${login.value.account.tenant.publicId}`,'--env-var',`adminEmail=${secondEmail}`,'--env-var',`adminPassword=${password}`,'--env-var',`foreignGuestId=${guest.id}`,'--no-report-events'],{stdio:['ignore','pipe','pipe']});
       let output = '';child.stdout.on('data',chunk => {output += chunk;});child.stderr.on('data',chunk => {output += chunk;});
       const [code] = await once(child,'close');console.log(output);assert.equal(code,0,output);
       await pool.query('UPDATE wedding.accounts SET active=false WHERE email=$1',[secondEmail]);
@@ -413,7 +470,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal((await adminRequest('/api/admin/session')).response.status,401);
     });
   } finally {
-    server.close();await once(server,'close');
+    await server.close();
     await pool.query('TRUNCATE wedding.guests,wedding.sessions,wedding.media,wedding.challenges,wedding.used_events,wedding.rate_limits CASCADE');
     await pool.query("UPDATE wedding.settings SET value='{}' WHERE tenant_id='firsta-talitha'");
     await pool.query("DELETE FROM wedding.settings WHERE tenant_id='tenant-two'; DELETE FROM wedding.tenants WHERE id='tenant-two'; DELETE FROM wedding.accounts WHERE email='tenant-two@example.com'");

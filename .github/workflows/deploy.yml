@@ -5,6 +5,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      service:
+        description: Redeploy service (also includes pending changes since last successful deploy)
+        type: choice
+        options: [auto, frontend, backend, both]
+        default: both
 
 permissions:
   contents: read
@@ -14,36 +20,113 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  changes:
+    runs-on: ubuntu-24.04
+    outputs:
+      frontend: ${{ steps.detect.outputs.frontend }}
+      backend: ${{ steps.detect.outputs.backend }}
+      services: ${{ steps.detect.outputs.services }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Read last successful deployment
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.VPS_DEPLOY_ENABLED == 'true'
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+          trap 'rm -f ~/.ssh/id_ed25519 ~/.ssh/known_hosts' EXIT
+          ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=15 "$VPS_USER@$VPS_HOST" 'if test -f /opt/wedding-invitation/state.json; then cat /opt/wedding-invitation/state.json; else echo "{}"; fi' > /tmp/deploy-state.json
+      - name: Select images
+        id: detect
+        env:
+          FORCE: ${{ inputs.service || 'auto' }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          BASE=$(python3 -c 'import json,pathlib; p=pathlib.Path("/tmp/deploy-state.json"); print(json.loads(p.read_text()).get("commit","") if p.exists() else "")')
+          if [ "$EVENT" = pull_request ]; then FORCE=both; fi
+          python3 scripts/changes.py --base "$BASE" --target "$GITHUB_SHA" --force "$FORCE" >> "$GITHUB_OUTPUT"
+
+  verify:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    permissions:
-      contents: read
-      packages: write
-    outputs:
-      image: ${{ steps.image.outputs.name }}
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: invitation-test
+          POSTGRES_DB: invitation_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_DISPOSABLE: '1'
+      TEST_DATABASE_URL: postgresql://postgres:invitation-test@127.0.0.1:5432/invitation_test?sslmode=disable
+      TEST_DATABASE_URL_UNPOOLED: postgresql://postgres:invitation-test@127.0.0.1:5432/invitation_test?sslmode=disable
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
-      - name: Set image name
-        id: image
-        run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}:$GITHUB_SHA" >> "$GITHUB_OUTPUT"
-      - name: Build and test
-        env:
-          IMAGE: ${{ steps.image.outputs.name }}
-        run: docker build --label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" --tag "$IMAGE" .
-      - name: Publish image
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - name: Install tools and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libvips-dev
+          curl --fail --silent --show-error https://dl-cli.pstmn.io/install/linux64.sh -o /tmp/install-postman.sh
+          sh /tmp/install-postman.sh
+          npm ci
+          npm ci --prefix frontend
+      - run: postman spec lint postman/specs/invitation.json --no-report-events
+      - run: npm run build
+      - run: npm test
+      - run: npm run test:integration
+
+  images:
+    needs: [changes, verify]
+    if: needs.changes.outputs.services != '[]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.changes.outputs.services) }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Build and publish selected image
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          IMAGE: ${{ steps.image.outputs.name }}
+          SERVICE: ${{ matrix.service }}
+          PUBLISH: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
         run: |
-          printf '%s' "$GH_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
-          docker push "$IMAGE"
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}-$SERVICE:$GITHUB_SHA"
+          docker build -f "$SERVICE/Dockerfile" --label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" -t "$IMAGE" .
+          if [ "$PUBLISH" = true ]; then
+            printf '%s' "$GH_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+            docker push "$IMAGE"
+          fi
 
   deploy:
-    needs: build
+    needs: [changes, images]
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.VPS_DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -51,20 +134,24 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
-      - name: Deploy over SSH
+      - name: Deploy selected services
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
           VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
           VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
-          IMAGE: ${{ needs.build.outputs.image }}
+          FRONTEND: ${{ needs.changes.outputs.frontend }}
+          BACKEND: ${{ needs.changes.outputs.backend }}
         run: |
-          : "${VPS_HOST:?Missing VPS_HOST}" "${VPS_USER:?Missing VPS_USER}" "${VPS_SSH_KEY:?Missing VPS_SSH_KEY}" "${VPS_KNOWN_HOSTS:?Missing VPS_KNOWN_HOSTS}"
           install -d -m 700 ~/.ssh
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
           trap 'rm -f ~/.ssh/id_ed25519 ~/.ssh/known_hosts' EXIT
           ssh_options=(-o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=15)
-          scp "${ssh_options[@]}" deploy/compose.yaml "$VPS_USER@$VPS_HOST:/opt/wedding-invitation/compose.yaml"
-          ssh "${ssh_options[@]}" "$VPS_USER@$VPS_HOST" "cd /opt/wedding-invitation && IMAGE='$IMAGE' docker compose pull && IMAGE='$IMAGE' docker compose up -d --wait --wait-timeout 150"
+          frontend_image=''
+          backend_image=''
+          if [ "$FRONTEND" = true ]; then frontend_image="ghcr.io/${GITHUB_REPOSITORY,,}-frontend:$GITHUB_SHA"; fi
+          if [ "$BACKEND" = true ]; then backend_image="ghcr.io/${GITHUB_REPOSITORY,,}-backend:$GITHUB_SHA"; fi
+          scp "${ssh_options[@]}" deploy/compose.yaml deploy/deploy.py "$VPS_USER@$VPS_HOST:/opt/wedding-invitation/"
+          ssh "${ssh_options[@]}" "$VPS_USER@$VPS_HOST" "python3 /opt/wedding-invitation/deploy.py --commit '$GITHUB_SHA' --frontend '$frontend_image' --backend '$backend_image'"

@@ -1,6 +1,6 @@
 $kind: http-request
 description: Delete guest and all their access records
-url: "{{baseUrl}}/api/admin/guests/:id"
+url: "{{cmsBaseUrl}}/api/admin/guests/:id"
 method: DELETE
 headers:
   - key: X-CSRF-Token

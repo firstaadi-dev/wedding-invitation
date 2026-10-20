@@ -1,7 +1,7 @@
 $kind: http-request
 name: Clear three device slots and revoke sessions/challenges
 description: Clear three device slots and revoke sessions/challenges
-url: "{{baseUrl}}/api/admin/guests/:id/devices"
+url: "{{cmsBaseUrl}}/api/admin/guests/:id/devices"
 method: DELETE
 headers:
   - key: X-CSRF-Token

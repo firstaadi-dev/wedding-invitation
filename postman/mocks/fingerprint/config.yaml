@@ -1,0 +1,10 @@
+version: 1
+slug: fingerprint-fixture
+protocol: http
+name: Fingerprint fixture
+port: 4500
+interceptRequests: true
+scenarios:
+  - name: default
+    default: true
+    path: ./default.js

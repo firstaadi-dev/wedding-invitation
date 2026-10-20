@@ -1,6 +1,6 @@
 $kind: http-request
 description: List guests and device counts
-url: "{{baseUrl}}/api/admin/guests"
+url: "{{cmsBaseUrl}}/api/admin/guests"
 method: GET
 headers:
   Accept: application/json

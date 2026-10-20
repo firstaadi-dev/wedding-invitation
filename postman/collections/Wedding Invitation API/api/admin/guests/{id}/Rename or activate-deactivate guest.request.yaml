@@ -1,7 +1,7 @@
 $kind: http-request
 name: Edit guest name, phone or active status
 description: Deactivation immediately revokes sessions and challenges. Device slots remain until explicit reset.
-url: "{{baseUrl}}/api/admin/guests/:id"
+url: "{{cmsBaseUrl}}/api/admin/guests/:id"
 method: PATCH
 headers:
   - key: X-CSRF-Token
@@ -11,7 +11,7 @@ headers:
   - key: Content-Type
     value: application/json
   - key: Origin
-    value: "{{baseUrl}}"
+    value: "{{cmsBaseUrl}}"
   - key: Accept
     value: application/json
 pathVariables:

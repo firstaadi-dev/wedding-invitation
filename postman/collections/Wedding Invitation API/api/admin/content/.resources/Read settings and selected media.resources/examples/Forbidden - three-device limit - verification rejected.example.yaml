@@ -1,7 +1,7 @@
 $kind: http-example
 name: Forbidden / three-device limit / verification rejected
 request:
-  url: "{{baseUrl}}/api/admin/content"
+  url: "{{cmsBaseUrl}}/api/admin/content"
   method: GET
   headers:
     - key: wedding_admin

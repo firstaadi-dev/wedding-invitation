@@ -1,146 +1,134 @@
-# Deploy otomatis ke VPS dari GitHub private
+# Frontend–backend di satu VPS
 
-Alur: pull request menjalankan Docker build dan tes. Push/merge ke `main` juga menerbitkan image ke GHCR dengan tag commit. Deploy VPS hanya berjalan setelah repository variable `VPS_DEPLOY_ENABLED` diisi `true`. Build berjalan di GitHub, bukan VPS.
+`frontend/` berisi CMS React/TypeScript dan undangan HTML/CSS/JavaScript, dibangun Vite. `backend/` berisi Go, Chi, pgx, govips/libvips, serta SQL eksplisit. Tidak ada runtime Node dalam image backend. Database dan media tetap di Neon, dengan schema dan catatan migrasi yang sama.
 
-Workflow: `.github/workflows/deploy.yml`. Gunakan VPS Ubuntu 24.04 **amd64/x86_64**, Docker Engine dari repository resmi Docker, Docker Compose versi 2.30+ (mendukung `env_file.format: raw`), dan Caddy yang berjalan langsung di host. Database tetap di Neon. Tidak ada perubahan kontrak API.
+Caddy **di host** mengelola HTTPS dua subdomain. `dashboard.domain.id/` melayani CMS React; API admin, preview `/preview`, API pembaca preview, dan media pada host ini masuk Go. `invitation.domain.id/{publicId}#secret` melayani undangan Go dengan ID acak tanpa nama; `/assets/*` masuk frontend. API admin dan `/preview` ditolak pada host invitation. Cookie login tetap host-only dan mutasi memeriksa Origin masing-masing, tanpa CORS. Go membaca dua template HTML hasil Vite dan mengisi metadata Open Graph per tenant. Frontend tidak menerima secret.
 
-## 1. Persiapan VPS sekali saja
+## Persiapan VPS
 
-Ikuti [instalasi Docker Ubuntu](https://docs.docker.com/engine/install/ubuntu/) dan [instalasi Caddy](https://caddyserver.com/docs/install#debian-ubuntu-raspbian). Jalankan sebagai akun administrator VPS:
+Gunakan Ubuntu 24.04 amd64, Docker Engine, Compose 2.30+ (untuk `env_file.format: raw`), Python 3, dan Caddy host. Build image berjalan di GitHub Actions.
 
 ```sh
 sudo adduser --disabled-password --gecos '' deploy
 sudo usermod -aG docker deploy
-sudo install -d -o deploy -g deploy -m 700 /home/deploy/.ssh
-sudo install -d -o deploy -g deploy -m 700 /opt/wedding-invitation
+sudo install -d -o deploy -g deploy -m 700 /home/deploy/.ssh /opt/wedding-invitation
 ```
 
-Akses grup Docker setara dengan akses root; gunakan akun dan SSH key khusus deployment. Jika user `deploy` sudah ada, gunakan user itu tanpa membuat ulang.
-
-Di komputer sendiri, buat key khusus GitHub Actions:
+Grup Docker setara akses root. Pakai akun/key deployment khusus. Jika user sudah ada, jangan buat ulang. Buat key di komputer sendiri dan pasang public key ke `/home/deploy/.ssh/authorized_keys` dengan mode 600:
 
 ```sh
 ssh-keygen -t ed25519 -f ~/.ssh/wedding-deploy -C github-actions-wedding -N ''
 ```
 
-Pasang **isi file `.pub`** ke `/home/deploy/.ssh/authorized_keys` di VPS. Gunakan pemilik `deploy:deploy` dan permission `600`. Private key `~/.ssh/wedding-deploy` nanti masuk GitHub Secret, bukan repository.
-
-## 2. Kredensial GHCR di VPS
-
-Di GitHub, buat **personal access token (classic)** dengan scope `read:packages`, dari akun yang boleh membaca package aplikasi. Untuk organisasi dengan SSO, otorisasi token sesuai aturan organisasi. Jalankan sebagai user `deploy` melalui SSH:
+Sebagai user `deploy` di VPS, login GHCR dengan token classic `read:packages` dari akun yang boleh membaca kedua package private:
 
 ```sh
-read -r -s -p 'GHCR read token: ' GHCR_READ_TOKEN
-printf '\n'
-printf '%s' "$GHCR_READ_TOKEN" | docker login ghcr.io -u USERNAME_GITHUB --password-stdin
-unset GHCR_READ_TOKEN
+read -r -s -p 'GHCR read token: ' taskGhcrToken
+printf '%s' "$taskGhcrToken" | docker login ghcr.io -u USERNAME_GITHUB --password-stdin
+unset taskGhcrToken
 ```
 
-Ganti `USERNAME_GITHUB`. Token hanya untuk menarik image private; GitHub Actions memakai `GITHUB_TOKEN` bawaan untuk menerbitkan image. Setelah publikasi pertama, cek package di GitHub Packages tetap **Private** dan repository ini punya akses Actions ke package tersebut.
-
-## 3. Environment aplikasi di VPS
-
-Sebagai user `deploy`, buat file dengan editor:
-
-```sh
-touch /opt/wedding-invitation/app.env
-chmod 600 /opt/wedding-invitation/app.env
-nano /opt/wedding-invitation/app.env
-```
-
-Isi nilainya mengikuti `.env.example`:
+Siapkan `/opt/wedding-invitation/app.env`, mode 600, mengikuti `.env.example`:
 
 ```dotenv
-PUBLIC_ORIGIN=https://undangan.domainkamu.com
+PUBLIC_ORIGIN=https://invitation.domain.id
+CMS_ORIGIN=https://dashboard.domain.id
 DATABASE_URL=KONEKSI_NEON_POOLED
 DATABASE_URL_UNPOOLED=KONEKSI_NEON_DIRECT
-ADMIN_PASSWORD_HASH=HASH_SCRYPT_ADMIN
+ADMIN_PASSWORD_HASH=HASH_LAMA_UNTUK_BOOTSTRAP
 FINGERPRINT_PUBLIC_KEY=PUBLIC_KEY
 FINGERPRINT_SECRET_KEY=SECRET_KEY
 FINGERPRINT_REGION=ap
-FINGERPRINT_ENDPOINT=https://SUBDOMAIN_FINGERPRINT_YANG_SUDAH_ACTIVE
+FINGERPRINT_ENDPOINT=https://SUBDOMAIN_FINGERPRINT_ACTIVE
 ```
 
-Nilai ditulis mentah, tanpa tanda kutip. Hapus baris `FINGERPRINT_ENDPOINT` jika belum memakai custom endpoint. Jangan simpan file ini di GitHub. Compose mengatur `NODE_ENV`, `PORT` dan `TRUST_PROXY`; jangan membawa variabel `RENDER` dari hosting lama. Perbarui domain/origin di Fingerprint jika domain aplikasi berubah.
+Nilai mentah tanpa tanda kutip. Hash bootstrap hanya diperlukan jika migration versi 1 belum tercatat; jangan mengganti hash akun existing. Isi juga environment hash provisioning akun baru jika diperlukan. Jangan isi `FINGERPRINT_API_ORIGIN` di produksi: variabel itu mengarahkan HTTP client ke simulation lokal saat tes. Jangan membawa `RENDER` atau koneksi tes ke VPS.
 
-## 4. Domain dan HTTPS
+## Domain, routing dan cutover
 
-Arahkan A record `undangan.domainkamu.com` ke IP VPS. Untuk konfigurasi awal ini, gunakan DNS langsung (tanpa proxy Cloudflare). Tambahkan ke `/etc/caddy/Caddyfile`:
-
-```caddyfile
-undangan.domainkamu.com {
-    reverse_proxy 127.0.0.1:5174 {
-        header_up X-Forwarded-For {remote_host}
-    }
-}
-```
+Arahkan DNS `dashboard.domain.id` dan `invitation.domain.id` langsung ke VPS, buka TCP 80/443 dan port SSH. Gunakan [Caddyfile](../deploy/Caddyfile): ganti `{$CMS_DOMAIN}` dan `{$INVITATION_DOMAIN}` dengan kedua hostname sebenarnya saat memasangnya di `/etc/caddy/Caddyfile`, atau berikan kedua environment tersebut melalui service Caddy. Origin backend wajib mencantumkan skema HTTPS dan cocok dengan domain routing. Izinkan origin invitation baru pada konfigurasi Fingerprint. Periksa dan reload:
 
 ```sh
 sudo caddy validate --config /etc/caddy/Caddyfile
 sudo systemctl reload caddy
 ```
 
-Buka TCP 80/443 di firewall VPS/provider, serta SSH port 22 untuk deployment. Port aplikasi 5174 **hanya** dipublikasikan ke `127.0.0.1` oleh Compose. Caddy mengganti header IP dari pengunjung agar `TRUST_PROXY=1` aman dan rate limit tidak menggabungkan seluruh tamu. Jangan membuka port 5174 ke internet atau menambahkan proxy lain tanpa meninjau ulang header IP.
+Caddy menimpa `X-Forwarded-For` dan `X-Real-IP`, serta menghapus `Forwarded`. Compose hanya mempublikasikan port 5173 dan 5174 ke `127.0.0.1`. Jangan membuka port tersebut ke internet. Menambahkan proxy/CDN lain memerlukan pengaturan IP terpercaya tersendiri.
 
-## 5. Secrets dan variable GitHub
+Pada perpindahan dari monolit, simpan salinan Compose lama dan tag image sehat. Deploy pertama membangun kedua image. Setelah migrasi berhasil, `up --remove-orphans` menghentikan/menghapus service `app` lama dalam project Compose `wedding-invitation` agar port backend dapat dipakai. Atur Caddy host untuk routing baru pada cutover ini. Ada jeda singkat; routing baru dan service baru harus siap bersama. Tidak ada data Neon yang dipindah. Migrasi versi 2 menambahkan ID publik acak tanpa mengubah link/hash/sesi lama. Jika domain lama telah dibagikan, pertahankan DNS/HTTPS dan redirect host lama ke `https://invitation.domain.id{uri}` agar path dan fragment lama tetap bisa digunakan. Alihkan `/admin` lama ke `https://dashboard.domain.id/` secara terpisah. Jangan mematikan domain lama sebelum masa kompatibilitas selesai.
 
-Di repository, buka **Settings → Secrets and variables → Actions → Secrets**, lalu tambahkan **repository secrets**. Konfigurasi ini tidak membutuhkan fitur Environments berbayar untuk repo private:
+Jika berpindah dari Render, ubah DNS saat kedua service VPS sudah sehat dan konfigurasi domain Fingerprint benar. Menonaktifkan Render dilakukan terpisah; workflow ini hanya mengelola VPS.
+
+## GitHub Actions
+
+Repository secrets:
 
 | Secret | Isi |
 | --- | --- |
-| `VPS_HOST` | IP publik atau hostname VPS, tanpa `https://` |
+| `VPS_HOST` | IP/hostname VPS |
 | `VPS_USER` | `deploy` |
-| `VPS_SSH_KEY` | Seluruh isi private key `~/.ssh/wedding-deploy` |
-| `VPS_KNOWN_HOSTS` | Baris host key OpenSSH untuk VPS |
+| `VPS_SSH_KEY` | Private key khusus deployment |
+| `VPS_KNOWN_HOSTS` | Host key OpenSSH yang telah diverifikasi |
 
-Untuk menyiapkan `VPS_KNOWN_HOSTS`, dari komputer sendiri:
+Ambil host key dengan `ssh-keyscan`, lalu bandingkan fingerprint menggunakan console provider yang dipercaya dan `sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub`. Jangan menganggap hasil `ssh-keyscan` sendiri sebagai verifikasi.
 
-```sh
-ssh-keyscan -t ed25519 IP_VPS > /tmp/wedding-known-hosts
-ssh-keygen -lf /tmp/wedding-known-hosts
-```
+Set repository variable `VPS_DEPLOY_ENABLED=true` setelah VPS siap. Tanpa variable itu, image dari `main` tetap diterbitkan, tetapi VPS tidak disentuh. Pastikan kedua package `REPO-frontend` dan `REPO-backend` tetap private dan mengizinkan Actions repository ini. `GITHUB_TOKEN` menerbitkan image; token VPS hanya menariknya. Batasi akses tulis repository/workflow karena workflow memakai secrets.
 
-Bandingkan fingerprint itu dengan hasil perintah berikut dari console provider VPS yang dipercaya:
+Pull request menjalankan build kedua image, tes Go, helper undangan, tes deployment, dan integrasi/Postman pada PostgreSQL disposable di CI. Image PR tidak dipublikasikan. Publikasi serta deployment hanya dari `main`.
 
-```sh
-sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
-```
+## Pemilihan deployment
 
-Hanya jika cocok, masukkan isi `/tmp/wedding-known-hosts` sebagai secret. `ssh-keyscan` saja tidak memverifikasi identitas server.
+[scripts/changes.py](../scripts/changes.py) membandingkan commit target dengan `commit` dalam `/opt/wedding-invitation/state.json`, yaitu deployment terakhir yang **seluruh service terdampaknya sehat**.
 
-Di **Settings → Secrets and variables → Actions → Variables**, tambahkan **repository variable**:
+| Perubahan | Image |
+| --- | --- |
+| CMS, JS browser, CSS, aset, frontend Caddy/Dockerfile | Frontend |
+| Go, dependency Go, SQL, provisioning | Backend |
+| `frontend/index.html`, `frontend/access.html` | Keduanya |
+| Dependency/build frontend yang menentukan template | Keduanya |
+| Konfigurasi deployment/workflow/build bersama | Keduanya |
+| Dokumentasi saja | Tidak ada |
+| Belum ada state atau commit baseline tidak tersedia | Keduanya |
 
-```text
-VPS_DEPLOY_ENABLED = true
-```
+Vite memakai nama entry/aset stabil dan menonaktifkan module preload di HTML, agar template dalam backend lama tetap menemukan aset setelah frontend saja dideploy. Jangan mengubah aturan output Vite tanpa membangun ulang kedua image. Respons aset memakai revalidasi cache. Perubahan source template harus dimasukkan ke classifier jika menambah entry/template baru.
 
-Aktifkan setelah semua persiapan VPS selesai. Tanpa variable ini, CI tetap build/tes dan menerbitkan image dari `main`, tetapi tidak menyentuh VPS. Pastikan GitHub Actions diperbolehkan oleh kebijakan repository/organisasi.
+Setiap image memakai full commit SHA masing-masing: `ghcr.io/OWNER/REPO-frontend:SHA` dan `ghcr.io/OWNER/REPO-backend:SHA`. State mencatat pasangan image dan commit baseline, tanpa file VERSION manual. Service yang tidak dipilih tetap memakai image dan container sebelumnya.
 
-Batasi akses tulis repository dan perubahan workflow ke orang yang dipercaya; orang yang boleh mengubah workflow juga dapat memakai repository secrets.
+[deploy.py](../deploy/deploy.py) mengunci deployment di host, menarik service terpilih, menjalankan `backend migrate` **sekali** sebelum pergantian backend, lalu `up --no-deps --wait` hanya untuk service terpilih. Deployment frontend saja tidak menjalankan migrasi. State ditulis atomik setelah health check lolos; migration/health gagal mempertahankan state sebelumnya, sehingga perubahan gagal ikut diperiksa lagi pada percobaan berikutnya. GitHub Actions juga menserialkan seluruh workflow produksi, termasuk pembacaan baseline.
 
-## 6. Deploy dan pemeriksaan
+Di **Actions → Build and deploy VPS → Run workflow**, pilih branch `main` dan `frontend`, `backend`, `both`, atau `auto`. Pilihan manual menambahkan service yang dipaksa deploy pada perubahan tertunda, agar pemulihan tidak melewatkan perubahan dari deployment gagal.
 
-Commit file konfigurasi, push ke branch kerja, lalu merge pull request ke `main`. Buka tab **Actions → Build and deploy VPS**. Untuk menjalankan ulang versi `main` tanpa commit baru, pilih **Run workflow** dengan branch `main`.
-
-Build menjalankan `npm run build` dan `npm test` dari Dockerfile. Jika gagal, image tidak diterbitkan dan deploy tidak berjalan. Jika berhasil, VPS menarik image, menjalankan migrasi yang sudah ada di Dockerfile, mengganti container, dan menunggu health check `/healthz` yang memeriksa koneksi database. Job deploy gagal jika container tidak sehat dalam batas waktu.
-
-Setelah deploy, periksa HTTPS dari browser, login admin, serta akses tautan tamu. Health check internal tidak membuktikan DNS, sertifikat atau integrasi Fingerprint berhasil. Render tidak diubah oleh workflow ini; setelah siap pindah, nonaktifkan auto-deploy Render secara terpisah jika tidak ingin kedua hosting ter-update.
-
-Tidak ada tes integrasi database di CI ini karena tes tersebut memerlukan branch Neon terisolasi dan menghapus data pengujian. Jangan memasukkan URL database produksi sebagai kredensial tes.
-
-## 7. Rollback manual dan batasan
-
-Catat tag image commit terakhir yang sehat dari log Actions. Untuk kembali ke image tersebut, sebagai user `deploy`:
+## Pemeriksaan dan pemulihan
 
 ```sh
 cd /opt/wedding-invitation
-export IMAGE=ghcr.io/OWNER_LOWERCASE/REPO_LOWERCASE:COMMIT_SHA_SEBELUMNYA
-docker compose pull
-docker compose up -d --wait --wait-timeout 150
+cat state.json
 ```
 
-Gunakan full SHA commit, bukan nama branch. Rollback aplikasi tidak mengembalikan schema/data database. Backup sebelum migrasi yang merusak, dan pastikan perubahan schema tetap kompatibel dengan versi sebelumnya. Rollback otomatis tidak disediakan.
+Periksa `/healthz`, login pada root dashboard, preview pada dashboard, tautan tamu UUID pada invitation, upload, serta metadata WhatsApp melalui HTTPS. Pastikan `/api/admin/session` dan `/preview` pada invitation menghasilkan 404. Health backend memeriksa database; health frontend memeriksa web server. Keduanya tidak membuktikan DNS, sertifikat, atau Fingerprint produksi.
 
-Satu container akan berhenti sebentar ketika diganti. Deploy gagal tidak otomatis mengembalikan container sebelumnya. Pantau ruang disk karena image lama tetap disimpan; hapus versi lama secara sengaja setelah masa rollback selesai. GitHub Actions dan penyimpanan image mengikuti kuota akun.
+Simpan pasangan tag sehat sebelum upgrade. Untuk rollback satu service yang kompatibel, gunakan `deploy.py` dengan pasangan/tag yang dipilih. Contoh (ganti SHA dan nama package):
 
-Referensi: [workflow image GitHub](https://docs.github.com/en/actions/tutorials/publish-packages/publish-docker-images), [akses GHCR private](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry), [Compose up dan wait](https://docs.docker.com/reference/cli/docker/compose/up/).
+```sh
+python3 deploy.py --commit COMMIT_SEBELUMNYA --backend ghcr.io/owner/repo-backend:COMMIT_SEBELUMNYA
+```
+
+`--commit` adalah baseline source yang terkait deployment itu. Service yang tidak diberikan tetap menggunakan state saat ini. Jika template atau kontrak antarservice berubah, rollback pasangan keduanya. Jangan mengedit state agar seolah deployment yang gagal telah berhasil.
+
+Tidak ada rollback otomatis container atau database. Deployment yang gagal bisa meninggalkan satu container pada image baru, tetapi state tetap pasangan terakhir yang lolos. Retry mencakup perubahan tersebut lagi. Migration harus kompatibel dengan backend lama selama cutover; migration yang merusak memerlukan backup dan prosedur khusus. Pantau disk image dan hapus versi lama setelah masa rollback.
+
+## Verifikasi lokal
+
+```sh
+npm ci
+npm ci --prefix frontend
+npm run build
+npm test
+npm run test:integration
+# Setelah kedua image dibangun:
+npm run test:deploy
+```
+
+Tes integrasi hanya memakai database disposable (lihat `.env.test.example`). Fingerprint Server API dipanggil melalui HTTP ke fixture Postman simulation lokal, tanpa kredensial produksi. Fixture mengikuti bentuk event dari verifier lama; pencarian mock milik provider di workspace cloud tidak dilakukan. CLI Postman 1.73 mempunyai race saat membuat tabel state pada request pertama yang bersamaan; helper tes menginisialisasinya sebelum pengujian paralel. Log simulation diperiksa untuk memastikan Go benar-benar memanggil `/v4/events/`.
+
+Tes Docker nyata memakai PostgreSQL disposable dan Caddy dengan kedua host: root CMS, login/cookie host-only, API terpisah, link UUID tanpa nama, redirect lama, metadata dan preview diperiksa. Tes juga memeriksa ID container/image service lain tetap sama pada deployment tunggal dan jumlah eksekusi migrasi. Registry pull dilewati dalam smoke test karena image sudah dibangun lokal; autentikasi GHCR/SSH serta cutover VPS perlu diverifikasi saat deployment pertama.

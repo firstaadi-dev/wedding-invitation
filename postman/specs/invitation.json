@@ -2,13 +2,17 @@
   "openapi": "3.0.3",
   "info": {
     "title": "weddinvita API",
-    "version": "2.0.0",
-    "description": "Same-origin multi-tenant API. Admin tenant is derived from the account session; guest tenant from the verified invitation. Account provisioning is migration-only; no public registration endpoint."
+    "version": "2.1.0",
+    "description": "Separate dashboard and invitation hosts. Admin APIs require the dashboard host and Origin; guest APIs require the invitation host and Origin. Cookies remain host-only, HttpOnly, SameSite=Strict and Secure in production. Dashboard preview remains on the dashboard host. New and listed recoverable invitation links use /{invitationId}#{secret}; invitationId is a random tenant UUID, while the fragment secret and Fingerprint verification grant access. Legacy slug links redirect to the UUID without revoking tokens or sessions."
   },
   "servers": [
     {
-      "url": "http://127.0.0.1:5174",
-      "description": "Local development"
+      "url": "https://invitation.domain.id",
+      "description": "Invitation host"
+    },
+    {
+      "url": "http://invitation.localhost:5173",
+      "description": "Local invitation host"
     }
   ],
   "tags": [
@@ -262,7 +266,17 @@
             }
           }
         }
-      }
+      },
+      "servers": [
+        {
+          "url": "https://dashboard.domain.id",
+          "description": "CMS host"
+        },
+        {
+          "url": "http://dashboard.localhost:5173",
+          "description": "Local CMS host"
+        }
+      ]
     },
     "/api/admin/session": {
       "get": {
@@ -379,7 +393,17 @@
             "adminSession": []
           }
         ]
-      }
+      },
+      "servers": [
+        {
+          "url": "https://dashboard.domain.id",
+          "description": "CMS host"
+        },
+        {
+          "url": "http://dashboard.localhost:5173",
+          "description": "Local CMS host"
+        }
+      ]
     },
     "/api/admin/logout": {
       "post": {
@@ -525,7 +549,17 @@
             "description": "Token returned by admin session/login, matching HttpOnly cookie session."
           }
         ]
-      }
+      },
+      "servers": [
+        {
+          "url": "https://dashboard.domain.id",
+          "description": "CMS host"
+        },
+        {
+          "url": "http://dashboard.localhost:5173",
+          "description": "Local CMS host"
+        }
+      ]
     },
     "/api/admin/guests": {
       "get": {
@@ -781,7 +815,17 @@
             "description": "Token returned by admin session/login, matching HttpOnly cookie session."
           }
         ]
-      }
+      },
+      "servers": [
+        {
+          "url": "https://dashboard.domain.id",
+          "description": "CMS host"
+        },
+        {
+          "url": "http://dashboard.localhost:5173",
+          "description": "Local CMS host"
+        }
+      ]
     },
     "/api/admin/guests/{id}": {
       "patch": {
@@ -1067,7 +1111,17 @@
             "description": "Token returned by admin session/login, matching HttpOnly cookie session."
           }
         ]
-      }
+      },
+      "servers": [
+        {
+          "url": "https://dashboard.domain.id",
+          "description": "CMS host"
+        },
+        {
+          "url": "http://dashboard.localhost:5173",
+          "description": "Local CMS host"
+        }
+      ]
     },
     "/api/admin/guests/{id}/link": {
       "post": {
@@ -1215,7 +1269,17 @@
             "description": "Token returned by admin session/login, matching HttpOnly cookie session."
           }
         ]
-      }
+      },
+      "servers": [
+        {
+          "url": "https://dashboard.domain.id",
+          "description": "CMS host"
+        },
+        {
+          "url": "http://dashboard.localhost:5173",
+          "description": "Local CMS host"
+        }
+      ]
     },
     "/api/admin/guests/{id}/devices": {
       "delete": {
@@ -1357,7 +1421,17 @@
             "description": "Token returned by admin session/login, matching HttpOnly cookie session."
           }
         ]
-      }
+      },
+      "servers": [
+        {
+          "url": "https://dashboard.domain.id",
+          "description": "CMS host"
+        },
+        {
+          "url": "http://dashboard.localhost:5173",
+          "description": "Local CMS host"
+        }
+      ]
     },
     "/api/admin/content": {
       "get": {
@@ -1610,13 +1684,23 @@
             "description": "Token returned by admin session/login, matching HttpOnly cookie session."
           }
         ]
-      }
+      },
+      "servers": [
+        {
+          "url": "https://dashboard.domain.id",
+          "description": "CMS host"
+        },
+        {
+          "url": "http://dashboard.localhost:5173",
+          "description": "Local CMS host"
+        }
+      ]
     },
     "/api/admin/media/{slot}": {
       "put": {
         "operationId": "uploadMedia",
         "summary": "Upload/replaces a photo or MP3 music slot",
-        "description": "Raw binary body, no multipart. Photos up to 12 MiB, decoded/re-encoded by Sharp; music MP3 up to 25 MiB with frame validation. Old file removed after committed replacement. The preview slot creates a public 1200\u00d7630 JPEG for link thumbnails; other media remains session-protected. All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
+        "description": "Raw binary body, no multipart. Photos up to 12 MiB, decoded/re-encoded by Sharp; music MP3 up to 25 MiB with frame validation. Old file removed after committed replacement. The preview slot creates a public 1200×630 JPEG for link thumbnails; other media remains session-protected. All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
         "tags": [
           "Admin"
         ],
@@ -1939,7 +2023,17 @@
             "description": "Token returned by admin session/login, matching HttpOnly cookie session."
           }
         ]
-      }
+      },
+      "servers": [
+        {
+          "url": "https://dashboard.domain.id",
+          "description": "CMS host"
+        },
+        {
+          "url": "http://dashboard.localhost:5173",
+          "description": "Local CMS host"
+        }
+      ]
     },
     "/api/access/challenge": {
       "post": {
@@ -2197,7 +2291,7 @@
       "get": {
         "operationId": "invitation",
         "summary": "Read personalized invitation and media",
-        "description": "Development /preview can read demo content; production always requires active guest session or admin session.",
+        "description": "Development /preview can read demo content; production always requires active guest session or admin session. Guest requests use the invitation host; authenticated dashboard previews may use the dashboard host. tenant accepts the public UUID or the legacy slug.",
         "tags": [
           "Guest"
         ],
@@ -2391,7 +2485,7 @@
         ],
         "responses": {
           "200": {
-            "description": "1200\u00d7630 JPEG thumbnail",
+            "description": "1200×630 JPEG thumbnail",
             "content": {
               "image/jpeg": {
                 "schema": {
@@ -2447,7 +2541,7 @@
         ],
         "responses": {
           "200": {
-            "description": "1200\u00d7630 JPEG thumbnail",
+            "description": "1200×630 JPEG thumbnail",
             "content": {
               "image/jpeg": {
                 "schema": {
@@ -2604,7 +2698,7 @@
       "get": {
         "operationId": "listWishes",
         "summary": "Read congratulatory wishes",
-        "description": "Only nonempty wishes from active guests. No attendance, count, guest ID, phone or invitation link. Ten per page ordered by latest update then guest ID. Offset pages may shift when wishes change. Production needs guest or admin cookie; development previews can read.",
+        "description": "Only nonempty wishes from active guests. No attendance, count, guest ID, phone or invitation link. Ten per page ordered by latest update then guest ID. Offset pages may shift when wishes change. Production needs guest or admin cookie; development previews can read. Guest requests use the invitation host; authenticated dashboard previews may use the dashboard host. tenant accepts the public UUID or the legacy slug.",
         "tags": [
           "Guest"
         ],
@@ -2685,7 +2779,7 @@
       "get": {
         "operationId": "invitationPage",
         "summary": "Read tenant invitation landing page",
-        "description": "Public HTML and Open Graph metadata for the slug. The invitation itself requires a matching guest or admin session. The legacy root URL remains valid for Firsta & Talitha.",
+        "description": "Legacy readable slug alias. Redirects to the random UUID path on the invitation host; browsers retain the original secret fragment. Does not grant API access.",
         "parameters": [
           {
             "name": "slug",
@@ -2698,8 +2792,42 @@
           }
         ],
         "responses": {
+          "302": {
+            "description": "Redirect to the UUID path, retaining the query string. Location never contains the secret fragment.",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Relative UUID invitation path."
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown invitation"
+          }
+        }
+      }
+    },
+    "/{invitationId}": {
+      "get": {
+        "operationId": "publicInvitationPage",
+        "summary": "Read invitation by random public UUID",
+        "description": "Public HTML/Open Graph metadata. Private content requires a matching verified guest session. The public UUID alone does not authorize API access.",
+        "parameters": [
+          {
+            "name": "invitationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
           "200": {
-            "description": "HTML landing page",
+            "description": "Gated access page or authenticated invitation HTML",
             "content": {
               "text/html": {
                 "schema": {
@@ -2709,7 +2837,27 @@
             }
           },
           "404": {
-            "description": "Unknown tenant"
+            "description": "Unknown invitation"
+          }
+        }
+      }
+    },
+    "/preview": {
+      "servers": [
+        {
+          "url": "https://dashboard.domain.id"
+        }
+      ],
+      "get": {
+        "operationId": "adminInvitationPreview",
+        "summary": "Preview the signed-in admin invitation on the dashboard host",
+        "description": "Uses the host-only dashboard admin cookie. Relative API and media URLs stay on the dashboard. No cross-host cookie sharing or CORS is required.",
+        "responses": {
+          "200": {
+            "description": "Invitation HTML with admin preview restrictions"
+          },
+          "404": {
+            "description": "No valid admin session"
           }
         }
       }
@@ -2744,7 +2892,7 @@
           "phone": {
             "type": "string",
             "maxLength": 40,
-            "description": "Optional phone number. Accepts 08\u2026, 62\u2026, or +country code, spaces, hyphens and parentheses; saved as 8\u201315 international digits. Empty clears it."
+            "description": "Optional phone number. Accepts 08…, 62…, or +country code, spaces, hyphens and parentheses; saved as 8–15 international digits. Empty clears it."
           }
         },
         "additionalProperties": false,
@@ -2766,7 +2914,7 @@
           "phone": {
             "type": "string",
             "maxLength": 40,
-            "description": "Optional phone number. Accepts 08\u2026, 62\u2026, or +country code, spaces, hyphens and parentheses; saved as 8\u201315 international digits. Empty clears it."
+            "description": "Optional phone number. Accepts 08…, 62…, or +country code, spaces, hyphens and parentheses; saved as 8–15 international digits. Empty clears it."
           }
         },
         "additionalProperties": false
@@ -2802,7 +2950,7 @@
           "link": {
             "type": "string",
             "nullable": true,
-            "description": "Persisted secret invitation URL, visible only to admins. Null for guests created before link storage; existing access remains valid until reissue."
+            "description": "Canonical PUBLIC_ORIGIN/{invitationId}#{secret}, visible only to admins. Legacy stored URLs are returned in this form with the same fragment secret. Null when no valid recoverable secret was stored."
           },
           "response": {
             "type": "object",
@@ -2820,7 +2968,7 @@
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 10,
-                "description": "1\u201310 when attending; exactly 0 otherwise."
+                "description": "1–10 when attending; exactly 0 otherwise."
               },
               "message": {
                 "type": "string",
@@ -2851,7 +2999,7 @@
           },
           "link": {
             "type": "string",
-            "description": "Secret invitation URL, stored for later copying from the authenticated admin guest list."
+            "description": "Canonical invitation-host URL with random tenant UUID path and cryptographic secret fragment. Link reissue revokes old tokens, sessions and devices."
           }
         },
         "additionalProperties": false,
@@ -2891,7 +3039,8 @@
             "additionalProperties": false,
             "required": [
               "email",
-              "tenant"
+              "tenant",
+              "invitationOrigin"
             ],
             "properties": {
               "email": {
@@ -2904,7 +3053,8 @@
                 "required": [
                   "id",
                   "slug",
-                  "name"
+                  "name",
+                  "publicId"
                 ],
                 "properties": {
                   "id": {
@@ -2915,8 +3065,18 @@
                   },
                   "name": {
                     "type": "string"
+                  },
+                  "publicId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Random stable public invitation ID, independent of couple names and the internal tenant slug."
                   }
                 }
+              },
+              "invitationOrigin": {
+                "type": "string",
+                "format": "uri",
+                "description": "Configured invitation origin used to compose shared links; never inferred from the dashboard URL."
               }
             }
           }
@@ -2967,7 +3127,7 @@
           "linkPreviewTitle": {
             "type": "string",
             "maxLength": 120,
-            "description": "Public page and Open Graph title; empty uses Firsta & Talitha \u2014 Undangan."
+            "description": "Public page and Open Graph title; empty uses Firsta & Talitha — Undangan."
           },
           "linkPreviewDescription": {
             "type": "string",
@@ -3033,7 +3193,7 @@
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 10,
-                "description": "1\u201310 when attending; exactly 0 otherwise."
+                "description": "1–10 when attending; exactly 0 otherwise."
               },
               "message": {
                 "type": "string",
@@ -3060,6 +3220,11 @@
           "tenantSlug": {
             "type": "string",
             "description": "Tenant of the authenticated invitation. The browser uses it to guard requests after a cookie changes in another tab."
+          },
+          "invitationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Opaque tenant scope for invitation, wishes and response requests. Legacy tenantSlug remains for old clients."
           }
         },
         "additionalProperties": false,
@@ -3069,7 +3234,8 @@
           "media",
           "response",
           "canRespond",
-          "tenantSlug"
+          "tenantSlug",
+          "invitationId"
         ]
       },
       "Challenge": {
@@ -3144,7 +3310,7 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 10,
-            "description": "1\u201310 when attending; exactly 0 otherwise."
+            "description": "1–10 when attending; exactly 0 otherwise."
           },
           "message": {
             "type": "string",
@@ -3174,7 +3340,7 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 10,
-            "description": "1\u201310 when attending; exactly 0 otherwise."
+            "description": "1–10 when attending; exactly 0 otherwise."
           },
           "message": {
             "type": "string",

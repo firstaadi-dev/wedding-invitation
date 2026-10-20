@@ -1,6 +1,6 @@
 $kind: http-request
 description: Remove media from slot
-url: "{{baseUrl}}/api/admin/media/:slot"
+url: "{{cmsBaseUrl}}/api/admin/media/:slot"
 method: DELETE
 headers:
   - key: X-CSRF-Token

@@ -3,23 +3,27 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --watch server/start.mjs",
-    "start": "node server/start.mjs",
+    "dev": "TEMPLATE_DIR=frontend node scripts/backend.mjs serve",
+    "start": "node scripts/backend.mjs serve",
+    "dev:frontend": "npm run dev --prefix frontend",
     "build": "node scripts/build.mjs",
-    "db:migrate": "node scripts/migrate.mjs",
-    "admin:hash": "node scripts/admin-password.mjs",
-    "test": "node tests/entrance.test.mjs && node --test tests/fingerprint.test.mjs tests/countdown.test.mjs tests/whatsapp.test.mjs tests/admin-data.test.mjs tests/proxy.test.mjs",
-    "test:integration": "node --test tests/api.test.mjs"
+    "db:migrate": "node scripts/backend.mjs migrate",
+    "admin:hash": "node scripts/backend.mjs hash",
+    "test": "node tests/entrance.test.mjs && node --test tests/countdown.test.mjs tests/whatsapp.test.mjs tests/admin-data.test.mjs tests/build.test.mjs && go -C backend test ./... && python3 -m unittest discover -s tests -p \"*_test.py\"",
+    "test:integration": "node --test tests/api.test.mjs",
+    "test:deploy": "python3 tests/compose_smoke.py"
   },
-  "engines": {"node": ">=22"},
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "@neon/config": "^1.9.1",
-    "@neon/env": "^1.6.1",
-    "pg": "^8.23.1",
-    "sharp": "^0.35.5"
+    "@neon/env": "^1.6.1"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "pg": "^8.23.1",
+    "sharp": "^0.35.5"
   }
 }
