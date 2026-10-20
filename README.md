@@ -67,6 +67,8 @@ postman collection run 'postman/collections/Wedding Invitation API' -i 'Health c
 
 ## Hosting
 
+Untuk VPS Ubuntu 24.04 dengan repo GitHub private, lihat [setup GitHub Actions dan deployment Docker](docs/vps-deploy.md). Workflow build/tes berjalan pada pull request dan `main`; deploy VPS baru aktif setelah `VPS_DEPLOY_ENABLED=true` dan repository secrets diisi.
+
 Repository: https://github.com/firstaadi-dev/wedding-invitation
 Render service: `srv-db7335bncjis73fbrlpg`, Docker, Singapore, paket free. `Dockerfile` menjalankan build dan tes unit saat image dibangun, kemudian migrasi dan server saat startup. Bind `0.0.0.0:$PORT`; health `/healthz` menguji database. Tidak membutuhkan persistent disk karena metadata dan media ada di Neon.
 

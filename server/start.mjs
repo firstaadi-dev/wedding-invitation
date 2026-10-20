@@ -6,6 +6,7 @@ const pool = database(process.env.DATABASE_URL);
 const server = createApp(pool,{
   origin:process.env.PUBLIC_ORIGIN || `http://127.0.0.1:${port}`,
   production:process.env.NODE_ENV === 'production',
+  trustProxy:process.env.TRUST_PROXY === '1',
   passwordHash:process.env.ADMIN_PASSWORD_HASH,
   publicKey:process.env.FINGERPRINT_PUBLIC_KEY,
   secretKey:process.env.FINGERPRINT_SECRET_KEY,

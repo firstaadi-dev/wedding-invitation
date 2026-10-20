@@ -85,8 +85,8 @@ export function createApp(pool, config, getEvent = fingerprintEvent) {
       return current;
     }
     async function limited(action, maximum, seconds = 60) {
-      // Render appends the verified client IP; direct local requests use the socket address.
-      const ip = production && process.env.RENDER ? req.headers['x-forwarded-for']?.split(',').at(-1)?.trim() : req.socket.remoteAddress;
+      // Only trust a proxy that overwrites/appends the client IP and blocks direct public access.
+      const ip = (production && (process.env.RENDER || config.trustProxy === true) && req.headers['x-forwarded-for']?.split(',').at(-1)?.trim()) || req.socket.remoteAddress;
       const key = hash(`${action}:${ip || 'unknown'}`);
       const {rows} = await pool.query(`INSERT INTO wedding.rate_limits(key,hits,expires_at) VALUES($1,1,now()+$2*interval '1 second')
         ON CONFLICT(key) DO UPDATE SET hits=CASE WHEN rate_limits.expires_at<now() THEN 1 ELSE rate_limits.hits+1 END,
