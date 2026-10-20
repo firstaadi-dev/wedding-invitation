@@ -46,17 +46,21 @@ func (a *App) content(ctx context.Context, q db, tenant string, admin bool) map[
 	}
 	return map[string]any{"settings": settings, "media": media}
 }
-func (a *App) invitationLink(publicID, token string) string {
-	return a.Config.Origin + "/" + publicID + "#" + token
+func (a *App) invitationLink(code string) string {
+	return a.Config.Origin + "/u/" + code
 }
 func (a *App) guestLink(g map[string]any, publicID string) map[string]any {
 	if g == nil {
 		return nil
 	}
+	if code := storedGuestCode(text(g["link"])); code != "" {
+		g["link"] = a.invitationLink(code)
+		return g
+	}
 	link, err := url.Parse(text(g["link"]))
 	g["link"] = nil
 	if err == nil && match(`^[A-Za-z0-9_-]{43}$`, link.Fragment) {
-		g["link"] = a.invitationLink(publicID, link.Fragment)
+		g["link"] = a.Config.Origin + "/" + publicID + "#" + link.Fragment
 	}
 	return g
 }
@@ -271,8 +275,8 @@ func (a *App) admin(w http.ResponseWriter, r *http.Request) {
 			if !exists {
 				phone = ""
 			}
-			id, token := uuid(), secret()
-			link := a.invitationLink(text(s["public_id"]), token)
+			id, token := uuid(), guestCode()
+			link := a.invitationLink(token)
 			exec(ctx, a.Pool, "INSERT INTO wedding.guests(id,name,phone,token_hash,invitation_link,tenant_id) VALUES($1,$2,$3,$4,$5,$6)", id, name, validPhone(phone), hash(token), link, tenant)
 			jsonResponse(w, 201, map[string]any{"guest": a.guest(ctx, a.Pool, id, tenant, text(s["public_id"])), "link": link})
 			return
@@ -322,9 +326,9 @@ func (a *App) admin(w http.ResponseWriter, r *http.Request) {
 				return map[string]bool{"ok": true}
 			}
 			if action == "link" && method == "POST" {
-				token := secret()
+				token := guestCode()
 				revoke(ctx, q, id, true)
-				link := a.invitationLink(text(s["public_id"]), token)
+				link := a.invitationLink(token)
 				exec(ctx, q, "UPDATE wedding.guests SET token_hash=$2,invitation_link=$3 WHERE id=$1", id, hash(token), link)
 				return map[string]any{"guest": a.guest(ctx, q, id, tenant, text(s["public_id"])), "link": link}
 			}

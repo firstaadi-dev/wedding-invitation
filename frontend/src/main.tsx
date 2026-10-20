@@ -1580,7 +1580,7 @@ function SettingsForm({
   const previewDescription =
     values.linkPreviewDescription?.trim() ||
     "22 November 2026 · Arjuna Ballroom Alam Indah Resto.";
-  const exampleLink = `${account.invitationOrigin}/${account.tenant.publicId}#contoh-tautan`;
+  const exampleLink = `${account.invitationOrigin}/u/AbCdEfGhIjKlMnOpQrStUvWxYz0`;
   return (
     <form
       id={kind === "messages" ? "whatsapp-settings" : "settings"}

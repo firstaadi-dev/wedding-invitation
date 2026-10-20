@@ -18,7 +18,7 @@ func (a *App) challenge(w http.ResponseWriter, r *http.Request) {
 	_, v := body(w, r, 8192, false)
 	only(v, "token")
 	token, ok := v["token"].(string)
-	if !ok || !match(`^[A-Za-z0-9_-]{43}$`, token) {
+	if !ok || !match(`^(?:[A-Za-z0-9_-]{27}|[A-Za-z0-9_-]{43})$`, token) {
 		fail(404, "invalid_link", "Tautan undangan tidak ditemukan atau sudah dinonaktifkan.")
 	}
 	id, cookie := secret(), secret()

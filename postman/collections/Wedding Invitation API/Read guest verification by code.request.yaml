@@ -1,0 +1,30 @@
+$kind: http-request
+description: Secret-code landing page returns public event metadata without identifying the guest or consuming a device slot.
+url: "{{baseUrl}}/u/:guestCode"
+method: GET
+headers:
+  Accept: text/html
+pathVariables:
+  - key: guestCode
+    value: "{{guestCode}}"
+settings: {}
+order: 6000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Code landing page is gated', () => {
+        pm.response.to.have.status(200);
+        pm.expect(pm.response.text()).to.include('access-message');
+        pm.expect(pm.response.text()).not.to.include('id="response-form"');
+      });
+      pm.test('Code is absent from HTML and canonical metadata', () => {
+        pm.expect(pm.response.text()).not.to.include(pm.variables.get('guestCode'));
+        pm.expect(pm.response.text()).to.include('property="og:url" content="'+pm.variables.get('origin')+'/'+pm.variables.get('invitationId')+'"');
+      });
+      pm.test('Code landing page is private to caches and search engines', () => {
+        pm.expect(pm.response.headers.get('Cache-Control')).to.eql('no-store');
+        pm.expect(pm.response.headers.get('Referrer-Policy')).to.eql('no-referrer');
+        pm.expect(pm.response.headers.get('X-Robots-Tag')).to.include('noindex');
+        pm.expect(pm.response.headers.has('Set-Cookie')).to.eql(false);
+      });

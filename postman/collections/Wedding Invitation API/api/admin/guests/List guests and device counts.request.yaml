@@ -19,7 +19,7 @@ scripts:
         for (const guest of guests) {
           pm.expect(guest).to.have.property('phone');
           pm.expect(guest).to.have.property('link');
-          if (guest.link !== null) pm.expect(guest.link).to.match(/^https?:\/\/.+\/#[-_A-Za-z0-9]{43}$/);
+          if (guest.link !== null) pm.expect(guest.link).to.match(/^https?:\/\/.+\/(?:u\/[-_A-Za-z0-9]{27}|[^#]*#[-_A-Za-z0-9]{43})$/);
         }
       });
       if (pm.collectionVariables.get('deliveryGuestId')) {

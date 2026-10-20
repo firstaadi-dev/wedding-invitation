@@ -5,7 +5,7 @@ import {once} from 'node:events';
 import {existsSync,readFileSync} from 'node:fs';
 import sharp from 'sharp';
 import {spawn} from 'node:child_process';
-import {database,migrate,provisionAccount} from './support/db.mjs';
+import {database,migrate,provisionAccount,command} from './support/db.mjs';
 import {startBackend} from './support/server.mjs';
 if (existsSync('.env.test.local')) process.loadEnvFile('.env.test.local');
 if (!process.env.TEST_DATABASE_URL || !process.env.TEST_DATABASE_URL_UNPOOLED) throw new Error('Set TEST_DATABASE_URL and TEST_DATABASE_URL_UNPOOLED for an isolated test branch. Never use production.');
@@ -142,9 +142,9 @@ test('Neon-backed CMS and guest access end to end',async t => {
     });
     await t.test('create guest secret link, persist and rename',async () => {
       const created = await adminRequest('/api/admin/guests',{method:'POST',data:{name:'Keluarga Uji <script>',phone:'0812-3456 7890'}});
-      assert.equal(created.response.status,201);guest=created.value.guest;token=created.value.link.split('#')[1];
-      assert.equal(token.length,43);
-      assert.equal(created.value.link,`${origin}/${invitationId}#${token}`);
+      assert.equal(created.response.status,201);guest=created.value.guest;token=new URL(created.value.link).pathname.slice(3);
+      assert.equal(token.length,27);
+      assert.equal(created.value.link,`${origin}/u/${token}`);
       assert.doesNotMatch(created.value.link,/firsta|talitha|\/i\//);
       const landing=await request(`/${invitationId}`);assert.equal(landing.response.status,200);assert.match(landing.value,/access-message/);
       assert.ok(landing.value.includes(`property="og:url" content="${origin}/${invitationId}"`));
@@ -244,7 +244,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
       const own = (await request('/api/invitation',{jar:guestBrowser})).value.response;
       assert.equal(own.message,'Doa terbaik untuk kalian.');
       const other = await adminRequest('/api/admin/guests',{method:'POST',data:{name:'Undangan lain'}});
-      const browser = await verify(await challenge(other.value.link.split('#')[1]),'other-visitor');
+      const browser = await verify(await challenge(new URL(other.value.link).pathname.slice(3)),'other-visitor');
       const data = {attendance:'not_attending',guestCount:0,message:'Ucapan tamu lain'};
       assert.equal((await request('/api/response',{method:'PUT',data:{...data,guestId:guest.id},jar:browser.jar})).response.status,400);
       assert.equal((await request('/api/response',{method:'PUT',data,jar:browser.jar})).response.status,200);
@@ -254,9 +254,32 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal((await pool.query("SELECT count(*) FROM wedding.responses WHERE guest_id LIKE 'wish-fixture-%'")).rows[0].count,'0');
     });
     await t.test('Postman collection verifies the local Neon-backed response endpoints',async () => {
-      const child = spawn('postman',['collection','run','postman/collections/Wedding Invitation API','-i','Save attendance and a congratulatory wish','-i','Read personalized invitation and media','-i','Read congratulatory wishes','--env-var',`baseUrl=${base}`,'--env-var',`origin=${origin}`,'--env-var',`guestCookie=wedding_guest=${guestBrowser.wedding_guest}`,'--no-report-events'],{stdio:['ignore','pipe','pipe']});
+      const child = spawn('postman',['collection','run','postman/collections/Wedding Invitation API','-i','Save attendance and a congratulatory wish','-i','Read personalized invitation and media','-i','Read congratulatory wishes','-i','Read guest verification by code','--env-var',`baseUrl=${base}`,'--env-var',`origin=${origin}`,'--env-var',`guestCode=${token}`,'--env-var',`invitationId=${invitationId}`,'--env-var',`guestCookie=wedding_guest=${guestBrowser.wedding_guest}`,'--no-report-events'],{stdio:['ignore','pipe','pipe']});
       let output = '';child.stdout.on('data',chunk => {output += chunk;});child.stderr.on('data',chunk => {output += chunk;});
       const [code] = await once(child,'close');console.log(output);assert.equal(code,0,output);
+    });
+    await t.test('code landing stays gated with an existing session and never allocates a device',async()=>{
+      const counts=async()=> (await pool.query('SELECT (SELECT count(*) FROM wedding.devices) AS devices,(SELECT count(*) FROM wedding.sessions) AS sessions,(SELECT count(*) FROM wedding.challenges) AS challenges')).rows;
+      const before=await counts();
+      for(const jar of [{},admin,guestBrowser]) {
+        const page=await request('/u/'+token,{jar});
+        assert.equal(page.response.status,200);assert.match(page.value,/access-message/);assert.doesNotMatch(page.value,/response-form|Keluarga Uji/);
+        assert.equal(page.value.includes(token),false);
+        assert.ok(page.value.includes(`property="og:url" content="${origin}/${invitationId}"`));
+        assert.ok(page.value.includes(`name="invitation-path" content="/${invitationId}"`));
+        assert.equal(page.response.headers.get('referrer-policy'),'no-referrer');
+        assert.match(page.response.headers.get('cache-control'),/no-store/);
+        assert.match(page.response.headers.get('x-robots-tag'),/noindex/);
+        assert.equal(page.response.headers.getSetCookie().length,0);
+      }
+      const head=await request('/u/'+token,{method:'HEAD'});assert.equal(head.response.status,200);assert.equal(head.value,'');
+      assert.match((await request(`/${invitationId}?access=1`,{jar:guestBrowser})).value,/access-message/);
+      assert.deepEqual(await counts(),before);
+      for(const path of ['/u/short','/u/'+'z'.repeat(27),'/u/'+token+'/extra'])assert.equal((await request(path)).response.status,404);
+      const key=createHash('sha256').update('link:127.0.0.1').digest('hex');
+      await pool.query("UPDATE wedding.rate_limits SET hits=120,expires_at=now()+interval '1 minute' WHERE key=$1",[key]);
+      assert.equal((await request('/u/'+token)).response.status,429);
+      await pool.query('DELETE FROM wedding.rate_limits WHERE key=$1',[key]);
     });
     await t.test('response submissions are rate limited',async () => {
       const key = createHash('sha256').update('response:127.0.0.1').digest('hex');
@@ -396,11 +419,14 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal((await adminRequest('/api/admin/guests')).value[0].name,'Keluarga Uji');
       assert.equal((await secondRequest('/api/admin/guests',{method:'POST',data:{name:'Bad',tenant_id:'firsta-talitha'}})).response.status,400);
       const created = await secondRequest('/api/admin/guests',{method:'POST',data:{name:'Second Tenant Guest'}});
-      assert.equal(created.response.status,201);assert.match(created.value.link,new RegExp('/'+login.value.account.tenant.publicId+'#'));
+      assert.equal(created.response.status,201);assert.match(created.value.link,/\/u\/[A-Za-z0-9_-]{27}$/);
       assert.equal((await adminRequest('/api/admin/guests')).value.length,1);
       const original = (await adminRequest('/api/admin/content')).value;
       const saved = await secondRequest('/api/admin/content',{method:'PUT',data:{ceremonyTitle:'Second Ceremony',linkPreviewTitle:'Tenant Two Preview'}});
       assert.equal(saved.value.settings.ceremonyTitle,'Second Ceremony');assert.deepEqual(saved.value.media,{});
+      const coded=await request(new URL(created.value.link).pathname,{jar:guestBrowser});
+      assert.equal(coded.response.status,200);assert.match(coded.value,/<title>Tenant Two Preview<\/title>/);
+      assert.match(coded.value,/access-message/);assert.doesNotMatch(coded.value,/response-form|Second Tenant Guest|Keluarga Uji/);
       assert.deepEqual((await adminRequest('/api/admin/content')).value,original);
       const privatePath = original.media.groom;
       assert.equal((await request(privatePath,{jar:second})).response.status,404);
@@ -410,7 +436,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.notEqual(secondPath,privatePath);assert.equal((await request(secondPath,{jar:admin})).response.status,404);
       assert.equal((await secondRequest('/api/admin/media/groom',{method:'DELETE'})).response.status,200);
       assert.equal((await adminRequest('/api/admin/content')).value.media.groom,privatePath);
-      const secondGuest = await verify(await challenge(created.value.link.split('#')[1]),'tenant-two-visitor');
+      const secondGuest = await verify(await challenge(new URL(created.value.link).pathname.slice(3)),'tenant-two-visitor');
       assert.equal(secondGuest.response.status,200);
       assert.equal((await request(privatePath,{jar:secondGuest.jar})).response.status,404);
       assert.deepEqual((await request('/api/wishes',{jar:secondGuest.jar})).value.wishes,[]);
@@ -455,11 +481,11 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal((await request('/api/wishes',{jar:admin})).value.wishes.length,0);
       await adminRequest(`/api/admin/guests/${guest.id}`,{method:'PATCH',data:{active:true}});
       const changed = await adminRequest(`/api/admin/guests/${guest.id}/link`,{method:'POST',data:{}});
-      assert.equal(changed.response.status,200);assert.notEqual(changed.value.link.split('#')[1],token);
+      assert.equal(changed.response.status,200);assert.notEqual(new URL(changed.value.link).pathname.slice(3),token);
       assert.equal(changed.value.guest.link,changed.value.link);
       assert.equal((await adminRequest('/api/admin/guests')).value[0].link,changed.value.link);
       assert.equal((await request('/api/access/challenge',{method:'POST',data:{token}})).response.status,404);
-      const c = await challenge(changed.value.link.split('#')[1]);const result=await verify(c,'visitor-new');assert.equal(result.response.status,200);
+      const c = await challenge(new URL(changed.value.link).pathname.slice(3));const result=await verify(c,'visitor-new');assert.equal(result.response.status,200);
       await adminRequest(`/api/admin/guests/${guest.id}`,{method:'DELETE'});
       assert.equal((await request('/api/invitation',{jar:result.jar})).response.status,401);
       assert.equal((await pool.query('SELECT count(*) FROM wedding.devices')).rows[0].count,'0');
@@ -474,6 +500,87 @@ test('Neon-backed CMS and guest access end to end',async t => {
     await pool.query('TRUNCATE wedding.guests,wedding.sessions,wedding.media,wedding.challenges,wedding.used_events,wedding.rate_limits CASCADE');
     await pool.query("UPDATE wedding.settings SET value='{}' WHERE tenant_id='firsta-talitha'");
     await pool.query("DELETE FROM wedding.settings WHERE tenant_id='tenant-two'; DELETE FROM wedding.tenants WHERE id='tenant-two'; DELETE FROM wedding.accounts WHERE email='tenant-two@example.com'");
+    await pool.end();
+  }
+});
+
+test('explicit all-account cutover is atomic, preserves content, resets guest access and is idempotent',async()=>{
+  const pool=database(process.env.TEST_DATABASE_URL_UNPOOLED);
+  const origin='https://invitation.example';
+  const hash=value=>createHash('sha256').update(value).digest('hex');
+  const secret=()=>randomBytes(32).toString('base64url');
+  const env={DATABASE_URL_UNPOOLED:process.env.TEST_DATABASE_URL_UNPOOLED,PUBLIC_ORIGIN:origin};
+  const oldToken=secret(),oldSession=secret(),oldChallenge=secret(),oldCookie=secret(),newCode=randomBytes(20).toString('base64url');
+  let backend;
+  // Snapshot every relevant table, excluding only unrelated rate-limit counters.
+  async function snapshot(){
+    const result={};
+    for(const table of ['accounts','tenants','guests','sessions','challenges','devices','responses','settings','media'])
+      result[table]=(await pool.query(`SELECT row_to_json(t) AS value FROM wedding.${table} t ORDER BY row_to_json(t)::text`)).rows;
+    return result;
+  }
+  try {
+    await provisionAccount(null,{email:'cutover@example.com',slug:'cutover-two',name:'Cutover Two'},`${'a'.repeat(32)}:${'b'.repeat(128)}`);
+    for(const [id,tenant,active,token,link] of [
+      ['cut-a','firsta-talitha',1,oldToken,`${origin}/#${oldToken}`],
+      ['cut-b','firsta-talitha',0,secret(),null],
+      ['cut-c','cutover-two',1,secret(),'https://old.example/i/cutover-two#old'],
+      ['cut-new','firsta-talitha',1,newCode,`${origin}/u/${newCode}`],
+    ]) {
+      await pool.query('INSERT INTO wedding.guests(id,tenant_id,name,active,token_hash,invitation_link,phone) VALUES($1,$2,$1,$3,$4,$5,$6)',[id,tenant,active,hash(token),link,'6281234567890']);
+      await pool.query('INSERT INTO wedding.devices(guest_id,visitor_hash) VALUES($1,$2)',[id,hash(id)]);
+      await pool.query("INSERT INTO wedding.sessions(token_hash,guest_id,version,expires_at) VALUES($1,$2,1,now()+interval '1 day')",[hash(id==='cut-a'?oldSession:secret()),id]);
+      await pool.query("INSERT INTO wedding.challenges(id,cookie_hash,guest_id,version,expires_at) VALUES($1,$2,$3,1,now()+interval '5 minutes')",[id==='cut-a'?oldChallenge:secret(),hash(oldCookie),id]);
+      await pool.query("INSERT INTO wedding.responses(guest_id,attendance,guest_count,message) VALUES($1,'attending',2,'Preserve my wish')",[id]);
+    }
+    await pool.query("INSERT INTO wedding.sessions(token_hash,account_id,tenant_id,csrf,expires_at) VALUES('cut-admin','firsta','firsta-talitha','csrf',now()+interval '1 day')");
+    await pool.query("UPDATE wedding.settings SET value=$1 WHERE tenant_id='cutover-two'",[{partnerOneName:'Keep Name',linkPreviewTitle:'Cutover Two Preview'}]);
+    await pool.query("INSERT INTO wedding.media(tenant_id,slot,id,mime,data) VALUES('cutover-two','groom','cut-media','image/webp',$1)",[Buffer.from('preserve media')]);
+    const before=await snapshot();
+    const expected=[{tenant:'cutover-two',count:1},{tenant:'firsta-talitha',count:2}];
+    assert.deepEqual(JSON.parse(await command(['rotate-links'],env)),{applied:false,tenants:expected});
+    assert.deepEqual(await snapshot(),before);
+    // Fail after another account has already changed, proving transaction rollback.
+    await pool.query("CREATE FUNCTION wedding.fail_cutover() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.id='cut-b' THEN RAISE EXCEPTION 'fixture cutover failure'; END IF; RETURN NEW; END $$; CREATE TRIGGER fail_cutover BEFORE UPDATE ON wedding.guests FOR EACH ROW EXECUTE FUNCTION wedding.fail_cutover()");
+    await assert.rejects(command(['rotate-links','--apply'],env),/fixture cutover failure/);
+    assert.deepEqual(await snapshot(),before);
+    await pool.query('DROP TRIGGER fail_cutover ON wedding.guests; DROP FUNCTION wedding.fail_cutover()');
+    const output=await command(['rotate-links','--apply'],env);
+    assert.deepEqual(JSON.parse(output),{applied:true,tenants:expected});
+    const after=await snapshot();
+    for(const table of ['accounts','tenants','responses','settings','media'])assert.deepEqual(after[table],before[table]);
+    const rotated=(await pool.query("SELECT * FROM wedding.guests WHERE id LIKE 'cut-%' AND id<>'cut-new' ORDER BY id")).rows;
+    const codes=rotated.map(g=>new URL(g.invitation_link).pathname.slice(3));
+    assert.equal(new Set(codes).size,3);
+    for(const [i,g] of rotated.entries()) {
+      assert.match(codes[i],/^[A-Za-z0-9_-]{27}$/);assert.equal(g.token_hash,hash(codes[i]));assert.equal(g.version,2);
+      assert.equal(g.name,g.id);assert.equal(g.phone,'6281234567890');assert.equal(g.active,g.id==='cut-b'?0:1);
+      assert.equal(output.includes(codes[i]),false);
+      for(const table of ['sessions','devices','challenges'])assert.equal((await pool.query(`SELECT count(*) FROM wedding.${table} WHERE guest_id=$1`,[g.id])).rows[0].count,'0');
+    }
+    assert.deepEqual(after.guests.filter(g=>g.value.id==='cut-new'),before.guests.filter(g=>g.value.id==='cut-new'));
+    for(const table of ['sessions','devices','challenges'])assert.deepEqual(after[table],before[table].filter(g=>g.value.guest_id===null||g.value.guest_id==='cut-new'));
+    assert.deepEqual(JSON.parse(await command(['rotate-links','--apply'],env)),{applied:true,tenants:[]});
+    assert.deepEqual(await snapshot(),after);
+    backend=await startBackend({origin,cmsOrigin:'https://dashboard.example',endpoint:'https://validator.firsta.my.id'});
+    const request=(path,data,cookie)=>fetch(backend.base+path,{method:data?'POST':'GET',headers:{Origin:origin,...(data?{'Content-Type':'application/json'}:{}),...(cookie?{Cookie:cookie}:{})},body:data?JSON.stringify(data):undefined});
+    assert.equal((await request('/api/access/challenge',{token:oldToken})).status,404);
+    assert.equal((await request('/api/invitation',null,'wedding_guest='+oldSession)).status,401);
+    assert.equal((await request('/api/access/verify',{challenge:oldChallenge,eventId:'old'},'wedding_challenge='+oldCookie)).status,409);
+    assert.equal((await request('/u/'+codes[1])).status,404);
+    const publicId=(await pool.query("SELECT public_id FROM wedding.tenants WHERE id='cutover-two'")).rows[0].public_id;
+    const page=await request('/u/'+codes[2]);assert.equal(page.status,200);assert.ok((await page.text()).includes(`${origin}/${publicId}`));
+    const challenge=await request('/api/access/challenge',{token:codes[0]});assert.equal(challenge.status,200);
+    const c=await challenge.json();
+    await backend.events.set('cutover-event',{event_id:'cutover-event',linked_id:c.challenge,url:origin+'/'+publicId,timestamp:Date.now(),identification:{visitor_id:'fresh-device'}});
+    assert.equal((await request('/api/access/verify',{challenge:c.challenge,eventId:'cutover-event'},challenge.headers.getSetCookie()[0].split(';')[0])).status,200);
+    assert.equal((await pool.query("SELECT count(*) FROM wedding.devices WHERE guest_id='cut-a'")).rows[0].count,'1');
+    await pool.query("UPDATE wedding.accounts SET active=false WHERE email='cutover@example.com'");
+    assert.equal((await request('/u/'+codes[2])).status,404);
+  } finally {
+    if(backend)await backend.server.close();
+    await pool.query('DROP TRIGGER IF EXISTS fail_cutover ON wedding.guests; DROP FUNCTION IF EXISTS wedding.fail_cutover()');
+    await pool.query("DELETE FROM wedding.guests WHERE id LIKE 'cut-%'; DELETE FROM wedding.sessions WHERE token_hash='cut-admin'; DELETE FROM wedding.media WHERE tenant_id='cutover-two'; DELETE FROM wedding.settings WHERE tenant_id='cutover-two'; DELETE FROM wedding.tenants WHERE id='cutover-two'; DELETE FROM wedding.accounts WHERE email='cutover@example.com'");
     await pool.end();
   }
 });

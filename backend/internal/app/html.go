@@ -29,7 +29,19 @@ func (a *App) html(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	landing := regexp.MustCompile(`^/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})$`).FindStringSubmatch(path)
-	if landing != nil {
+	coded := strings.HasPrefix(path, "/u/")
+	if coded {
+		w.Header().Set("X-Robots-Tag", "noindex, nofollow")
+		if !match(`^/u/[A-Za-z0-9_-]{27}$`, path) {
+			fail(404, "invalid_link", "Tautan undangan tidak ditemukan atau sudah dinonaktifkan.")
+		}
+		a.limited(w, r, "link", 120, 60)
+		g := row(r.Context(), a.Pool, `SELECT g.tenant_id FROM wedding.guests g JOIN wedding.tenants t ON t.id=g.tenant_id JOIN wedding.accounts a ON a.id=t.owner_id WHERE g.token_hash=$1 AND g.active=1 AND a.active`, hash(path[3:]))
+		if g == nil {
+			fail(404, "invalid_link", "Tautan undangan tidak ditemukan atau sudah dinonaktifkan.")
+		}
+		tenant, filename = text(g["tenant_id"]), "access.html"
+	} else if landing != nil {
 		t := row(r.Context(), a.Pool, "SELECT id FROM wedding.tenants WHERE public_id=$1::uuid", landing[1])
 		if t == nil {
 			fail(404, "not_found", "Undangan tidak ditemukan.")
@@ -95,6 +107,10 @@ func (a *App) html(w http.ResponseWriter, r *http.Request) {
 <meta property="og:description" content="%s">
 <meta property="og:type" content="website">
 <meta property="og:url" content="%s/%s">`, title, description, title, description, escapeHTML(a.Config.Origin), text(s["public_id"]))
+	if coded {
+		metadata += fmt.Sprintf(`
+<meta name="invitation-path" content="/%s">`, text(s["public_id"]))
+	}
 	if id := text(s["previewId"]); id != "" {
 		metadata += fmt.Sprintf(`
 <meta property="og:image" content="%s/preview-image/%s">

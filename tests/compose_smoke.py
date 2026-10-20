@@ -97,7 +97,10 @@ services:
         assert status==201, (status,body)
         link=json.loads(body)['link']
         public_id=account['account']['tenant']['publicId']
-        assert link.startswith('https://invitation.example/'+public_id+'#'), link
+        assert link.startswith('https://invitation.example/u/') and len(link.rsplit('/',1)[1])==27, link
+        status,headers,html=request('invitation.example','/u/'+link.rsplit('/',1)[1])
+        assert status==200 and 'access-message' in html and 'response-form' not in html, 'Guest code bypassed verification'
+        assert headers['Referrer-Policy']=='no-referrer' and headers['X-Robots-Tag']=='noindex, nofollow'
         status,_,html=request('invitation.example','/'+public_id)
         assert status==200 and 'content="https://invitation.example/'+public_id+'"' in html, 'Opaque URL metadata missing'
         status,headers,_=request('invitation.example','/i/firsta-talitha')
@@ -119,6 +122,12 @@ services:
         assert state['frontend_image']==images['frontend','b'*40]
         assert state['backend_image']==images['backend','c'*40]
         print('PASS: real frontend-only and backend-only deployments preserve the other container and image; migrations run only with backend.')
+        compose('stop','backend')
+        code='a'*27
+        assert request('invitation.example','/u/'+code,headers={'Referer':'https://invitation.example/u/'+code})[0]==502
+        logs=compose('logs','--no-color','gateway')
+        assert '/u/[redacted]' in logs and code not in logs, 'Guest code leaked into proxy error logs'
+        print('PASS: proxy errors redact guest codes and omit credential-bearing Referer headers.')
     finally:
         compose('down','-v','--remove-orphans')
         for image in images.values():

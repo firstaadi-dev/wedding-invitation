@@ -127,3 +127,27 @@ func TestStoredLinksUseOpaqueInvitationURLWithoutRotatingSecret(t *testing.T) {
 		}
 	}
 }
+
+func TestGuestCodes(t *testing.T) {
+	a, _ := New(nil, Config{Origin: "https://invitation.example"})
+	seen := map[string]bool{}
+	for i := 0; i < 100; i++ {
+		code := guestCode()
+		if !match(`^[A-Za-z0-9_-]{27}$`, code) || seen[code] {
+			t.Fatal("invalid or duplicate guest code")
+		}
+		seen[code] = true
+		if storedGuestCode("https://old.example/u/"+code) != code || a.guestLink(map[string]any{"link": "https://old.example/u/" + code}, "unused")["link"] != a.Config.Origin+"/u/"+code {
+			t.Fatal("stored code did not survive origin normalization")
+		}
+	}
+	code := strings.Repeat("a", 27)
+	for _, raw := range []string{"/u/" + code, "https://example/u/short", "https://example/u/" + code + "#fragment", "https://example/u/" + code + "?query", "https://user@example/u/" + code, "ftp://example/u/" + code} {
+		if storedGuestCode(raw) != "" {
+			t.Fatalf("invalid stored link accepted: %s", raw)
+		}
+	}
+	if len(secret()) != 43 {
+		t.Fatal("session/challenge secrets must retain 256 bits")
+	}
+}

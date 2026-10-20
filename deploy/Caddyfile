@@ -1,3 +1,17 @@
+{
+    # Redact credentials from runtime/proxy errors as well as access-log fields.
+    log default {
+        format filter {
+            wrap json
+            fields {
+                request>uri regexp "/u/[^/?[:space:]]+" "/u/[redacted]"
+                uri regexp "/u/[^/?[:space:]]+" "/u/[redacted]"
+                msg regexp "/u/[^/?[:space:]]+" "/u/[redacted]"
+                request>headers>Referer delete
+            }
+        }
+    }
+}
 (backend) {
     reverse_proxy 127.0.0.1:5174 {
         header_up X-Forwarded-For {remote_host}
@@ -22,6 +36,7 @@
     }
 }
 {$INVITATION_DOMAIN} {
+    log_skip /u/*
     @cms path /admin /admin/* /api/admin/* /preview
     handle @cms {
         respond "Not found" 404

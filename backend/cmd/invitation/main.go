@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -32,6 +33,25 @@ func run() error {
 		command = os.Args[1]
 	}
 	switch command {
+	case "rotate-links":
+		flags := flag.NewFlagSet("rotate-links", flag.ContinueOnError)
+		apply := flags.Bool("apply", false, "Replace legacy links across all accounts and revoke guest sessions/devices")
+		if err := flags.Parse(os.Args[2:]); err != nil {
+			return err
+		}
+		if flags.NArg() != 0 {
+			return fmt.Errorf("rotate-links accepts only --apply; default is dry-run")
+		}
+		pool, err := app.Database(ctx, os.Getenv("DATABASE_URL_UNPOOLED"))
+		if err != nil {
+			return err
+		}
+		defer pool.Close()
+		counts, err := app.RotateLegacyLinks(ctx, pool, os.Getenv("PUBLIC_ORIGIN"), *apply)
+		if err != nil {
+			return err
+		}
+		return json.NewEncoder(os.Stdout).Encode(map[string]any{"applied": *apply, "tenants": counts})
 	case "health":
 		client := &http.Client{Timeout: 15 * time.Second}
 		res, err := client.Get("http://127.0.0.1:" + env("PORT", "5174") + "/healthz")

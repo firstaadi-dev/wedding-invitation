@@ -3,7 +3,7 @@
   "info": {
     "title": "weddinvita API",
     "version": "2.1.0",
-    "description": "Separate dashboard and invitation hosts. Admin APIs require the dashboard host and Origin; guest APIs require the invitation host and Origin. Cookies remain host-only, HttpOnly, SameSite=Strict and Secure in production. Dashboard preview remains on the dashboard host. New and listed recoverable invitation links use /{invitationId}#{secret}; invitationId is a random tenant UUID, while the fragment secret and Fingerprint verification grant access. Legacy slug links redirect to the UUID without revoking tokens or sessions."
+    "description": "Separate dashboard and invitation hosts. Admin APIs require the dashboard host and Origin; guest APIs require the invitation host and Origin. Cookies remain host-only, HttpOnly, SameSite=Strict and Secure in production. Dashboard preview remains on the dashboard host. New guest links use /u/{code}, a 27-character random bearer credential. GET/HEAD only return gated HTML and public event metadata; Fingerprint verification grants access. The stable random tenant UUID remains the canonical public event URL. Legacy fragment links remain compatible until the explicit all-account credential cutover."
   },
   "servers": [
     {
@@ -2861,6 +2861,151 @@
           }
         }
       }
+    },
+    "/u/{code}": {
+      "get": {
+        "operationId": "readGuestCodePage",
+        "summary": "Read guest verification page by secret code",
+        "description": "Reusable 27-character random guest code. Resolves only active guests and account owners. Returns gated HTML and public event metadata; no guest identity, session or device allocation. Canonical Open Graph URL excludes the code. no-store, no-referrer and noindex apply.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{27}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Gated verification HTML with public event metadata",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              },
+              "Referrer-Policy": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-referrer"
+                  ]
+                }
+              },
+              "X-Robots-Tag": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "noindex, nofollow"
+                  ]
+                }
+              }
+            },
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invalid, inactive or revoked code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many lookup attempts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "head": {
+        "operationId": "headGuestCodePage",
+        "summary": "Read guest verification headers by secret code",
+        "description": "Reusable 27-character random guest code. Resolves only active guests and account owners. Returns the same headers as GET without a response body; no guest identity, session or device allocation. Canonical Open Graph URL excludes the code. no-store, no-referrer and noindex apply.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{27}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Verification page headers without a response body",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              },
+              "Referrer-Policy": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-referrer"
+                  ]
+                }
+              },
+              "X-Robots-Tag": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "noindex, nofollow"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invalid, inactive or revoked code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many lookup attempts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2950,7 +3095,7 @@
           "link": {
             "type": "string",
             "nullable": true,
-            "description": "Canonical PUBLIC_ORIGIN/{invitationId}#{secret}, visible only to admins. Legacy stored URLs are returned in this form with the same fragment secret. Null when no valid recoverable secret was stored."
+            "description": "PUBLIC_ORIGIN/u/{code}, visible only to admins. Recoverable legacy links retain /{invitationId}#{secret} during rollout. Null when no valid recoverable credential was stored."
           },
           "response": {
             "type": "object",
@@ -2999,7 +3144,7 @@
           },
           "link": {
             "type": "string",
-            "description": "Canonical invitation-host URL with random tenant UUID path and cryptographic secret fragment. Link reissue revokes old tokens, sessions and devices."
+            "description": "Invitation-host /u/{code} URL containing a cryptographically random 27-character code. Reissue revokes the old code, sessions and devices; legacy links remain readable until the explicit cutover."
           }
         },
         "additionalProperties": false,
@@ -3351,7 +3496,8 @@
         "properties": {
           "token": {
             "type": "string",
-            "pattern": "^[A-Za-z0-9_-]{43}$"
+            "pattern": "^(?:[A-Za-z0-9_-]{27}|[A-Za-z0-9_-]{43})$",
+            "description": "New guest code or legacy secret during cutover. Rotated legacy secrets are rejected by hash lookup."
           }
         },
         "additionalProperties": false,

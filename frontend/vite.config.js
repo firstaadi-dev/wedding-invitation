@@ -43,6 +43,7 @@ export default defineConfig(({mode})=>{
         "/preview-image",
         "/healthz",
         "/i/",
+        "/u/",
         "^/[a-f0-9-]{36}(?:[?].*)?$",
         "/preview",
       ].map((path) => [path, "http://127.0.0.1:5174"]),
