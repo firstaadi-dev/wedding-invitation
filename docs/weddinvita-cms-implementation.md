@@ -35,6 +35,14 @@ Fixture callback dibuat sementara dari source komponen aktual, tanpa server API 
 
 ## Batas pemeriksaan
 
-Penyimpanan/unggah server tidak dijalankan ulang secara menyeluruh; interaksi mutasi diperiksa lewat callback lokal untuk menghindari perubahan data asli. Tidak mengirim WhatsApp, menyalin tautan pribadi, atau mengunggah media contoh ke server. Tidak menjalankan suite backend/deploy. Pemeriksaan visual dilakukan pada ukuran yang disebutkan, bukan seluruh perangkat.
+Pada pemeriksaan UI awal, penyimpanan/unggah server tidak dijalankan ulang secara menyeluruh; interaksi mutasi diperiksa lewat callback lokal untuk menghindari perubahan data asli. Tidak mengirim WhatsApp, menyalin tautan pribadi, atau mengunggah media contoh ke server. Tidak menjalankan suite backend/deploy. Pemeriksaan visual dilakukan pada ukuran yang disebutkan, bukan seluruh perangkat.
 
 Pagination membatasi baris yang dirender. Endpoint lama tetap mengirim seluruh daftar tamu; memindahkan filter/pagination ke server diperlukan jika pemuatan awal daftar menjadi lambat. Tidak ada klaim load test backend.
+
+## Verifikasi lanjutan — perbaikan metadata preview
+
+[Run CI39506291644](https://github.com/firstaadi-dev/wedding-invitation/actions/runs/39506291644) pada commit802038a gagal pada metadata Open Graph. Atribut `id` pada tag `<title>` membuat pola penggantian template backend tidak cocok, sehingga metadata judul, URL, dan thumbnail tidak disisipkan untuk HTML undangan. Tes tenant berikutnya gagal sebelum cleanup dan menyebabkan kegagalan hitungan perangkat pada tes sesudahnya. Tahap images/deploy dilewati oleh CI.
+
+Perbaikan mempertahankan tag `<title>` tanpa atribut dan memperbarui judul browser lewat `document.title`. Kontrak API dan assertion integrasi tetap sama.
+
+Reproduksi memakai PostgreSQL17 lokal sementara dan simulasi Fingerprint Postman yang sudah ada: sebelum perbaikan14/19 lulus; setelah perbaikan19/19 lulus tanpa skip. Dua run koleksi Postman menjalankan total9 request dan21 assertion, semuanya lulus (exit0). `npm run build` dan `npm test` juga berhasil. Database lokal sementara dihentikan dan dihapus setelah tes; database aplikasi/produksi tidak digunakan. Perbaikan belum membuktikan deployment ulang sampai workflow untuk commit perbaikan dijalankan.

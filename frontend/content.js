@@ -28,7 +28,7 @@ async function load() {
     const role = fallback.match(/^(Bapak|Ibu)/)[0];
     document.querySelector(`#${id}`).textContent = `${role} ${settings[key] || fallback.slice(role.length).trim()}`;
   }
-  document.querySelector('#page-title').textContent = `${partners[0].split(/\s+/)[0]} & ${partners[1].split(/\s+/)[0]} — 22 November 2026`;
+  document.title = `${partners[0].split(/\s+/)[0]} & ${partners[1].split(/\s+/)[0]} — 22 November 2026`;
   if (guestResponse) {
     for (const key of ['attendance','message']) responseForm.elements[key].value = guestResponse[key];
     responseForm.elements.guestCount.value = guestResponse.guestCount || 1;
