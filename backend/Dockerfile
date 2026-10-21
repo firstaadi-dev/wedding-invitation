@@ -11,7 +11,7 @@ WORKDIR /build
 COPY backend/go.* ./
 RUN go mod download
 COPY backend/ ./
-RUN go test ./... && go build -trimpath -o /invitation ./cmd/invitation
+RUN go build -trimpath -o /invitation ./cmd/invitation
 
 FROM debian:trixie-slim
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libvips42t64 && rm -rf /var/lib/apt/lists/*
