@@ -364,7 +364,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal(partial.value.settings.whatsappTemplate,template);
       const cleared = await adminRequest('/api/admin/content',{method:'PUT',data:{linkPreviewTitle:'',linkPreviewDescription:''}});
       assert.equal(cleared.response.status,200);
-      assert.ok((await request('/')).value.includes('property="og:title" content="Firsta &amp; Talitha — Undangan"'));
+      assert.ok((await request('/')).value.includes('property="og:title" content="Undangan Pernikahan Firsta &amp; Talitha"'));
     });
     await t.test('preview thumbnails are public JPEGs, replace safely, and cannot expose private media',async () => {
       const photo = await sharp({create:{width:60,height:90,channels:4,background:'#183d32'}}).png().toBuffer();
