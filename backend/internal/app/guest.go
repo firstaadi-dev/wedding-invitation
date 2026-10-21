@@ -92,7 +92,7 @@ func (a *App) verify(w http.ResponseWriter, r *http.Request) {
 	c := row(ctx, a.Pool, "SELECT * FROM wedding.challenges WHERE id=$1 AND expires_at>now()", challenge)
 	cookie, err := r.Cookie("wedding_challenge")
 	if c == nil || err != nil || cookie.Value == "" || c["cookie_hash"] != hash(cookie.Value) {
-		fail(409, "challenge_expired", "Verifikasi kedaluwarsa. Muat ulang tautan undangan.")
+		fail(409, "challenge_expired", "Pemeriksaan undangan perlu diulang. Silakan buka kembali tautan undangan yang diterima.")
 	}
 	visitor := verifiedVisitor(a.fingerprintEvent(r, id), id, challenge, a.Config.Origin, time.Now())
 	token := secret()
@@ -103,7 +103,7 @@ func (a *App) verify(w http.ResponseWriter, r *http.Request) {
 			fail(404, "revoked", "Tautan sudah dinonaktifkan.")
 		}
 		if fresh == nil {
-			fail(409, "challenge_expired", "Verifikasi sudah digunakan. Muat ulang tautan undangan.")
+			fail(409, "challenge_expired", "Pemeriksaan undangan perlu diulang. Silakan buka kembali tautan undangan yang diterima.")
 		}
 		if exec(ctx, q, "INSERT INTO wedding.used_events(event_hash) VALUES($1) ON CONFLICT DO NOTHING", hash(id)).RowsAffected() == 0 {
 			fail(409, "replayed", "Verifikasi sudah digunakan.")

@@ -35,7 +35,7 @@ async function load() {
   }
   attendanceChanged();
   document.querySelector('#response-fields').disabled = !canRespond;
-  responseStatus.textContent = canRespond ? (guestResponse ? 'Jawaban Anda sudah tersimpan dan dapat diperbarui melalui formulir ini.' : '') : 'Ini adalah pratinjau undangan. Untuk mengisi konfirmasi, buka tautan tamu.';
+  responseStatus.textContent = canRespond ? (guestResponse ? 'Konfirmasi kehadiran sudah tersimpan dan masih dapat diperbarui melalui formulir ini.' : '') : 'Ini adalah pratinjau undangan. Untuk mengisi konfirmasi, buka tautan tamu.';
   loadWishes();
   for (const [key,fallback] of [['ceremonyTitle','Prosesi Pernikahan'],['receptionTitle','Resepsi']]) {
     document.querySelector(key === 'ceremonyTitle' ? '#ceremony-title' : '#reception-title').textContent = settings[key] || fallback;
@@ -101,7 +101,7 @@ function startCountdown(time) {
   const numbers = document.querySelectorAll('.countdown-units strong');
   const update = () => {
     countdownParts(target).forEach((value,index) => {numbers[index].textContent = String(value).padStart(2,'0');});
-    document.querySelector('#countdown-label').textContent = Date.now() >= target ? 'Hari bahagia telah tiba' : 'Menuju hari bahagia';
+    document.querySelector('#countdown-label').textContent = Date.now() >= target ? 'Hari pernikahan putra-putri kami' : 'Menuju hari bahagia';
   };
   update();
   const timer = setInterval(() => {update();if (Date.now() >= target) clearInterval(timer);},1000);
@@ -117,7 +117,7 @@ function renderGallery(media) {
   let selected = 0;
   function select(index) {
     selected = (index + photos.length) % photos.length;
-    const description = `Kenangan kami · Foto ${selected+1} dari ${photos.length}`;
+    const description = `Kenangan mempelai · Foto ${selected+1} dari ${photos.length}`;
     featured.replaceChildren(photo(photos[selected],description));
     featured.setAttribute('aria-label',`Perbesar ${description}`);
     [...thumbnails.children].forEach((button,i) => button.setAttribute('aria-pressed',String(i === selected)));
@@ -129,7 +129,7 @@ function renderGallery(media) {
     for (const [container,isThumbnail] of [[thumbnails,true],[collage,false]]) {
       const button = document.createElement('button');button.type = 'button';
       button.setAttribute('aria-label',`${isThumbnail ? 'Pilih' : 'Perbesar'} foto ${index+1}`);
-      button.append(photo(src,`Kenangan kami · Foto ${index+1}`));
+      button.append(photo(src,`Kenangan mempelai · Foto ${index+1}`));
       button.addEventListener('click',() => isThumbnail ? select(index) : open(index));
       container.append(button);
     }
@@ -172,7 +172,7 @@ responseForm.addEventListener('submit',async event => {
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Konfirmasi belum tersimpan. Silakan coba lagi.');
     responseForm.elements.message.value = result.message;
-    responseStatus.textContent = 'Terima kasih. Jawaban Anda sudah tersimpan.';
+    responseStatus.textContent = 'Terima kasih. Konfirmasi kehadiran sudah kami terima.';
     await loadWishes(true);
   } catch (error) {
     responseStatus.classList.add('error');responseStatus.textContent = error.message;

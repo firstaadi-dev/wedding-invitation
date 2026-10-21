@@ -74,7 +74,7 @@ assert.match(page, /lang="ar" dir="rtl"/);
 assert.match(page, /quran.com\/id\/ar-rum\/21/);
 
 const gifts = page.match(/<details class="gift-details">([\s\S]*?)<\/details>/)[1];
-assert.match(gifts, /<summary class="guest-button">[\s\S]*?<span>Lihat informasi hadiah<\/span>[\s\S]*?<\/summary>/);
+assert.match(gifts, /<summary class="guest-button">[\s\S]*?<span>Lihat rekening dan alamat<\/span>[\s\S]*?<\/summary>/);
 assert.equal((gifts.match(/class="guest-paper gift-paper"/g) || []).length,1);
 assert.match(gifts, /id="gift-accounts"/);
 const content = readFileSync(new URL('../frontend/content.js', import.meta.url), 'utf8');

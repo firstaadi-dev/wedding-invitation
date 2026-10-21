@@ -1,6 +1,6 @@
 // This public browser key is safe to publish; the server key stays in environment only.
 const fpPromise = fetch('/api/identification/config').then(async response => {
-  if (!response.ok) throw new Error('Konfigurasi verifikasi belum tersedia.');
+  if (!response.ok) throw new Error('Undangan belum dapat dibuka. Silakan coba lagi nanti.');
   const {endpoint} = await response.json();
   const source = endpoint ? `${endpoint}/web/v4/k3IGGzMGUOYb5FnccL4s` : 'https://fpjscdn.net/v4/k3IGGzMGUOYb5FnccL4s';
   const Fingerprint = await import(source);
