@@ -95,10 +95,10 @@ func (a *App) html(w http.ResponseWriter, r *http.Request) {
 		if second == "" {
 			second = "Talitha Syahda Arundatie"
 		}
-		title = strings.Fields(first)[0] + " & " + strings.Fields(second)[0] + " — Undangan"
+		title = "Undangan Pernikahan " + strings.Fields(first)[0] + " & " + strings.Fields(second)[0]
 	}
 	if description == "" {
-		description = "22 November 2026 · Arjuna Ballroom Alam Indah Resto."
+		description = "Minggu, 22 November 2026 · Arjuna Ballroom, Alam Indah Resto."
 	}
 	title, description = escapeHTML(title), escapeHTML(description)
 	metadata := fmt.Sprintf(`<title>%s</title>

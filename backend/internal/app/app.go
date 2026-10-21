@@ -255,7 +255,7 @@ func (a *App) invitationSession(r *http.Request) map[string]any {
 		}
 	}
 	if s == nil {
-		fail(401, "unauthorized", "Buka tautan undangan yang Bapak/Ibu/Sdr/Sdri terima.")
+		fail(401, "unauthorized", "Buka tautan undangan yang Anda terima.")
 	}
 	if r.URL.Query().Has("tenant") && !matchesTenant(r.URL.Query().Get("tenant"), s) {
 		fail(401, "unauthorized", "Silakan buka tautan undangan kembali.")
@@ -301,7 +301,7 @@ func (a *App) serve(w http.ResponseWriter, r *http.Request) {
 			e, ok := recovered.(apiError)
 			if !ok {
 				log.Printf("Request failed: %T", recovered)
-				e = apiError{500, "server_error", "Ada gangguan sementara. Silakan coba kembali."}
+				e = apiError{500, "server_error", "Ada gangguan sementara. Silakan coba lagi."}
 			}
 			jsonResponse(w, e.Status, map[string]string{"error": e.Message, "code": e.Code})
 		}
@@ -408,7 +408,7 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 	email, emailOK := v["email"].(string)
 	password, passwordOK := v["password"].(string)
 	if !emailOK || length(email) > 254 || !match(`^[^\s@]+@[^\s@]+\.[^\s@]+$`, strings.TrimSpace(email)) || !passwordOK || password == "" || length(password) > 1024 {
-		fail(400, "credentials", "Email atau password tidak valid.")
+		fail(400, "credentials", "Email atau kata sandi tidak valid.")
 	}
 	s := row(r.Context(), a.Pool, `SELECT a.id,a.email,a.password_hash,t.id AS tenant_id,t.slug AS tenant_slug,t.public_id::text AS public_id,t.name AS tenant_name FROM wedding.accounts a JOIN wedding.tenants t ON t.owner_id=a.id WHERE a.email=$1 AND a.active`, strings.ToLower(strings.TrimSpace(email)))
 	encoded := strings.Repeat("0", 32) + ":" + strings.Repeat("0", 128)
@@ -416,7 +416,7 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 		encoded = text(s["password_hash"])
 	}
 	if !passwordMatches(password, encoded) || s == nil {
-		fail(401, "invalid_login", "Email atau password tidak sesuai.")
+		fail(401, "invalid_login", "Email atau kata sandi tidak sesuai.")
 	}
 	token, csrf := secret(), secret()
 	exec(r.Context(), a.Pool, `INSERT INTO wedding.sessions(token_hash,csrf,account_id,tenant_id,expires_at) VALUES($1,$2,$3,$4,now()+interval '8 hours')`, hash(token), csrf, s["id"], s["tenant_id"])

@@ -33,4 +33,8 @@ export type API = <T>(
   value?: unknown,
   type?: string,
 ) => Promise<T>;
-export type Confirm = (message: string, title: string) => Promise<boolean>;
+export type Confirm = (
+  message: string,
+  title: string,
+  action: string,
+) => Promise<boolean>;

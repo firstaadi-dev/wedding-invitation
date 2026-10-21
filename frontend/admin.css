@@ -779,7 +779,7 @@ fieldset {
   border-collapse: separate;
   border-spacing: 0;
   width: 100%;
-  min-width: 1140px;
+  min-width: 1410px;
   text-align: left;
   font-size: 14px;
   line-height: 1.5;
@@ -796,6 +796,9 @@ fieldset {
 .attendance-col {
   width: 140px;
 }
+.guest-count-col {
+  width: 170px;
+}
 .devices-col {
   width: 106px;
 }
@@ -803,7 +806,7 @@ fieldset {
   width: 80px;
 }
 .actions-col {
-  width: 280px;
+  width: 380px;
 }
 .guest-workspace tr {
   --row-bg: #fff;

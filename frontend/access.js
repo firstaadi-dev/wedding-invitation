@@ -20,14 +20,14 @@ async function request(path,data) {
 async function open() {
   retry.hidden = true;
   if (!token) {
-    message.textContent = 'Silakan buka tautan undangan yang Bapak/Ibu/Sdr/Sdri terima.';
+    message.textContent = 'Silakan buka tautan undangan yang Anda terima.';
     if (['localhost','127.0.0.1'].includes(location.hostname)) {
       document.querySelector('.preview-link').hidden = false;
       try {await (await import('./identification.js')).identify();} catch (error) {console.warn('Fingerprint local test failed:',error.code || error.message);}
     }
     return;
   }
-  message.textContent = 'Menyiapkan undangan Bapak/Ibu/Sdr/Sdri…';
+  message.textContent = 'Menyiapkan undangan…';
   try {
     const challenge = await request('/api/access/challenge',{token});
     const {identify} = await import('./identification.js');
@@ -36,7 +36,7 @@ async function open() {
     try {sessionStorage.removeItem(tokenKey);} catch {}
     location.replace(location.pathname);
   } catch (error) {
-    message.textContent = error.message || 'Undangan belum dapat dibuka. Silakan coba kembali.';
+    message.textContent = error.message || 'Undangan belum dapat dibuka. Silakan coba lagi.';
     retry.hidden = false;
   }
 }

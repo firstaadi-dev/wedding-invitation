@@ -13,7 +13,7 @@ import (
 func (a *App) challenge(w http.ResponseWriter, r *http.Request) {
 	a.limited(w, r, "challenge", 30, 60)
 	if a.Config.PublicKey == "" || a.Config.SecretKey == "" {
-		fail(503, "verification_unavailable", "Undangan belum tersedia. Silakan coba kembali nanti.")
+		fail(503, "verification_unavailable", "Undangan belum tersedia. Silakan coba lagi nanti.")
 	}
 	_, v := body(w, r, 8192, false)
 	only(v, "token")
@@ -36,7 +36,7 @@ func (a *App) challenge(w http.ResponseWriter, r *http.Request) {
 func (a *App) fingerprintEvent(r *http.Request, id string) map[string]any {
 	host := map[string]string{"us": "api.fpjs.io", "eu": "eu.api.fpjs.io", "ap": "ap.api.fpjs.io"}[a.Config.Region]
 	if host == "" || a.Config.SecretKey == "" || a.Config.PublicKey == "" {
-		fail(503, "verification_unavailable", "Verifikasi undangan belum tersedia. Silakan coba kembali nanti.")
+		fail(503, "verification_unavailable", "Verifikasi undangan belum tersedia. Silakan coba lagi nanti.")
 	}
 	base := "https://" + host
 	if a.Config.FingerprintOrigin != "" {
@@ -48,7 +48,7 @@ func (a *App) fingerprintEvent(r *http.Request, id string) map[string]any {
 	req.Header.Set("Accept", "application/json")
 	res, err := a.Client.Do(req)
 	if err != nil {
-		fail(503, "verification_unavailable", "Koneksi verifikasi sedang terganggu. Silakan coba kembali.")
+		fail(503, "verification_unavailable", "Koneksi verifikasi sedang terganggu. Silakan coba lagi.")
 	}
 	defer res.Body.Close()
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
@@ -56,11 +56,11 @@ func (a *App) fingerprintEvent(r *http.Request, id string) map[string]any {
 		if res.StatusCode == 404 {
 			status = 403
 		}
-		fail(status, "verification_failed", "Verifikasi belum berhasil. Silakan coba kembali.")
+		fail(status, "verification_failed", "Verifikasi belum berhasil. Silakan coba lagi.")
 	}
 	var event map[string]any
 	if json.NewDecoder(io.LimitReader(res.Body, 1024*1024)).Decode(&event) != nil {
-		fail(503, "verification_unavailable", "Verifikasi belum berhasil. Silakan coba kembali.")
+		fail(503, "verification_unavailable", "Verifikasi belum berhasil. Silakan coba lagi.")
 	}
 	return event
 }
@@ -75,7 +75,7 @@ func verifiedVisitor(event map[string]any, id, challenge, origin string, now tim
 	identification, _ := event["identification"].(map[string]any)
 	visitor := text(identification["visitor_id"])
 	if event["event_id"] != id || event["linked_id"] != challenge || eventOrigin != origin || !validTime || age < -10000 || age > 300000 || visitor == "" || length(visitor) > 200 || event["tampering"] == true || event["replayed"] == true || event["bot"] == "detected" || event["rule_action"] == "deny" {
-		fail(403, "invalid_fingerprint", "Perangkat belum dapat diverifikasi. Silakan coba kembali.")
+		fail(403, "invalid_fingerprint", "Perangkat belum dapat diverifikasi. Silakan coba lagi.")
 	}
 	return visitor
 }
@@ -112,7 +112,7 @@ func (a *App) verify(w http.ResponseWriter, r *http.Request) {
 		if row(ctx, q, "SELECT 1 FROM wedding.devices WHERE guest_id=$1 AND visitor_hash=$2", g["id"], vh) == nil {
 			count := row(ctx, q, "SELECT count(*) AS count FROM wedding.devices WHERE guest_id=$1", g["id"])
 			if number(count["count"]) >= 3 {
-				fail(403, "device_limit", "Undangan ini sudah dibuka pada tiga perangkat. Silakan hubungi pengundang untuk bantuan.")
+				fail(403, "device_limit", "Batas akses undangan ini sudah tercapai (3 browser). Silakan hubungi pengundang untuk bantuan.")
 			}
 			exec(ctx, q, "INSERT INTO wedding.devices(guest_id,visitor_hash) VALUES($1,$2)", g["id"], vh)
 		}

@@ -28,7 +28,7 @@ import "../admin.css";
 
 const pages = {
   tamu: "Tamu Undangan",
-  pesan: "Pesan & Preview",
+  pesan: "Pesan dan pratinjau",
   media: "Foto & Lagu",
   acara: "Detail Acara",
 };
@@ -233,19 +233,17 @@ function Login({
           weddinvita<span aria-hidden="true">.</span>
         </a>
         <div className="login-statement">
-          <p className="login-eyebrow">Setiap undangan, sebuah cerita</p>
+          <p className="login-eyebrow">Kelola undangan pernikahan Anda</p>
           <h1 id="login-story-title">
-            Hari Istimewa.
+            Siapkan
             <br />
-            Lebih Tertata.
+            undangan Anda
           </h1>
           <p>
-            Satu ruang untuk merangkai undangan dan menyambut orang-orang
-            tersayang.
+            Atur detail acara, bagikan undangan, dan lihat konfirmasi tamu.
           </p>
           <span className="login-signature">weddinvita</span>
         </div>
-        <p className="login-story-footer">Dibuat untuk momen yang berarti.</p>
         <span className="login-watermark" aria-hidden="true">
           W
         </span>
@@ -253,7 +251,7 @@ function Login({
       <section className="login-form-side">
         <div className="login-panel">
           <p className="login-eyebrow">Portal Undangan</p>
-          <h2 id="login-title">Selamat Datang Kembali.</h2>
+          <h2 id="login-title">Selamat datang</h2>
           <p>Masuk untuk menyiapkan dan memantau undangan pernikahan Anda.</p>
           <form id="login" onSubmit={submit} aria-busy={busy}>
             {error && (
@@ -274,19 +272,19 @@ function Login({
               />
             </label>
             <label>
-              Password
+              Kata sandi
               <input
                 name="password"
                 type="password"
                 autoComplete="current-password"
                 required
                 maxLength={1024}
-                placeholder="Masukkan password"
+                placeholder="Masukkan kata sandi"
                 disabled={busy}
               />
             </label>
             <button className="primary" type="submit" disabled={busy}>
-              {busy ? "Memeriksa…" : "Masuk ke Akun"}
+              {busy ? "Memeriksa…" : "Masuk ke akun"}
               <span aria-hidden="true">→</span>
             </button>
           </form>
@@ -349,8 +347,8 @@ function GuestEditor({
           </button>
         </div>
         <p>
-          Setiap undangan memiliki tautan pribadi dan tiga slot
-          browser/perangkat.
+          Setiap undangan memiliki tautan pribadi. Maksimal 3 browser per undangan.
+          Browser berbeda pada perangkat yang sama dapat memakai slot terpisah.
         </p>
         <label>
           Nama tamu
@@ -434,26 +432,34 @@ function GuestRow({
     setBusy(true);
     const descriptions = {
       active: [
-        `Undangan ${guest.name} tidak bisa dibuka, seluruh sesi dicabut, dan ucapannya disembunyikan. Data tetap tersimpan dan tamu bisa diaktifkan kembali.`,
-        "Nonaktifkan Undangan?",
+        `Undangan ${guest.name} tidak dapat dibuka lagi dan ucapannya disembunyikan. Semua akses saat ini akan dihentikan. Data tetap tersimpan dan undangan dapat diaktifkan kembali.`,
+        "Nonaktifkan undangan?",
+        "Nonaktifkan undangan",
       ],
       link: [
-        `Tautan lama ${guest.name}, seluruh sesi, dan slot perangkat akan dicabut. Kirim tautan pengganti kepada tamu.`,
-        "Ganti Tautan Undangan?",
+        `Tautan lama ${guest.name} tidak dapat digunakan lagi. Semua akses browser akan direset. Kirim tautan pengganti kepada tamu.`,
+        "Ganti tautan undangan?",
+        "Ganti tautan",
       ],
       devices: [
-        `Seluruh sesi ${guest.name} akan dicabut dan ketiga slot dikosongkan. Tautan yang sama dapat dipakai untuk mendaftarkan perangkat kembali.`,
-        "Reset Slot Perangkat?",
+        `Semua akses browser ${guest.name} akan direset. Tamu dapat membuka kembali undangan melalui tautan yang sama.`,
+        "Reset akses browser?",
+        "Reset akses browser",
       ],
       delete: [
         `Hapus ${guest.name} beserta tautan, seluruh akses, konfirmasi, dan ucapannya? Data tidak dapat dipulihkan.`,
-        "Hapus Tamu?",
+        "Hapus tamu?",
+        "Hapus tamu",
       ],
     };
     try {
       if (
         (kind !== "active" || guest.active) &&
-        !(await confirm(descriptions[kind][0], descriptions[kind][1]))
+        !(await confirm(
+          descriptions[kind][0],
+          descriptions[kind][1],
+          descriptions[kind][2],
+        ))
       )
         return;
       const result = await api<{ link?: string }>(
@@ -471,7 +477,7 @@ function GuestRow({
         {
           active: "Status tamu disimpan.",
           link: "Tautan pengganti dibuat.",
-          devices: "Slot perangkat direset.",
+          devices: "Akses browser direset.",
           delete: "Tamu dihapus.",
         }[kind],
       );
@@ -518,10 +524,11 @@ function GuestRow({
         <td>
           <span className={`tag ${attendance || "pending"}`}>{label}</span>
         </td>
+        <td>{guest.response?.guestCount ?? "—"}</td>
         <td>
           <span
             className={`device-count${guest.deviceCount === 3 ? " full" : ""}`}
-            title={`${guest.deviceCount} dari 3 slot perangkat terpakai`}
+            title={`${guest.deviceCount} dari 3 slot browser terpakai`}
           >
             {guest.deviceCount} / 3
           </span>
@@ -550,7 +557,7 @@ function GuestRow({
               onClick={() => copy(guest.link!)}
             >
               <ActionIcon kind="copy" />
-              <span>Salin link</span>
+              <span>Salin tautan</span>
             </button>
             {guest.phone && guest.link && guest.active && !disabled ? (
               <a
@@ -558,20 +565,20 @@ function GuestRow({
                 href={whatsappUrl(template, guest)}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`Kirim undangan ${guest.name} melalui WhatsApp`}
+                aria-label={`Buka WhatsApp untuk mengirim undangan ${guest.name}`}
               >
                 <ActionIcon kind="send" />
-                <span>Kirim</span>
+                <span>Buka WhatsApp</span>
               </a>
             ) : (
               <button
                 className="send-link"
                 type="button"
                 disabled
-                title="Isi nomor WhatsApp, gunakan tautan tersimpan, dan aktifkan tamu untuk mengirim."
+                title="Untuk membuka WhatsApp, isi nomor tamu, pastikan tautannya tersedia, dan aktifkan undangannya."
               >
                 <ActionIcon kind="send" />
-                <span>Kirim</span>
+                <span>Buka WhatsApp</span>
               </button>
             )}
             <button
@@ -629,7 +636,7 @@ function GuestRow({
               Buat tautan baru
             </button>
             <button onClick={() => action("devices")} disabled={busy}>
-              Reset perangkat
+              Reset akses browser
             </button>
             <button
               onClick={() => action("delete")}
@@ -644,7 +651,7 @@ function GuestRow({
       {wishOpen && (
         <Modal label={`wish-${guest.id}`} onClose={() => setWishOpen(false)}>
           <div className="section-heading">
-            <h2 id={`wish-${guest.id}`}>Ucapan &amp; doa</h2>
+            <h2 id={`wish-${guest.id}`}>Ucapan dan doa</h2>
             <button
               className="icon-button quiet"
               type="button"
@@ -763,8 +770,9 @@ function GuestsPage({
         !(await confirm(
           active
             ? `${ids.length} undangan yang dipilih dapat kembali dibuka.`
-            : `${ids.length} undangan yang dipilih tidak dapat dibuka dan seluruh sesinya dicabut. Data tetap tersimpan.`,
+            : `${ids.length} undangan yang dipilih tidak dapat dibuka dan semua akses saat ini dihentikan. Data tetap tersimpan.`,
           `${active ? "Aktifkan" : "Nonaktifkan"} ${ids.length} undangan?`,
+          active ? "Aktifkan undangan" : "Nonaktifkan undangan",
         ))
       )
         return;
@@ -907,7 +915,7 @@ function GuestsPage({
         <div className="metrics" aria-label="Ringkasan undangan">
           {[
             ["Total undangan", summary.total, "total"],
-            ["Hadir", summary.attending, "attending"],
+            ["Konfirmasi hadir", summary.attending, "attending"],
             ["Belum konfirmasi", summary.pending, "pending"],
             ["Nonaktif", summary.inactive, "inactive"],
           ].map(([label, value, key]) => (
@@ -988,7 +996,7 @@ function GuestsPage({
             </div>
           ) : (
             <span className="muted">
-              Pilih baris pada halaman ini · 3 slot perangkat per tautan
+              Ringkasan dihitung per undangan aktif, kecuali total undangan dan nonaktif.
             </span>
           )}
         </div>
@@ -1004,8 +1012,8 @@ function GuestsPage({
         >
           <table>
             <caption className="sr-only">
-              Daftar tamu, WhatsApp, status, konfirmasi, perangkat, ucapan, dan
-              aksi
+              Daftar tamu, WhatsApp, status, konfirmasi, jumlah kehadiran,
+              browser, ucapan, dan aksi
             </caption>
             <colgroup>
               <col className="select-col" />
@@ -1013,6 +1021,7 @@ function GuestsPage({
               <col className="phone-col" />
               <col className="status-col" />
               <col className="attendance-col" />
+              <col className="guest-count-col" />
               <col className="devices-col" />
               <col className="wish-col" />
               <col className="actions-col" />
@@ -1064,7 +1073,8 @@ function GuestsPage({
                 >
                   {sortHeader("attendance", "Konfirmasi")}
                 </th>
-                <th scope="col">Perangkat</th>
+                <th scope="col">Jumlah kehadiran</th>
+                <th scope="col">Browser</th>
                 <th scope="col">Ucapan</th>
                 <th scope="col">Aksi</th>
               </tr>
@@ -1197,7 +1207,7 @@ function GuestsPage({
             </button>
           </div>
           <label>
-            Perangkat
+            Browser
             <select
               value={devices}
               onChange={(e) => {
@@ -1205,13 +1215,14 @@ function GuestsPage({
                 resetPage();
               }}
             >
-              <option value="all">Semua perangkat</option>
+              <option value="all">Semua browser</option>
               <option value="full">Slot penuh (3/3)</option>
-              <option value="unused">0 slot terpakai</option>
+              <option value="unused">Belum digunakan</option>
             </select>
           </label>
           <p className="help">
-            Setiap tautan memiliki maksimal 3 slot browser/perangkat.
+            Maksimal 3 browser per undangan. Browser berbeda pada perangkat
+            yang sama dapat memakai slot terpisah.
           </p>
           <div className="dialog-actions">
             <button
@@ -1271,9 +1282,12 @@ function MediaCard({
       method === "DELETE" &&
       !(await confirm(
         slot === "preview"
-          ? "Thumbnail publik dan URL gambar lama akan dicabut dari preview tautan."
-          : `${title} akan dihapus. Undangan kembali menampilkan bingkai kosong untuk media ini.`,
-        "Hapus Media?",
+          ? "Gambar pratinjau akan dihapus dan tautan gambar lama tidak dapat diakses lagi."
+          : music
+            ? "Musik latar akan dihapus dari undangan."
+            : `${title} akan dihapus. Undangan kembali menampilkan bingkai kosong untuk foto ini.`,
+        "Hapus media?",
+        music ? "Hapus lagu" : "Hapus foto",
       ))
     )
       return;
@@ -1324,7 +1338,7 @@ function MediaCard({
       ) : (
         <div className="placeholder" aria-hidden="true">
           {music ? "♫" : "▧"}
-          <span>{music ? "Lengkapi suasana" : "Bingkai cerita Anda"}</span>
+          <span>{music ? "Belum ada lagu" : "Belum ada foto"}</span>
         </div>
       )}
       <label className="file-picker">
@@ -1529,6 +1543,7 @@ function SettingsForm({
       !(await confirm(
         "Isian pada informasi hadiah ini akan dikosongkan untuk jenis yang baru.",
         "Ganti jenis informasi?",
+        "Ganti jenis informasi",
       ))
     )
       return;
@@ -1554,7 +1569,7 @@ function SettingsForm({
       setDirty(false);
       notice(
         kind === "messages"
-          ? "Pesan WhatsApp dan preview tautan disimpan."
+          ? "Pesan WhatsApp dan pratinjau tautan disimpan."
           : "Detail acara disimpan.",
       );
     } catch (e) {
@@ -1576,10 +1591,10 @@ function SettingsForm({
   } catch {}
   const previewTitle =
     values.linkPreviewTitle?.trim() ||
-    `${textSetting("partnerOneName", values.partnerOneName).trim().split(/\s+/)[0]} & ${textSetting("partnerTwoName", values.partnerTwoName).trim().split(/\s+/)[0]} — Undangan`;
+    `Undangan Pernikahan ${textSetting("partnerOneName", values.partnerOneName).trim().split(/\s+/)[0]} & ${textSetting("partnerTwoName", values.partnerTwoName).trim().split(/\s+/)[0]}`;
   const previewDescription =
     values.linkPreviewDescription?.trim() ||
-    "22 November 2026 · Arjuna Ballroom Alam Indah Resto.";
+    "Minggu, 22 November 2026 · Arjuna Ballroom, Alam Indah Resto.";
   const exampleLink = `${account.invitationOrigin}/u/AbCdEfGhIjKlMnOpQrStUvWxYz0`;
   return (
     <form
@@ -1593,7 +1608,7 @@ function SettingsForm({
           <header className="page-heading">
             <div>
               <h1 id="whatsapp-title" tabIndex={-1}>
-                Pesan &amp; Preview
+                Pesan dan pratinjau
               </h1>
               <p>
                 Atur template pesan WhatsApp dan tampilan pratinjau tautan
@@ -1609,7 +1624,7 @@ function SettingsForm({
                     : "Pengaturan tersimpan"}
               </span>
               <button className="primary" disabled={busy}>
-                {busy ? "Menyimpan…" : "Simpan pesan & preview"}
+                {busy ? "Menyimpan…" : "Simpan pesan dan pratinjau"}
               </button>
             </div>
           </header>
@@ -1622,10 +1637,10 @@ function SettingsForm({
                 </div>
                 <p>
                   Gunakan {"{nama}"} untuk nama tamu dan {"{link}"} untuk tautan
-                  undangan. Token {"{link}"} wajib ada.
+                  undangan. Sertakan {"{link}"} agar tamu dapat membuka undangannya.
                 </p>
                 <div className="token-list">
-                  <span>Sisipkan token:</span>
+                  <span>Sisipkan nama atau tautan:</span>
                   {["{nama}", "{link}"].map((token) => (
                     <button
                       type="button"
@@ -1639,7 +1654,7 @@ function SettingsForm({
                 </div>
                 {field(
                   "whatsappTemplate",
-                  "Template pesan global",
+                  "Pesan untuk semua tamu",
                   4000,
                   "",
                   true,
@@ -1651,7 +1666,7 @@ function SettingsForm({
               </section>
               <section className="panel">
                 <div className="section-heading">
-                  <h2>Preview tautan</h2>
+                  <h2>Pratinjau tautan</h2>
                 </div>
                 <p>
                   Judul dan deskripsi saat dibagikan di WhatsApp. Kosongkan
@@ -1660,13 +1675,13 @@ function SettingsForm({
                 <div className="field-stack">
                   {field(
                     "linkPreviewTitle",
-                    "Judul preview",
+                    "Judul pratinjau",
                     120,
-                    "Nama pasangan — Undangan",
+                    "Undangan Pernikahan Nama Pasangan",
                   )}
                   {field(
                     "linkPreviewDescription",
-                    "Deskripsi preview",
+                    "Deskripsi pratinjau",
                     300,
                     "Deskripsi undangan",
                     true,
@@ -1675,11 +1690,11 @@ function SettingsForm({
               </section>
               <section className="panel">
                 <div className="section-heading">
-                  <h2>Thumbnail WhatsApp</h2>
+                  <h2>Gambar pratinjau WhatsApp</h2>
                 </div>
                 <p>
                   JPG, PNG, WebP maksimal 12 MB. Dipotong otomatis menjadi 1200
-                  × 630 piksel dan dapat diakses publik untuk preview WhatsApp.
+                  × 630 piksel dan dapat diakses publik untuk pratinjau WhatsApp.
                 </p>
                 {previewMedia}
               </section>
@@ -1697,10 +1712,10 @@ function SettingsForm({
                       {content.media.preview ? (
                         <img
                           src={content.media.preview}
-                          alt="Thumbnail tautan WhatsApp"
+                          alt="Gambar pratinjau tautan WhatsApp"
                         />
                       ) : (
-                        <span>Thumbnail belum diunggah</span>
+                        <span>Gambar pratinjau belum diunggah</span>
                       )}
                     </div>
                     <div className="link-description">
@@ -1718,8 +1733,8 @@ function SettingsForm({
                 </div>
               </div>
               <p className="info-note">
-                Pengiriman dilakukan secara manual melalui tombol Kirim pada
-                halaman Tamu Undangan.
+                Pilih Buka WhatsApp pada halaman Tamu Undangan. Periksa pesannya,
+                lalu kirim dari WhatsApp.
               </p>
             </aside>
           </div>
@@ -1809,7 +1824,7 @@ function SettingsForm({
               <div className="countdown-field">
                 {field(
                   "countdownTime",
-                  "Jam mulai hitung mundur (WIB)",
+                  "Waktu tujuan hitung mundur (WIB)",
                   5,
                   "",
                   false,
@@ -1832,8 +1847,9 @@ function SettingsForm({
                 true,
               )}
               <p className="help">
-                Google Maps → Bagikan → Sematkan peta. Salin URL pada atribut
-                src, bukan seluruh kode iframe.
+                Di Google Maps, pilih Bagikan, lalu Sematkan peta. Dari kode yang
+                muncul, salin alamat di dalam tanda kutip setelah src=.
+                Contoh: https://www.google.com/maps/embed?pb=…
               </p>
               <div className="map-preview">
                 {mapPreview ? (
@@ -1902,7 +1918,7 @@ function SettingsForm({
                             aria-label={`Jenis informasi hadiah ${index + 1}`}
                           >
                             <option value="account">Rekening</option>
-                            <option value="address">Alamat rumah</option>
+                            <option value="address">Alamat pengiriman</option>
                           </select>
                         </label>
                       </div>
@@ -2070,6 +2086,7 @@ function App() {
   const [confirmation, setConfirmation] = useState<{
     message: string;
     title: string;
+    action: string;
   }>();
   const csrf = useRef("");
   const pendingConfirmation = useRef<((yes: boolean) => void) | undefined>(
@@ -2177,12 +2194,12 @@ function App() {
   useEffect(() => {
     document.title = session
       ? `weddinvita — ${pages[page]}`
-      : "weddinvita — Masuk ke Akun";
+      : "weddinvita — Masuk ke akun";
   }, [session, page]);
-  const confirm: Confirm = (message, title) =>
+  const confirm: Confirm = (message, title, action) =>
     new Promise((resolve) => {
       pendingConfirmation.current = resolve;
-      setConfirmation({ message, title });
+      setConfirmation({ message, title, action });
     });
   function finishConfirmation(yes: boolean) {
     pendingConfirmation.current?.(yes);
@@ -2322,7 +2339,7 @@ function App() {
                     notice={notice}
                     account={session.account}
                     confirm={confirm}
-                    previewMedia={mediaCard("preview", "Thumbnail WhatsApp")}
+                    previewMedia={mediaCard("preview", "Gambar pratinjau WhatsApp")}
                   />
                 </section>
                 <section
@@ -2499,7 +2516,7 @@ function App() {
                 Batal
               </button>
               <button value="confirm" className="primary">
-                Lanjutkan
+                {confirmation.action}
               </button>
             </div>
           </form>
@@ -2516,8 +2533,7 @@ function App() {
           >
             <h2 id="copy-title">Salin tautan undangan</h2>
             <p>
-              Clipboard tidak tersedia. Salin tautan yang sudah dipilih di
-              bawah.
+              Tautan belum dapat disalin otomatis. Silakan salin tautan di bawah.
             </p>
             <label>
               Tautan undangan

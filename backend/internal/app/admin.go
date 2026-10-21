@@ -16,12 +16,17 @@ const guestSelect = `SELECT g.id,g.name,g.phone,g.invitation_link AS link,g.acti
 // Keep this copy equal to frontend/whatsapp.js; the compatibility test checks both.
 const DefaultWhatsappTemplate = `Yth. {nama},
 
-Dengan bahagia kami mengundang Bapak/Ibu/Sdr/Sdri untuk hadir di pernikahan kami pada 22 November 2026 di Arjuna Ballroom Alam Indah Resto.
+Kami mengundang Bapak/Ibu/Saudara/i untuk hadir dalam pernikahan kami.
 
-Undangan lengkap:
+Minggu, 22 November 2026
+Arjuna Ballroom, Alam Indah Resto
+
+Informasi acara dan konfirmasi kehadiran tersedia melalui undangan berikut:
 {link}
 
-Terima kasih atas doa dan kehadirannya.`
+Terima kasih atas doa restunya.
+
+Firsta & Talitha`
 
 func (a *App) content(ctx context.Context, q db, tenant string, admin bool) map[string]any {
 	s := row(ctx, q, "SELECT value FROM wedding.settings WHERE tenant_id=$1", tenant)
@@ -136,7 +141,7 @@ func validateSettings(v map[string]any) {
 		if raw, exists := v[key]; exists {
 			s, ok := raw.(string)
 			if !ok || length(s) > max {
-				fail(400, "link_preview", fmt.Sprintf("Teks preview maksimal %d karakter.", max))
+				fail(400, "link_preview", fmt.Sprintf("Teks pratinjau maksimal %d karakter.", max))
 			}
 			v[key] = strings.TrimSpace(s)
 		}
@@ -169,13 +174,13 @@ func validateSettings(v map[string]any) {
 	}
 	if raw, exists := v["giftEnabled"]; exists {
 		if raw != "true" && raw != "false" {
-			fail(400, "gift_enabled", "Pengaturan rekening tidak valid.")
+			fail(400, "gift_enabled", "Pengaturan hadiah tidak valid.")
 		}
 	}
 	if raw, exists := v["giftAccounts"]; exists {
 		accounts, ok := raw.([]any)
 		if !ok || len(accounts) > 10 {
-			fail(400, "gift_accounts", "Maksimal 10 rekening dengan format yang valid.")
+			fail(400, "gift_accounts", "Maksimal 10 rekening atau alamat pengiriman dengan format yang valid.")
 		}
 		for i, rawAccount := range accounts {
 			account, ok := rawAccount.(map[string]any)
@@ -184,7 +189,7 @@ func validateSettings(v map[string]any) {
 			}
 			kind, hasType := account["type"].(string)
 			if _, exists := account["type"]; exists && !hasType {
-				fail(400, "gift_accounts", "Pilih rekening atau alamat rumah.")
+				fail(400, "gift_accounts", "Pilih rekening atau alamat pengiriman.")
 			}
 			if _, exists := account["type"]; !exists { // Existing account entries predate the type field.
 				kind = "account"
@@ -220,15 +225,15 @@ func validateSettings(v map[string]any) {
 					phone, phoneOK = "", true
 				}
 				if (len(account) != 3 && len(account) != 4) || !recipientOK || !addressOK || !phoneOK {
-					fail(400, "gift_accounts", "Penerima dan alamat rumah wajib diisi.")
+					fail(400, "gift_accounts", "Penerima dan alamat pengiriman wajib diisi.")
 				}
 				recipient, address, phone = strings.TrimSpace(recipient), strings.TrimSpace(address), strings.TrimSpace(phone)
 				if recipient == "" || length(recipient) > 120 || address == "" || length(address) > 1000 || match(`[\x00-\x08\x0b\x0c\x0e-\x1f]`, recipient+address+phone) || length(phone) > 40 {
-					fail(400, "gift_accounts", "Penerima, alamat rumah, atau nomor kontak tidak valid.")
+					fail(400, "gift_accounts", "Penerima, alamat pengiriman, atau nomor kontak tidak valid.")
 				}
 				accounts[i] = map[string]any{"type": "address", "recipient": recipient, "address": address, "phone": phone}
 			default:
-				fail(400, "gift_accounts", "Pilih rekening atau alamat rumah.")
+				fail(400, "gift_accounts", "Pilih rekening atau alamat pengiriman.")
 			}
 		}
 		v["giftAccounts"] = accounts
@@ -236,7 +241,7 @@ func validateSettings(v map[string]any) {
 	if raw, exists := v["countdownTime"]; exists {
 		s, ok := raw.(string)
 		if !ok || !match(`^(?:|(?:[01]\d|2[0-3]):[0-5]\d)$`, s) {
-			fail(400, "countdown_time", "Jam countdown tidak valid. Gunakan HH:mm dalam WIB.")
+			fail(400, "countdown_time", "Waktu tujuan hitung mundur tidak valid. Gunakan format 24 jam, misalnya 09:00 (WIB).")
 		}
 	}
 	if raw, exists := v["mapEmbedUrl"]; exists && !validMap(raw) {

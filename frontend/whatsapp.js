@@ -1,11 +1,16 @@
 export const defaultWhatsappTemplate = `Yth. {nama},
 
-Dengan bahagia kami mengundang Bapak/Ibu/Sdr/Sdri untuk hadir di pernikahan kami pada 22 November 2026 di Arjuna Ballroom Alam Indah Resto.
+Kami mengundang Bapak/Ibu/Saudara/i untuk hadir dalam pernikahan kami.
 
-Undangan lengkap:
+Minggu, 22 November 2026
+Arjuna Ballroom, Alam Indah Resto
+
+Informasi acara dan konfirmasi kehadiran tersedia melalui undangan berikut:
 {link}
 
-Terima kasih atas doa dan kehadirannya.`;
+Terima kasih atas doa restunya.
+
+Firsta & Talitha`;
 
 export function invitationMessage(template, guest) {
   return template.replace(/\{(nama|link)\}/g, (_, key) => key === 'nama' ? guest.name : guest.link);

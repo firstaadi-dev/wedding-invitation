@@ -28,14 +28,14 @@ async function load() {
     const role = fallback.match(/^(Bapak|Ibu)/)[0];
     document.querySelector(`#${id}`).textContent = `${role} ${settings[key] || fallback.slice(role.length).trim()}`;
   }
-  document.title = `${partners[0].split(/\s+/)[0]} & ${partners[1].split(/\s+/)[0]} — 22 November 2026`;
+  document.title = `Undangan Pernikahan ${partners[0].split(/\s+/)[0]} & ${partners[1].split(/\s+/)[0]}`;
   if (guestResponse) {
     for (const key of ['attendance','message']) responseForm.elements[key].value = guestResponse[key];
     responseForm.elements.guestCount.value = guestResponse.guestCount || 1;
   }
   attendanceChanged();
   document.querySelector('#response-fields').disabled = !canRespond;
-  responseStatus.textContent = canRespond ? (guestResponse ? 'Konfirmasi sudah tersimpan. Bapak/Ibu/Sdr/Sdri dapat memperbaruinya.' : '') : 'Formulir aktif saat dibuka melalui tautan tamu. Preview tidak dapat mengirim konfirmasi.';
+  responseStatus.textContent = canRespond ? (guestResponse ? 'Jawaban Anda sudah tersimpan dan dapat diperbarui melalui formulir ini.' : '') : 'Ini adalah pratinjau undangan. Untuk mengisi konfirmasi, buka tautan tamu.';
   loadWishes();
   for (const [key,fallback] of [['ceremonyTitle','Prosesi Pernikahan'],['receptionTitle','Resepsi']]) {
     document.querySelector(key === 'ceremonyTitle' ? '#ceremony-title' : '#reception-title').textContent = settings[key] || fallback;
@@ -54,7 +54,7 @@ async function load() {
   giftContainer.replaceChildren(...accounts.map(account => {
     const card = document.createElement('div');card.className = 'gift-bank';
     if (account.type === 'address') {
-      const title = document.createElement('h3');title.textContent = 'Alamat Rumah';
+      const title = document.createElement('h3');title.textContent = 'Alamat pengiriman';
       const recipient = document.createElement('p');recipient.textContent = `Penerima: ${account.recipient}`;
       const address = document.createElement('p');address.className = 'gift-address';address.textContent = account.address;
       card.append(title,recipient,address);
@@ -170,9 +170,9 @@ responseForm.addEventListener('submit',async event => {
     const attendance = responseForm.elements.attendance.value;
     const response = await fetch(`/api/response?${scope}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({attendance,guestCount:attendance === 'attending' ? Number(responseForm.elements.guestCount.value) : 0,message:responseForm.elements.message.value})});
     const result = await response.json();
-    if (!response.ok) throw new Error(result.error || 'Konfirmasi belum tersimpan. Silakan coba kembali.');
+    if (!response.ok) throw new Error(result.error || 'Konfirmasi belum tersimpan. Silakan coba lagi.');
     responseForm.elements.message.value = result.message;
-    responseStatus.textContent = 'Terima kasih! Konfirmasi dan ucapan sudah tersimpan.';
+    responseStatus.textContent = 'Terima kasih. Jawaban Anda sudah tersimpan.';
     await loadWishes(true);
   } catch (error) {
     responseStatus.classList.add('error');responseStatus.textContent = error.message;
