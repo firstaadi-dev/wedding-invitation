@@ -21,7 +21,7 @@ Hash kode tetap dipakai untuk verifikasi. Link lengkap tetap disimpan pada data 
    Contoh keluaran hanya memuat jumlah per ID tenant internal, tanpa kode/link:
 
    ```json
-   {"applied":false,"tenants":[{"tenant":"firsta-talitha","count":250}]}
+   {"applied":false,"tenants":[{"tenant":"019a0685-0000-7000-8000-000000000001","count":250}]}
    ```
 
 4. Setelah hasil dry-run sesuai, jalankan cutover eksplisit:

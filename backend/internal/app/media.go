@@ -93,7 +93,7 @@ func (a *App) media(w http.ResponseWriter, r *http.Request) {
 	if preview {
 		m = row(r.Context(), a.Pool, "SELECT mime,data FROM wedding.media WHERE id=$1 AND slot='preview'", id)
 	} else {
-		m = row(r.Context(), a.Pool, "SELECT mime,data FROM wedding.media WHERE id=$1 AND tenant_id=ANY($2::text[])", id, tenants)
+		m = row(r.Context(), a.Pool, "SELECT mime,data FROM wedding.media WHERE id=$1 AND tenant_id=ANY($2::uuid[])", id, tenants)
 	}
 	if m == nil {
 		fail(404, "media_not_found", "Media tidak ditemukan.")

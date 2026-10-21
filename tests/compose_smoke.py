@@ -29,7 +29,7 @@ services:
     ports: ['127.0.0.1::80']
     volumes: ['./Caddyfile:/etc/caddy/Caddyfile:ro']
   database:
-    image: postgres:17-alpine
+    image: postgres:18-alpine
     environment:
       POSTGRES_PASSWORD: invitation-test
       POSTGRES_DB: invitation_test

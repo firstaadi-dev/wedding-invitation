@@ -10,6 +10,8 @@ import {startBackend} from './support/server.mjs';
 if (existsSync('.env.test.local')) process.loadEnvFile('.env.test.local');
 if (!process.env.TEST_DATABASE_URL || !process.env.TEST_DATABASE_URL_UNPOOLED) throw new Error('Set TEST_DATABASE_URL and TEST_DATABASE_URL_UNPOOLED for an isolated test branch. Never use production.');
 
+const uuidv7=/^[a-f0-9]{8}-[a-f0-9]{4}-7[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
+
 if(process.env.TEST_DATABASE_DISPOSABLE!=='1')throw new Error('Set TEST_DATABASE_DISPOSABLE=1 only for a disposable isolated database. Tests delete their data.');
 for(const key of ['DATABASE_URL','DATABASE_URL_UNPOOLED'])if(process.env[key]&&[process.env.TEST_DATABASE_URL,process.env.TEST_DATABASE_URL_UNPOOLED].includes(process.env[key]))throw new Error('Test and application database URLs must be separate.');
 
@@ -28,7 +30,9 @@ test('legacy migration preserves invitation data, guest sessions and password; r
     await client.query('UPDATE settings SET value=$1 WHERE id=1',[{ceremonyTime:'09:00',whatsappTemplate:'Legacy {link}'}]);
     await client.query("INSERT INTO sessions(token_hash,guest_id,version,csrf,expires_at) VALUES('guest-session','legacy',1,NULL,now()+interval '1 day'),('admin-session',NULL,NULL,'old-csrf',now()+interval '1 day')");
     await migrate(process.env.TEST_DATABASE_URL_UNPOOLED,schema,passwordHash);
-    assert.deepEqual((await client.query('SELECT tenant_id,name,token_hash,invitation_link FROM guests')).rows,[{tenant_id:'firsta-talitha',name:'Legacy Guest',token_hash:'old-token-hash',invitation_link:'https://invitation.example/#old-link'}]);
+    const tenant=(await client.query('SELECT id,owner_id FROM tenants')).rows[0];
+    assert.match(tenant.id,uuidv7);assert.match(tenant.owner_id,uuidv7);
+    assert.deepEqual((await client.query('SELECT tenant_id,name,token_hash,invitation_link FROM guests')).rows,[{tenant_id:tenant.id,name:'Legacy Guest',token_hash:'old-token-hash',invitation_link:'https://invitation.example/#old-link'}]);
     assert.equal((await client.query('SELECT visitor_hash FROM devices')).rows[0].visitor_hash,'old-device');
     assert.equal((await client.query('SELECT message FROM responses')).rows[0].message,'Legacy wish');
     assert.equal((await client.query('SELECT tenant_id,data FROM media')).rows[0].data.toString(),'original image bytes');
@@ -56,12 +60,72 @@ test('version-one upgrade assigns stable opaque IDs without changing existing ow
     await migrate(process.env.TEST_DATABASE_URL_UNPOOLED,schema);
     const tenant=(await client.query('SELECT id,owner_id,slug,name,public_id FROM tenants')).rows[0];
     assert.match(tenant.public_id,/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);
-    assert.deepEqual({...tenant,public_id:undefined},{id:'firsta-talitha',owner_id:'firsta',slug:'firsta-talitha',name:'Firsta & Talitha',public_id:undefined});
+    assert.match(tenant.id,uuidv7);assert.match(tenant.owner_id,uuidv7);
+    assert.equal(tenant.slug,'firsta-talitha');assert.equal(tenant.name,'Firsta & Talitha');
     assert.equal((await client.query('SELECT invitation_link FROM guests')).rows[0].invitation_link,'https://old.example/i/firsta-talitha#secret');
     assert.equal((await client.query('SELECT password_hash FROM accounts')).rows[0].password_hash,passwordHash);
     await migrate(process.env.TEST_DATABASE_URL_UNPOOLED,schema);
-    assert.equal((await client.query('SELECT public_id FROM tenants')).rows[0].public_id,tenant.public_id);
-    assert.deepEqual((await client.query('SELECT version FROM schema_migrations ORDER BY version')).rows,[{version:1},{version:2}]);
+    assert.deepEqual((await client.query('SELECT id,owner_id,slug,name,public_id FROM tenants')).rows[0],tenant);
+    assert.deepEqual((await client.query('SELECT version FROM schema_migrations ORDER BY version')).rows,[{version:1},{version:2},{version:3}]);
+  }finally{await client.query('SET search_path TO public');await client.query(`DROP SCHEMA IF EXISTS ${schema} CASCADE`);client.release();await pool.end()}
+});
+
+test('version-two UUIDv7 migration preserves every reference and rolls back on failure',async()=>{
+  const schema=`uuidv7_${randomBytes(6).toString('hex')}`;
+  const pool=database(process.env.TEST_DATABASE_URL_UNPOOLED),client=await pool.connect();
+  const passwordHash=`${'a'.repeat(32)}:${'b'.repeat(128)}`;
+  const tables=['accounts','tenants','guests','settings','media','sessions','responses','devices','challenges','schema_migrations'];
+  async function snapshot(){
+    const result={};
+    for(const table of tables)result[table]=(await client.query(`SELECT row_to_json(t) AS value FROM ${table} t`)).rows.map(r=>r.value).sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)));
+    return result;
+  }
+  try{
+    await client.query(`CREATE SCHEMA ${schema}; SET search_path TO ${schema}`);
+    await client.query(readFileSync(new URL('../backend/db/schema.sql',import.meta.url),'utf8'));
+    await client.query("SELECT set_config('weddinvita.legacy_password_hash',$1,false)",[passwordHash]);
+    for(const file of ['001-multi-tenant.sql','002-public-invitation-id.sql'])await client.query(readFileSync(new URL('../backend/db/'+file,import.meta.url),'utf8'));
+    await client.query('CREATE TABLE schema_migrations(version integer PRIMARY KEY,applied_at timestamptz NOT NULL DEFAULT now()); INSERT INTO schema_migrations(version) VALUES(1),(2)');
+    const secondAccount=randomUUID();
+    await client.query("INSERT INTO accounts(id,email,password_hash,active) VALUES($1,'second@example.com',$2,false)",[secondAccount,passwordHash]);
+    await client.query("INSERT INTO tenants(id,owner_id,slug,name) VALUES('second',$1,'second','Second')",[secondAccount]);
+    await client.query("INSERT INTO settings(tenant_id,value) VALUES('second','{\"partnerOneName\":\"Preserved\"}')");
+    for(const tenant of ['firsta-talitha','second']){
+      await client.query("INSERT INTO guests(id,name,token_hash,invitation_link,tenant_id) VALUES($1,'Preserved Guest',$1,'https://old.example/#secret',$1)",[tenant]);
+      await client.query("INSERT INTO media(slot,id,mime,data,tenant_id) VALUES('groom',$1,'image/webp',$2,$1)",[tenant,Buffer.from('original bytes')]);
+      await client.query("INSERT INTO sessions(token_hash,account_id,tenant_id,csrf,expires_at) SELECT 'admin-'||slug,owner_id,id,'csrf',now()+interval '1 day' FROM tenants WHERE id=$1",[tenant]);
+      await client.query("INSERT INTO sessions(token_hash,guest_id,version,expires_at) VALUES($1,$1,1,now()+interval '1 day')",[tenant]);
+      await client.query("INSERT INTO responses(guest_id,attendance,guest_count,message) VALUES($1,'attending',2,'Preserved wish')",[tenant]);
+      await client.query("INSERT INTO devices(guest_id,visitor_hash) VALUES($1,'visitor')",[tenant]);
+      await client.query("INSERT INTO challenges(id,cookie_hash,guest_id,version,expires_at) VALUES($1,'cookie',$1,1,now()+interval '1 day')",[tenant]);
+    }
+    const before=await snapshot();
+    await client.query("CREATE FUNCTION fail_ids() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'fixture ID migration failure'; END $$; CREATE TRIGGER fail_ids BEFORE UPDATE ON media FOR EACH ROW EXECUTE FUNCTION fail_ids()");
+    await assert.rejects(migrate(process.env.TEST_DATABASE_URL_UNPOOLED,schema),/fixture ID migration failure/);
+    assert.deepEqual(await snapshot(),before);
+    await client.query('DROP TRIGGER fail_ids ON media; DROP FUNCTION fail_ids()');
+    await migrate(process.env.TEST_DATABASE_URL_UNPOOLED,schema);
+    const tenants=(await client.query('SELECT id,owner_id,slug FROM tenants')).rows;
+    const tenantMap=Object.fromEntries(tenants.map(t=>[t.slug,t.id]));
+    const accountMap=Object.fromEntries(tenants.map(t=>[t.slug==='second'?secondAccount:'firsta',t.owner_id]));
+    for(const t of tenants){assert.match(t.id,uuidv7);assert.match(t.owner_id,uuidv7)}
+    const after=await snapshot();
+    for(const table of tables.filter(t=>t!=='schema_migrations')){
+      const expected=before[table].map(r=>({...r}));
+      for(const r of expected){
+        if(table==='accounts')r.id=accountMap[r.id];
+        if(table==='tenants'){r.id=tenantMap[r.id];r.owner_id=accountMap[r.owner_id]}
+        if(r.tenant_id)r.tenant_id=tenantMap[r.tenant_id];
+        if(r.account_id)r.account_id=accountMap[r.account_id];
+      }
+      assert.deepEqual(after[table],expected.sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b))),table);
+    }
+    const columns=(await client.query("SELECT data_type FROM information_schema.columns WHERE table_schema=$1 AND ((table_name='accounts' AND column_name='id') OR (table_name='tenants' AND column_name IN ('id','owner_id')) OR column_name IN ('tenant_id','account_id'))",[schema])).rows;
+    assert.equal(columns.length,8);assert.ok(columns.every(c=>c.data_type==='uuid'));
+    await assert.rejects(client.query("INSERT INTO sessions(token_hash,account_id,tenant_id,csrf,expires_at) VALUES('wrong',$1,$2,'csrf',now()+interval '1 day')",[accountMap.firsta,tenantMap.second]),e=>e.code==='23503');
+    await assert.rejects(client.query("INSERT INTO guests(id,name,token_hash,tenant_id) VALUES('orphan','Orphan','orphan',$1)",[randomUUID()]),e=>e.code==='23503');
+    await migrate(process.env.TEST_DATABASE_URL_UNPOOLED,schema);
+    assert.deepEqual(await snapshot(),after);
   }finally{await client.query('SET search_path TO public');await client.query(`DROP SCHEMA IF EXISTS ${schema} CASCADE`);client.release();await pool.end()}
 });
 
@@ -72,8 +136,9 @@ test('Neon-backed CMS and guest access end to end',async t => {
   const pool = database(process.env.TEST_DATABASE_URL);
   // Only disposable isolated-branch test data is cleared; production URLs are never used.
   await pool.query('TRUNCATE wedding.guests,wedding.devices,wedding.sessions,wedding.challenges,wedding.used_events,wedding.media,wedding.rate_limits CASCADE');
-  await pool.query("UPDATE wedding.settings SET value='{}' WHERE tenant_id='firsta-talitha'");
-  await pool.query('UPDATE wedding.accounts SET password_hash=$1 WHERE id=$2',[passwordHash,'firsta']);
+  const tenantId=(await pool.query("SELECT id FROM wedding.tenants WHERE slug='firsta-talitha'")).rows[0].id;
+  await pool.query("UPDATE wedding.settings SET value='{}' WHERE tenant_id=$1",[tenantId]);
+  await pool.query('UPDATE wedding.accounts SET password_hash=$1 WHERE email=$2',[passwordHash,'firstaadip16@gmail.com']);
   const email = 'firstaadip16@gmail.com';
   const origin = 'https://invitation.example';
   const cmsOrigin = 'https://dashboard.example';
@@ -122,7 +187,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
     await t.test('legacy root links and existing guest sessions remain usable',async()=>{
       const id=randomUUID(),legacyToken=randomBytes(32).toString('base64url'),sessionToken=randomBytes(32).toString('base64url');
       const hash=value=>createHash('sha256').update(value).digest('hex');
-      await pool.query("INSERT INTO wedding.guests(id,name,token_hash,invitation_link,tenant_id) VALUES($1,'Legacy Guest',$2,$3,'firsta-talitha')",[id,hash(legacyToken),`${origin}/#${legacyToken}`]);
+      await pool.query("INSERT INTO wedding.guests(id,name,token_hash,invitation_link,tenant_id) VALUES($1,'Legacy Guest',$2,$3,$4)",[id,hash(legacyToken),`${origin}/#${legacyToken}`,tenantId]);
       await pool.query("INSERT INTO wedding.sessions(token_hash,guest_id,version,expires_at) VALUES($1,$2,1,now()+interval '1 day')",[hash(sessionToken),id]);
       const jar={wedding_guest:sessionToken};
       assert.equal((await request('/api/invitation',{jar})).value.guestName,'Legacy Guest');
@@ -133,7 +198,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
     await t.test('stored readable links are shown canonically without revoking their secret',async()=>{
       const id=randomUUID(),legacyToken=randomBytes(32).toString('base64url');
       const legacy=`https://old-domain.example/i/firsta-talitha#${legacyToken}`;
-      await pool.query("INSERT INTO wedding.guests(id,name,token_hash,invitation_link,tenant_id) VALUES($1,'Existing Guest',$2,$3,'firsta-talitha')",[id,createHash('sha256').update(legacyToken).digest('hex'),legacy]);
+      await pool.query("INSERT INTO wedding.guests(id,name,token_hash,invitation_link,tenant_id) VALUES($1,'Existing Guest',$2,$3,$4)",[id,createHash('sha256').update(legacyToken).digest('hex'),legacy,tenantId]);
       const listed=(await adminRequest('/api/admin/guests')).value.find(g=>g.id===id);
       assert.equal(listed.link,`${origin}/${invitationId}#${legacyToken}`);
       assert.equal((await pool.query('SELECT invitation_link FROM wedding.guests WHERE id=$1',[id])).rows[0].invitation_link,legacy);
@@ -233,7 +298,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
     await t.test('wishes paginate, exclude inactive guests, and cannot change another invitation',async () => {
       for (let i=0;i<11;i++) {
         const id = `wish-fixture-${i}`;
-        await pool.query('INSERT INTO wedding.guests(id,name,token_hash,active,tenant_id) VALUES($1,$2,$1,$3,$4)',[id,`Tamu ${i}`,i === 10 ? 0 : 1,'firsta-talitha']);
+        await pool.query('INSERT INTO wedding.guests(id,name,token_hash,active,tenant_id) VALUES($1,$2,$1,$3,$4)',[id,`Tamu ${i}`,i === 10 ? 0 : 1,tenantId]);
         await pool.query("INSERT INTO wedding.responses(guest_id,attendance,guest_count,message,updated_at) VALUES($1,'attending',1,$2,'2026-01-01')",[id,`Ucapan ${i}`]);
       }
       const first = (await request('/api/wishes',{jar:guestBrowser})).value;
@@ -411,6 +476,9 @@ test('Neon-backed CMS and guest access end to end',async t => {
       } catch(error) {await client.query('ROLLBACK');throw error;} finally {client.release();}
       const second = {};const login = await request('/api/admin/login',{method:'POST',data:{email:' TENANT-TWO@example.com ',password},jar:second});
       assert.equal(login.response.status,200);assert.equal(login.value.account.email,secondEmail);assert.equal(login.value.account.tenant.slug,secondSlug);
+      assert.match(login.value.account.tenant.id,uuidv7);
+      const secondTenantId=login.value.account.tenant.id;
+      const owner=(await pool.query('SELECT owner_id FROM wedding.tenants WHERE id=$1',[secondTenantId])).rows[0].owner_id;assert.match(owner,uuidv7);
       const secondRequest = (path,options={}) => request(path,{...options,jar:second,headers:{'X-CSRF-Token':login.value.csrf,...options.headers}});
       assert.deepEqual((await secondRequest('/api/admin/guests')).value,[]);
       for (const [suffix,method,data] of [['','PATCH',{name:'Stolen'}],['','DELETE',{}],['/link','POST',{}],['/devices','DELETE',{}]]) {
@@ -467,9 +535,9 @@ test('Neon-backed CMS and guest access end to end',async t => {
       await pool.query('UPDATE wedding.accounts SET active=false WHERE email=$1',[secondEmail]);
       assert.equal((await secondRequest('/api/admin/session')).response.status,401);
       assert.equal((await request('/api/invitation',{jar:secondGuest.jar})).response.status,401);
-      await pool.query('DELETE FROM wedding.guests WHERE tenant_id=$1',[secondSlug]);
-      await pool.query('DELETE FROM wedding.settings WHERE tenant_id=$1',[secondSlug]);
-      await pool.query('DELETE FROM wedding.tenants WHERE id=$1',[secondSlug]);
+      await pool.query('DELETE FROM wedding.guests WHERE tenant_id=$1',[secondTenantId]);
+      await pool.query('DELETE FROM wedding.settings WHERE tenant_id=$1',[secondTenantId]);
+      await pool.query('DELETE FROM wedding.tenants WHERE id=$1',[secondTenantId]);
       await pool.query('DELETE FROM wedding.accounts WHERE email=$1',[secondEmail]);
     });
     await t.test('reset, deactivate and link rotation revoke sessions immediately',async () => {
@@ -498,8 +566,8 @@ test('Neon-backed CMS and guest access end to end',async t => {
   } finally {
     await server.close();
     await pool.query('TRUNCATE wedding.guests,wedding.sessions,wedding.media,wedding.challenges,wedding.used_events,wedding.rate_limits CASCADE');
-    await pool.query("UPDATE wedding.settings SET value='{}' WHERE tenant_id='firsta-talitha'");
-    await pool.query("DELETE FROM wedding.settings WHERE tenant_id='tenant-two'; DELETE FROM wedding.tenants WHERE id='tenant-two'; DELETE FROM wedding.accounts WHERE email='tenant-two@example.com'");
+    await pool.query("UPDATE wedding.settings SET value='{}' WHERE tenant_id=$1",[tenantId]);
+    await pool.query("DELETE FROM wedding.settings WHERE tenant_id=(SELECT id FROM wedding.tenants WHERE slug='tenant-two'); DELETE FROM wedding.tenants WHERE slug='tenant-two'; DELETE FROM wedding.accounts WHERE email='tenant-two@example.com'");
     await pool.end();
   }
 });
@@ -521,23 +589,24 @@ test('explicit all-account cutover is atomic, preserves content, resets guest ac
   }
   try {
     await provisionAccount(null,{email:'cutover@example.com',slug:'cutover-two',name:'Cutover Two'},`${'a'.repeat(32)}:${'b'.repeat(128)}`);
+    const tenants=Object.fromEntries((await pool.query('SELECT slug,id FROM wedding.tenants')).rows.map(t=>[t.slug,t.id]));
     for(const [id,tenant,active,token,link] of [
       ['cut-a','firsta-talitha',1,oldToken,`${origin}/#${oldToken}`],
       ['cut-b','firsta-talitha',0,secret(),null],
       ['cut-c','cutover-two',1,secret(),'https://old.example/i/cutover-two#old'],
       ['cut-new','firsta-talitha',1,newCode,`${origin}/u/${newCode}`],
     ]) {
-      await pool.query('INSERT INTO wedding.guests(id,tenant_id,name,active,token_hash,invitation_link,phone) VALUES($1,$2,$1,$3,$4,$5,$6)',[id,tenant,active,hash(token),link,'6281234567890']);
+      await pool.query('INSERT INTO wedding.guests(id,tenant_id,name,active,token_hash,invitation_link,phone) VALUES($1,$2,$1,$3,$4,$5,$6)',[id,tenants[tenant],active,hash(token),link,'6281234567890']);
       await pool.query('INSERT INTO wedding.devices(guest_id,visitor_hash) VALUES($1,$2)',[id,hash(id)]);
       await pool.query("INSERT INTO wedding.sessions(token_hash,guest_id,version,expires_at) VALUES($1,$2,1,now()+interval '1 day')",[hash(id==='cut-a'?oldSession:secret()),id]);
       await pool.query("INSERT INTO wedding.challenges(id,cookie_hash,guest_id,version,expires_at) VALUES($1,$2,$3,1,now()+interval '5 minutes')",[id==='cut-a'?oldChallenge:secret(),hash(oldCookie),id]);
       await pool.query("INSERT INTO wedding.responses(guest_id,attendance,guest_count,message) VALUES($1,'attending',2,'Preserve my wish')",[id]);
     }
-    await pool.query("INSERT INTO wedding.sessions(token_hash,account_id,tenant_id,csrf,expires_at) VALUES('cut-admin','firsta','firsta-talitha','csrf',now()+interval '1 day')");
-    await pool.query("UPDATE wedding.settings SET value=$1 WHERE tenant_id='cutover-two'",[{partnerOneName:'Keep Name',linkPreviewTitle:'Cutover Two Preview'}]);
-    await pool.query("INSERT INTO wedding.media(tenant_id,slot,id,mime,data) VALUES('cutover-two','groom','cut-media','image/webp',$1)",[Buffer.from('preserve media')]);
+    await pool.query("INSERT INTO wedding.sessions(token_hash,account_id,tenant_id,csrf,expires_at) SELECT 'cut-admin',owner_id,id,'csrf',now()+interval '1 day' FROM wedding.tenants WHERE slug='firsta-talitha'");
+    await pool.query("UPDATE wedding.settings SET value=$1 WHERE tenant_id=(SELECT id FROM wedding.tenants WHERE slug='cutover-two')",[{partnerOneName:'Keep Name',linkPreviewTitle:'Cutover Two Preview'}]);
+    await pool.query("INSERT INTO wedding.media(tenant_id,slot,id,mime,data) SELECT id,'groom','cut-media','image/webp',$1 FROM wedding.tenants WHERE slug='cutover-two'",[Buffer.from('preserve media')]);
     const before=await snapshot();
-    const expected=[{tenant:'cutover-two',count:1},{tenant:'firsta-talitha',count:2}];
+    const expected=[{tenant:tenants['cutover-two'],count:1},{tenant:tenants['firsta-talitha'],count:2}].sort((a,b)=>a.tenant.localeCompare(b.tenant));
     assert.deepEqual(JSON.parse(await command(['rotate-links'],env)),{applied:false,tenants:expected});
     assert.deepEqual(await snapshot(),before);
     // Fail after another account has already changed, proving transaction rollback.
@@ -568,7 +637,7 @@ test('explicit all-account cutover is atomic, preserves content, resets guest ac
     assert.equal((await request('/api/invitation',null,'wedding_guest='+oldSession)).status,401);
     assert.equal((await request('/api/access/verify',{challenge:oldChallenge,eventId:'old'},'wedding_challenge='+oldCookie)).status,409);
     assert.equal((await request('/u/'+codes[1])).status,404);
-    const publicId=(await pool.query("SELECT public_id FROM wedding.tenants WHERE id='cutover-two'")).rows[0].public_id;
+    const publicId=(await pool.query("SELECT public_id FROM wedding.tenants WHERE slug='cutover-two'")).rows[0].public_id;
     const page=await request('/u/'+codes[2]);assert.equal(page.status,200);assert.ok((await page.text()).includes(`${origin}/${publicId}`));
     const challenge=await request('/api/access/challenge',{token:codes[0]});assert.equal(challenge.status,200);
     const c=await challenge.json();
@@ -580,7 +649,7 @@ test('explicit all-account cutover is atomic, preserves content, resets guest ac
   } finally {
     if(backend)await backend.server.close();
     await pool.query('DROP TRIGGER IF EXISTS fail_cutover ON wedding.guests; DROP FUNCTION IF EXISTS wedding.fail_cutover()');
-    await pool.query("DELETE FROM wedding.guests WHERE id LIKE 'cut-%'; DELETE FROM wedding.sessions WHERE token_hash='cut-admin'; DELETE FROM wedding.media WHERE tenant_id='cutover-two'; DELETE FROM wedding.settings WHERE tenant_id='cutover-two'; DELETE FROM wedding.tenants WHERE id='cutover-two'; DELETE FROM wedding.accounts WHERE email='cutover@example.com'");
+    await pool.query("DELETE FROM wedding.guests WHERE id LIKE 'cut-%'; DELETE FROM wedding.sessions WHERE token_hash='cut-admin'; DELETE FROM wedding.media WHERE tenant_id=(SELECT id FROM wedding.tenants WHERE slug='cutover-two'); DELETE FROM wedding.settings WHERE tenant_id=(SELECT id FROM wedding.tenants WHERE slug='cutover-two'); DELETE FROM wedding.tenants WHERE slug='cutover-two'; DELETE FROM wedding.accounts WHERE email='cutover@example.com'");
     await pool.end();
   }
 });

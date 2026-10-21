@@ -36,13 +36,13 @@ func (a *App) html(w http.ResponseWriter, r *http.Request) {
 			fail(404, "invalid_link", "Tautan undangan tidak ditemukan atau sudah dinonaktifkan.")
 		}
 		a.limited(w, r, "link", 120, 60)
-		g := row(r.Context(), a.Pool, `SELECT g.tenant_id FROM wedding.guests g JOIN wedding.tenants t ON t.id=g.tenant_id JOIN wedding.accounts a ON a.id=t.owner_id WHERE g.token_hash=$1 AND g.active=1 AND a.active`, hash(path[3:]))
+		g := row(r.Context(), a.Pool, `SELECT g.tenant_id::text AS tenant_id FROM wedding.guests g JOIN wedding.tenants t ON t.id=g.tenant_id JOIN wedding.accounts a ON a.id=t.owner_id WHERE g.token_hash=$1 AND g.active=1 AND a.active`, hash(path[3:]))
 		if g == nil {
 			fail(404, "invalid_link", "Tautan undangan tidak ditemukan atau sudah dinonaktifkan.")
 		}
 		tenant, filename = text(g["tenant_id"]), "access.html"
 	} else if landing != nil {
-		t := row(r.Context(), a.Pool, "SELECT id FROM wedding.tenants WHERE public_id=$1::uuid", landing[1])
+		t := row(r.Context(), a.Pool, "SELECT id::text AS id FROM wedding.tenants WHERE public_id=$1::uuid", landing[1])
 		if t == nil {
 			fail(404, "not_found", "Undangan tidak ditemukan.")
 		}
@@ -79,7 +79,10 @@ func (a *App) html(w http.ResponseWriter, r *http.Request) {
 	file, err := os.ReadFile(filepath.Join(a.Config.Templates, filename))
 	must(err)
 	if tenant == "" {
-		tenant = "firsta-talitha"
+		tenant = text(row(r.Context(), a.Pool, "SELECT id::text AS id FROM wedding.tenants WHERE slug='firsta-talitha'")["id"])
+		if tenant == "" {
+			fail(404, "not_found", "Undangan tidak ditemukan.")
+		}
 	}
 	s := row(r.Context(), a.Pool, `SELECT s.value,m.id AS "previewId",t.public_id::text AS public_id FROM wedding.settings s JOIN wedding.tenants t ON t.id=s.tenant_id LEFT JOIN wedding.media m ON m.tenant_id=s.tenant_id AND m.slot='preview' WHERE s.tenant_id=$1`, tenant)
 	if s == nil {

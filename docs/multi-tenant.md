@@ -18,6 +18,8 @@ Migrasi versi 1 adalah cutover schema multi-tenant awal. Pemisahan Go/React memp
 
 Pengujian awal pada salinan produksi mempertahankan 6 tamu, 12 media dan 11 catatan perangkat, serta memastikan hash password pemilik tidak berubah. Branch pengujian `dev-multitenant-20261020` kedaluwarsa 27 Oktober 2026.
 
+Migrasi versi 3 (`003-internal-uuidv7.sql`) mengganti seluruh ID account dan tenant, termasuk UUIDv4 account yang pernah diprovision, menjadi UUIDv7 native. Semua foreign key pada owner, tamu, settings, media, dan sesi dipetakan dalam transaksi yang sama. Account dan tenant baru memakai default `uuidv7()` PostgreSQL 18+. Slug dan `public_id` tetap stabil; link, hash, konten, dan sesi tetap dipertahankan. Timestamp UUIDv7 adalah waktu pembuatan ID baru, sementara `created_at` lama tetap utuh. Pengulangan migrasi tidak merotasi ID. Cutover memerlukan [maintenance singkat](vps-deploy.md#uuidv7-cutover), karena backend lama tidak mendukung tipe kolom baru.
+
 ## Stack dan deployment
 
 CMS memakai komponen React, state lokal dan fetch; undangan mempertahankan HTML/CSS/JavaScript. Go melayani API dan template HTML dengan metadata per tenant. Dua image berada dalam satu repository dengan dua host: CMS pada `dashboard.domain.id` dan undangan pada `invitation.domain.id`. Set `CMS_ORIGIN` dan `PUBLIC_ORIGIN` sesuai host tersebut. Cookie tetap host-only; API CMS dan preview memakai host dashboard, API tamu memakai host invitation. Tidak perlu CORS. Deployment memilih service dari perubahan sejak deployment sehat terakhir. [Aturan, routing, dan pemulihan](vps-deploy.md).

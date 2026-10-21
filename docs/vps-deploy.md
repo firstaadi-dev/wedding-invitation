@@ -117,6 +117,17 @@ python3 deploy.py --commit COMMIT_SEBELUMNYA --backend ghcr.io/owner/repo-backen
 
 Tidak ada rollback otomatis container atau database. Deployment yang gagal bisa meninggalkan satu container pada image baru, tetapi state tetap pasangan terakhir yang lolos. Retry mencakup perubahan tersebut lagi. Migration harus kompatibel dengan backend lama selama cutover; migration yang merusak memerlukan backup dan prosedur khusus. Pantau disk image dan hapus versi lama setelah masa rollback.
 
+### UUIDv7 cutover
+
+Migration 3 memerlukan PostgreSQL 18+ dan maintenance singkat: backend sebelum perubahan ini tidak bisa membaca ID internal bertipe `uuid` dengan benar. Jangan menerapkannya lewat rollout normal yang masih melayani traffic dengan backend lama.
+
+1. Uji image baru dan migrasi pada branch/salinan produksi yang terisolasi. Simpan backup/restore point sebelum cutover beserta pasangan image sehat.
+2. Hentikan backend lama pada project Compose undangan (`docker compose --project-directory /opt/wedding-invitation -f /opt/wedding-invitation/compose.yaml stop backend`), termasuk instance lain bila ada. Jalankan langkah ini sebelum workflow deploy image baru; jangan mulai deployment otomatis sebelum backend dihentikan.
+3. Deploy image backend baru melalui `deploy.py` seperti biasa. Helper menjalankan migration 3 lalu menghidupkan backend baru. Migrasi memetakan semua ID dan foreign key dalam satu transaksi, menunggu lock maksimal 5 detik per akuisisi, dan rollback penuh bila gagal. Retry migrasi tidak mengganti UUID yang sudah tercatat pada versi 3.
+4. Periksa login dan pemulihan sesi admin, sesi tamu lama, metadata/link publik, media, dan isolasi tenant. `accounts.id`, `tenants.id`, `owner_id`, dan kolom referensinya kini `uuid`; `schema_migrations` mencatat versi 3. Gunakan email/slug untuk mencari ID baru.
+
+Bila migrasi gagal sebelum commit, database tetap pada skema lama dan backend lama dapat dihidupkan kembali. Setelah commit, rollback image lama saja tidak aman: pulihkan database dari restore point sebelum migrasi beserta image lama, atau perbaiki backend baru. Restore menghilangkan penulisan yang terjadi setelah restore point; pertahankan maintenance hingga hasil verifikasi diterima.
+
 ## Verifikasi lokal
 
 ```sh

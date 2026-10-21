@@ -19,7 +19,7 @@ npm run dev:frontend
 
 Atur `PUBLIC_ORIGIN=http://invitation.localhost:5173` dan `CMS_ORIGIN=http://dashboard.localhost:5173` untuk development. Buka http://dashboard.localhost:5173 untuk CMS, `/preview` pada host dashboard dengan sesi admin, atau tautan tamu pada host invitation. Vite meneruskan route aplikasi ke Go; Go tetap memilih halaman akses/undangan dan metadata tenant. Pada development backend membaca source template; produksi memakai hasil build Vite. `npm start` menjalankan backend dengan template hasil build dan membutuhkan frontend/proxy terpisah.
 
-`neon.ts` tetap memakai Postgres. Koneksi `DATABASE_URL` pooled dipakai aplikasi; `DATABASE_URL_UNPOOLED` dipakai migrasi. Query menyebut schema `wedding` secara eksplisit, tanpa ORM. PostgreSQL dan media tetap di Neon.
+`neon.ts` tetap memakai Postgres. PostgreSQL 18+ diperlukan untuk `uuidv7()` bawaan pada ID internal account dan tenant. Koneksi `DATABASE_URL` pooled dipakai aplikasi; `DATABASE_URL_UNPOOLED` dipakai migrasi. Query menyebut schema `wedding` secara eksplisit, tanpa ORM. PostgreSQL dan media tetap di Neon.
 
 Isi environment mengikuti `.env.example`. Password admin minimal 12 karakter, disimpan sebagai hash scrypt. Untuk membuat hash tanpa menampilkan password di terminal (zsh):
 
@@ -65,7 +65,7 @@ npm run test:integration
 Tes integrasi memerlukan Postman CLI, `TEST_DATABASE_DISPOSABLE=1`, serta `TEST_DATABASE_URL` dan `TEST_DATABASE_URL_UNPOOLED` pada `.env.test.local` menuju database disposable. Tes menghapus data pengujian. Jangan memakai koneksi produksi. Contoh lokal:
 
 ```sh
-docker run --name invitation-test-db -e POSTGRES_PASSWORD=invitation-test -e POSTGRES_DB=invitation_test -p 127.0.0.1:55439:5432 -d postgres:17-alpine
+docker run --name invitation-test-db -e POSTGRES_PASSWORD=invitation-test -e POSTGRES_DB=invitation_test -p 127.0.0.1:55439:5432 -d postgres:18-alpine
 cp .env.test.example .env.test.local
 npm run test:integration
 # Selesai pengujian:

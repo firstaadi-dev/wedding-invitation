@@ -74,14 +74,14 @@ func ProvisionAccount(ctx context.Context, tx pgx.Tx, v AccountMigration, passwo
 	if !match(`^[a-f0-9]{32}:[a-f0-9]{128}$`, passwordHash) {
 		return errors.New("A valid password hash is required for a new account")
 	}
-	id := uuid()
-	if _, err = tx.Exec(ctx, "INSERT INTO accounts(id,email,password_hash) VALUES($1,$2,$3)", id, v.Email, passwordHash); err != nil {
+	var id, tenant string
+	if err = tx.QueryRow(ctx, "INSERT INTO accounts(email,password_hash) VALUES($1,$2) RETURNING id::text", v.Email, passwordHash).Scan(&id); err != nil {
 		return err
 	}
-	if _, err = tx.Exec(ctx, "INSERT INTO tenants(id,owner_id,slug,name) VALUES($1,$2,$1,$3)", v.Slug, id, v.Name); err != nil {
+	if err = tx.QueryRow(ctx, "INSERT INTO tenants(owner_id,slug,name) VALUES($1,$2,$3) RETURNING id::text", id, v.Slug, v.Name).Scan(&tenant); err != nil {
 		return err
 	}
-	_, err = tx.Exec(ctx, "INSERT INTO settings(tenant_id) VALUES($1)", v.Slug)
+	_, err = tx.Exec(ctx, "INSERT INTO settings(tenant_id) VALUES($1)", tenant)
 	return err
 }
 func Migrate(ctx context.Context, dsn, schema, passwordHash string) error {
@@ -147,6 +147,21 @@ func Migrate(ctx context.Context, dsn, schema, passwordHash string) error {
 			return err
 		}
 		if _, err = tx.Exec(ctx, "INSERT INTO schema_migrations(version) VALUES(2)"); err != nil {
+			return err
+		}
+	}
+	if err = tx.QueryRow(ctx, "SELECT EXISTS(SELECT 1 FROM schema_migrations WHERE version=3)").Scan(&applied); err != nil {
+		return err
+	}
+	if !applied {
+		data, err := dbdata.Files.ReadFile("003-internal-uuidv7.sql")
+		if err != nil {
+			return err
+		}
+		if _, err = tx.Exec(ctx, string(data)); err != nil {
+			return err
+		}
+		if _, err = tx.Exec(ctx, "INSERT INTO schema_migrations(version) VALUES(3)"); err != nil {
 			return err
 		}
 	}

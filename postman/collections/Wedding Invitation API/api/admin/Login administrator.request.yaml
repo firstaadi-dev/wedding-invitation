@@ -25,6 +25,7 @@ scripts:
       pm.collectionVariables.set('adminCookie', pm.response.headers.get('Set-Cookie').split(';')[0]);
       pm.test('Session belongs to the requested account', () => pm.expect(pm.response.json().account.email).to.eql(pm.variables.get('adminEmail')));
       pm.test('Session includes tenant identity', () => pm.expect(pm.response.json().account.tenant.slug).to.be.a('string'));
+      pm.test('Internal tenant ID is UUIDv7', () => pm.expect(pm.response.json().account.tenant.id).to.match(/^[a-f0-9]{8}-[a-f0-9]{4}-7[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/));
 
       pm.test('Session includes an opaque invitation ID and the invitation origin', () => {
         const account=pm.response.json().account;

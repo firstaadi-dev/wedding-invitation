@@ -228,7 +228,7 @@ func (a *App) session(r *http.Request, admin bool) map[string]any {
 	if err != nil || !match(`^[A-Za-z0-9_-]{43}$`, cookie.Value) {
 		return nil
 	}
-	return row(r.Context(), a.Pool, `SELECT s.token_hash,s.guest_id,s.version,s.csrf,s.account_id,g.name,COALESCE(g.tenant_id,s.tenant_id) AS tenant_id,t.slug AS tenant_slug,t.public_id::text AS public_id,t.name AS tenant_name,a.email
+	return row(r.Context(), a.Pool, `SELECT s.token_hash,s.guest_id,s.version,s.csrf,s.account_id::text AS account_id,g.name,COALESCE(g.tenant_id,s.tenant_id)::text AS tenant_id,t.slug AS tenant_slug,t.public_id::text AS public_id,t.name AS tenant_name,a.email
  FROM wedding.sessions s LEFT JOIN wedding.guests g ON g.id=s.guest_id
  JOIN wedding.tenants t ON t.id=COALESCE(g.tenant_id,s.tenant_id)
  JOIN wedding.accounts owner ON owner.id=t.owner_id AND owner.active LEFT JOIN wedding.accounts a ON a.id=s.account_id
@@ -410,7 +410,7 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 	if !emailOK || length(email) > 254 || !match(`^[^\s@]+@[^\s@]+\.[^\s@]+$`, strings.TrimSpace(email)) || !passwordOK || password == "" || length(password) > 1024 {
 		fail(400, "credentials", "Email atau kata sandi tidak valid.")
 	}
-	s := row(r.Context(), a.Pool, `SELECT a.id,a.email,a.password_hash,t.id AS tenant_id,t.slug AS tenant_slug,t.public_id::text AS public_id,t.name AS tenant_name FROM wedding.accounts a JOIN wedding.tenants t ON t.owner_id=a.id WHERE a.email=$1 AND a.active`, strings.ToLower(strings.TrimSpace(email)))
+	s := row(r.Context(), a.Pool, `SELECT a.id::text AS id,a.email,a.password_hash,t.id::text AS tenant_id,t.slug AS tenant_slug,t.public_id::text AS public_id,t.name AS tenant_name FROM wedding.accounts a JOIN wedding.tenants t ON t.owner_id=a.id WHERE a.email=$1 AND a.active`, strings.ToLower(strings.TrimSpace(email)))
 	encoded := strings.Repeat("0", 32) + ":" + strings.Repeat("0", 128)
 	if s != nil {
 		encoded = text(s["password_hash"])

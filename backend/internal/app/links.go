@@ -45,7 +45,7 @@ func RotateLegacyLinks(ctx context.Context, pool *pgxpool.Pool, origin string, a
 	if _, err = tx.Exec(ctx, "LOCK TABLE wedding.guests IN EXCLUSIVE MODE"); err != nil {
 		return nil, err
 	}
-	r, err := tx.Query(ctx, "SELECT id,tenant_id,token_hash,COALESCE(invitation_link,'') AS link FROM wedding.guests ORDER BY tenant_id,id FOR UPDATE")
+	r, err := tx.Query(ctx, "SELECT id,tenant_id::text AS tenant_id,token_hash,COALESCE(invitation_link,'') AS link FROM wedding.guests ORDER BY tenant_id,id FOR UPDATE")
 	if err != nil {
 		return nil, err
 	}
