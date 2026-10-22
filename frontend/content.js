@@ -1,5 +1,4 @@
 import {countdownParts} from './countdown.js';
-import {getLogoUrl} from 'idn-finlogos';
 const music = document.querySelector('.music-status');
 if (location.hash) location.replace(`${location.pathname}?access=1${location.hash}`);
 const scope = new URLSearchParams();
@@ -62,10 +61,6 @@ async function load() {
       if (account.phone) {const phone = document.createElement('p');phone.textContent = `Kontak: ${account.phone}`;card.append(phone);}
       return card;
     }
-    const logoUrl = getLogoUrl(account.bank);
-    if (logoUrl) {
-      const logo = document.createElement('img');logo.className = 'gift-bank-logo';logo.src = logoUrl;logo.alt = `Logo ${account.bank}`;logo.onerror = () => logo.remove();card.append(logo);
-    }
     const bank = document.createElement('h3');bank.textContent = account.bank;
     const row = document.createElement('div');row.className = 'gift-account-row';
     const input = document.createElement('input');input.className = 'gift-account';input.value = account.number;input.readOnly = true;input.setAttribute('aria-label',`Nomor rekening ${account.bank}`);
@@ -75,11 +70,6 @@ async function load() {
     button.addEventListener('click',async () => {try {await navigator.clipboard.writeText(input.value.replace(/\s/g,''));status.textContent = 'Nomor rekening disalin.';} catch {input.focus();input.select();status.textContent = 'Salin nomor rekening yang sudah dipilih.';}});
     row.append(input,button);card.append(bank,row,owner,status);return card;
   }));
-  if (accounts.some(account => account.type !== 'address' && getLogoUrl(account.bank))) {
-    const credit = document.createElement('p');credit.className = 'gift-logo-credit';
-    credit.innerHTML = 'Logo bank oleh <a href="https://github.com/hafidznoor/idn-finlogos" target="_blank" rel="noopener noreferrer">idn-finlogos</a> · <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC 4.0</a>';
-    giftContainer.append(credit);
-  }
   const frames = document.querySelectorAll('.couple-grid .photo-placeholder');
   ['groom','bride'].forEach((slot,index) => {
     if (!media[slot]) return;
