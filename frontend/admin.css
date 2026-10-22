@@ -1357,6 +1357,14 @@ fieldset {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
 }
+.gift-bank-logo-preview {
+  display: block;
+  width: 76px;
+  height: 28px;
+  margin-top: 8px;
+  object-fit: contain;
+  object-position: left center;
+}
 .address-fields {
   display: grid;
   gap: 20px;

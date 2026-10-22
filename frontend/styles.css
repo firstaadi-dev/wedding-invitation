@@ -43,6 +43,8 @@
 .gift-bank + .gift-bank {margin-top:16px;padding-top:16px;border-top:1px solid #d7c5ab;}
 .gift-bank-logo {display:block;width:48px;max-width:100%;height:24px;object-fit:contain;object-position:left center;}
 .gift-bank-logo[src$="bank-mandiri.webp"] {width:76px;}
+.gift-logo-credit {margin-top:16px;text-align:center;font-size:10px;color:#a89378;}
+.gift-logo-credit a {color:inherit;}
 .gift-account-row {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;}
 .gift-paper .gift-account {min-width:0;border:0;background:transparent;padding:0;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;user-select:all;}
 .gift-bank-info>p {font-size:13px;line-height:1.6;margin-top:4px;color:var(--wood);}

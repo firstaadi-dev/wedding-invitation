@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import { createPortal } from "react-dom";
+import { getLogoUrl, listLogos } from "idn-finlogos";
 import {
   useCallback,
   useEffect,
@@ -25,6 +26,10 @@ import type {
   Confirm,
 } from "./types";
 import "../admin.css";
+
+const bankOptions = listLogos({ category: "bank-logo" }).sort((a, b) =>
+  a.name.localeCompare(b.name, "id"),
+);
 
 const pages = {
   tamu: "Tamu Undangan",
@@ -1942,6 +1947,7 @@ function SettingsForm({
                           Nama bank
                           <input
                             required
+                            list={`bank-options-${index}`}
                             value={item.bank}
                             maxLength={80}
                             onChange={(e) =>
@@ -1951,6 +1957,18 @@ function SettingsForm({
                               })
                             }
                           />
+                          <datalist id={`bank-options-${index}`}>
+                            {bankOptions.map((bank) => (
+                              <option key={bank.slug} value={bank.name} />
+                            ))}
+                          </datalist>
+                          {getLogoUrl(item.bank) && (
+                            <img
+                              className="gift-bank-logo-preview"
+                              src={getLogoUrl(item.bank)!}
+                              alt={`Logo ${item.bank}`}
+                            />
+                          )}
                         </label>
                         <label>
                           Nomor rekening
