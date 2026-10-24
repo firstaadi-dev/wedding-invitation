@@ -73,18 +73,30 @@ export function queryGuests(
 export function mediaType(file, music = false) {
   if (!file) throw new Error("Pilih berkas terlebih dahulu.");
   const extensions = music
-    ? { mp3: "audio/mpeg" }
+    ? {
+        mp3: "audio/mpeg",
+        m4a: "audio/mp4",
+        aac: "audio/aac",
+        wav: "audio/wav",
+        ogg: "audio/ogg",
+        oga: "audio/ogg",
+        opus: "audio/ogg",
+        flac: "audio/flac",
+        webm: "audio/webm",
+      }
     : {
         jpg: "image/jpeg",
         jpeg: "image/jpeg",
         png: "image/png",
         webp: "image/webp",
       };
-  const type =
-    file.type || extensions[file.name.split(".").pop().toLowerCase()];
+  const extensionType = extensions[file.name.split(".").pop().toLowerCase()];
+  const type = (music && extensionType) || file.type || extensionType;
   if (!Object.values(extensions).includes(type))
     throw new Error(
-      music ? "Gunakan berkas MP3." : "Gunakan foto JPG, PNG, atau WebP.",
+      music
+        ? "Gunakan MP3, M4A, AAC, WAV, OGG/Opus, FLAC, atau WebM audio."
+        : "Gunakan foto JPG, PNG, atau WebP.",
     );
   if (!file.size) throw new Error("Berkas kosong. Pilih berkas lain.");
   if (file.size > (music ? 25 : 12) * 1024 * 1024)

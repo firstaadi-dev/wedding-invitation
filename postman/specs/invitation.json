@@ -1699,8 +1699,8 @@
     "/api/admin/media/{slot}": {
       "put": {
         "operationId": "uploadMedia",
-        "summary": "Upload/replaces a photo or MP3 music slot",
-        "description": "Raw binary body, no multipart. Photos up to 12 MiB, decoded/re-encoded by Sharp; music MP3 up to 25 MiB with frame validation. Old file removed after committed replacement. The preview slot creates a public 1200\u00d7630 JPEG for link thumbnails; other media remains session-protected. All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
+        "summary": "Upload or replace a photo or background audio",
+        "description": "Raw binary body, no multipart. Photos up to 12 MiB, decoded/re-encoded by libvips. Audio up to 25 MiB: MP3 (including consecutive leading ID3v2 tags), M4A/MP4 audio, AAC, WAV, OGG/Opus, FLAC and WebM audio. MP3 is validated and preserved; other audio is decoded and converted to MP3 for browser playback. Converted output must also fit 25 MiB. Malformed audio returns 415, oversized input/output 413 and a processing timeout 503. Failed uploads preserve existing media. The preview slot creates a public 1200\u00d7630 JPEG; other media remains session-protected. All resources are scoped to the authenticated tenant.",
         "tags": [
           "Admin"
         ],
@@ -1867,6 +1867,72 @@
               }
             },
             "audio/mpeg": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "audio/mp4": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "audio/x-m4a": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "audio/aac": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "audio/x-aac": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "audio/wav": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "audio/x-wav": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "audio/ogg": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "audio/opus": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "audio/flac": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "audio/x-flac": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "audio/webm": {
               "schema": {
                 "type": "string",
                 "format": "binary"

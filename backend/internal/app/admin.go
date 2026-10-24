@@ -383,14 +383,13 @@ func (a *App) admin(w http.ResponseWriter, r *http.Request) {
 		} else {
 			limit := int64(12 * 1024 * 1024)
 			if slot == "music" {
-				limit = 25 * 1024 * 1024
+				limit = maxAudioBytes
 			}
 			data, _ := body(w, r, limit, true)
 			mime := r.Header.Get("Content-Type")
 			if slot == "music" {
-				if mime != "audio/mpeg" || !validMP3(data) {
-					fail(415, "media_type", "Unggah lagu dalam format MP3.")
-				}
+				data = processAudio(ctx, data, mime)
+				mime = "audio/mpeg"
 			} else {
 				if mime != "image/jpeg" && mime != "image/png" && mime != "image/webp" {
 					fail(415, "media_type", "Gunakan JPG, PNG atau WebP.")

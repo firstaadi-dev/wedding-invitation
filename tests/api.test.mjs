@@ -478,10 +478,12 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal(partial.status,206);assert.equal((await partial.arrayBuffer()).byteLength,10);
       const invalid = await fetch(base+'/api/admin/media/bride',{method:'PUT',headers:{Origin:cmsOrigin,Cookie:`wedding_admin=${admin.wedding_admin}`,'X-CSRF-Token':csrf,'Content-Type':'image/png'},body:'<svg onload="evil()"></svg>'});
       assert.equal(invalid.status,415);
-      const music = readFileSync(new URL('./fixtures/silence.mp3',import.meta.url));
+      const music = readFileSync(new URL('./fixtures/silence-id3.mp3',import.meta.url));
       const musicHeaders = {Origin:cmsOrigin,Cookie:`wedding_admin=${admin.wedding_admin}`,'X-CSRF-Token':csrf,'Content-Type':'audio/mpeg'};
-      const uploaded = await fetch(base+'/api/admin/media/music',{method:'PUT',headers:musicHeaders,body:music});
-      assert.equal(uploaded.status,200);const musicPath = (await uploaded.json()).media.music;
+      const child=spawn('postman',['collection','run','postman/collections/Wedding Invitation API','-i','Upload MP3 with consecutive ID3 metadata','--env-var',`cmsBaseUrl=${base}`,'--env-var',`cmsOrigin=${cmsOrigin}`,'--env-var',`adminCookie=wedding_admin=${admin.wedding_admin}`,'--env-var',`csrf=${csrf}`,'--working-dir',process.cwd(),'--no-report-events'],{stdio:['ignore','pipe','pipe']});
+      let output='';child.stdout.on('data',c=>output+=c);child.stderr.on('data',c=>output+=c);
+      const [code]=await once(child,'close');console.log(output);assert.equal(code,0,output);
+      const musicPath = (await adminRequest('/api/admin/content')).value.media.music;
       assert.equal((await request(musicPath)).response.status,401);
       const downloaded = await fetch(base+musicPath,{headers:{Cookie:`wedding_guest=${guestBrowser.wedding_guest}`}});
       assert.equal(downloaded.headers.get('content-type'),'audio/mpeg');
@@ -494,6 +496,23 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal((await request('/api/invitation',{jar:guestBrowser})).value.media.music,musicPath);
       assert.equal((await adminRequest('/api/admin/media/music',{method:'DELETE'})).response.status,200);
       assert.equal((await request('/api/invitation',{jar:guestBrowser})).value.media.music,undefined);
+    });
+    await t.test('common audio formats upload, play as MP3, support ranges and preserve music on failure',async () => {
+      const child=spawn('postman',['collection','run','postman/collections/Wedding Invitation API','-i','Upload common audio format','-d','tests/fixtures/audio-formats.json','--env-var',`cmsBaseUrl=${base}`,'--env-var',`cmsOrigin=${cmsOrigin}`,'--env-var',`adminCookie=wedding_admin=${admin.wedding_admin}`,'--env-var',`csrf=${csrf}`,'--working-dir',process.cwd(),'--no-report-events'],{stdio:['ignore','pipe','pipe']});
+      let output='';child.stdout.on('data',c=>output+=c);child.stderr.on('data',c=>output+=c);
+      const [code]=await once(child,'close');console.log(output);assert.equal(code,0,output);
+      const musicPath=(await adminRequest('/api/admin/content')).value.media.music;
+      const audio=await fetch(base+musicPath,{headers:{Cookie:`wedding_guest=${guestBrowser.wedding_guest}`}});
+      assert.equal(audio.status,200);assert.equal(audio.headers.get('content-type'),'audio/mpeg');
+      const data=Buffer.from(await audio.arrayBuffer());assert.ok(data.length>0);
+      const range=await fetch(base+musicPath,{headers:{Cookie:`wedding_guest=${guestBrowser.wedding_guest}`,Range:'bytes=0-9'}});
+      assert.equal(range.status,206);assert.deepEqual(Buffer.from(await range.arrayBuffer()),data.subarray(0,10));
+      for(const {audioMime} of JSON.parse(readFileSync(new URL('./fixtures/audio-formats.json',import.meta.url),'utf8'))) {
+        const result=await fetch(base+'/api/admin/media/music',{method:'PUT',headers:{Origin:cmsOrigin,Cookie:`wedding_admin=${admin.wedding_admin}`,'X-CSRF-Token':csrf,'Content-Type':audioMime},body:'not an audio file'});
+        assert.equal(result.status,415);
+        assert.equal((await adminRequest('/api/admin/content')).value.media.music,musicPath);
+      }
+      assert.equal((await adminRequest('/api/admin/media/music',{method:'DELETE'})).response.status,200);
     });
     await t.test('global WhatsApp settings persist, stay private, and preview metadata is public and escaped',async () => {
       const template = 'Yth. {nama},\nUndangan Firsta & Talitha:\n{link}';

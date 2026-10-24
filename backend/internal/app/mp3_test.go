@@ -51,3 +51,25 @@ func TestValidMP3SupportsMPEG2AndID3Metadata(t *testing.T) {
 		t.Fatal("invalid ID3 size encoding accepted")
 	}
 }
+
+func TestValidMP3SupportsConsecutiveID3Tags(t *testing.T) {
+	fixture, err := os.ReadFile("../../../tests/fixtures/silence-id3.mp3")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !validMP3(fixture) {
+		t.Fatal("MP3 with consecutive ID3v2 tags rejected")
+	}
+	for name, data := range map[string][]byte{
+		"truncated audio":         fixture[:len(fixture)-1],
+		"truncated second tag":    fixture[:19],
+		"metadata without audio":  fixture[:20],
+		"invalid second tag size": append(append(bytes.Clone(fixture[:19]), 128), fixture[20:]...),
+	} {
+		t.Run(name, func(t *testing.T) {
+			if validMP3(data) {
+				t.Fatal("invalid MP3 accepted")
+			}
+		})
+	}
+}

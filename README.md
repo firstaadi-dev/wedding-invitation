@@ -4,7 +4,7 @@ Undangan satu halaman tanpa navigasi: amplop burgundy, segel pembuka, transisi j
 
 ## Jalankan
 
-Node.js 22+, Go 1.26+, libvips (8.15+), npm, dan Neon Postgres. Backend Go + Chi + pgx; CMS React + TypeScript; undangan HTML/CSS/JavaScript dibangun Vite.
+Node.js 22+, Go 1.26+, libvips (8.15+), FFmpeg, npm, dan Neon Postgres. Backend Go + Chi + pgx; CMS React + TypeScript; undangan HTML/CSS/JavaScript dibangun Vite.
 
 ```sh
 npm ci
@@ -43,7 +43,7 @@ Fingerprint agent v4 melalui custom subdomain `validator.firsta.my.id`, region `
 
 Ad blocker harus dinonaktifkan untuk tes CDN lokal. Helium terdeteksi sebagai anti-detect/tampering pada pengujian ini dan ditolak oleh kebijakan server yang ketat; uji juga Safari/Chrome biasa. Custom subdomain sudah Active dan environment Render `FINGERPRINT_ENDPOINT=https://validator.firsta.my.id` sudah diisi. Agent memakai `/web/v4/` dan `endpoints` pada subdomain tersebut, tetap dengan region `ap`. Alur tamu Chrome di domain produksi berhasil pada 14 Oktober 2026.
 
-Media disimpan di tiga belas slot Postgres; foto didekode, diputar sesuai EXIF, diperkecil dan dikonversi ke WebP. Ini cukup untuk undangan kecil. Gunakan object storage jika galeri besar; transfer media memakai bandwidth database. MP3 dibatasi 25 MiB dengan validasi header frame; audio belum dipilih pengguna. Fixture tes `tests/fixtures/silence.mp3` adalah 40 frame MPEG-1 Layer III hening yang dibuat sendiri, bukan lagu produksi; decoder macOS memeriksanya. Media hanya dilayani kepada sesi admin/tamu aktif, dengan dukungan Range.
+Media disimpan di tiga belas slot Postgres; foto didekode, diputar sesuai EXIF, diperkecil dan dikonversi ke WebP. Ini cukup untuk undangan kecil. Gunakan object storage jika galeri besar; transfer media memakai bandwidth database. Audio MP3, M4A/AAC, WAV, OGG/Opus, FLAC, dan WebM dibatasi 25 MiB. MP3 divalidasi per frame dan disimpan utuh; format lain didekode dan dikonversi menjadi MP3 untuk pemutaran browser. Input, hasil konversi, dan waktu pemrosesan dibatasi; upload gagal mempertahankan lagu sebelumnya. Fixture tes `tests/fixtures/silence.mp3` adalah 40 frame MPEG-1 Layer III hening yang dibuat sendiri, bukan lagu produksi; decoder macOS memeriksanya. Fixture `silence-id3.mp3` memakai audio hening yang sama dengan dua tag ID3v2 untuk menguji upload metadata berlapis. Fixture audio dalam format lain juga dibuat dari audio hening yang sama. Media hanya dilayani kepada sesi admin/tamu aktif, dengan dukungan Range.
 
 ## Sumbangan, konfirmasi & ucapan
 

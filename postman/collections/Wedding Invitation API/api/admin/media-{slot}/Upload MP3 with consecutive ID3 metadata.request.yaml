@@ -1,0 +1,24 @@
+$kind: http-request
+description: Upload synthesized silent MP3 with two leading ID3v2 tags. Run with the repository root as the working directory.
+url: '{{cmsBaseUrl}}/api/admin/media/music'
+method: PUT
+order: 1500
+headers:
+  - key: Origin
+    value: '{{cmsOrigin}}'
+  - key: Cookie
+    value: '{{adminCookie}}'
+  - key: X-CSRF-Token
+    value: '{{csrf}}'
+  - key: Content-Type
+    value: audio/mpeg
+body:
+  type: file
+  content:
+    src: tests/fixtures/silence-id3.mp3
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('MP3 with consecutive ID3 tags uploads successfully', () => pm.response.to.have.status(200));
+      pm.test('Uploaded music has a private media URL', () => pm.expect(pm.response.json().media.music).to.match(/^\/media\/[a-f0-9-]{36}$/));

@@ -1358,11 +1358,15 @@ function MediaCard({
         </div>
       )}
       <label className="file-picker">
-        <span>{music ? "Pilih MP3" : "Pilih foto"}</span>
+        <span>{music ? "Pilih audio" : "Pilih foto"}</span>
         <input
           type="file"
           ref={input}
-          accept={music ? "audio/mpeg,.mp3" : "image/jpeg,image/png,image/webp"}
+          accept={
+            music
+              ? "audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/ogg,audio/flac,audio/webm,.mp3,.m4a,.aac,.wav,.ogg,.oga,.opus,.flac,.webm"
+              : "image/jpeg,image/png,image/webp"
+          }
           aria-label={`Pilih berkas ${title}`}
           disabled={busy}
           onChange={(e) => select(e.target.files?.[0])}
@@ -2424,7 +2428,8 @@ function App() {
                   </header>
                   <p className="info-note">
                     Foto JPG, PNG, WebP maksimal 12 MB diperkecil otomatis. Lagu
-                    MP3 maksimal 25 MB. Pilih berkas, lalu tekan Unggah.
+                    MP3, M4A, AAC, WAV, OGG/Opus, FLAC, atau WebM audio maksimal
+                    25 MB. Pilih berkas, lalu tekan Unggah.
                   </p>
                   <section
                     className="media-section"
@@ -2466,7 +2471,7 @@ function App() {
                     aria-labelledby="music-title"
                   >
                     <div className="section-heading">
-                      <h2 id="music-title">Musik Latar Belakang (MP3)</h2>
+                      <h2 id="music-title">Musik Latar Belakang</h2>
                     </div>
                     <div id="music-media">
                       {mediaCard("music", "Lagu undangan")}

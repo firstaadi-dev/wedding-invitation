@@ -3,15 +3,16 @@ package app
 import "bytes"
 
 // validMP3 accepts complete MPEG Layer III streams with at least two frames.
-// Optional ID3v2 metadata may precede the stream and ID3v1 may follow it.
+// Consecutive ID3v2 metadata tags may precede the stream and ID3v1 may follow it.
 func validMP3(data []byte) bool {
 	start, end := 0, len(data)
-	if bytes.HasPrefix(data, []byte("ID3")) {
-		if len(data) < 10 || data[3] < 2 || data[3] > 4 || data[4] == 0xff || data[6] > 127 || data[7] > 127 || data[8] > 127 || data[9] > 127 {
+	for bytes.HasPrefix(data[start:], []byte("ID3")) {
+		tag := data[start:]
+		if len(tag) < 10 || tag[3] < 2 || tag[3] > 4 || tag[4] == 0xff || tag[6] > 127 || tag[7] > 127 || tag[8] > 127 || tag[9] > 127 {
 			return false
 		}
-		tagSize := int(data[6])<<21 | int(data[7])<<14 | int(data[8])<<7 | int(data[9])
-		start = 10 + tagSize
+		tagSize := int(tag[6])<<21 | int(tag[7])<<14 | int(tag[8])<<7 | int(tag[9])
+		start += 10 + tagSize
 		if start > len(data) {
 			return false
 		}

@@ -14,7 +14,7 @@ COPY backend/ ./
 RUN go build -trimpath -o /invitation ./cmd/invitation
 
 FROM debian:trixie-slim
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libvips42t64 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libvips42t64 ffmpeg && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=build /invitation /usr/local/bin/invitation
 COPY --from=templates /frontend/dist/index.html /frontend/dist/access.html /app/templates/

@@ -1,0 +1,30 @@
+[
+  {
+    "audioFile": "tests/fixtures/silence.m4a",
+    "audioMime": "audio/mp4"
+  },
+  {
+    "audioFile": "tests/fixtures/silence.aac",
+    "audioMime": "audio/aac"
+  },
+  {
+    "audioFile": "tests/fixtures/silence.wav",
+    "audioMime": "audio/wav"
+  },
+  {
+    "audioFile": "tests/fixtures/silence.ogg",
+    "audioMime": "audio/ogg"
+  },
+  {
+    "audioFile": "tests/fixtures/silence.opus",
+    "audioMime": "audio/opus"
+  },
+  {
+    "audioFile": "tests/fixtures/silence.flac",
+    "audioMime": "audio/flac"
+  },
+  {
+    "audioFile": "tests/fixtures/silence.webm",
+    "audioMime": "audio/webm"
+  }
+]

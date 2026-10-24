@@ -1,0 +1,24 @@
+$kind: http-request
+description: Run with tests/fixtures/audio-formats.json and the repository root as the working directory to verify common audio uploads.
+url: '{{cmsBaseUrl}}/api/admin/media/music'
+method: PUT
+order: 1600
+headers:
+  - key: Origin
+    value: '{{cmsOrigin}}'
+  - key: Cookie
+    value: '{{adminCookie}}'
+  - key: X-CSRF-Token
+    value: '{{csrf}}'
+  - key: Content-Type
+    value: '{{audioMime}}'
+body:
+  type: file
+  content:
+    src: '{{audioFile}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Common audio format uploads successfully', () => pm.response.to.have.status(200));
+      pm.test('Processed audio has a private media URL', () => pm.expect(pm.response.json().media.music).to.match(/^\/media\/[a-f0-9-]{36}$/));

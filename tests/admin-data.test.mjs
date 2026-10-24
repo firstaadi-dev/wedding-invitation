@@ -24,8 +24,13 @@ test('CMS media validation accepts supported types and boundary sizes before upl
   assert.equal(mediaType({name:'photo.JPG',type:'',size:12*1024*1024}),'image/jpeg');
   assert.equal(mediaType({name:'photo',type:'image/webp',size:100}),'image/webp');
   assert.equal(mediaType({name:'song.MP3',type:'',size:25*1024*1024},true),'audio/mpeg');
+  for (const [ext,mime] of Object.entries({m4a:'audio/mp4',aac:'audio/aac',wav:'audio/wav',ogg:'audio/ogg',oga:'audio/ogg',opus:'audio/ogg',flac:'audio/flac',webm:'audio/webm'})) {
+    assert.equal(mediaType({name:`song.${ext.toUpperCase()}`,type:'',size:100},true),mime);
+  }
+  assert.equal(mediaType({name:'song.m4a',type:'audio/x-m4a',size:100},true),'audio/mp4');
+  assert.equal(mediaType({name:'song.wav',type:'application/octet-stream',size:100},true),'audio/wav');
   for (const file of [undefined,{name:'a.png',type:'image/png',size:0},{name:'a.png',type:'image/png',size:12*1024*1024+1},{name:'a.gif',type:'image/gif',size:100},{name:'a.svg',type:'image/svg+xml',size:100}]) assert.throws(() => mediaType(file));
-  for (const file of [{name:'a.mp3',type:'audio/mpeg',size:25*1024*1024+1},{name:'a.wav',type:'audio/wav',size:100},{name:'a.png',type:'image/png',size:100}]) assert.throws(() => mediaType(file,true));
+  for (const file of [{name:'a.mp3',type:'audio/mpeg',size:25*1024*1024+1},{name:'a.wav',type:'audio/wav',size:0},{name:'a.wav',type:'audio/wav',size:25*1024*1024+1},{name:'a.png',type:'image/png',size:100}]) assert.throws(() => mediaType(file,true));
 });
 
 
