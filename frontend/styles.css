@@ -603,8 +603,23 @@ body.gallery-open {overflow:hidden;}
 
 @media(min-width:1000px) {
   .entrance-picture {
+    background:none;
+  }
+  .entrance-picture::before,.entrance-picture::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:url('/assets/joglo-forest.webp') center 45%/cover no-repeat;
+  }
+  .entrance-picture::before {
+    inset:-16px;
+    filter:blur(12px) brightness(.65);
+  }
+  .entrance-picture::after {
+    width:min(100%,90svh);
+    margin-inline:auto;
     background-size:auto 125%;
-    background-color:#102d23;
+    mask-image:linear-gradient(90deg,transparent,#000 16%,#000 84%,transparent);
   }
   .entrance-trees.trees-left {
     left:-3%;
