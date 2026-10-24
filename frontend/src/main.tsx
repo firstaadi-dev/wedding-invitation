@@ -303,7 +303,7 @@ function GuestEditor({
 }: {
   guest: Guest | null;
   api: API;
-  onSaved: (result: { link?: string }) => Promise<void>;
+  onSaved: (result: { link?: string }) => void;
   onClose: () => void;
 }) {
   const [busy, setBusy] = useState(false),
@@ -319,7 +319,7 @@ function GuestEditor({
         guest ? "PATCH" : "POST",
         values,
       );
-      await onSaved(result);
+      onSaved(result);
       onClose();
     } catch (e) {
       setError(errorMessage(e));
@@ -2485,10 +2485,12 @@ function App() {
           guest={editor.guest}
           api={api}
           onClose={() => setEditor(undefined)}
-          onSaved={async (result) => {
-            await refreshGuests();
+          onSaved={(result) => {
             if (result.link) showLink(result.link);
             notice(editor.guest ? "Data tamu disimpan." : "Tamu ditambahkan.");
+            void refreshGuests().catch(() =>
+              notice("Tamu tersimpan. Muat ulang daftar untuk melihat perubahan.", true),
+            );
           }}
         />
       )}
