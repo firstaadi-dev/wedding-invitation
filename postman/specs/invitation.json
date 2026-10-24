@@ -2581,7 +2581,7 @@
       "put": {
         "operationId": "saveResponse",
         "summary": "Save attendance and a congratulatory wish",
-        "description": "Replace the current guest response, one per invitation shared across devices. Guest identity comes only from the active cookie session. Same-origin Origin header is mandatory; guests have no CSRF token. Attendance/count remain private to the guest and admin. Guest deletion cascades to their response.",
+        "description": "Replace the current guest response, one per invitation shared across devices. Guest identity comes only from the active cookie session. Same-origin Origin header is mandatory; guests have no CSRF token. Attendance/count remain private to the guest and admin. Guest deletion cascades to their response. X-Invitation-Token must match responseToken from the displayed invitation. A changed guest session rejects stale forms with 409; this token never grants access without the cookie.",
         "tags": [
           "Guest"
         ],
@@ -2598,6 +2598,15 @@
               "type": "string"
             },
             "description": "Optional tenant guard. A stale form with another tenant session is rejected with 401."
+          },
+          {
+            "name": "X-Invitation-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "responseToken captured when the form was loaded."
           }
         ],
         "requestBody": {
@@ -2683,6 +2692,16 @@
           },
           "500": {
             "description": "Temporary server failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Missing or stale invitation token; reload the displayed invitation.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3481,6 +3500,10 @@
             "type": "string",
             "format": "uuid",
             "description": "Opaque tenant scope for invitation, wishes and response requests. Legacy tenantSlug remains for old clients."
+          },
+          "responseToken": {
+            "type": "string",
+            "description": "Opaque session binding for RSVP; empty in admin preview."
           }
         },
         "additionalProperties": false,

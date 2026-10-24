@@ -128,6 +128,7 @@ func (a *App) respond(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Has("tenant") && !matchesTenant(r.URL.Query().Get("tenant"), s) {
 		fail(401, "unauthorized", "Undangan berubah. Silakan buka undangan kembali.")
 	}
+	requireResponseToken(r, s)
 	a.limited(w, r, "response", 20, 60)
 	_, v := body(w, r, 8192, false)
 	only(v, "attendance", "guestCount", "message")

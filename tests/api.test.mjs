@@ -147,6 +147,10 @@ test('Neon-backed CMS and guest access end to end',async t => {
   const admin = {};
   let csrf;let guest;let token;let guestBrowser;let guestVisitor;let invitationId;
   async function request(path,{method='GET',data,jar={},headers={}} = {}) {
+    if (path.startsWith('/api/response') && !Object.hasOwn(headers,'X-Invitation-Token') && jar.wedding_guest) {
+      const invitation = await request('/api/invitation',{jar});
+      headers = {'X-Invitation-Token':invitation.value.responseToken || '',...headers};
+    }
     const response = await fetch(base+path,{method,headers:{Origin:path.startsWith('/api/admin/') ? cmsOrigin : origin,...(Object.keys(jar).length ? {Cookie:Object.entries(jar).map(([k,v])=>`${k}=${v}`).join('; ')} : {}),...(data ? {'Content-Type':'application/json'} : {}),...headers},body:data ? JSON.stringify(data) : undefined});
     for (const cookie of response.headers.getSetCookie()) {const [key,value] = cookie.split(';')[0].split('=');jar[key]=value;}
     const type = response.headers.get('content-type');
@@ -311,6 +315,15 @@ test('Neon-backed CMS and guest access end to end',async t => {
       const other = await adminRequest('/api/admin/guests',{method:'POST',data:{name:'Undangan lain'}});
       const browser = await verify(await challenge(new URL(other.value.link).pathname.slice(3)),'other-visitor');
       const data = {attendance:'not_attending',guestCount:0,message:'Ucapan tamu lain'};
+      const displayed = (await request('/api/invitation',{jar:guestBrowser})).value;
+      for (const responseToken of [displayed.responseToken, '']) {
+        const stale = await request(`/api/response?tenant=${invitationId}`,{method:'PUT',data,jar:browser.jar,headers:{'X-Invitation-Token':responseToken}});
+        assert.equal(stale.response.status,409);
+        assert.equal(stale.value.code,'invitation_changed');
+      }
+      assert.equal((await request('/api/invitation',{jar:browser.jar})).value.response,null);
+      assert.deepEqual((await request('/api/invitation',{jar:guestBrowser})).value.response,own);
+
       assert.equal((await request('/api/response',{method:'PUT',data:{...data,guestId:guest.id},jar:browser.jar})).response.status,400);
       assert.equal((await request('/api/response',{method:'PUT',data,jar:browser.jar})).response.status,200);
       assert.deepEqual((await request('/api/invitation',{jar:guestBrowser})).value.response,own);

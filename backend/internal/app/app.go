@@ -262,6 +262,19 @@ func (a *App) invitationSession(r *http.Request) map[string]any {
 	}
 	return s
 }
+
+// Bind a rendered form to its session without exposing the session credential.
+func responseToken(s map[string]any) string {
+	if s["guest_id"] == nil {
+		return ""
+	}
+	return hash("invitation-response:" + text(s["token_hash"]))
+}
+func requireResponseToken(r *http.Request, s map[string]any) {
+	if subtle.ConstantTimeCompare([]byte(r.Header.Get("X-Invitation-Token")), []byte(responseToken(s))) != 1 {
+		fail(409, "invitation_changed", "Sesi undangan berubah. Muat ulang halaman sebelum mengisi konfirmasi.")
+	}
+}
 func matchesTenant(scope string, s map[string]any) bool {
 	return scope == text(s["tenant_slug"]) || scope == text(s["public_id"])
 }
@@ -354,6 +367,7 @@ func (a *App) serve(w http.ResponseWriter, r *http.Request) {
 		result["invitationId"] = s["public_id"]
 		result["canRespond"] = s["guest_id"] != nil
 		result["response"] = response
+		result["responseToken"] = responseToken(s)
 		jsonResponse(w, 200, result)
 		return
 	}

@@ -3,6 +3,8 @@ description: Replace the current guest response, one per invitation shared acros
 url: "{{baseUrl}}/api/response"
 method: PUT
 headers:
+  - key: X-Invitation-Token
+    value: '{{responseToken}}'
   - key: Origin
     value: '{{origin}}'
   - key: Cookie
@@ -23,6 +25,12 @@ settings: {}
 order: 5000
 
 scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      const invitation = await pm.sendRequest({url: pm.variables.get('baseUrl') + '/api/invitation', header: {Cookie: pm.variables.get('guestCookie')}});
+      pm.expect(invitation.code).to.eql(200);
+      pm.variables.set('responseToken', invitation.json().responseToken);
   - type: afterResponse
     language: text/javascript
     code: |-

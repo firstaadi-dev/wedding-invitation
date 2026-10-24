@@ -6,12 +6,14 @@ if (location.pathname === '/preview') scope.set('preview','1');
 if (/^\/[a-f0-9-]{36}$/.test(location.pathname)) scope.set('tenant',location.pathname.slice(1));
 else if (location.pathname.startsWith('/i/')) scope.set('tenant',location.pathname.slice(3));
 let audio;
+let responseToken;
 async function load() {
   const response = await fetch(`/api/invitation?${scope}`);
   if (response.status === 401) {location.replace(location.pathname === '/preview' ? '/' : `${location.pathname}?access=1`);return;}
   if (!response.ok) throw new Error('Konten belum dapat dimuat. Muat ulang halaman.');
-  const {tenantSlug,invitationId,guestName,settings,media,response:guestResponse,canRespond} = await response.json();
+  const {tenantSlug,invitationId,guestName,settings,media,response:guestResponse,canRespond,responseToken:loadedToken} = await response.json();
   scope.set('tenant',invitationId || tenantSlug);
+  responseToken = loadedToken;
   document.querySelector('#guest-name').textContent = guestName;
   document.querySelector('#response-guest').textContent = guestName;
   const partners = [settings.partnerOneName || 'Firsta Adi Pradana', settings.partnerTwoName || 'Talitha Syahda Arundatie'];
@@ -168,7 +170,7 @@ responseForm.addEventListener('submit',async event => {
   responseStatus.classList.remove('error');responseStatus.textContent = 'Menyimpan…';
   try {
     const attendance = responseForm.elements.attendance.value;
-    const response = await fetch(`/api/response?${scope}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({attendance,guestCount:attendance === 'attending' ? Number(responseForm.elements.guestCount.value) : 0,message:responseForm.elements.message.value})});
+    const response = await fetch(`/api/response?${scope}`,{method:'PUT',headers:{'Content-Type':'application/json','X-Invitation-Token':responseToken},body:JSON.stringify({attendance,guestCount:attendance === 'attending' ? Number(responseForm.elements.guestCount.value) : 0,message:responseForm.elements.message.value})});
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Konfirmasi belum tersimpan. Silakan coba lagi.');
     responseForm.elements.message.value = result.message;

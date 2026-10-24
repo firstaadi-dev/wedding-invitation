@@ -151,3 +151,16 @@ func TestGuestCodes(t *testing.T) {
 		t.Fatal("session/challenge secrets must retain 256 bits")
 	}
 }
+
+func TestResponseTokenBindsDisplayedSession(t *testing.T) {
+	a := map[string]any{"guest_id": "a", "token_hash": hash("session-a")}
+	b := map[string]any{"guest_id": "b", "token_hash": hash("session-b")}
+	r := httptest.NewRequest("PUT", "/api/response", nil)
+	rejects(t, func() { requireResponseToken(r, a) }, 409)
+	r.Header.Set("X-Invitation-Token", responseToken(a))
+	requireResponseToken(r, a)
+	rejects(t, func() { requireResponseToken(r, b) }, 409)
+	if responseToken(a) == a["token_hash"] || responseToken(map[string]any{}) != "" {
+		t.Fatal("credential exposure or preview binding")
+	}
+}
