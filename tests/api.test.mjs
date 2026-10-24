@@ -416,6 +416,9 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal((await request('/api/invitation',{jar:guestBrowser})).value.media.music,musicPath);
       const invalidMusic = await fetch(base+'/api/admin/media/music',{method:'PUT',headers:musicHeaders,body:'not an MP3'});
       assert.equal(invalidMusic.status,415);
+      const truncatedMusic = await fetch(base+'/api/admin/media/music',{method:'PUT',headers:musicHeaders,body:music.subarray(0,music.length-1)});
+      assert.equal(truncatedMusic.status,415);
+      assert.equal((await request('/api/invitation',{jar:guestBrowser})).value.media.music,musicPath);
       assert.equal((await adminRequest('/api/admin/media/music',{method:'DELETE'})).response.status,200);
       assert.equal((await request('/api/invitation',{jar:guestBrowser})).value.media.music,undefined);
     });

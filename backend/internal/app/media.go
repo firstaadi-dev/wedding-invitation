@@ -53,21 +53,7 @@ func processImage(data []byte, preview bool) ([]byte, string, error) {
 	b, _, err := image.ExportWebp(params)
 	return b, "image/webp", err
 }
-func validMP3(data []byte) bool {
-	offset := 0
-	if bytes.HasPrefix(data, []byte("ID3")) {
-		if len(data) < 10 || data[6] > 127 || data[7] > 127 || data[8] > 127 || data[9] > 127 {
-			return false
-		}
-		offset = 10 + (int(data[6])<<21 | int(data[7])<<14 | int(data[8])<<7 | int(data[9]))
-	}
-	for i := offset; i < len(data)-4 && i < offset+4096; i++ {
-		if data[i] == 255 && data[i+1]&224 == 224 && data[i+1]&6 != 0 && data[i+1]&24 != 8 && data[i+2]&240 != 0 && data[i+2]&240 != 240 && data[i+2]&12 != 12 {
-			return true
-		}
-	}
-	return false
-}
+
 func (a *App) media(w http.ResponseWriter, r *http.Request) {
 	preview := strings.HasPrefix(r.URL.Path, "/preview-image/")
 	tenants := []string{}
