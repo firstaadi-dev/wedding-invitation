@@ -1,4 +1,6 @@
 import {countdownParts} from './countdown.js';
+import {defaultEventDate, defaultVenueName, eventDateLabels, mapTitle} from './event.js';
+import {playAudio} from './audio.js';
 const music = document.querySelector('.music-status');
 if (location.hash) location.replace(`${location.pathname}?access=1${location.hash}`);
 const scope = new URLSearchParams();
@@ -12,6 +14,9 @@ async function load() {
   if (response.status === 401) {location.replace(location.pathname === '/preview' ? '/' : `${location.pathname}?access=1`);return;}
   if (!response.ok) throw new Error('Konten belum dapat dimuat. Muat ulang halaman.');
   const {tenantSlug,invitationId,guestName,settings,media,response:guestResponse,canRespond,responseToken:loadedToken} = await response.json();
+  const eventDate = settings.eventDate || defaultEventDate;
+  const venueName = settings.venueName?.trim() || defaultVenueName;
+  const dateLabels = eventDateLabels(eventDate);
   scope.set('tenant',invitationId || tenantSlug);
   responseToken = loadedToken;
   document.querySelector('#guest-name').textContent = guestName;
@@ -21,6 +26,11 @@ async function load() {
   document.querySelector('#partner-two-name').textContent = partners[1];
   document.querySelector('#partner-one-short').textContent = partners[0].split(/\s+/)[0];
   document.querySelector('#partner-two-short').textContent = partners[1].split(/\s+/)[0];
+  document.querySelector('.envelope-date').textContent = dateLabels.short;
+  document.querySelector('.ceremony-date').textContent = dateLabels.full;
+  document.querySelectorAll('.event-date').forEach(date => {date.textContent = dateLabels.full;});
+  document.querySelectorAll('.event-venue').forEach(venue => {venue.textContent = venueName;});
+  document.querySelector('#venue-name').textContent = venueName;
   for (const [id, key, fallback] of [
     ['partner-one-father', 'partnerOneFather', 'Bapak Nugroho Andang Hapsoro'],
     ['partner-one-mother', 'partnerOneMother', 'Ibu Arieta Rahmasari'],
@@ -45,7 +55,7 @@ async function load() {
   const times = document.querySelectorAll('.pending-time');
   times[0].textContent = settings.ceremonyTime || 'Waktu akan diinformasikan';
   times[1].textContent = settings.receptionTime || 'Waktu akan diinformasikan';
-  startCountdown(settings.countdownTime || '00:00');
+  startCountdown(settings.countdownTime || '00:00', eventDate);
   const gifts = document.querySelector('.gift-details');
   const accounts = settings.giftAccounts || [
     {bank:'blu by BCA Digital',number:'0033 1600 0000',owner:'Firsta Adi Pradana'},
@@ -81,7 +91,7 @@ async function load() {
   renderGallery(media);
   if (settings.mapEmbedUrl) {
     const frame = document.createElement('iframe');
-    frame.src = settings.mapEmbedUrl;frame.title = 'Lokasi Arjuna Ballroom Alam Indah Resto';
+    frame.src = settings.mapEmbedUrl;frame.title = mapTitle(venueName);
     frame.loading = 'lazy';frame.referrerPolicy = 'strict-origin-when-cross-origin';frame.allowFullscreen = true;
     document.querySelector('.map-placeholder').replaceWith(frame);
   }
@@ -90,7 +100,7 @@ async function load() {
     music.disabled = false;music.classList.add('has-music');
     music.setAttribute('aria-pressed','false');label(false);
     audio.addEventListener('play',() => label(true));audio.addEventListener('pause',() => label(false));
-    audio.addEventListener('error',() => {music.disabled = true;music.title = 'Lagu belum dapat diputar';music.setAttribute('aria-label',music.title);});
+    audio.addEventListener('error',() => {music.title = 'Lagu gagal dimuat. Tekan untuk mencoba lagi.';music.setAttribute('aria-label',music.title);music.setAttribute('aria-pressed','false');});
   }
 }
 function photo(src,alt) {
@@ -98,8 +108,8 @@ function photo(src,alt) {
   image.src = src;image.alt = alt;image.loading = 'lazy';image.decoding = 'async';
   return image;
 }
-function startCountdown(time) {
-  const target = Date.parse(`2026-11-22T${time}:00+07:00`);
+function startCountdown(time, date) {
+  const target = Date.parse(`${date}T${time}:00+07:00`);
   const numbers = document.querySelectorAll('.countdown-units strong');
   const update = () => {
     countdownParts(target).forEach((value,index) => {numbers[index].textContent = String(value).padStart(2,'0');});
@@ -149,8 +159,15 @@ function renderGallery(media) {
   viewer.addEventListener('close',() => document.body.classList.remove('gallery-open'));
 }
 function label(playing) {
-  const text = playing ? 'Jeda musik' : 'Putar musik';
+const text = playing ? 'Jeda musik' : 'Putar musik';
   music.title = text;music.setAttribute('aria-label',text);music.setAttribute('aria-pressed',String(playing));
+}
+function playMusic() {
+  playAudio(audio,() => {
+    music.title = 'Lagu belum dapat diputar. Tekan untuk mencoba lagi.';
+    music.setAttribute('aria-label',music.title);
+    music.setAttribute('aria-pressed','false');
+  });
 }
 const responseForm = document.querySelector('#response-form');
 const responseStatus = document.querySelector('#response-status');
@@ -202,8 +219,8 @@ async function loadWishes(reset = false) {
   finally {if (request === wishesRequest) moreWishes.disabled = false;}
 }
 moreWishes.addEventListener('click',() => loadWishes());
-music.addEventListener('click',() => {if (audio) audio.paused ? audio.play().catch(() => label(false)) : audio.pause();});
-document.querySelector('#open-invitation').addEventListener('click',() => {audio?.play().catch(() => label(false));});
+music.addEventListener('click',() => {if (audio) audio.paused ? playMusic() : audio.pause();});
+document.querySelector('#open-invitation').addEventListener('click',() => {if(audio) playMusic();});
 load().catch(error => {
   responseStatus.textContent = 'Formulir belum dapat dimuat. Muat ulang halaman.';
   const message = document.createElement('p');message.className = 'content-error';message.setAttribute('role','alert');

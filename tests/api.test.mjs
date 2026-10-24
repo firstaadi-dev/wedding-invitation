@@ -439,16 +439,20 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal(result.response.status,429);assert.equal(result.response.headers.get('retry-after'),'60');
     });
     await t.test('content, photo and MP3 uploads, authenticated media and range response',async () => {
-      const saved = await adminRequest('/api/admin/content',{method:'PUT',data:{ceremonyTitle:' Akad ',receptionTitle:'Syukuran',countdownTime:'09:00',ceremonyTime:'09.00 WIB',mapEmbedUrl:'https://www.google.com/maps/embed?pb=test'}});
+      const saved = await adminRequest('/api/admin/content',{method:'PUT',data:{ceremonyTitle:' Akad ',receptionTitle:'Syukuran',countdownTime:'09:00',eventDate:'2027-01-09',venueName:' Gedung Baru ',ceremonyTime:'09.00 WIB',mapEmbedUrl:'https://www.google.com/maps/embed?pb=test'}});
       assert.equal(saved.response.status,200);
       assert.equal(saved.value.settings.ceremonyTime,'09.00 WIB');
       assert.equal(saved.value.settings.ceremonyTitle,'Akad');
       assert.equal(saved.value.settings.receptionTitle,'Syukuran');
       assert.equal(saved.value.settings.countdownTime,'09:00');
+      assert.equal(saved.value.settings.eventDate,'2027-01-09');
+      assert.equal(saved.value.settings.venueName,'Gedung Baru');
       const {whatsappTemplate, ...publicSettings} = saved.value.settings;
       assert.ok(whatsappTemplate.includes('{link}'));
-      assert.deepEqual((await request('/api/invitation',{jar:guestBrowser})).value.settings,publicSettings);
-      for (const data of [{ceremonyTitle:'a'.repeat(81)},{receptionTitle:9},{countdownTime:'24:00'},{countdownTime:'09:60'},{countdownTime:900},{unknown:'Akad'}]) {
+      const publicContent = (await request('/api/invitation',{jar:guestBrowser})).value.settings;
+      assert.deepEqual(publicContent,publicSettings);
+      assert.equal(publicContent.eventDate,'2027-01-09');assert.equal(publicContent.venueName,'Gedung Baru');
+      for (const data of [{ceremonyTitle:'a'.repeat(81)},{receptionTitle:9},{countdownTime:'24:00'},{countdownTime:'09:60'},{countdownTime:900},{eventDate:'2027-02-30'},{eventDate:20270109},{venueName:'x'.repeat(161)},{unknown:'Akad'}]) {
         assert.equal((await adminRequest('/api/admin/content',{method:'PUT',data})).response.status,400);
       }
       const partialSettings = await adminRequest('/api/admin/content',{method:'PUT',data:{receptionTime:'11.00–13.00 WIB'}});
@@ -538,6 +542,12 @@ test('Neon-backed CMS and guest access end to end',async t => {
       const cleared = await adminRequest('/api/admin/content',{method:'PUT',data:{linkPreviewTitle:'',linkPreviewDescription:''}});
       assert.equal(cleared.response.status,200);
       assert.ok((await request('/')).value.includes('property="og:title" content="Undangan Pernikahan Firsta &amp; Talitha"'));
+      const changedEvent = await adminRequest('/api/admin/content',{method:'PUT',data:{partnerOneName:'  ',partnerTwoName:'',linkPreviewTitle:'',linkPreviewDescription:'',eventDate:'2027-01-09',venueName:'Gedung Baru'}});
+      assert.equal(changedEvent.response.status,200);
+      const page = await request('/u/'+token);
+      assert.equal(page.response.status,200);
+      assert.ok(page.value.includes('<title>Undangan Pernikahan Firsta &amp; Talitha</title>'));
+      assert.ok(page.value.includes('property="og:description" content="Sabtu, 9 Januari 2027 · Gedung Baru."'));
     });
     await t.test('preview thumbnails are public JPEGs, replace safely, and cannot expose private media',async () => {
       const photo = await sharp({create:{width:60,height:90,channels:4,background:'#183d32'}}).png().toBuffer();

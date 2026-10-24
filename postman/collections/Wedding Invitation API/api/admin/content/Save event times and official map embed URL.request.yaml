@@ -1,6 +1,6 @@
 $kind: http-request
-name: Save event names, times, countdown time and official map embed URL
-description: Save editable event names, displayed times, WIB countdown start and official map embed URL
+name: Save event date, venue, event times and official map embed URL
+description: Save the event date, venue, displayed times, WIB countdown start and official map embed URL
 url: "{{cmsBaseUrl}}/api/admin/content"
 method: PUT
 headers:
@@ -22,11 +22,13 @@ body:
     {
       "ceremonyTime": "09.00 WIB",
       "receptionTime": "11.00–13.00 WIB",
+      "eventDate": "2027-01-09",
+      "venueName": "Gedung Baru, Jakarta",
       "mapEmbedUrl": "",
       "ceremonyTitle": "Akad",
       "receptionTitle": "Resepsi",
       "countdownTime": "09:00",
-      "whatsappTemplate": "Yth. {nama},\nUndangan Firsta & Talitha:\n{link}",
+      "whatsappTemplate": "Yth. {nama},\n{tanggal}\n{tempat}\n{link}",
       "linkPreviewTitle": "Firsta & Talitha — Undangan",
       "linkPreviewDescription": "22 November 2026 · Arjuna Ballroom Alam Indah Resto."
     }
@@ -44,6 +46,8 @@ scripts:
       pm.test('Custom ceremony name saved', () => pm.expect(settings.ceremonyTitle).to.eql('Akad'));
       pm.test('Reception name saved', () => pm.expect(settings.receptionTitle).to.eql('Resepsi'));
       pm.test('WIB countdown time saved', () => pm.expect(settings.countdownTime).to.eql('09:00'));
+      pm.test('Event date saved', () => pm.expect(settings.eventDate).to.eql('2027-01-09'));
+      pm.test('Venue saved', () => pm.expect(settings.venueName).to.eql('Gedung Baru, Jakarta'));
       pm.test('Global message saved', () => pm.expect(settings.whatsappTemplate).to.include('{link}'));
       pm.test('Preview title saved', () => pm.expect(settings.linkPreviewTitle).to.eql('Firsta & Talitha — Undangan'));
       pm.collectionVariables.set('savedSettings', JSON.stringify(settings));

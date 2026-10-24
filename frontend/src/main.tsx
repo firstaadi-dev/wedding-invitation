@@ -15,6 +15,7 @@ import {
   whatsappUrl,
 } from "../whatsapp.js";
 import { guestSummary, queryGuests, mediaType } from "../admin-data.js";
+import { defaultEventDate, defaultVenueName, eventDateLabels } from "../event.js";
 import type {
   Account,
   Session,
@@ -33,6 +34,7 @@ const pages = {
   acara: "Detail Acara",
 };
 type Page = keyof typeof pages;
+type EventContext = { date: string; venue: string };
 const currentPage = (): Page =>
   Object.hasOwn(pages, location.hash.slice(1))
     ? (location.hash.slice(1) as Page)
@@ -415,6 +417,7 @@ function GuestEditor({
 function GuestRow({
   guest,
   template,
+  event,
   api,
   refresh,
   confirm,
@@ -428,6 +431,7 @@ function GuestRow({
 }: {
   guest: Guest;
   template: string;
+  event: EventContext;
   api: API;
   refresh: () => Promise<void>;
   confirm: Confirm;
@@ -577,7 +581,7 @@ function GuestRow({
             {guest.phone && guest.link && guest.active && !disabled ? (
               <a
                 className="send-link secondary"
-                href={whatsappUrl(template, guest)}
+                href={whatsappUrl(template, guest, event)}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`Buka WhatsApp untuk mengirim undangan ${guest.name}`}
@@ -688,6 +692,7 @@ function GuestRow({
 function GuestsPage({
   guests,
   template,
+  event,
   api,
   refresh,
   confirm,
@@ -701,6 +706,7 @@ function GuestsPage({
 }: {
   guests: Guest[];
   template: string;
+  event: EventContext;
   api: API;
   refresh: () => Promise<void>;
   confirm: Confirm;
@@ -1100,6 +1106,7 @@ function GuestsPage({
                   key={guest.id}
                   guest={guest}
                   template={template}
+                  event={event}
                   api={api}
                   refresh={refresh}
                   confirm={confirm}
@@ -1433,6 +1440,8 @@ function SettingsForm({
     deviceLimit: textSetting("deviceLimit", "3"),
     deviceLimitEnabled: textSetting("deviceLimitEnabled", "true"),
     whatsappTemplate: textSetting("whatsappTemplate", defaultWhatsappTemplate),
+    eventDate: textSetting("eventDate", defaultEventDate),
+    venueName: textSetting("venueName", defaultVenueName),
     partnerOneName: textSetting("partnerOneName", "Firsta Adi Pradana"),
     partnerTwoName: textSetting("partnerTwoName", "Talitha Syahda Arundatie"),
     partnerOneFather: textSetting("partnerOneFather", "Nugroho Andang Hapsoro"),
@@ -1611,12 +1620,17 @@ function SettingsForm({
     )
       mapPreview = url.href;
   } catch {}
+  const eventDate =
+    (kind === "messages" ? textSetting("eventDate", defaultEventDate) : values.eventDate) || defaultEventDate;
+  const venueName =
+    (kind === "messages" ? textSetting("venueName", defaultVenueName) : values.venueName).trim() || defaultVenueName;
+  const event = {date:eventDateLabels(eventDate).full,venue:venueName};
   const previewTitle =
     values.linkPreviewTitle?.trim() ||
     `Undangan Pernikahan ${textSetting("partnerOneName", values.partnerOneName).trim().split(/\s+/)[0]} & ${textSetting("partnerTwoName", values.partnerTwoName).trim().split(/\s+/)[0]}`;
   const previewDescription =
     values.linkPreviewDescription?.trim() ||
-    "Minggu, 22 November 2026 · Arjuna Ballroom, Alam Indah Resto.";
+    `${event.date} · ${event.venue}.`;
   const exampleLink = `${account.invitationOrigin}/u/AbCdEfGhIjKlMnOpQrStUvWxYz0`;
   return (
     <form
@@ -1658,12 +1672,13 @@ function SettingsForm({
                   <span className="tag">Wajib {"{link}"}</span>
                 </div>
                 <p>
-                  Gunakan {"{nama}"} untuk nama tamu dan {"{link}"} untuk tautan
-                  undangan. Sertakan {"{link}"} agar tamu dapat membuka undangannya.
+                  Gunakan {"{nama}"} untuk nama tamu, {"{link}"} untuk tautan,
+                  {"{tanggal}"} untuk tanggal acara, dan {"{tempat}"} untuk tempat.
+                  Sertakan {"{link}"} agar tamu dapat membuka undangannya.
                 </p>
                 <div className="token-list">
-                  <span>Sisipkan nama atau tautan:</span>
-                  {["{nama}", "{link}"].map((token) => (
+                  <span>Sisipkan informasi acara:</span>
+                  {["{nama}", "{link}", "{tanggal}", "{tempat}"].map((token) => (
                     <button
                       type="button"
                       key={token}
@@ -1750,7 +1765,7 @@ function SettingsForm({
                     {invitationMessage(values.whatsappTemplate, {
                       name: "Bapak/Ibu Tamu Undangan",
                       link: exampleLink,
-                    })}
+                    }, event)}
                   </pre>
                 </div>
               </div>
@@ -1852,6 +1867,7 @@ function SettingsForm({
               <div className="section-heading">
                 <h2>Rangkaian Acara</h2>
               </div>
+              {field("eventDate", "Tanggal acara", 10, "", false, "date")}
               <div className="event-group">
                 <h3>
                   <span>1</span>Acara pertama
@@ -1899,13 +1915,14 @@ function SettingsForm({
                 )}
               </div>
               <p className="help">
-                Menuju 22 November 2026. Jika kosong, memakai pukul 00.00 WIB.
+                Menuju {event.date}. Jika kosong, memakai pukul 00.00 WIB.
               </p>
             </section>
             <section className="panel">
               <div className="section-heading">
                 <h2>Lokasi Acara</h2>
               </div>
+              {field("venueName", "Nama tempat", 160, "Nama gedung atau lokasi acara")}
               {field(
                 "mapEmbedUrl",
                 "URL embed Google Maps",
@@ -1922,7 +1939,7 @@ function SettingsForm({
                 {mapPreview ? (
                   <iframe
                     src={mapPreview}
-                    title="Pratinjau peta lokasi acara"
+                    title={`Pratinjau peta lokasi acara — ${venueName}`}
                     loading="lazy"
                     referrerPolicy="no-referrer"
                   />
@@ -2317,6 +2334,18 @@ function App() {
       notice={notice}
     />
   );
+  const eventContext = {
+    date: eventDateLabels(
+      typeof content?.settings.eventDate === "string"
+        ? content.settings.eventDate
+        : defaultEventDate,
+    ).full,
+    venue:
+      typeof content?.settings.venueName === "string" &&
+      content.settings.venueName.trim()
+        ? content.settings.venueName.trim()
+        : defaultVenueName,
+  };
   const footer = (
     <div className="sidebar-footer">
       <a
@@ -2375,6 +2404,7 @@ function App() {
                 <div hidden={page !== "tamu"}>
                   <GuestsPage
                     guests={guests}
+                    event={eventContext}
                     template={
                       typeof content.settings.whatsappTemplate === "string"
                         ? content.settings.whatsappTemplate

@@ -7,10 +7,27 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 )
 
 func escapeHTML(s string) string {
 	return strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;", "\"", "&quot;", "'", "&#39;").Replace(s)
+}
+func firstWord(value, fallback string) string {
+	words := strings.Fields(value)
+	if len(words) == 0 {
+		words = strings.Fields(fallback)
+	}
+	return words[0]
+}
+func eventDateLabel(value string) string {
+	date, err := time.Parse("2006-01-02", value)
+	if err != nil {
+		date, _ = time.Parse("2006-01-02", "2026-11-22")
+	}
+	months := [...]string{"Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"}
+	weekdays := [...]string{"Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"}
+	return fmt.Sprintf("%s, %d %s %d", weekdays[date.Weekday()], date.Day(), months[date.Month()-1], date.Year())
 }
 func (a *App) html(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
@@ -89,19 +106,19 @@ func (a *App) html(w http.ResponseWriter, r *http.Request) {
 		fail(404, "not_found", "Undangan tidak ditemukan.")
 	}
 	settings := s["value"].(map[string]any)
+	eventDate, venue := text(settings["eventDate"]), strings.TrimSpace(text(settings["venueName"]))
+	if eventDate == "" {
+		eventDate = "2026-11-22"
+	}
+	if venue == "" {
+		venue = "Arjuna Ballroom, Alam Indah Resto"
+	}
 	title, description := text(settings["linkPreviewTitle"]), text(settings["linkPreviewDescription"])
 	if title == "" {
-		first, second := text(settings["partnerOneName"]), text(settings["partnerTwoName"])
-		if first == "" {
-			first = "Firsta Adi Pradana"
-		}
-		if second == "" {
-			second = "Talitha Syahda Arundatie"
-		}
-		title = "Undangan Pernikahan " + strings.Fields(first)[0] + " & " + strings.Fields(second)[0]
+		title = "Undangan Pernikahan " + firstWord(text(settings["partnerOneName"]), "Firsta Adi Pradana") + " & " + firstWord(text(settings["partnerTwoName"]), "Talitha Syahda Arundatie")
 	}
 	if description == "" {
-		description = "Minggu, 22 November 2026 · Arjuna Ballroom, Alam Indah Resto."
+		description = eventDateLabel(eventDate) + " · " + venue + "."
 	}
 	title, description = escapeHTML(title), escapeHTML(description)
 	metadata := fmt.Sprintf(`<title>%s</title>
@@ -122,7 +139,8 @@ func (a *App) html(w http.ResponseWriter, r *http.Request) {
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="%s">`, escapeHTML(a.Config.Origin), id, title)
 	}
-	result := regexp.MustCompile(`<title>.*?</title>`).ReplaceAllStringFunc(string(file), func(string) string { return metadata })
+	html := strings.ReplaceAll(string(file), "{{EVENT_DATE}}", escapeHTML(eventDateLabel(eventDate)))
+	result := regexp.MustCompile(`<title>.*?</title>`).ReplaceAllStringFunc(html, func(string) string { return metadata })
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Content-Length", fmt.Sprint(len(result)))
 	w.WriteHeader(200)

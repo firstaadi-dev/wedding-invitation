@@ -16,9 +16,10 @@ request:
     type: json
     content: |-
       {
-        "ceremonyTime": "string",
-        "receptionTime": "string",
-        "mapEmbedUrl": "string"
+        "eventDate": "2027-01-09",
+        "venueName": "Gedung Baru, Jakarta",
+        "countdownTime": "09:00",
+        "mapEmbedUrl": ""
       }
 response:
   statusCode: 200
@@ -30,9 +31,10 @@ response:
     content: |-
       {
         "settings": {
-          "ceremonyTime": "string",
-          "receptionTime": "string",
-          "mapEmbedUrl": "string"
+          "eventDate": "2027-01-09",
+          "venueName": "Gedung Baru, Jakarta",
+          "countdownTime": "09:00",
+          "whatsappTemplate": "Yth. {nama},\n{tanggal}\n{tempat}\n{link}"
         },
         "media": {
           "key_0": "string"

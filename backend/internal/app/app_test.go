@@ -88,7 +88,23 @@ func TestValidation(t *testing.T) {
 		}
 	}
 	rejects(t, func() { validateSettings(map[string]any{"whatsappTemplate": "{link} {unknown}"}) }, 400)
+	validateSettings(map[string]any{"eventDate": "2027-01-09", "venueName": "  Gedung Baru  ", "whatsappTemplate": "{tanggal} · {tempat} · {link}"})
+	rejects(t, func() { validateSettings(map[string]any{"eventDate": "2027-02-30"}) }, 400)
+	rejects(t, func() { validateSettings(map[string]any{"eventDate": 20270109}) }, 400)
+	rejects(t, func() { validateSettings(map[string]any{"venueName": strings.Repeat("x", 161)}) }, 400)
 	rejects(t, func() { validateSettings(map[string]any{"tenant_id": "other"}) }, 400)
+}
+
+func TestMetadataFallbacksHandleEmptyNamesAndCustomEventDate(t *testing.T) {
+	if firstWord("  \t", "Firsta Adi Pradana") != "Firsta" || firstWord("Talitha Syahda", "Other") != "Talitha" {
+		t.Fatal("metadata title fallback did not select a safe first word")
+	}
+	if got := eventDateLabel("2026-11-22"); got != "Minggu, 22 November 2026" {
+		t.Fatalf("unexpected Indonesian event date: %q", got)
+	}
+	if got := eventDateLabel("invalid"); got != "Minggu, 22 November 2026" {
+		t.Fatalf("invalid stored date did not use the legacy default: %q", got)
+	}
 }
 func TestBodyBoundaries(t *testing.T) {
 	for _, tc := range []struct {

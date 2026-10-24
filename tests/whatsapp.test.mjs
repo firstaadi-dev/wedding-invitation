@@ -14,3 +14,10 @@ test('WhatsApp message substitutes once and preserves names, line breaks and sec
   assert.equal(url.hash,'');
   assert.ok(invitationMessage(defaultWhatsappTemplate,guest).includes(guest.link));
 });
+
+test('WhatsApp date and venue tokens follow current event settings', () => {
+  const guest = {name:'Keluarga',phone:'628123456789',link:'https://invitation.example/u/secret'};
+  const event = {date:'Sabtu, 9 Januari 2027',venue:'Gedung Baru'};
+  assert.equal(invitationMessage('{tanggal}\n{tempat}\n{link}',guest,event),'Sabtu, 9 Januari 2027\nGedung Baru\n'+guest.link);
+  assert.ok(invitationMessage(defaultWhatsappTemplate,guest,event).includes('Sabtu, 9 Januari 2027\nGedung Baru'));
+});
