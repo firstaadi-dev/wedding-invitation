@@ -9,17 +9,16 @@ headers:
     value: '{{guestCookie}}'
 settings: {}
 examples: ./.resources/Read personalized invitation and media.resources/examples
-order: 5500
+order: 4500
 
 scripts:
   - type: afterResponse
     language: text/javascript
     code: |-
-      pm.test('Own response is readable', () => pm.response.to.have.status(200));
-      pm.test('Invitation contains the saved response and permits guest submissions', () => {
-        const result = pm.response.json();
+      pm.test('Invitation is readable for this guest', () => pm.response.to.have.status(200));
+      const result = pm.response.json();
+      pm.test('Invitation can bind RSVP to this guest session', () => {
         pm.expect(result.canRespond).to.eql(true);
-        pm.expect(result.response.attendance).to.eql('attending');
-        pm.expect(result.response.guestCount).to.eql(2);
-        pm.expect(result.response.message).to.eql('Selamat menempuh hidup baru!');
+        pm.expect(result.responseToken).to.be.a('string').and.not.empty;
       });
+      pm.collectionVariables.set('responseToken', result.responseToken);

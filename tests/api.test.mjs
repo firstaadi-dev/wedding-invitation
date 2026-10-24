@@ -332,7 +332,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal((await pool.query("SELECT count(*) FROM wedding.responses WHERE guest_id LIKE 'wish-fixture-%'")).rows[0].count,'0');
     });
     await t.test('Postman collection verifies the local Neon-backed response endpoints',async () => {
-      const child = spawn('postman',['collection','run','postman/collections/Wedding Invitation API','-i','Save attendance and a congratulatory wish','-i','Read personalized invitation and media','-i','Read congratulatory wishes','-i','Read guest verification by code','--env-var',`baseUrl=${base}`,'--env-var',`origin=${origin}`,'--env-var',`guestCode=${token}`,'--env-var',`invitationId=${invitationId}`,'--env-var',`guestCookie=wedding_guest=${guestBrowser.wedding_guest}`,'--no-report-events'],{stdio:['ignore','pipe','pipe']});
+      const child = spawn('postman',['collection','run','postman/collections/Wedding Invitation API','-i','Read personalized invitation and media','-i','Save attendance and a congratulatory wish','-i','Read congratulatory wishes','-i','Read guest verification by code','--env-var',`baseUrl=${base}`,'--env-var',`origin=${origin}`,'--env-var',`guestCode=${token}`,'--env-var',`invitationId=${invitationId}`,'--env-var',`guestCookie=wedding_guest=${guestBrowser.wedding_guest}`,'--no-report-events'],{stdio:['ignore','pipe','pipe']});
       let output = '';child.stdout.on('data',chunk => {output += chunk;});child.stderr.on('data',chunk => {output += chunk;});
       const [code] = await once(child,'close');console.log(output);assert.equal(code,0,output);
     });
