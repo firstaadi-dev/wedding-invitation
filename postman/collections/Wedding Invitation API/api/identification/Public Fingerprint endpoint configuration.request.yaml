@@ -7,5 +7,6 @@ scripts:
     language: text/javascript
     code: |-
       pm.test('Public identification configuration responds 200', () => pm.response.to.have.status(200));
-      pm.test('Workspace region is ap', () => pm.expect(pm.response.json().region).to.eql('ap'));
+      pm.test('Configured workspace region is ap', () => pm.expect(pm.response.json().region).to.eql('ap');
+        pm.expect(pm.response.json().publicKey).to.be.a('string').and.not.empty;);
       pm.test('No server secret is exposed', () => pm.expect(pm.response.text()).not.to.include('secretKey'));

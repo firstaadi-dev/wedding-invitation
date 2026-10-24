@@ -9,7 +9,7 @@
     "build": "node scripts/build.mjs",
     "db:migrate": "node scripts/backend.mjs migrate",
     "admin:hash": "node scripts/backend.mjs hash",
-    "test": "node tests/entrance.test.mjs && node --test tests/countdown.test.mjs tests/whatsapp.test.mjs tests/admin-data.test.mjs tests/access.test.mjs tests/build.test.mjs && go -C backend test -trimpath ./... && python3 -m unittest discover -s tests -p \"*_test.py\"",
+    "test": "node tests/entrance.test.mjs && node --test tests/countdown.test.mjs tests/whatsapp.test.mjs tests/admin-data.test.mjs tests/access.test.mjs tests/identification.test.mjs tests/build.test.mjs && go -C backend test -trimpath ./... && python3 -m unittest discover -s tests -p \"*_test.py\"",
     "test:integration": "node --test tests/api.test.mjs",
     "test:deploy": "python3 tests/compose_smoke.py"
   },

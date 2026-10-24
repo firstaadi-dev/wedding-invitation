@@ -1,10 +1,12 @@
 // This public browser key is safe to publish; the server key stays in environment only.
 const fpPromise = fetch('/api/identification/config').then(async response => {
   if (!response.ok) throw new Error('Undangan belum dapat dibuka. Silakan coba lagi nanti.');
-  const {endpoint} = await response.json();
-  const source = endpoint ? `${endpoint}/web/v4/k3IGGzMGUOYb5FnccL4s` : 'https://fpjscdn.net/v4/k3IGGzMGUOYb5FnccL4s';
+  const {endpoint,publicKey,region} = await response.json();
+  if (!publicKey || !['us','eu','ap'].includes(region)) throw new Error('Undangan belum dapat dibuka. Silakan coba lagi nanti.');
+  const key = encodeURIComponent(publicKey);
+  const source = endpoint ? `${endpoint}/web/v4/${key}` : `https://fpjscdn.net/v4/${key}`;
   const Fingerprint = await import(source);
-  const agent = Fingerprint.start({region: 'ap', ...(endpoint ? {endpoints: [endpoint]} : {})});
+  const agent = Fingerprint.start({region, ...(endpoint ? {endpoints: [endpoint]} : {})});
   return new Promise(resolve => setTimeout(() => resolve(agent), 1000));
 });
 

@@ -144,6 +144,9 @@ func New(pool *pgxpool.Pool, c Config) (*App, error) {
 	if c.Region == "" {
 		c.Region = "ap"
 	}
+	if c.Region != "us" && c.Region != "eu" && c.Region != "ap" {
+		return nil, fmt.Errorf("FINGERPRINT_REGION must be us, eu, or ap")
+	}
 	if c.Templates == "" {
 		c.Templates = "frontend/dist"
 	}
@@ -332,7 +335,7 @@ func (a *App) serve(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if path == "/api/identification/config" && method == "GET" {
-		jsonResponse(w, 200, map[string]string{"endpoint": a.Config.Endpoint, "region": "ap"})
+		jsonResponse(w, 200, map[string]string{"endpoint": a.Config.Endpoint, "publicKey": a.Config.PublicKey, "region": a.Config.Region})
 		return
 	}
 	if path == "/api/admin/login" && method == "POST" {

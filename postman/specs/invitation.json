@@ -2429,7 +2429,7 @@
       "get": {
         "operationId": "identificationConfig",
         "summary": "Public Fingerprint endpoint configuration",
-        "description": "Custom HTTPS origin only after subdomain Active; empty endpoint uses CDN. Region is ap. Contains no secret key.",
+        "description": "Uses configured public Fingerprint endpoint, browser key, and data-center region. Custom HTTPS origin only after subdomain Active; empty endpoint uses CDN. Contains no server secret key.",
         "tags": [
           "Guest"
         ],
@@ -2448,12 +2448,19 @@
                     "region": {
                       "type": "string",
                       "enum": [
+                        "us",
+                        "eu",
                         "ap"
                       ]
+                    },
+                    "publicKey": {
+                      "type": "string",
+                      "description": "Public browser key; never the server secret key."
                     }
                   },
                   "required": [
                     "endpoint",
+                    "publicKey",
                     "region"
                   ]
                 }

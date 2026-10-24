@@ -170,7 +170,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
     await t.test('database health, admin auth, private content and CSRF',async () => {
       assert.equal((await request('/healthz')).response.status,200);
       const config = await request('/api/identification/config');
-      assert.deepEqual(config.value,{endpoint,region:'ap'});
+      assert.deepEqual(config.value,{endpoint,publicKey:'test',region:'ap'});
       assert.match(config.response.headers.get('content-security-policy'),/script-src 'self' https:\/\/validator\.firsta\.my\.id/);
       assert.match(config.response.headers.get('content-security-policy'),/connect-src 'self' https:\/\/validator\.firsta\.my\.id/);
       assert.equal((await request('/api/admin/guests')).response.status,401);
