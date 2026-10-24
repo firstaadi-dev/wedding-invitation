@@ -3,6 +3,7 @@ description: List guests and device counts
 url: "{{cmsBaseUrl}}/api/admin/guests"
 method: GET
 headers:
+  Cookie: '{{adminCookie}}'
   Accept: application/json
 auth:
   type: noauth

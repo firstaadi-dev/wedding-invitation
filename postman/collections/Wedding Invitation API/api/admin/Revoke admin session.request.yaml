@@ -3,10 +3,12 @@ description: Revoke admin session
 url: "{{cmsBaseUrl}}/api/admin/logout"
 method: POST
 headers:
+  - key: Origin
+    value: '{{cmsOrigin}}'
+  - key: Cookie
+    value: '{{adminCookie}}'
   - key: X-CSRF-Token
-    value: string
-    disabled: false
-    description: (Required) Token returned by admin session/login, matching HttpOnly cookie session.
+    value: '{{csrf}}'
   - key: Content-Type
     value: application/json
   - key: Accept
@@ -15,11 +17,14 @@ body:
   type: json
   content: "{}"
 auth:
-  type: apikey
-  credentials:
-    key: wedding_admin
-    value: "{{apiKey}}"
-    in: header
+  type: noauth
 settings: {}
 examples: ./.resources/Revoke admin session.resources/examples
-order: 3000
+order: 9000
+
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Admin logout succeeds', () => pm.response.to.have.status(200));
+      pm.test('Session is revoked', () => pm.expect(pm.response.json().ok).to.eql(true));

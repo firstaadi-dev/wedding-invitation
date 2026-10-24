@@ -3,23 +3,27 @@ description: Remove media from slot
 url: "{{cmsBaseUrl}}/api/admin/media/:slot"
 method: DELETE
 headers:
+  - key: Origin
+    value: '{{cmsOrigin}}'
+  - key: Cookie
+    value: '{{adminCookie}}'
   - key: X-CSRF-Token
-    value: string
-    disabled: false
-    description: (Required) Token returned by admin session/login, matching HttpOnly cookie session.
+    value: '{{csrf}}'
   - key: Accept
     value: application/json
 pathVariables:
   - key: slot
-    value: gallery1
-    disabled: false
-    description: "(Required) "
+    value: '{{mediaSlot}}'
 auth:
-  type: apikey
-  credentials:
-    key: wedding_admin
-    value: "{{apiKey}}"
-    in: header
+  type: noauth
 settings: {}
 examples: ./.resources/Remove media from slot.resources/examples
 order: 2000
+
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Media removal succeeds', () => pm.response.to.have.status(200));
+      const slot=pm.variables.get('mediaSlot');
+      pm.test('Selected slot is no longer stored', () => pm.expect(pm.response.json().media[slot]).to.be.undefined);

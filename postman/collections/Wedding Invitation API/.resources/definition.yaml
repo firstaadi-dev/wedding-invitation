@@ -5,11 +5,13 @@ variables:
   cmsBaseUrl: http://dashboard.localhost:5173
   cmsOrigin: http://dashboard.localhost:5173
   invitationId: ""
-  apiKey: ""
   adminPassword: ""
   adminEmail: ""
   adminCookie: ""
   foreignGuestId: ""
+  deliveryGuestId: ""
+  deliveryGuestLink: ""
+  mediaSlot: gallery1
   csrf: ""
   savedSettings: ""
   origin: http://invitation.localhost:5173

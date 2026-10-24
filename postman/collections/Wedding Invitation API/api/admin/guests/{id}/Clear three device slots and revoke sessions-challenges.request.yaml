@@ -4,23 +4,26 @@ description: Clear three device slots and revoke sessions/challenges
 url: "{{cmsBaseUrl}}/api/admin/guests/:id/devices"
 method: DELETE
 headers:
+  - key: Origin
+    value: '{{cmsOrigin}}'
+  - key: Cookie
+    value: '{{adminCookie}}'
   - key: X-CSRF-Token
-    value: string
-    disabled: false
-    description: (Required) Token returned by admin session/login, matching HttpOnly cookie session.
+    value: '{{csrf}}'
   - key: Accept
     value: application/json
 pathVariables:
   - key: id
-    value: string
-    disabled: false
-    description: "(Required) "
+    value: '{{deliveryGuestId}}'
 auth:
-  type: apikey
-  credentials:
-    key: wedding_admin
-    value: "{{apiKey}}"
-    in: header
+  type: noauth
 settings: {}
 examples: ./.resources/Clear three device slots and revoke sessions-challenges.resources/examples
 order: 4000
+
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Device reset succeeds', () => pm.response.to.have.status(200));
+      pm.test('Device reset is acknowledged', () => pm.expect(pm.response.json().ok).to.eql(true));

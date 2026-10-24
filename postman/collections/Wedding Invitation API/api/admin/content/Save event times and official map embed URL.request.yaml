@@ -4,6 +4,8 @@ description: Save editable event names, displayed times, WIB countdown start and
 url: "{{cmsBaseUrl}}/api/admin/content"
 method: PUT
 headers:
+  - key: Cookie
+    value: '{{adminCookie}}'
   - key: X-CSRF-Token
     value: "{{csrf}}"
     disabled: false
@@ -11,7 +13,7 @@ headers:
   - key: Content-Type
     value: application/json
   - key: Origin
-    value: "{{cmsBaseUrl}}"
+    value: "{{cmsOrigin}}"
   - key: Accept
     value: application/json
 body:
@@ -44,5 +46,4 @@ scripts:
       pm.test('WIB countdown time saved', () => pm.expect(settings.countdownTime).to.eql('09:00'));
       pm.test('Global message saved', () => pm.expect(settings.whatsappTemplate).to.include('{link}'));
       pm.test('Preview title saved', () => pm.expect(settings.linkPreviewTitle).to.eql('Firsta & Talitha — Undangan'));
-      const {whatsappTemplate, ...publicSettings} = settings;
-      pm.collectionVariables.set('savedSettings', JSON.stringify(publicSettings));
+      pm.collectionVariables.set('savedSettings', JSON.stringify(settings));

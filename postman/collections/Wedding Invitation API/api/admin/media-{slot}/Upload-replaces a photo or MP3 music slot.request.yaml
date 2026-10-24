@@ -4,28 +4,32 @@ description: Raw binary body, no multipart. Photos up to 12 MiB, decoded/re-enco
 url: "{{cmsBaseUrl}}/api/admin/media/:slot"
 method: PUT
 headers:
+  - key: Origin
+    value: '{{cmsOrigin}}'
+  - key: Cookie
+    value: '{{adminCookie}}'
   - key: X-CSRF-Token
-    value: string
-    disabled: false
-    description: (Required) Token returned by admin session/login, matching HttpOnly cookie session.
+    value: '{{csrf}}'
   - key: Content-Type
     value: image/jpeg
   - key: Accept
     value: application/json
 pathVariables:
   - key: slot
-    value: gallery1
-    disabled: false
-    description: "(Required) "
+    value: '{{mediaSlot}}'
 body:
   type: file
   content: {}
 auth:
-  type: apikey
-  credentials:
-    key: wedding_admin
-    value: "{{apiKey}}"
-    in: header
+  type: noauth
 settings: {}
 examples: ./.resources/Upload-replaces a photo or MP3 music slot.resources/examples
 order: 1000
+
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Media upload succeeds', () => pm.response.to.have.status(200));
+      const slot=pm.variables.get('mediaSlot');
+      pm.test('Uploaded media is returned for selected slot', () => pm.expect(pm.response.json().media[slot]).to.match(/^\/media\/[a-f0-9-]{36}$/));

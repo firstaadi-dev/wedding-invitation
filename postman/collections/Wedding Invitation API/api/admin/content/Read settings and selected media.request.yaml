@@ -3,6 +3,7 @@ description: Read settings and selected media
 url: "{{cmsBaseUrl}}/api/admin/content"
 method: GET
 headers:
+  Cookie: '{{adminCookie}}'
   Accept: application/json
 auth:
   type: noauth
