@@ -72,7 +72,7 @@
             }
           },
           "403": {
-            "description": "Forbidden / three-device limit / verification rejected",
+            "description": "Forbidden / configured device limit / verification rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -185,7 +185,7 @@
             }
           },
           "403": {
-            "description": "Forbidden / three-device limit / verification rejected",
+            "description": "Forbidden / configured device limit / verification rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -318,7 +318,7 @@
             }
           },
           "403": {
-            "description": "Forbidden / three-device limit / verification rejected",
+            "description": "Forbidden / configured device limit / verification rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -451,7 +451,7 @@
             }
           },
           "403": {
-            "description": "Forbidden / three-device limit / verification rejected",
+            "description": "Forbidden / configured device limit / verification rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -604,7 +604,7 @@
             }
           },
           "403": {
-            "description": "Forbidden / three-device limit / verification rejected",
+            "description": "Forbidden / configured device limit / verification rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -719,7 +719,7 @@
             }
           },
           "403": {
-            "description": "Forbidden / three-device limit / verification rejected",
+            "description": "Forbidden / configured device limit / verification rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -867,7 +867,7 @@
             }
           },
           "403": {
-            "description": "Forbidden / three-device limit / verification rejected",
+            "description": "Forbidden / configured device limit / verification rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -1017,7 +1017,7 @@
             }
           },
           "403": {
-            "description": "Forbidden / three-device limit / verification rejected",
+            "description": "Forbidden / configured device limit / verification rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -1163,7 +1163,7 @@
             }
           },
           "403": {
-            "description": "Forbidden / three-device limit / verification rejected",
+            "description": "Forbidden / configured device limit / verification rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -1284,8 +1284,8 @@
     "/api/admin/guests/{id}/devices": {
       "delete": {
         "operationId": "resetDevices",
-        "summary": "Clear three device slots and revoke sessions/challenges",
-        "description": "Clear three device slots and revoke sessions/challenges All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
+        "summary": "Clear recorded browsers and revoke sessions/challenges",
+        "description": "Clear recorded browsers and revoke sessions/challenges All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
         "tags": [
           "Admin"
         ],
@@ -1327,7 +1327,7 @@
             }
           },
           "403": {
-            "description": "Forbidden / three-device limit / verification rejected",
+            "description": "Forbidden / configured device limit / verification rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -1473,7 +1473,7 @@
             }
           },
           "403": {
-            "description": "Forbidden / three-device limit / verification rejected",
+            "description": "Forbidden / configured device limit / verification rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -1588,7 +1588,7 @@
             }
           },
           "403": {
-            "description": "Forbidden / three-device limit / verification rejected",
+            "description": "Forbidden / configured device limit / verification rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -1700,7 +1700,7 @@
       "put": {
         "operationId": "uploadMedia",
         "summary": "Upload/replaces a photo or MP3 music slot",
-        "description": "Raw binary body, no multipart. Photos up to 12 MiB, decoded/re-encoded by Sharp; music MP3 up to 25 MiB with frame validation. Old file removed after committed replacement. The preview slot creates a public 1200×630 JPEG for link thumbnails; other media remains session-protected. All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
+        "description": "Raw binary body, no multipart. Photos up to 12 MiB, decoded/re-encoded by Sharp; music MP3 up to 25 MiB with frame validation. Old file removed after committed replacement. The preview slot creates a public 1200\u00d7630 JPEG for link thumbnails; other media remains session-protected. All resources are scoped to the authenticated account tenant; foreign-tenant IDs return 404.",
         "tags": [
           "Admin"
         ],
@@ -1736,7 +1736,7 @@
             }
           },
           "403": {
-            "description": "Forbidden / three-device limit / verification rejected",
+            "description": "Forbidden / configured device limit / verification rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -1914,7 +1914,7 @@
             }
           },
           "403": {
-            "description": "Forbidden / three-device limit / verification rejected",
+            "description": "Forbidden / configured device limit / verification rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -2075,7 +2075,7 @@
             }
           },
           "403": {
-            "description": "Forbidden / three-device limit / verification rejected",
+            "description": "Forbidden / configured device limit / verification rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -2162,7 +2162,7 @@
       "post": {
         "operationId": "verify",
         "summary": "Verify Fingerprint event and register up to three visitors",
-        "description": "Server v4 API verifies event age, linked_id challenge, origin, visitor identity and anti-tampering signals. Atomic Postgres transaction deduplicates visitor, rejects fourth, consumes challenge/event and issues HttpOnly guest session.",
+        "description": "Server v4 API verifies event age, linked_id challenge, origin, visitor identity and anti-tampering signals. Atomic Postgres transaction deduplicates visitor, rejects fourth, consumes challenge/event and issues HttpOnly guest session. New distinct browsers follow the account deviceLimit (default 3) unless deviceLimitEnabled is false or the invitation is unlimited. Every accepted browser is recorded even with limits disabled. Existing browsers can return above a lowered limit; settings never erase records or revoke sessions.",
         "tags": [
           "Guest"
         ],
@@ -2204,7 +2204,7 @@
             }
           },
           "403": {
-            "description": "Forbidden / three-device limit / verification rejected",
+            "description": "Forbidden / configured device limit / verification rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -2327,7 +2327,7 @@
             }
           },
           "403": {
-            "description": "Forbidden / three-device limit / verification rejected",
+            "description": "Forbidden / configured device limit / verification rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -2492,7 +2492,7 @@
         ],
         "responses": {
           "200": {
-            "description": "1200×630 JPEG thumbnail",
+            "description": "1200\u00d7630 JPEG thumbnail",
             "content": {
               "image/jpeg": {
                 "schema": {
@@ -2548,7 +2548,7 @@
         ],
         "responses": {
           "200": {
-            "description": "1200×630 JPEG thumbnail",
+            "description": "1200\u00d7630 JPEG thumbnail",
             "content": {
               "image/jpeg": {
                 "schema": {
@@ -2658,7 +2658,7 @@
             }
           },
           "403": {
-            "description": "Forbidden / three-device limit / verification rejected",
+            "description": "Forbidden / configured device limit / verification rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -3063,7 +3063,7 @@
           "phone": {
             "type": "string",
             "maxLength": 40,
-            "description": "Optional phone number. Accepts 08…, 62…, or +country code, spaces, hyphens and parentheses; saved as 8–15 international digits. Empty clears it."
+            "description": "Optional phone number. Accepts 08\u2026, 62\u2026, or +country code, spaces, hyphens and parentheses; saved as 8\u201315 international digits. Empty clears it."
           }
         },
         "additionalProperties": false,
@@ -3085,7 +3085,11 @@
           "phone": {
             "type": "string",
             "maxLength": 40,
-            "description": "Optional phone number. Accepts 08…, 62…, or +country code, spaces, hyphens and parentheses; saved as 8–15 international digits. Empty clears it."
+            "description": "Optional phone number. Accepts 08\u2026, 62\u2026, or +country code, spaces, hyphens and parentheses; saved as 8\u201315 international digits. Empty clears it."
+          },
+          "unlimited": {
+            "type": "boolean",
+            "description": "True exempts this invitation from device limits. False follows account settings. Preserves access history and sessions."
           }
         },
         "additionalProperties": false
@@ -3109,7 +3113,7 @@
           "deviceCount": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 3
+            "description": "Distinct verified browsers, including those admitted while limits are disabled. Never cleared by limit settings."
           },
           "createdAt": {
             "type": "integer"
@@ -3139,7 +3143,7 @@
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 10,
-                "description": "1–10 when attending; exactly 0 otherwise."
+                "description": "1\u201310 when attending; exactly 0 otherwise."
               },
               "message": {
                 "type": "string",
@@ -3158,6 +3162,17 @@
               "updatedAt"
             ],
             "nullable": true
+          },
+          "unlimited": {
+            "type": "boolean",
+            "description": "Bypass the account device limit for this invitation; defaults to false. Toggling preserves devices and sessions."
+          },
+          "deviceLimit": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 1,
+            "maximum": 2147483647,
+            "description": "Effective account limit, default 3. Null when globally disabled or this invitation is unlimited. Existing browsers and sessions remain valid above a lowered limit."
           }
         },
         "additionalProperties": false
@@ -3415,6 +3430,19 @@
             "type": "string",
             "maxLength": 300,
             "description": "Public description and Open Graph description; empty uses the wedding date and venue."
+          },
+          "deviceLimitEnabled": {
+            "type": "string",
+            "enum": [
+              "true",
+              "false"
+            ],
+            "description": "Account-wide enforcement for every invitation, default true. Does not delete devices, sessions or challenges. Disabled mode still verifies and records browsers."
+          },
+          "deviceLimit": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]{0,9}$",
+            "description": "Positive integer browser limit (1\u20132147483647), default 3, for all invitations without the unlimited exemption. Lowering the limit only blocks new browsers."
           }
         },
         "additionalProperties": false
@@ -3475,7 +3503,7 @@
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 10,
-                "description": "1–10 when attending; exactly 0 otherwise."
+                "description": "1\u201310 when attending; exactly 0 otherwise."
               },
               "message": {
                 "type": "string",
@@ -3597,7 +3625,7 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 10,
-            "description": "1–10 when attending; exactly 0 otherwise."
+            "description": "1\u201310 when attending; exactly 0 otherwise."
           },
           "message": {
             "type": "string",
@@ -3627,7 +3655,7 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 10,
-            "description": "1–10 when attending; exactly 0 otherwise."
+            "description": "1\u201310 when attending; exactly 0 otherwise."
           },
           "message": {
             "type": "string",

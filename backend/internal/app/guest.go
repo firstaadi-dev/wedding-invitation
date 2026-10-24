@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -97,7 +98,7 @@ func (a *App) verify(w http.ResponseWriter, r *http.Request) {
 	visitor := verifiedVisitor(a.fingerprintEvent(r, id), id, challenge, a.Config.Origin, time.Now())
 	token := secret()
 	a.transaction(ctx, func(q db) any {
-		g := row(ctx, q, "SELECT * FROM wedding.guests WHERE id=$1 FOR UPDATE", c["guest_id"])
+		g := row(ctx, q, `SELECT g.*,`+deviceLimitSQL+` AS "deviceLimit" FROM wedding.guests g JOIN wedding.settings s ON s.tenant_id=g.tenant_id WHERE g.id=$1 FOR UPDATE OF g FOR SHARE OF s`, c["guest_id"])
 		fresh := row(ctx, q, "SELECT * FROM wedding.challenges WHERE id=$1 AND expires_at>now() FOR UPDATE", challenge)
 		if g == nil || number(g["active"]) == 0 || g["version"] != c["version"] {
 			fail(404, "revoked", "Tautan sudah dinonaktifkan.")
@@ -111,8 +112,8 @@ func (a *App) verify(w http.ResponseWriter, r *http.Request) {
 		vh := hash(visitor)
 		if row(ctx, q, "SELECT 1 FROM wedding.devices WHERE guest_id=$1 AND visitor_hash=$2", g["id"], vh) == nil {
 			count := row(ctx, q, "SELECT count(*) AS count FROM wedding.devices WHERE guest_id=$1", g["id"])
-			if number(count["count"]) >= 3 {
-				fail(403, "device_limit", "Batas akses undangan ini sudah tercapai (3 browser). Silakan hubungi pengundang untuk bantuan.")
+			if g["deviceLimit"] != nil && number(count["count"]) >= number(g["deviceLimit"]) {
+				fail(403, "device_limit", fmt.Sprintf("Batas akses undangan ini sudah tercapai (%d browser). Silakan hubungi pengundang untuk bantuan.", number(g["deviceLimit"])))
 			}
 			exec(ctx, q, "INSERT INTO wedding.devices(guest_id,visitor_hash) VALUES($1,$2)", g["id"], vh)
 		}

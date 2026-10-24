@@ -1,0 +1,26 @@
+$kind: http-request
+method: PUT
+url: '{{cmsBaseUrl}}/api/admin/content'
+order: 5000
+headers:
+  - key: Origin
+    value: '{{cmsOrigin}}'
+  - key: Cookie
+    value: '{{adminCookie}}'
+  - key: X-CSRF-Token
+    value: '{{csrf}}'
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "deviceLimit": "3",
+      "deviceLimitEnabled": "true"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Limit control succeeds', () => pm.response.to.have.status(200));
+      pm.test('Account limit restored', () => { pm.expect(pm.response.json().settings.deviceLimit).to.eql('3'); pm.expect(pm.response.json().settings.deviceLimitEnabled).to.eql('true'); });

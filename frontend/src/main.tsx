@@ -317,7 +317,7 @@ function GuestEditor({
       const result = await api<{ link?: string }>(
         guest ? `/api/admin/guests/${guest.id}` : "/api/admin/guests",
         guest ? "PATCH" : "POST",
-        values,
+        { ...values, ...(guest ? { unlimited: values.unlimited === "true" } : {}) },
       );
       onSaved(result);
       onClose();
@@ -347,8 +347,9 @@ function GuestEditor({
           </button>
         </div>
         <p>
-          Setiap undangan memiliki tautan pribadi. Maksimal 3 browser per undangan.
-          Browser berbeda pada perangkat yang sama dapat memakai slot terpisah.
+          Setiap undangan memiliki tautan pribadi. Batas browser mengikuti
+          pengaturan global. Browser berbeda pada perangkat yang sama dapat
+          memakai slot terpisah.
         </p>
         <label>
           Nama tamu
@@ -380,6 +381,20 @@ function GuestEditor({
           Nomor 08… otomatis diubah ke 62…. Nomor internasional dapat memakai
           +kode negara.
         </p>
+        {guest && (
+          <label>
+            Batas browser
+            <select
+              name="unlimited"
+              defaultValue={String(guest.unlimited)}
+              disabled={busy}
+            >
+              <option value="false">Ikuti pengaturan global</option>
+              <option value="true">Tanpa limit</option>
+            </select>
+            <span className="help">Perubahan ini tetap menyimpan riwayat akses.</span>
+          </label>
+        )}
         {error && (
           <p className="form-error" role="alert">
             {error}
@@ -527,10 +542,10 @@ function GuestRow({
         <td>{guest.response?.guestCount ?? "—"}</td>
         <td>
           <span
-            className={`device-count${guest.deviceCount === 3 ? " full" : ""}`}
-            title={`${guest.deviceCount} dari 3 slot browser terpakai`}
+            className={`device-count${guest.deviceLimit !== null && guest.deviceCount >= guest.deviceLimit ? " full" : ""}`}
+            title={`${guest.deviceCount} browser tercatat${guest.deviceLimit === null ? "; tanpa limit" : `; batas ${guest.deviceLimit} browser`}`}
           >
-            {guest.deviceCount} / 3
+            {guest.deviceCount} / {guest.deviceLimit ?? "∞"}
           </span>
         </td>
         <td>
@@ -1216,13 +1231,14 @@ function GuestsPage({
               }}
             >
               <option value="all">Semua browser</option>
-              <option value="full">Slot penuh (3/3)</option>
+              <option value="full">Batas tercapai</option>
               <option value="unused">Belum digunakan</option>
             </select>
           </label>
           <p className="help">
-            Maksimal 3 browser per undangan. Browser berbeda pada perangkat
-            yang sama dapat memakai slot terpisah.
+            Batas browser mengikuti pengaturan global dan pengecualian per
+            undangan. Browser berbeda pada perangkat yang sama dapat memakai slot
+            terpisah.
           </p>
           <div className="dialog-actions">
             <button
@@ -1410,6 +1426,8 @@ function SettingsForm({
         ([, value]) => typeof value === "string",
       ),
     ) as Record<string, string>),
+    deviceLimit: textSetting("deviceLimit", "3"),
+    deviceLimitEnabled: textSetting("deviceLimitEnabled", "true"),
     whatsappTemplate: textSetting("whatsappTemplate", defaultWhatsappTemplate),
     partnerOneName: textSetting("partnerOneName", "Firsta Adi Pradana"),
     partnerTwoName: textSetting("partnerTwoName", "Talitha Syahda Arundatie"),
@@ -1742,6 +1760,51 @@ function SettingsForm({
       ) : (
         <>
           <fieldset disabled={busy} className="event-fields">
+            <section className="panel">
+              <h2>Batas akses undangan</h2>
+              <p>
+                Berlaku untuk semua undangan dalam akun ini, kecuali undangan
+                yang diatur tanpa limit.
+              </p>
+              <div className="two-columns">
+                <label>
+                  Pembatasan browser
+                  <select
+                    name="deviceLimitEnabled"
+                    value={values.deviceLimitEnabled}
+                    onChange={(e) => {
+                      setValues({ ...values, deviceLimitEnabled: e.target.value });
+                      setDirty(true);
+                    }}
+                  >
+                    <option value="true">Aktif</option>
+                    <option value="false">Nonaktif — tanpa limit</option>
+                  </select>
+                </label>
+                <label>
+                  Maksimal browser per undangan
+                  <input
+                    name="deviceLimit"
+                    type="number"
+                    min="1"
+                    max="2147483647"
+                    step="1"
+                    required
+                    value={values.deviceLimit}
+                    onChange={(e) => {
+                      setValues({ ...values, deviceLimit: e.target.value });
+                      setDirty(true);
+                    }}
+                  />
+                </label>
+              </div>
+              <p className="help">
+                Riwayat akses tetap tersimpan dan browser baru tetap dicatat saat
+                limit nonaktif. Setelah limit diaktifkan kembali atau diturunkan,
+                browser yang sudah tercatat tetap bisa masuk; browser baru
+                mengikuti batas yang berlaku. Atur pengecualian melalui Edit Tamu.
+              </p>
+            </section>
             <section className="panel">
               <div className="section-heading">
                 <h2>Mempelai</h2>
@@ -2431,7 +2494,12 @@ function App() {
                     kind="event"
                     content={content}
                     api={api}
-                    onContent={setContent}
+                    onContent={(c) => {
+                      setContent(c);
+                      void refreshGuests().catch(() =>
+                        notice("Gagal memuat ulang daftar tamu.", true),
+                      );
+                    }}
                     notice={notice}
                     account={session.account}
                     confirm={confirm}

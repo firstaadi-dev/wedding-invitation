@@ -6,12 +6,14 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 	"unicode"
 )
 
 const responseSelect = `SELECT attendance,guest_count AS "guestCount",message,updated_at AS "updatedAt" FROM wedding.responses WHERE guest_id=$1`
-const guestSelect = `SELECT g.id,g.name,g.phone,g.invitation_link AS link,g.active,(EXTRACT(EPOCH FROM g.created_at)*1000)::float8 AS "createdAt",(SELECT count(*)::integer FROM wedding.devices d WHERE d.guest_id=g.id) AS "deviceCount",CASE WHEN r.guest_id IS NULL THEN NULL ELSE json_build_object('attendance',r.attendance,'guestCount',r.guest_count,'message',r.message,'updatedAt',r.updated_at) END AS response FROM wedding.guests g LEFT JOIN wedding.responses r ON r.guest_id=g.id`
+const deviceLimitSQL = `CASE WHEN g.unlimited OR s.value->>'deviceLimitEnabled'='false' THEN NULL ELSE COALESCE((s.value->>'deviceLimit')::integer,3) END`
+const guestSelect = `SELECT g.id,g.name,g.phone,g.invitation_link AS link,g.active,g.unlimited,` + deviceLimitSQL + ` AS "deviceLimit",(EXTRACT(EPOCH FROM g.created_at)*1000)::float8 AS "createdAt",(SELECT count(*)::integer FROM wedding.devices d WHERE d.guest_id=g.id) AS "deviceCount",CASE WHEN r.guest_id IS NULL THEN NULL ELSE json_build_object('attendance',r.attendance,'guestCount',r.guest_count,'message',r.message,'updatedAt',r.updated_at) END AS response FROM wedding.guests g JOIN wedding.settings s ON s.tenant_id=g.tenant_id LEFT JOIN wedding.responses r ON r.guest_id=g.id`
 
 // Keep this copy equal to frontend/whatsapp.js; the compatibility test checks both.
 const DefaultWhatsappTemplate = `Yth. {nama},
@@ -129,7 +131,17 @@ func validMap(v any) bool {
 	return err == nil && u.Scheme == "https" && u.Host == "www.google.com" && u.User == nil && strings.HasPrefix(u.Path, "/maps/embed")
 }
 func validateSettings(v map[string]any) {
-	only(v, "partnerOneName", "partnerTwoName", "partnerOneFather", "partnerOneMother", "partnerTwoFather", "partnerTwoMother", "giftEnabled", "giftAccounts", "ceremonyTitle", "receptionTitle", "ceremonyTime", "receptionTime", "countdownTime", "mapEmbedUrl", "whatsappTemplate", "linkPreviewTitle", "linkPreviewDescription")
+	only(v, "partnerOneName", "partnerTwoName", "partnerOneFather", "partnerOneMother", "partnerTwoFather", "partnerTwoMother", "giftEnabled", "giftAccounts", "ceremonyTitle", "receptionTitle", "ceremonyTime", "receptionTime", "countdownTime", "mapEmbedUrl", "whatsappTemplate", "linkPreviewTitle", "linkPreviewDescription", "deviceLimitEnabled", "deviceLimit")
+	if raw, exists := v["deviceLimitEnabled"]; exists && raw != "true" && raw != "false" {
+		fail(400, "device_limit_enabled", "Pengaturan batas browser tidak valid.")
+	}
+	if raw, exists := v["deviceLimit"]; exists {
+		s, ok := raw.(string)
+		n, err := strconv.ParseInt(s, 10, 32)
+		if !ok || !match(`^[1-9][0-9]{0,9}$`, s) || err != nil || n < 1 {
+			fail(400, "device_limit", "Batas browser harus bilangan bulat 1–2147483647.")
+		}
+	}
 	if raw, exists := v["whatsappTemplate"]; exists {
 		s, ok := raw.(string)
 		unknown := regexp.MustCompile(`\{(?:nama|link)\}`).ReplaceAllString(s, "")
@@ -296,7 +308,7 @@ func (a *App) admin(w http.ResponseWriter, r *http.Request) {
 			}
 			if action == "" && method == "PATCH" {
 				_, v := body(w, r, 8192, false)
-				only(v, "name", "phone", "active")
+				only(v, "name", "phone", "active", "unlimited")
 				if len(v) == 0 {
 					fail(400, "invalid_field", "Isi nama, nomor telepon atau status.")
 				}
@@ -305,6 +317,13 @@ func (a *App) admin(w http.ResponseWriter, r *http.Request) {
 				}
 				if value, ok := v["phone"]; ok {
 					exec(ctx, q, "UPDATE wedding.guests SET phone=$2 WHERE id=$1", id, validPhone(value))
+				}
+				if value, exists := v["unlimited"]; exists {
+					unlimited, ok := value.(bool)
+					if !ok {
+						fail(400, "unlimited", "Pengaturan tanpa limit tidak valid.")
+					}
+					exec(ctx, q, "UPDATE wedding.guests SET unlimited=$2 WHERE id=$1", id, unlimited)
 				}
 				if value, exists := v["active"]; exists {
 					active, ok := value.(bool)

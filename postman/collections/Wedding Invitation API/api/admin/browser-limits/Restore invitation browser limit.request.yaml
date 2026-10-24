@@ -1,0 +1,26 @@
+$kind: http-request
+method: PATCH
+url: '{{cmsBaseUrl}}/api/admin/guests/{{limitGuestId}}'
+order: 4000
+headers:
+  - key: Origin
+    value: '{{cmsOrigin}}'
+  - key: Cookie
+    value: '{{adminCookie}}'
+  - key: X-CSRF-Token
+    value: '{{csrf}}'
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "unlimited": false
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Limit control succeeds', () => pm.response.to.have.status(200));
+      pm.test('Invitation follows disabled account limit', () => { pm.expect(pm.response.json().unlimited).to.eql(false); pm.expect(pm.response.json().deviceLimit).to.eql(null); });
+      pm.test('Browser history remains intact', () => pm.expect(String(pm.response.json().deviceCount)).to.eql(pm.collectionVariables.get('limitDeviceCount')));

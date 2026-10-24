@@ -1,6 +1,6 @@
 $kind: http-request
-name: Clear three device slots and revoke sessions/challenges
-description: Clear three device slots and revoke sessions/challenges
+name: Clear recorded browsers and revoke sessions/challenges
+description: Clear recorded browsers and revoke sessions/challenges
 url: "{{cmsBaseUrl}}/api/admin/guests/:id/devices"
 method: DELETE
 headers:
@@ -18,7 +18,7 @@ pathVariables:
 auth:
   type: noauth
 settings: {}
-examples: ./.resources/Clear three device slots and revoke sessions-challenges.resources/examples
+examples: ./.resources/Clear recorded browsers and revoke sessions-challenges.resources/examples
 order: 4000
 
 scripts:

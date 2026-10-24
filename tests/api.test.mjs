@@ -34,6 +34,7 @@ test('legacy migration preserves invitation data, guest sessions and password; r
     assert.match(tenant.id,uuidv7);assert.match(tenant.owner_id,uuidv7);
     assert.deepEqual((await client.query('SELECT tenant_id,name,token_hash,invitation_link FROM guests')).rows,[{tenant_id:tenant.id,name:'Legacy Guest',token_hash:'old-token-hash',invitation_link:'https://invitation.example/#old-link'}]);
     assert.equal((await client.query('SELECT visitor_hash FROM devices')).rows[0].visitor_hash,'old-device');
+    assert.equal((await client.query('SELECT unlimited FROM guests')).rows[0].unlimited,false);
     assert.equal((await client.query('SELECT message FROM responses')).rows[0].message,'Legacy wish');
     assert.equal((await client.query('SELECT tenant_id,data FROM media')).rows[0].data.toString(),'original image bytes');
     assert.deepEqual((await client.query('SELECT value FROM settings')).rows[0].value,{ceremonyTime:'09:00',whatsappTemplate:'Legacy {link}'});
@@ -66,7 +67,7 @@ test('version-one upgrade assigns stable opaque IDs without changing existing ow
     assert.equal((await client.query('SELECT password_hash FROM accounts')).rows[0].password_hash,passwordHash);
     await migrate(process.env.TEST_DATABASE_URL_UNPOOLED,schema);
     assert.deepEqual((await client.query('SELECT id,owner_id,slug,name,public_id FROM tenants')).rows[0],tenant);
-    assert.deepEqual((await client.query('SELECT version FROM schema_migrations ORDER BY version')).rows,[{version:1},{version:2},{version:3}]);
+    assert.deepEqual((await client.query('SELECT version FROM schema_migrations ORDER BY version')).rows,[{version:1},{version:2},{version:3},{version:4}]);
   }finally{await client.query('SET search_path TO public');await client.query(`DROP SCHEMA IF EXISTS ${schema} CASCADE`);client.release();await pool.end()}
 });
 
@@ -113,6 +114,7 @@ test('version-two UUIDv7 migration preserves every reference and rolls back on f
     for(const table of tables.filter(t=>t!=='schema_migrations')){
       const expected=before[table].map(r=>({...r}));
       for(const r of expected){
+        if(table==='guests')r.unlimited=false;
         if(table==='accounts')r.id=accountMap[r.id];
         if(table==='tenants'){r.id=tenantMap[r.id];r.owner_id=accountMap[r.owner_id]}
         if(r.tenant_id)r.tenant_id=tenantMap[r.tenant_id];
@@ -266,6 +268,72 @@ test('Neon-backed CMS and guest access end to end',async t => {
       const invitation = await request('/api/invitation',{jar:guestBrowser});assert.equal(invitation.value.guestName,'Keluarga Uji');
       assert.equal((await request('/',{jar:guestBrowser})).value.includes('envelope-card'),true);
     });
+    await t.test('account limits and invitation exemptions preserve every recorded browser and session',async () => {
+      await pool.query('TRUNCATE wedding.rate_limits');
+      const devices = async () => (await pool.query('SELECT visitor_hash,created_at FROM wedding.devices WHERE guest_id=$1 ORDER BY visitor_hash',[guest.id])).rows;
+      const sessions = async () => (await pool.query('SELECT token_hash,version,expires_at FROM wedding.sessions WHERE guest_id=$1 ORDER BY token_hash',[guest.id])).rows;
+      const currentGuest = async () => (await adminRequest('/api/admin/guests')).value.find(g=>g.id===guest.id);
+      const save = async data => {
+        const result=await adminRequest('/api/admin/content',{method:'PUT',data});
+        assert.equal(result.response.status,200);return result.value.settings;
+      };
+      const exempt = async unlimited => {
+        const result=await adminRequest(`/api/admin/guests/${guest.id}`,{method:'PATCH',data:{unlimited}});
+        assert.equal(result.response.status,200);assert.equal(result.value.unlimited,unlimited);return result.value;
+      };
+      const originalDevices=await devices(),originalSessions=await sessions();
+      assert.equal((await currentGuest()).deviceLimit,3);
+      for(const data of [{deviceLimit:'0'},{deviceLimit:'-1'},{deviceLimit:'1.5'},{deviceLimit:'2147483648'},{deviceLimit:'01'},{deviceLimit:''},{deviceLimit:4},{deviceLimit:null},{deviceLimitEnabled:true},{deviceLimitEnabled:'other'},{deviceLimitEnabled:null}]) {
+        assert.equal((await adminRequest('/api/admin/content',{method:'PUT',data})).response.status,400);
+      }
+      assert.equal((await adminRequest(`/api/admin/guests/${guest.id}`,{method:'PATCH',data:{unlimited:'true'}})).response.status,400);
+      assert.equal((await currentGuest()).unlimited,false);
+      await save({deviceLimit:'5'});
+      const other=await adminRequest('/api/admin/guests',{method:'POST',data:{name:'Other invitation'}});
+      assert.equal(other.response.status,201);assert.equal(other.value.guest.deviceLimit,5);
+      const otherId=other.value.guest.id,otherToken=new URL(other.value.link).pathname.split('/').pop();
+      const concurrent=[];for(let i=0;i<4;i++)concurrent.push(await challenge());
+      const results=await Promise.all(concurrent.map((c,i)=>verify(c,`raised-limit-${i}`)));
+      assert.equal(results.filter(r=>r.response.status===200).length,2);
+      assert.equal(results.filter(r=>r.value.code==='device_limit').length,2);
+      assert.equal((await currentGuest()).deviceLimit,5);
+      const fiveDevices=await devices(),fiveSessions=await sessions(),pending=await challenge();
+      await save({deviceLimitEnabled:'false'});
+      assert.equal((await currentGuest()).deviceLimit,null);
+      assert.deepEqual(await devices(),fiveDevices);assert.deepEqual(await sessions(),fiveSessions);
+      assert.equal((await verify(pending,'global-disabled-browser')).response.status,200);
+      assert.equal((await adminRequest('/api/admin/guests')).value.find(g=>g.id===otherId).deviceLimit,null);
+      assert.equal((await currentGuest()).deviceCount,6);
+      const sixDevices=await devices(),sixSessions=await sessions();
+      await save({deviceLimitEnabled:'true',deviceLimit:'2'});
+      assert.equal((await currentGuest()).deviceLimit,2);
+      assert.deepEqual(await devices(),sixDevices);assert.deepEqual(await sessions(),sixSessions);
+      const blocked=await verify(await challenge(),'new-blocked-browser');
+      assert.equal(blocked.value.code,'device_limit');assert.match(blocked.value.error,/2 browser/);
+      assert.equal((await verify(await challenge(),'global-disabled-browser')).response.status,200);
+      assert.equal((await request('/api/invitation',{jar:guestBrowser})).response.status,200);
+      const beforeExemption=await devices(),beforeSessions=await sessions(),pendingExemption=await challenge();
+      assert.equal((await exempt(true)).deviceLimit,null);
+      assert.deepEqual(await devices(),beforeExemption);assert.deepEqual(await sessions(),beforeSessions);
+      assert.equal((await verify(pendingExemption,'exempt-browser')).response.status,200);
+      assert.equal((await adminRequest('/api/admin/guests')).value.find(g=>g.id===otherId).deviceLimit,2);
+      for(let i=0;i<3;i++)assert.equal((await verify(await challenge(otherToken),`other-visitor-${i}`)).response.status,i<2?200:403);
+      const sevenDevices=await devices(),sevenSessions=await sessions();
+      assert.equal((await exempt(false)).deviceLimit,2);
+      assert.deepEqual(await devices(),sevenDevices);assert.deepEqual(await sessions(),sevenSessions);
+      assert.equal((await verify(await challenge(),'blocked-after-exemption')).value.code,'device_limit');
+      assert.equal((await verify(await challenge(),'exempt-browser')).response.status,200);
+      const template='Limit test {link}';
+      await save({deviceLimit:'3',whatsappTemplate:template});
+      const persisted=await save({ceremonyTitle:'Akad'});
+      assert.equal(persisted.deviceLimit,'3');assert.equal(persisted.deviceLimitEnabled,'true');
+      assert.equal(persisted.whatsappTemplate,template);
+      const finalDevices=await devices(),finalSessions=await sessions();
+      for(const d of originalDevices)assert.deepEqual(finalDevices.find(x=>x.visitor_hash===d.visitor_hash),d);
+      for(const session of originalSessions)assert.deepEqual(finalSessions.find(x=>x.token_hash===session.token_hash),session);
+      assert.equal((await adminRequest(`/api/admin/guests/${otherId}`,{method:'DELETE'})).response.status,200);
+      await pool.query('TRUNCATE wedding.rate_limits');
+    });
     await t.test('attendance and wishes persist per guest, validate input, and keep private fields private',async () => {
       const submit = (data,options={}) => request('/api/response',{method:'PUT',data,jar:guestBrowser,...options});
       const value = {attendance:'attending',guestCount:2,message:'  Selamat <script>alert(1)</script>\nBahagia selalu!  '};
@@ -335,6 +403,11 @@ test('Neon-backed CMS and guest access end to end',async t => {
       const child = spawn('postman',['collection','run','postman/collections/Wedding Invitation API','-i','Read personalized invitation and media','-i','Save attendance and a congratulatory wish','-i','Read congratulatory wishes','-i','Read guest verification by code','--env-var',`baseUrl=${base}`,'--env-var',`origin=${origin}`,'--env-var',`guestCode=${token}`,'--env-var',`invitationId=${invitationId}`,'--env-var',`guestCookie=wedding_guest=${guestBrowser.wedding_guest}`,'--no-report-events'],{stdio:['ignore','pipe','pipe']});
       let output = '';child.stdout.on('data',chunk => {output += chunk;});child.stderr.on('data',chunk => {output += chunk;});
       const [code] = await once(child,'close');console.log(output);assert.equal(code,0,output);
+    });
+    await t.test('Postman collection checks account and per-invitation limit controls',async () => {
+      const child=spawn('postman',['collection','run','postman/collections/Wedding Invitation API','-i','Configure account browser limit','-i','Disable account browser limit','-i','Exempt invitation from browser limit','-i','Restore invitation browser limit','-i','Restore account browser limit','--env-var',`cmsBaseUrl=${base}`,'--env-var',`cmsOrigin=${cmsOrigin}`,'--env-var',`adminCookie=wedding_admin=${admin.wedding_admin}`,'--env-var',`csrf=${csrf}`,'--env-var',`limitGuestId=${guest.id}`,'--no-report-events'],{stdio:['ignore','pipe','pipe']});
+      let output='';child.stdout.on('data',c=>output+=c);child.stderr.on('data',c=>output+=c);
+      const [code]=await once(child,'close');console.log(output);assert.equal(code,0,output);
     });
     await t.test('code landing stays gated with an existing session and never allocates a device',async()=>{
       const counts=async()=> (await pool.query('SELECT (SELECT count(*) FROM wedding.devices) AS devices,(SELECT count(*) FROM wedding.sessions) AS sessions,(SELECT count(*) FROM wedding.challenges) AS challenges')).rows;
@@ -497,7 +570,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
       const owner=(await pool.query('SELECT owner_id FROM wedding.tenants WHERE id=$1',[secondTenantId])).rows[0].owner_id;assert.match(owner,uuidv7);
       const secondRequest = (path,options={}) => request(path,{...options,jar:second,headers:{'X-CSRF-Token':login.value.csrf,...options.headers}});
       assert.deepEqual((await secondRequest('/api/admin/guests')).value,[]);
-      for (const [suffix,method,data] of [['','PATCH',{name:'Stolen'}],['','DELETE',{}],['/link','POST',{}],['/devices','DELETE',{}]]) {
+      for (const [suffix,method,data] of [['','PATCH',{unlimited:true}],['','PATCH',{name:'Stolen'}],['','DELETE',{}],['/link','POST',{}],['/devices','DELETE',{}]]) {
         assert.equal((await secondRequest(`/api/admin/guests/${guest.id}${suffix}`,{method,data})).response.status,404);
       }
       assert.equal((await adminRequest('/api/admin/guests')).value[0].name,'Keluarga Uji');
@@ -506,7 +579,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal(created.response.status,201);assert.match(created.value.link,/\/u\/[A-Za-z0-9_-]{27}$/);
       assert.equal((await adminRequest('/api/admin/guests')).value.length,1);
       const original = (await adminRequest('/api/admin/content')).value;
-      const saved = await secondRequest('/api/admin/content',{method:'PUT',data:{ceremonyTitle:'Second Ceremony',linkPreviewTitle:'Tenant Two Preview'}});
+      const saved = await secondRequest('/api/admin/content',{method:'PUT',data:{ceremonyTitle:'Second Ceremony',linkPreviewTitle:'Tenant Two Preview',deviceLimit:'1',deviceLimitEnabled:'false'}});
       assert.equal(saved.value.settings.ceremonyTitle,'Second Ceremony');assert.deepEqual(saved.value.media,{});
       const coded=await request(new URL(created.value.link).pathname,{jar:guestBrowser});
       assert.equal(coded.response.status,200);assert.match(coded.value,/<title>Tenant Two Preview<\/title>/);

@@ -1,5 +1,5 @@
 $kind: http-request
-name: Edit guest name, phone or active status
+name: Edit guest name, phone, active status or unlimited exemption
 description: Deactivation immediately revokes sessions and challenges. Device slots remain until explicit reset.
 url: "{{cmsBaseUrl}}/api/admin/guests/:id"
 method: PATCH

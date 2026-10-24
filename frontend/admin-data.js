@@ -53,7 +53,9 @@ export function queryGuests(
         (attendance === "all" ||
           (guest.response?.attendance || "pending") === attendance) &&
         (devices === "all" ||
-          guest.deviceCount === (devices === "full" ? 3 : 0)),
+          (devices === "full"
+            ? guest.deviceLimit != null && guest.deviceCount >= guest.deviceLimit
+            : guest.deviceCount === 0)),
     )
     .sort(
       (a, b) =>

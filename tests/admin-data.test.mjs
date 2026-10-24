@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {guestSummary,findGuests,mediaType} from '../frontend/admin-data.js';
+import {guestSummary,findGuests,mediaType,queryGuests} from '../frontend/admin-data.js';
 
 test('CMS summary counts invitations separately from people, excluding inactive responses',() => {
   const guests = [
@@ -26,4 +26,17 @@ test('CMS media validation accepts supported types and boundary sizes before upl
   assert.equal(mediaType({name:'song.MP3',type:'',size:25*1024*1024},true),'audio/mpeg');
   for (const file of [undefined,{name:'a.png',type:'image/png',size:0},{name:'a.png',type:'image/png',size:12*1024*1024+1},{name:'a.gif',type:'image/gif',size:100},{name:'a.svg',type:'image/svg+xml',size:100}]) assert.throws(() => mediaType(file));
   for (const file of [{name:'a.mp3',type:'audio/mpeg',size:25*1024*1024+1},{name:'a.wav',type:'audio/wav',size:100},{name:'a.png',type:'image/png',size:100}]) assert.throws(() => mediaType(file,true));
+});
+
+
+test('browser filter follows effective limits and excludes unlimited invitations', () => {
+  const guests = [
+    {name:'At limit',deviceCount:5,deviceLimit:5},
+    {name:'Above lowered limit',deviceCount:7,deviceLimit:2},
+    {name:'Available',deviceCount:3,deviceLimit:5},
+    {name:'Unlimited',deviceCount:9,deviceLimit:null},
+    {name:'Unused',deviceCount:0,deviceLimit:3},
+  ];
+  assert.deepEqual(queryGuests(guests,{devices:'full'}).map(g=>g.name),['Above lowered limit','At limit']);
+  assert.deepEqual(queryGuests(guests,{devices:'unused'}).map(g=>g.name),['Unused']);
 });

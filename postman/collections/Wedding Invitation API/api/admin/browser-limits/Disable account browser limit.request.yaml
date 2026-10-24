@@ -1,0 +1,25 @@
+$kind: http-request
+method: PUT
+url: '{{cmsBaseUrl}}/api/admin/content'
+order: 2000
+headers:
+  - key: Origin
+    value: '{{cmsOrigin}}'
+  - key: Cookie
+    value: '{{adminCookie}}'
+  - key: X-CSRF-Token
+    value: '{{csrf}}'
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "deviceLimitEnabled": "false"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Limit control succeeds', () => pm.response.to.have.status(200));
+      pm.test('Account limit disabled without losing the configured maximum', () => { pm.expect(pm.response.json().settings.deviceLimitEnabled).to.eql('false'); pm.expect(pm.response.json().settings.deviceLimit).to.eql('5'); });

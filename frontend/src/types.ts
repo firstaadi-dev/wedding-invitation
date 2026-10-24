@@ -13,6 +13,8 @@ export type Guest = {
   active: 0 | 1;
   createdAt: number;
   deviceCount: number;
+  deviceLimit: number | null;
+  unlimited: boolean;
   response: null | {
     attendance: Attendance;
     guestCount: number;
