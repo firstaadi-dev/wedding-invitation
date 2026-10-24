@@ -1,6 +1,11 @@
 package app
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"github.com/jackc/pgx/v5/pgconn"
+	"log"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -162,5 +167,36 @@ func TestResponseTokenBindsDisplayedSession(t *testing.T) {
 	rejects(t, func() { requireResponseToken(r, b) }, 409)
 	if responseToken(a) == a["token_hash"] || responseToken(map[string]any{}) != "" {
 		t.Fatal("credential exposure or preview binding")
+	}
+}
+
+func TestRequestFailureLogIsStructuredAndSanitized(t *testing.T) {
+	var output bytes.Buffer
+	previousWriter, previousFlags := log.Writer(), log.Flags()
+	log.SetOutput(&output)
+	log.SetFlags(0)
+	defer log.SetOutput(previousWriter)
+	defer log.SetFlags(previousFlags)
+	r := httptest.NewRequest("PUT", "/api/admin/guests/secret-id?token=secret-query", nil)
+	r.Header.Set("X-Request-ID", "request-123")
+	logRequestFailure(r, &pgconn.PgError{Code: "23505", Message: "private database detail secret-value"})
+	line := strings.TrimSpace(output.String())
+	var record map[string]any
+	if err := json.Unmarshal([]byte(line), &record); err != nil {
+		t.Fatalf("invalid structured log: %v", err)
+	}
+	if record["request_id"] != "request-123" || record["operation"] != "admin" || record["method"] != "PUT" || record["sqlstate"] != "23505" {
+		t.Fatalf("missing request context: %#v", record)
+	}
+	if strings.Contains(line, "secret-id") || strings.Contains(line, "secret-query") || strings.Contains(line, "secret-value") {
+		t.Fatalf("sensitive request or database content leaked: %s", line)
+	}
+	if len(record["stack"].([]any)) == 0 {
+		t.Fatal("stack frames missing")
+	}
+	output.Reset()
+	logRequestFailure(r, errors.New("sensitive failure"))
+	if strings.Contains(output.String(), "sensitive failure") {
+		t.Fatal("panic message leaked")
 	}
 }

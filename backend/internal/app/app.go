@@ -17,6 +17,7 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
 	"unicode/utf16"
@@ -161,6 +162,7 @@ func (a *App) Handler() http.Handler {
 func (a *App) security(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h := w.Header()
+		h.Set("X-Request-ID", uuid())
 		h.Set("X-Content-Type-Options", "nosniff")
 		h.Set("Referrer-Policy", "no-referrer")
 		h.Set("X-Frame-Options", "DENY")
@@ -311,12 +313,74 @@ func (a *App) limited(w http.ResponseWriter, r *http.Request, action string, max
 func (a *App) account(s map[string]any) map[string]any {
 	return map[string]any{"email": s["email"], "invitationOrigin": a.Config.Origin, "tenant": map[string]any{"id": s["tenant_id"], "slug": s["tenant_slug"], "publicId": s["public_id"], "name": s["tenant_name"]}}
 }
+func logRequestFailure(r *http.Request, recovered any) {
+	method := r.Method
+	if method != "GET" && method != "HEAD" && method != "POST" && method != "PUT" && method != "PATCH" && method != "DELETE" {
+		method = "other"
+	}
+	path := r.URL.Path
+	operation := "other"
+	switch {
+	case path == "/healthz":
+		operation = "health"
+	case path == "/api/identification/config":
+		operation = "identification_config"
+	case path == "/api/access/challenge":
+		operation = "access_challenge"
+	case path == "/api/access/verify":
+		operation = "access_verify"
+	case path == "/api/invitation":
+		operation = "invitation_read"
+	case path == "/api/response":
+		operation = "response_write"
+	case path == "/api/wishes":
+		operation = "wishes_read"
+	case strings.HasPrefix(path, "/api/admin/"):
+		operation = "admin"
+	case strings.HasPrefix(path, "/media/"):
+		operation = "media_read"
+	case strings.HasPrefix(path, "/preview-image/"):
+		operation = "preview_image_read"
+	case strings.HasPrefix(path, "/u/"):
+		operation = "guest_landing"
+	case strings.HasPrefix(path, "/i/"):
+		operation = "tenant_landing"
+	}
+	fields := map[string]any{"event": "request_failure", "request_id": r.Header.Get("X-Request-ID"), "method": method, "operation": operation, "error_type": fmt.Sprintf("%T", recovered), "stack": failureStack()}
+	if err, ok := recovered.(error); ok {
+		var pg *pgconn.PgError
+		if errors.As(err, &pg) {
+			fields["sqlstate"] = pg.Code
+		}
+	}
+	encoded, err := json.Marshal(fields)
+	if err != nil {
+		log.Printf("request_failure")
+		return
+	}
+	log.Print(string(encoded))
+}
+func failureStack() []string {
+	pcs := make([]uintptr, 16)
+	n := runtime.Callers(3, pcs)
+	frames := runtime.CallersFrames(pcs[:n])
+	stack := make([]string, 0, 8)
+	for len(stack) < 8 {
+		frame, more := frames.Next()
+		stack = append(stack, fmt.Sprintf("%s:%d", frame.Function, frame.Line))
+		if !more {
+			break
+		}
+	}
+	return stack
+}
+
 func (a *App) serve(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if recovered := recover(); recovered != nil {
 			e, ok := recovered.(apiError)
 			if !ok {
-				log.Printf("Request failed: %T", recovered)
+				logRequestFailure(r, recovered)
 				e = apiError{500, "server_error", "Ada gangguan sementara. Silakan coba lagi."}
 			}
 			jsonResponse(w, e.Status, map[string]string{"error": e.Message, "code": e.Code})
