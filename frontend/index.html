@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=11">
+  <link rel="stylesheet" href="/styles.css?v=15">
   <script type="module" src="/invitation.js?v=3"></script>
   <script type="module" src="/content.js"></script>
 </head>
@@ -34,8 +34,16 @@
               </div>
             </div>
             <button class="envelope-seal" id="open-invitation" type="button" aria-label="Buka undangan">
-              <svg class="seal-gunungan" viewBox="0 0 40 56" fill="none" aria-hidden="true"><path d="M20 2C15 14 4 26 4 38C4 46 10 49 20 49C30 49 36 46 36 38C36 26 25 14 20 2Z"/><path d="M20 12V54M20 25L12 31M20 25L28 31M20 34L10 39M20 34L30 39M13 46H27"/></svg>
-              <span>Buka undangan</span>
+              <svg class="seal-lettering" viewBox="0 0 160 160" aria-hidden="true">
+                <defs>
+                  <path id="seal-upper-arc" d="M 44,78 A 34,34 0 0,1 112,78"/>
+                  <path id="seal-lower-arc" d="M 35,78 A 43,43 0 0,0 121,78"/>
+                </defs>
+                <text class="seal-word seal-word-upper"><textPath href="#seal-upper-arc" startOffset="50%">BUKA</textPath></text>
+                <text class="seal-word seal-word-lower"><textPath href="#seal-lower-arc" startOffset="50%">UNDANGAN</textPath></text>
+                <circle cx="36" cy="78" r="1.8"/>
+                <circle cx="120" cy="78" r="1.8"/>
+              </svg>
             </button>
           </div>
         </div>
