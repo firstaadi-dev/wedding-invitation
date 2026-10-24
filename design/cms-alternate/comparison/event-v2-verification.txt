@@ -1,0 +1,16 @@
+1440/pasangan: visible, one section, no page overflow
+1440/waktu: visible, one section, no page overflow
+1440/lokasi: visible, one section, no page overflow
+1440/hadiah: visible, one section, no page overflow
+1440/akses: visible, one section, no page overflow
+390/pasangan: visible, one section, no page overflow
+390/waktu: visible, one section, no page overflow
+390/lokasi: visible, one section, no page overflow
+390/hadiah: visible, one section, no page overflow
+390/akses: visible, one section, no page overflow
+320/pasangan: visible, one section, no page overflow
+320/waktu: visible, one section, no page overflow
+320/lokasi: visible, one section, no page overflow
+320/hadiah: visible, one section, no page overflow
+320/akses: visible, one section, no page overflow
+PASS: drafts preserved across sections/routes; live summary; gift OFF retains data; hidden invalid gift/browser/map reveals correct section and focuses field; save all/busy; pager and heading focus; mobile selector/summary; no JS errors.

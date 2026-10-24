@@ -1,0 +1,5 @@
+Studio V2 1440: full WA bubble in both sections, selected-only media, gallery File retention/retry/focus, all routes overflow PASS
+Studio V2 390: full WA bubble in both sections, selected-only media, gallery File retention/retry/focus, all routes overflow PASS
+Studio V2 320: full WA bubble in both sections, selected-only media, gallery File retention/retry/focus, all routes overflow PASS
+Thumbnail upload preserves text dirty state; complete bubble includes uploaded image; music pauses on section/route leave PASS
+Hidden-field validation opens correct section/Edit; message/event payloads preserve mounted fields; no JS errors PASS

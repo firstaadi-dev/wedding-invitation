@@ -1,0 +1,9 @@
+studio/1440: same DetailAcara navigation, message editor + complete final WhatsApp preview, only selected media section visible, gallery/mobile dialog, no overflow PASS
+studio/390: same DetailAcara navigation, message editor + complete final WhatsApp preview, only selected media section visible, gallery/mobile dialog, no overflow PASS
+studio/320: same DetailAcara navigation, message editor + complete final WhatsApp preview, only selected media section visible, gallery/mobile dialog, no overflow PASS
+studio-v2/1440: same DetailAcara navigation, message editor + complete final WhatsApp preview, only selected media section visible, gallery/mobile dialog, no overflow PASS
+studio-v2/390: same DetailAcara navigation, message editor + complete final WhatsApp preview, only selected media section visible, gallery/mobile dialog, no overflow PASS
+studio-v2/320: same DetailAcara navigation, message editor + complete final WhatsApp preview, only selected media section visible, gallery/mobile dialog, no overflow PASS
+studio: submenu computed styles identical across3pages; full final preview text+metadata+uploadedimage; keyboard/validation/draft/independentupload/save; media file retention acrosssections/slots/modal, retries, busy/delete, native audio PASS
+studio-v2: submenu computed styles identical across3pages; full final preview text+metadata+uploadedimage; keyboard/validation/draft/independentupload/save; media file retention acrosssections/slots/modal, retries, busy/delete, native audio PASS
+No JS errors. Production unchanged; Detail Acara shared navigation preserves its geometry and behavior.

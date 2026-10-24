@@ -1,0 +1,368 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-24T16:01:12.032117+00:00",
+  "title": "Design System: weddinvita CMS — Studio V2",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Primary",
+        "tonalRamp": [
+          "oklch(15% 0.0165 171.31)",
+          "oklch(26% 0.0306 171.31)",
+          "oklch(38% 0.0424 171.31)",
+          "oklch(50% 0.0471 171.31)",
+          "oklch(62% 0.0471 171.31)",
+          "oklch(74% 0.0377 171.31)",
+          "oklch(86% 0.0236 171.31)",
+          "oklch(95% 0.0071 171.31)"
+        ]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Primary Hover",
+        "tonalRamp": [
+          "oklch(15% 0.0142 171.57)",
+          "oklch(26% 0.0264 171.57)",
+          "oklch(38% 0.0366 171.57)",
+          "oklch(50% 0.0407 171.57)",
+          "oklch(62% 0.0407 171.57)",
+          "oklch(74% 0.0325 171.57)",
+          "oklch(86% 0.0203 171.57)",
+          "oklch(95% 0.0061 171.57)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "tonalRamp": [
+          "oklch(15% 0.0014 106.47)",
+          "oklch(26% 0.0026 106.47)",
+          "oklch(38% 0.0036 106.47)",
+          "oklch(50% 0.0040 106.47)",
+          "oklch(62% 0.0040 106.47)",
+          "oklch(74% 0.0032 106.47)",
+          "oklch(86% 0.0020 106.47)",
+          "oklch(95% 0.0006 106.47)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(26% 0.0000 89.88)",
+          "oklch(38% 0.0000 89.88)",
+          "oklch(50% 0.0000 89.88)",
+          "oklch(62% 0.0000 89.88)",
+          "oklch(74% 0.0000 89.88)",
+          "oklch(86% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
+      },
+      "soft": {
+        "role": "primary",
+        "displayName": "Soft",
+        "tonalRamp": [
+          "oklch(15% 0.0041 162.04)",
+          "oklch(26% 0.0076 162.04)",
+          "oklch(38% 0.0105 162.04)",
+          "oklch(50% 0.0116 162.04)",
+          "oklch(62% 0.0116 162.04)",
+          "oklch(74% 0.0093 162.04)",
+          "oklch(86% 0.0058 162.04)",
+          "oklch(95% 0.0017 162.04)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "tonalRamp": [
+          "oklch(15% 0.0049 131.74)",
+          "oklch(26% 0.0091 131.74)",
+          "oklch(38% 0.0126 131.74)",
+          "oklch(50% 0.0140 131.74)",
+          "oklch(62% 0.0140 131.74)",
+          "oklch(74% 0.0112 131.74)",
+          "oklch(86% 0.0070 131.74)",
+          "oklch(95% 0.0021 131.74)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "tonalRamp": [
+          "oklch(15% 0.0066 130.63)",
+          "oklch(26% 0.0122 130.63)",
+          "oklch(38% 0.0169 130.63)",
+          "oklch(50% 0.0187 130.63)",
+          "oklch(62% 0.0187 130.63)",
+          "oklch(74% 0.0150 130.63)",
+          "oklch(86% 0.0094 130.63)",
+          "oklch(95% 0.0028 130.63)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Line",
+        "tonalRamp": [
+          "oklch(15% 0.0048 120.29)",
+          "oklch(26% 0.0090 120.29)",
+          "oklch(38% 0.0124 120.29)",
+          "oklch(50% 0.0138 120.29)",
+          "oklch(62% 0.0138 120.29)",
+          "oklch(74% 0.0110 120.29)",
+          "oklch(86% 0.0069 120.29)",
+          "oklch(95% 0.0021 120.29)"
+        ]
+      },
+      "input-border": {
+        "role": "neutral",
+        "displayName": "Input Border",
+        "tonalRamp": [
+          "oklch(15% 0.0094 127.83)",
+          "oklch(26% 0.0175 127.83)",
+          "oklch(38% 0.0242 127.83)",
+          "oklch(50% 0.0269 127.83)",
+          "oklch(62% 0.0269 127.83)",
+          "oklch(74% 0.0215 127.83)",
+          "oklch(86% 0.0135 127.83)",
+          "oklch(95% 0.0040 127.83)"
+        ]
+      },
+      "soft-text": {
+        "role": "primary",
+        "displayName": "Soft Text",
+        "tonalRamp": [
+          "oklch(15% 0.0135 163.67)",
+          "oklch(26% 0.0250 163.67)",
+          "oklch(38% 0.0346 163.67)",
+          "oklch(50% 0.0385 163.67)",
+          "oklch(62% 0.0385 163.67)",
+          "oklch(74% 0.0308 163.67)",
+          "oklch(86% 0.0192 163.67)",
+          "oklch(95% 0.0058 163.67)"
+        ]
+      },
+      "on-primary-muted": {
+        "role": "primary",
+        "displayName": "On Primary Muted",
+        "tonalRamp": [
+          "oklch(15% 0.0091 161.90)",
+          "oklch(26% 0.0168 161.90)",
+          "oklch(38% 0.0233 161.90)",
+          "oklch(50% 0.0259 161.90)",
+          "oklch(62% 0.0259 161.90)",
+          "oklch(74% 0.0207 161.90)",
+          "oklch(86% 0.0129 161.90)",
+          "oklch(95% 0.0039 161.90)"
+        ]
+      },
+      "success": {
+        "role": "neutral",
+        "displayName": "Success",
+        "tonalRamp": [
+          "oklch(15% 0.0237 152.65)",
+          "oklch(26% 0.0440 152.65)",
+          "oklch(38% 0.0609 152.65)",
+          "oklch(50% 0.0676 152.65)",
+          "oklch(62% 0.0676 152.65)",
+          "oklch(74% 0.0541 152.65)",
+          "oklch(86% 0.0338 152.65)",
+          "oklch(95% 0.0101 152.65)"
+        ]
+      },
+      "danger": {
+        "role": "neutral",
+        "displayName": "Danger",
+        "tonalRamp": [
+          "oklch(15% 0.0315 18.31)",
+          "oklch(26% 0.0585 18.31)",
+          "oklch(38% 0.0810 18.31)",
+          "oklch(50% 0.0900 18.31)",
+          "oklch(62% 0.0900 18.31)",
+          "oklch(74% 0.0720 18.31)",
+          "oklch(86% 0.0450 18.31)",
+          "oklch(95% 0.0135 18.31)"
+        ]
+      },
+      "disabled": {
+        "role": "neutral",
+        "displayName": "Disabled",
+        "tonalRamp": [
+          "oklch(15% 0.0029 157.08)",
+          "oklch(26% 0.0054 157.08)",
+          "oklch(38% 0.0075 157.08)",
+          "oklch(50% 0.0083 157.08)",
+          "oklch(62% 0.0083 157.08)",
+          "oklch(74% 0.0066 157.08)",
+          "oklch(86% 0.0042 157.08)",
+          "oklch(95% 0.0012 157.08)"
+        ]
+      },
+      "disabled-text": {
+        "role": "neutral",
+        "displayName": "Disabled Text",
+        "tonalRamp": [
+          "oklch(15% 0.0068 162.17)",
+          "oklch(26% 0.0126 162.17)",
+          "oklch(38% 0.0174 162.17)",
+          "oklch(50% 0.0194 162.17)",
+          "oklch(62% 0.0194 162.17)",
+          "oklch(74% 0.0155 162.17)",
+          "oklch(86% 0.0097 162.17)",
+          "oklch(95% 0.0029 162.17)"
+        ]
+      },
+      "disabled-border": {
+        "role": "neutral",
+        "displayName": "Disabled Border",
+        "tonalRamp": [
+          "oklch(15% 0.0050 155.55)",
+          "oklch(26% 0.0093 155.55)",
+          "oklch(38% 0.0129 155.55)",
+          "oklch(50% 0.0144 155.55)",
+          "oklch(62% 0.0144 155.55)",
+          "oklch(74% 0.0115 155.55)",
+          "oklch(86% 0.0072 155.55)",
+          "oklch(95% 0.0022 155.55)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Desktop page headings."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Event section headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Inherited base text."
+      },
+      "field": {
+        "displayName": "Field",
+        "purpose": "Native field values."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Field labels."
+      },
+      "helper": {
+        "displayName": "Helper",
+        "purpose": "Compact status and help."
+      }
+    },
+    "shadows": [
+      {
+        "name": "standard-dialog",
+        "value": "0 24px 80px #0f172a30",
+        "purpose": "Inherited standard dialogs; the gallery dialog overrides this with no shadow."
+      }
+    ],
+    "motion": [
+      {
+        "name": "control-colors",
+        "value": "background 0.15s, border-color 0.15s",
+        "purpose": "Buttons and links only when prefers-reduced-motion is no-preference."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact",
+        "value": "599px"
+      },
+      {
+        "name": "mobile",
+        "value": "899px"
+      },
+      {
+        "name": "intermediate",
+        "value": "1199px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary CMS action; the save-bar variant uses pill corners.",
+      "html": "<button class=\"ds-primary\">Simpan perubahan</button>",
+      "css": ".ds-primary{font-family:Manrope,system-ui,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 16px;border:1px solid #cbd5cc;border-radius:10px;font-size:14px;font-weight:600;line-height:1.45;cursor:pointer;background:var(--forest,#183D32);color:#fff;border-color:var(--forest,#183D32)}.ds-primary:hover{background:var(--forest-hover,#102F26);border-color:var(--forest-hover,#102F26)}.ds-primary:focus-visible{outline:3px solid var(--forest,#183D32);outline-offset:3px;}.ds-primary:disabled{background:#E7EDE9;color:#59665F;border-color:#CED8D1;cursor:default}@media(prefers-reduced-motion:no-preference){.ds-primary{transition:background .15s,border-color .15s}}"
+    },
+    {
+      "name": "Secondary button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "A supporting action on white.",
+      "html": "<button class=\"ds-secondary\">Sebelumnya</button>",
+      "css": ".ds-secondary{font-family:Manrope,system-ui,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 16px;border:1px solid #cbd5cc;border-radius:10px;font-size:14px;font-weight:600;line-height:1.45;cursor:pointer;background:#fff;color:var(--ink,#22261F)}.ds-secondary:hover{background:var(--cream,#E7F0EB);border-color:#7B8372}.ds-secondary:focus-visible{outline:3px solid var(--forest,#183D32);outline-offset:3px;}@media(prefers-reduced-motion:no-preference){.ds-secondary{transition:background .15s,border-color .15s}}"
+    },
+    {
+      "name": "Text field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Native labeled field with explicit border.",
+      "html": "<label class=\"ds-label\">Nama mempelai<input class=\"ds-input\" value=\"Nama contoh\"></label>",
+      "css": ".ds-label{font-family:Manrope,system-ui,sans-serif;display:block;color:var(--ink,#22261F);font-size:14px;font-weight:500;line-height:1.5}.ds-input{font-family:Manrope,system-ui,sans-serif;display:block;width:calc(100% - 30px);min-height:24px;margin-top:8px;padding:11px 14px;border:1px solid #7B8372;border-radius:10px;background:#fff;color:var(--ink,#22261F);font-size:16px;line-height:1.5;caret-color:var(--forest,#183D32)}.ds-input:focus-visible{outline:3px solid var(--forest,#183D32);outline-offset:3px;}"
+    },
+    {
+      "name": "Selected section navigation",
+      "kind": "nav",
+      "refersTo": "section-navigation-active",
+      "description": "Shared desktop settings menu; use a native select on mobile.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Bagian pengaturan\"><button class=\"ds-section\" aria-current=\"step\"><span>Pesan WhatsApp</span><small>Template dan token tamu</small></button></nav>",
+      "css": ".ds-nav{width:192px}.ds-section{font-family:Manrope,system-ui,sans-serif;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;min-height:72px;width:100%;padding:14px 12px;border:0;border-radius:10px;text-align:left;background:var(--forest,#183D32);color:#fff;cursor:pointer}.ds-section span{font-size:14px;font-weight:600;line-height:20px}.ds-section small{font-size:12px;line-height:18px;color:#D3E7DC}.ds-section:hover{background:var(--forest,#183D32)}.ds-section:focus-visible{outline:3px solid var(--forest,#183D32);outline-offset:3px;}"
+    },
+    {
+      "name": "Attending tag",
+      "kind": "chip",
+      "refersTo": "tag-attending",
+      "description": "Written status remains visible alongside semantic color.",
+      "html": "<span class=\"ds-tag\">Hadir</span>",
+      "css": ".ds-tag{font-family:Manrope,system-ui,sans-serif;display:inline-flex;align-items:center;padding:3px 8px;border-radius:5px;background:var(--cream,#E7F0EB);color:#315B3E;font-size:13px;font-weight:500;line-height:1.5;white-space:nowrap}"
+    },
+    {
+      "name": "Content panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Flat bordered settings surface.",
+      "html": "<section class=\"ds-panel\"><h2>Template pesan</h2><p>Atur pesan untuk tamu undangan.</p></section>",
+      "css": ".ds-panel{font-family:Manrope,system-ui,sans-serif;padding:24px;border:1px solid var(--line,#DFE2D8);border-radius:12px;background:#fff;color:var(--ink,#22261F);box-shadow:none}.ds-panel h2{margin:0 0 12px;font-size:22px;font-weight:600;line-height:30px}.ds-panel p{margin:0;max-width:75ch;font-size:14px;line-height:1.6;color:var(--muted,#5C6257)}"
+    },
+    {
+      "name": "Complete message preview",
+      "kind": "custom",
+      "refersTo": "message-preview",
+      "description": "Image state, link metadata/domain and full body remain together.",
+      "html": "<div class=\"ds-bubble\"><div class=\"ds-image\">Gambar pratinjau belum diunggah</div><div class=\"ds-meta\"><strong>Undangan Pernikahan</strong><p>Tanggal dan tempat acara</p><span>contoh.invalid</span></div><pre class=\"ds-body\">Yth. Bapak/Ibu Tamu Undangan,\nKami mengundang Anda.\nhttps://contoh.invalid/u/contoh</pre></div>",
+      "css": ".ds-bubble{font-family:Manrope,system-ui,sans-serif;background:var(--cream,#E7F0EB);color:var(--forest,#183D32);border-radius:12px;overflow:hidden}.ds-image{padding:24px;text-align:center;background:#DCE7DF;color:#466154}.ds-meta{padding:16px;background:#DCE7DF;font-size:14px;line-height:1.6}.ds-meta p{margin:8px 0;color:#466154}.ds-meta span{color:#466154}.ds-body{font-family:Manrope,system-ui,sans-serif;margin:0;padding:20px;font-size:14px;line-height:24px;white-space:pre-wrap;overflow-wrap:anywhere}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Studio — an open preparation desk",
+    "overview": "Studio V2 is the approved production extension of Studio: an open preparation desk with warm-white ground, white work surfaces, Manrope and restrained forest green. It keeps guest comparison spacious and gives each settings task a clear local work area. Indonesian copy is warm, calm and direct.\n\nThis records the CMS implementation in `src/main.tsx`, `admin.css` and `studio.css`; the latter overrides the former only through the admin entry. It does not redefine the public invitation theme. The inherited direction seed is `0903cca35435964f`; no new visual-world roll is implied. Comparison studies remain separate historical alternatives.",
+    "keyCharacteristics": [
+      "Open guest table and five metrics, with people attending distinguished from invitations.",
+      "One shared section-navigation pattern across event, message and media settings.",
+      "Flat work surfaces, clear borders, labeled states and visible keyboard focus.",
+      "One complete WhatsApp preview and persistent mounted text/file controls."
+    ],
+    "rules": [],
+    "dos": [
+      "Do preserve the distinction between invitations and people attending.",
+      "Do retain native controls, visible focus, labeled states and contained table scrolling.",
+      "Do preserve mounted fields and distinguish text saving, file selection and successful upload.",
+      "Do apply this system through the admin entry and keep comparison studies separate."
+    ],
+    "donts": [
+      "Don't introduce citrus or Fokus monochrome styling into Studio V2.",
+      "Don't split the final WhatsApp preview into section-dependent fragments.",
+      "Don't treat a selected file as installed media or a thumbnail upload as a text save.",
+      "Don't infer publishing, automated WhatsApp delivery, extra media slots or backend changes from the layout."
+    ]
+  }
+}

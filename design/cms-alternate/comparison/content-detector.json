@@ -1,0 +1,34 @@
+[
+  {
+    "antipattern": "cramped-padding",
+    "name": "Cramped padding",
+    "description": "Text is too close to the edge of its container. Two shapes: (1) an element with its own text where the space between the rendered text and the border box is too small for the font size, and (2) a wrapper whose children's text lands flush against a visible boundary (border, outline, or non-transparent background) with nothing to inset it. Add at least 8px (ideally 12–16px) of space inside bordered, outlined, or colored containers.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/Users/firsta/Documents/Work/wedding-invitation/design/cms-alternate/comparison/studio.html",
+    "line": 0,
+    "snippet": "<div> \"table-wrap\": children flush against border-top/bottom+bg on all sides (no inset)"
+  },
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/firsta/Documents/Work/wedding-invitation/design/cms-alternate/comparison/studio.html",
+    "line": 0,
+    "snippet": "text color rgb(64, 73, 38) on small \"orang, termasuk pendamping\" is outside DESIGN.md colors",
+    "advisory": true,
+    "ignoreValue": "rgb(64, 73, 38)"
+  },
+  {
+    "antipattern": "cramped-padding",
+    "name": "Cramped padding",
+    "description": "Text is too close to the edge of its container. Two shapes: (1) an element with its own text where the space between the rendered text and the border box is too small for the font size, and (2) a wrapper whose children's text lands flush against a visible boundary (border, outline, or non-transparent background) with nothing to inset it. Add at least 8px (ideally 12–16px) of space inside bordered, outlined, or colored containers.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/Users/firsta/Documents/Work/wedding-invitation/design/cms-alternate/comparison/studio-v2.html",
+    "line": 0,
+    "snippet": "<div> \"table-wrap\": children flush against border-top/bottom+bg on all sides (no inset)"
+  }
+]

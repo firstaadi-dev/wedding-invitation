@@ -26,10 +26,11 @@ import type {
   Confirm,
 } from "./types";
 import "../admin.css";
+import "../studio.css";
 
 const pages = {
   tamu: "Tamu Undangan",
-  pesan: "Pesan dan pratinjau",
+  pesan: "Pesan & Preview",
   media: "Foto & Lagu",
   acara: "Detail Acara",
 };
@@ -82,21 +83,41 @@ const NavIcon = ({ index }: { index: number }) =>
     </svg>,
   ][index];
 const Brand = () => (
-  <a className="brand" href="/">
-    <span className="brand-mark" aria-hidden="true">
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      >
-        <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" />
-      </svg>
-    </span>
-    <span className="brand-name">weddinvita</span>
-    <span className="brand-caption">Portal Undangan</span>
-  </a>
+  <a className="brand" href="#tamu" aria-label="weddinvita — Tamu Undangan">weddinvita</a>
 );
+type EditorSection = { id: string; title: string; short: string };
+const eventSections: EditorSection[] = [
+  {id:"pasangan",title:"Pasangan & keluarga",short:"Nama mempelai dan orang tua"},
+  {id:"waktu",title:"Acara & waktu",short:"Tanggal, rangkaian, countdown"},
+  {id:"lokasi",title:"Lokasi acara",short:"Tempat dan Google Maps"},
+  {id:"hadiah",title:"Hadiah",short:"Rekening atau alamat pengiriman"},
+  {id:"akses",title:"Akses undangan",short:"Pengaturan limit akses"},
+];
+const messageSections: EditorSection[] = [
+  {id:"template",title:"Pesan WhatsApp",short:"Template dan token tamu"},
+  {id:"link",title:"Pratinjau tautan",short:"Judul, deskripsi, dan gambar"},
+];
+const mediaSections: EditorSection[] = [
+  {id:"couple",title:"Foto pasangan",short:"Dua foto mempelai"},
+  {id:"gallery",title:"Galeri undangan",short:"Sembilan slot foto"},
+  {id:"music",title:"Lagu undangan",short:"Musik latar acara"},
+];
+function SectionNavigation({sections, current, onChange, prefix, disabled = false}: {
+  sections: EditorSection[]; current: string; onChange: (id:string)=>void; prefix:string; disabled?:boolean;
+}) {
+  return <nav className="event-section-nav" aria-label="Bagian pengaturan">
+    <p className="event-nav-title">Informasi undangan</p>
+    <label className="event-mobile-select">Bagian yang diatur
+      <select id={`${prefix}-section-select`} value={current} onChange={e=>onChange(e.target.value)} disabled={disabled}>
+        {sections.map(section=><option key={section.id} value={section.id}>{section.title}</option>)}
+      </select>
+    </label>
+    <div className="event-section-buttons">{sections.map(section=><button key={section.id} type="button" data-section={section.id}
+      disabled={disabled} aria-current={current===section.id ? "step" : undefined} aria-controls={`${prefix}-part-${section.id}`}
+      onClick={()=>onChange(section.id)}><span>{section.title}</span><small>{section.short}</small></button>)}</div>
+    <p className="event-nav-help">Pilih bagian yang ingin Anda atur. Isian tetap ada saat berpindah bagian.</p>
+  </nav>;
+}
 function ActionIcon({
   kind,
 }: {
@@ -232,10 +253,9 @@ function Login({
     >
       <section className="login-story" aria-labelledby="login-story-title">
         <a href="/" className="login-wordmark">
-          weddinvita<span aria-hidden="true">.</span>
+          weddinvita
         </a>
         <div className="login-statement">
-          <p className="login-eyebrow">Kelola undangan pernikahan Anda</p>
           <h1 id="login-story-title">
             Siapkan
             <br />
@@ -244,15 +264,10 @@ function Login({
           <p>
             Atur detail acara, bagikan undangan, dan lihat konfirmasi tamu.
           </p>
-          <span className="login-signature">weddinvita</span>
         </div>
-        <span className="login-watermark" aria-hidden="true">
-          W
-        </span>
       </section>
       <section className="login-form-side">
         <div className="login-panel">
-          <p className="login-eyebrow">Portal Undangan</p>
           <h2 id="login-title">Selamat datang</h2>
           <p>Masuk untuk menyiapkan dan memantau undangan pernikahan Anda.</p>
           <form id="login" onSubmit={submit} aria-busy={busy}>
@@ -349,7 +364,7 @@ function GuestEditor({
           </button>
         </div>
         <p>
-          Setiap undangan memiliki tautan pribadi. Batas browser mengikuti
+          Setiap undangan memiliki tautan pribadi. Jumlah Limit Akses mengikuti
           pengaturan global. Browser berbeda pada perangkat yang sama dapat
           memakai slot terpisah.
         </p>
@@ -385,7 +400,7 @@ function GuestEditor({
         </p>
         {guest && (
           <label>
-            Batas browser
+            Jumlah Limit Akses
             <select
               name="unlimited"
               defaultValue={String(guest.unlimited)}
@@ -939,6 +954,7 @@ function GuestsPage({
             ["Konfirmasi hadir", summary.attending, "attending"],
             ["Belum konfirmasi", summary.pending, "pending"],
             ["Nonaktif", summary.inactive, "inactive"],
+            ["Perkiraan orang hadir", summary.people, "people"],
           ].map(([label, value, key]) => (
             <article className={`metric ${key}`} key={key}>
               <h2>{label}</h2>
@@ -1095,7 +1111,7 @@ function GuestsPage({
                   {sortHeader("attendance", "Konfirmasi")}
                 </th>
                 <th scope="col">Jumlah kehadiran</th>
-                <th scope="col">Browser</th>
+                <th scope="col">Limit</th>
                 <th scope="col">Ucapan</th>
                 <th scope="col">Aksi</th>
               </tr>
@@ -1229,7 +1245,7 @@ function GuestsPage({
             </button>
           </div>
           <label>
-            Browser
+            Limit
             <select
               value={devices}
               onChange={(e) => {
@@ -1237,13 +1253,13 @@ function GuestsPage({
                 resetPage();
               }}
             >
-              <option value="all">Semua browser</option>
+              <option value="all">Semua limit</option>
               <option value="full">Batas tercapai</option>
               <option value="unused">Belum digunakan</option>
             </select>
           </label>
           <p className="help">
-            Batas browser mengikuti pengaturan global dan pengecualian per
+            Jumlah Limit Akses mengikuti pengaturan global dan pengecualian per
             undangan. Browser berbeda pada perangkat yang sama dapat memakai slot
             terpisah.
           </p>
@@ -1261,6 +1277,79 @@ function GuestsPage({
     </section>
   );
 }
+type MediaState = { busy:boolean; label:string };
+function MediaPage({content, api, onContent, confirm, notice, active}: {
+  content:Content;api:API;onContent:(c:Content)=>void;confirm:Confirm;notice:(message:string,error?:boolean)=>void;active:boolean;
+}) {
+  const [part,setPart]=useState("couple");
+  const [slot,setSlot]=useState("gallery1");
+  const [states,setStates]=useState<Record<string,MediaState>>({});
+  const [dialogOpen,setDialogOpen]=useState(false);
+  const dialog=useRef<HTMLDialogElement>(null);
+  const trigger=useRef<HTMLButtonElement>(null);
+  const galleryBusy=Object.entries(states).some(([key,state])=>key.startsWith("gallery") && state.busy);
+  const reportState=useCallback((key:string,state:MediaState)=>setStates(previous=>({...previous,[key]:state})),[]);
+  const closeGallery=useCallback(()=>{
+    if(matchMedia("(max-width:899px)").matches) dialog.current?.close();
+    setDialogOpen(false);
+    if(trigger.current?.checkVisibility()) trigger.current.focus();
+  },[]);
+  useEffect(()=>{
+    const query=matchMedia("(max-width:899px)");
+    const sync=()=>{
+      const element=dialog.current!;
+      if(element.open) element.close();
+      if(!query.matches && active && part==="gallery") element.show();
+      setDialogOpen(false);
+    };
+    sync();query.addEventListener("change",sync);
+    return()=>query.removeEventListener("change",sync);
+  },[active,part]);
+  function showPart(id:string) {
+    setPart(id);
+    requestAnimationFrame(()=>document.getElementById(`media-part-${id}`)?.querySelector<HTMLElement>("h2")?.focus());
+  }
+  const card=(key:string,title:string,compact=false)=><MediaCard key={key} slot={key} title={title} src={content.media[key]} api={api} onContent={onContent} confirm={confirm} notice={notice} compact={compact} active={active && part==="music"} onStateChange={reportState}/>;
+  return <>
+    <header className="page-heading"><div><h1 id="media-title" tabIndex={-1}>Foto &amp; Lagu</h1><p>Foto pasangan, koleksi galeri, dan musik. Kelola satu per satu dengan jelas.</p></div></header>
+    <p className="media-format-note">2 foto pasangan · 9 foto galeri · 1 lagu. Foto JPG, PNG, WebP maksimal 12 MiB. Audio MP3, M4A, AAC, WAV, OGG/Opus, FLAC, WebM maksimal 25 MiB. Pilih berkas, lalu Unggah.</p>
+    <div className="settings-workspace media-workspace">
+      <SectionNavigation sections={mediaSections} current={part} onChange={showPart} prefix="media" disabled={galleryBusy && dialogOpen}/>
+      <div className="media-content-column">
+        <section id="media-part-couple" hidden={part!=="couple"}>
+          <div className="section-heading"><h2 tabIndex={-1}>Foto pasangan</h2><span className="muted">2 slot foto</span></div>
+          <div id="couple-media" className="media-grid couple-grid">{card("groom","Foto mempelai pertama",true)}{card("bride","Foto mempelai kedua",true)}</div>
+        </section>
+        <section id="media-part-gallery" hidden={part!=="gallery"}>
+          <div className="section-heading"><h2 tabIndex={-1}>Galeri undangan</h2><span className="tag">{Array.from({length:9},(_,i)=>content.media[`gallery${i+1}`]).filter(Boolean).length}/9 terpasang</span></div>
+          <div className="gallery-workbench">
+            <div className="gallery-tile-grid" role="group" aria-label="Sembilan slot galeri">{Array.from({length:9},(_,i)=>{
+              const key=`gallery${i+1}`;
+              return <button key={key} type="button" className="gallery-tile" data-gallery-slot={key} aria-pressed={slot===key} disabled={galleryBusy}
+                aria-controls="gallery-slot-dialog" onClick={e=>{
+                  setSlot(key); trigger.current=e.currentTarget;
+                  if(matchMedia("(max-width:899px)").matches){dialog.current?.showModal();setDialogOpen(true);}
+                  requestAnimationFrame(()=>dialog.current?.querySelector<HTMLElement>(`[data-gallery-editor="${key}"] h3`)?.focus());
+                }}>
+                <span className="gallery-tile-image">{content.media[key] ? <img src={content.media[key]} alt=""/> : <NavIcon index={2}/>}</span>
+                <span className="gallery-tile-caption"><strong>Foto {i+1}</strong><span>{states[key]?.label || "Belum diunggah"}</span></span>
+              </button>;
+            })}</div>
+            <dialog ref={dialog} className="gallery-slot-dialog" id="gallery-slot-dialog" aria-labelledby="gallery-dialog-title"
+              onCancel={e=>{if(galleryBusy)e.preventDefault();}} onClose={()=>{setDialogOpen(false);if(trigger.current?.checkVisibility())trigger.current.focus();}}>
+              <div className="dialog-heading"><h2 id="gallery-dialog-title">Kelola foto galeri</h2><button type="button" disabled={galleryBusy} onClick={closeGallery} aria-label="Tutup editor foto">Tutup</button></div>
+              {Array.from({length:9},(_,i)=>{const key=`gallery${i+1}`;return <div key={key} data-gallery-editor={key} hidden={slot!==key}>{card(key,`Galeri ${i+1}`)}</div>;})}
+            </dialog>
+          </div>
+        </section>
+        <section id="media-part-music" hidden={part!=="music"}>
+          <div className="section-heading"><h2 tabIndex={-1}>Lagu undangan</h2></div>
+          <div id="music-media">{card("music","Lagu undangan")}</div>
+        </section>
+      </div>
+    </div>
+  </>;
+}
 function MediaCard({
   slot,
   title,
@@ -1269,7 +1358,13 @@ function MediaCard({
   onContent,
   confirm,
   notice,
+  compact = false,
+  active = true,
+  onStateChange,
 }: {
+  compact?: boolean;
+  active?: boolean;
+  onStateChange?: (slot:string, state:MediaState)=>void;
   slot: string;
   title: string;
   src?: string;
@@ -1285,6 +1380,9 @@ function MediaCard({
   const input = useRef<HTMLInputElement>(null);
   const audio = useRef<HTMLAudioElement>(null);
   const music = slot === "music";
+  const [expanded, setExpanded] = useState(false);
+  useEffect(()=>{ if(!active) audio.current?.pause(); },[active]);
+  useEffect(()=>{onStateChange?.(slot,{busy, label:busy ? "Memproses…" : error ? "Periksa berkas" : file ? "Berkas dipilih" : src ? "Terpasang" : "Belum diunggah"});},[slot,busy,error,file,src,onStateChange]);
   useEffect(() => () => audio.current?.pause(), []);
   function select(file?: File) {
     setFeedback("");
@@ -1342,11 +1440,11 @@ function MediaCard({
   }
   return (
     <article
-      className={`media-card${music ? " music-card" : ""}`}
+      className={`media-card${music ? " music-card" : ""}${compact ? " couple-photo-card" : ""}`}
       data-slot={slot}
       aria-busy={busy}
     >
-      <h3>
+      <h3 tabIndex={-1}>
         {title}
         <span className="media-state">
           {src ? "Terpasang" : "Belum diunggah"}
@@ -1360,10 +1458,12 @@ function MediaCard({
         )
       ) : (
         <div className="placeholder" aria-hidden="true">
-          {music ? "♫" : "▧"}
+          <NavIcon index={music ? 1 : 2} />
           <span>{music ? "Belum ada lagu" : "Belum ada foto"}</span>
         </div>
       )}
+      {compact && <button type="button" className="couple-edit-button" disabled={busy} aria-expanded={expanded} aria-controls={`media-controls-${slot}`} onClick={()=>setExpanded(!expanded)}>{expanded ? "Tutup editor" : "Kelola foto"}</button>}
+      <div className="media-controls" id={`media-controls-${slot}`} hidden={compact && !expanded}>
       <label className="file-picker">
         <span>{music ? "Pilih audio" : "Pilih foto"}</span>
         <input
@@ -1405,6 +1505,7 @@ function MediaCard({
           {feedback}
         </p>
       )}
+      </div>
     </article>
   );
 }
@@ -1451,6 +1552,25 @@ function SettingsForm({
   }));
   const [busy, setBusy] = useState(false),
     [dirty, setDirty] = useState(false);
+  const [part, setPart] = useState(kind === "messages" ? "template" : "pasangan");
+  const [messageView, setMessageView] = useState("edit");
+  const formRef = useRef<HTMLFormElement>(null);
+  const sections = kind === "messages" ? messageSections : eventSections;
+  const prefix = kind === "messages" ? "message" : "event";
+  function showPart(id: string) {
+    setPart(id);
+    requestAnimationFrame(()=>{
+      const target = document.getElementById(`${prefix}-part-${id}`);
+      target?.querySelector<HTMLElement>("h2")?.focus({preventScroll:true});
+      target?.scrollIntoView({block:"start", behavior:"instant"});
+    });
+  }
+  useEffect(()=>{
+    if(kind!=="event") return;
+    const query=matchMedia("(min-width:1200px)");
+    const update=()=>{const overview=formRef.current?.querySelector<HTMLDetailsElement>(".event-overview"); if(overview) overview.open=query.matches;};
+    update();query.addEventListener("change",update);return()=>query.removeEventListener("change",update);
+  },[kind]);
   const templateInput = useRef<HTMLTextAreaElement>(null);
   const [giftEnabled, setGiftEnabled] = useState(
     content.settings.giftEnabled !== "false",
@@ -1587,6 +1707,20 @@ function SettingsForm({
   }
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
+    const template = templateInput.current;
+    template?.setCustomValidity(template.value.includes("{link}") ? "" : "Sertakan {link} agar tamu menerima tautan undangannya.");
+    const invalid = Array.from(form.elements).find((element) =>
+      element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement
+        ? element.willValidate && !element.checkValidity() : false,
+    ) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | undefined;
+    if (invalid) {
+      const section = invalid.closest<HTMLElement>("[data-settings-part]");
+      if (section) setPart(section.dataset.settingsPart!);
+      setMessageView("edit");
+      requestAnimationFrame(()=>{ invalid.focus(); invalid.reportValidity(); });
+      return;
+    }
     const payload: Record<string, unknown> = Object.fromEntries(
       new FormData(e.currentTarget),
     );
@@ -1636,6 +1770,18 @@ function SettingsForm({
     <form
       id={kind === "messages" ? "whatsapp-settings" : "settings"}
       className={`settings-form ${kind === "messages" ? "messages-form" : "event-form"}`}
+      ref={formRef}
+      onFocusCapture={e=>{
+        const field=e.target as HTMLElement;
+        if(!field.matches("input,textarea,select")) return;
+        requestAnimationFrame(()=>{
+          const bar=formRef.current?.querySelector<HTMLElement>(".settings-save-bar.has-changes");
+          const bounds=field.getBoundingClientRect();
+          const bottom=bar && getComputedStyle(bar).position==="sticky" ? Math.min(bar.getBoundingClientRect().top-16,innerHeight-16) : innerHeight-16;
+          if(bounds.bottom>bottom || bounds.top<16) field.scrollIntoView({block:"center",behavior:"instant"});
+        });
+      }}
+      noValidate
       onSubmit={submit}
       aria-busy={busy}
     >
@@ -1644,31 +1790,27 @@ function SettingsForm({
           <header className="page-heading">
             <div>
               <h1 id="whatsapp-title" tabIndex={-1}>
-                Pesan dan pratinjau
+                Pesan &amp; Preview
               </h1>
               <p>
                 Atur template pesan WhatsApp dan tampilan pratinjau tautan
                 undangan.
               </p>
             </div>
-            <div className="settings-actions">
-              <span className="save-state" role="status">
-                {busy
-                  ? "Menyimpan…"
-                  : dirty
-                    ? "Perubahan belum disimpan"
-                    : "Pengaturan tersimpan"}
-              </span>
-              <button className="primary" disabled={busy}>
-                {busy ? "Menyimpan…" : "Simpan pesan dan pratinjau"}
-              </button>
-            </div>
           </header>
-          <div className="messages-layout">
+          <div className="settings-workspace message-workspace" data-view={messageView}>
+            <SectionNavigation sections={sections} current={part} onChange={showPart} prefix={prefix} disabled={busy}/>
+            <div className="message-content-column">
+              <div className="message-view-switch" role="group" aria-label="Tampilan pesan">
+                <button type="button" aria-pressed={messageView==="edit"} onClick={()=>setMessageView("edit")}>Edit</button>
+                <button type="button" aria-pressed={messageView==="preview"} onClick={()=>setMessageView("preview")}>Pratinjau final</button>
+              </div>
+              <div className="messages-layout">
+            <div className="message-editor-pane">
             <fieldset disabled={busy} className="message-edit">
-              <section className="panel">
+              <section className="panel" id="message-part-template" data-settings-part="template" hidden={part!=="template"}>
                 <div className="section-heading">
-                  <h2>Template pesan</h2>
+                  <h2 tabIndex={-1}>Template pesan</h2>
                   <span className="tag">Wajib {"{link}"}</span>
                 </div>
                 <p>
@@ -1701,9 +1843,9 @@ function SettingsForm({
                   tamu.
                 </p>
               </section>
-              <section className="panel">
+              <section className="panel" id="message-part-link" data-settings-part="link" hidden={part!=="link"}>
                 <div className="section-heading">
-                  <h2>Pratinjau tautan</h2>
+                  <h2 tabIndex={-1}>Pratinjau tautan</h2>
                 </div>
                 <p>
                   Judul dan deskripsi saat dibagikan di WhatsApp. Kosongkan
@@ -1725,7 +1867,8 @@ function SettingsForm({
                   )}
                 </div>
               </section>
-              <section className="panel">
+            </fieldset>
+              <section className="panel thumbnail-panel" hidden={part!=="link"}>
                 <div className="section-heading">
                   <h2>Gambar pratinjau WhatsApp</h2>
                 </div>
@@ -1735,13 +1878,13 @@ function SettingsForm({
                 </p>
                 {previewMedia}
               </section>
-            </fieldset>
+            </div>
             <aside
               className="panel preview-panel"
               aria-labelledby="message-preview-title"
             >
-              <h2 id="message-preview-title">Pratinjau Pesan WhatsApp</h2>
-              <p>Simulasi untuk Bapak/Ibu Tamu Undangan.</p>
+              <h2 id="message-preview-title">Pratinjau pesan WhatsApp final</h2>
+              <p>Gambar, pratinjau tautan, dan seluruh pesan tampil bersama.</p>
               <div className="whatsapp-preview">
                 <div className="wa-bubble">
                   <div className="link-preview">
@@ -1774,59 +1917,20 @@ function SettingsForm({
                 lalu kirim dari WhatsApp.
               </p>
             </aside>
+              </div>
+            </div>
           </div>
         </>
       ) : (
         <>
-          <fieldset disabled={busy} className="event-fields">
-            <section className="panel">
-              <h2>Batas akses undangan</h2>
-              <p>
-                Berlaku untuk semua undangan dalam akun ini, kecuali undangan
-                yang diatur tanpa limit.
-              </p>
-              <div className="two-columns">
-                <label>
-                  Pembatasan browser
-                  <select
-                    name="deviceLimitEnabled"
-                    value={values.deviceLimitEnabled}
-                    onChange={(e) => {
-                      setValues({ ...values, deviceLimitEnabled: e.target.value });
-                      setDirty(true);
-                    }}
-                  >
-                    <option value="true">Aktif</option>
-                    <option value="false">Nonaktif — tanpa limit</option>
-                  </select>
-                </label>
-                <label>
-                  Maksimal browser per undangan
-                  <input
-                    name="deviceLimit"
-                    type="number"
-                    min="1"
-                    max="2147483647"
-                    step="1"
-                    required
-                    value={values.deviceLimit}
-                    onChange={(e) => {
-                      setValues({ ...values, deviceLimit: e.target.value });
-                      setDirty(true);
-                    }}
-                  />
-                </label>
-              </div>
-              <p className="help">
-                Riwayat akses tetap tersimpan dan browser baru tetap dicatat saat
-                limit nonaktif. Setelah limit diaktifkan kembali atau diturunkan,
-                browser yang sudah tercatat tetap bisa masuk; browser baru
-                mengikuti batas yang berlaku. Atur pengecualian melalui Edit Tamu.
-              </p>
-            </section>
-            <section className="panel">
+          <div className="event-editor-layout">
+            <SectionNavigation sections={sections} current={part} onChange={showPart} prefix={prefix} disabled={busy}/>
+            <fieldset disabled={busy} className="event-fields">
+              <section className="event-part" id="event-part-pasangan" data-settings-part="pasangan" hidden={part!=="pasangan"}>
+                <header className="event-part-heading"><h2 tabIndex={-1}>{eventSections.find(item=>item.id==="pasangan")!.title}</h2><p>{eventSections.find(item=>item.id==="pasangan")!.short}</p></header>
+<section className="panel">
               <div className="section-heading">
-                <h2>Mempelai</h2>
+                <h3>Mempelai</h3>
               </div>
               <div className="two-columns">
                 {field(
@@ -1846,9 +1950,9 @@ function SettingsForm({
                 Gelar akademik atau kehormatan dapat ditulis langsung pada nama.
               </p>
             </section>
-            <section className="panel">
+<section className="panel">
               <div className="section-heading">
-                <h2>Keluarga &amp; Orang Tua</h2>
+                <h3>Keluarga &amp; Orang Tua</h3>
               </div>
               <div className="two-columns">
                 <div className="family-group">
@@ -1863,9 +1967,12 @@ function SettingsForm({
                 </div>
               </div>
             </section>
-            <section className="panel">
+              </section>
+              <section className="event-part" id="event-part-waktu" data-settings-part="waktu" hidden={part!=="waktu"}>
+                <header className="event-part-heading"><h2 tabIndex={-1}>{eventSections.find(item=>item.id==="waktu")!.title}</h2><p>{eventSections.find(item=>item.id==="waktu")!.short}</p></header>
+<section className="panel">
               <div className="section-heading">
-                <h2>Rangkaian Acara</h2>
+                <h3>Rangkaian Acara</h3>
               </div>
               {field("eventDate", "Tanggal acara", 10, "", false, "date")}
               <div className="event-group">
@@ -1900,9 +2007,9 @@ function SettingsForm({
                 Waktu kosong ditampilkan sebagai “Waktu akan diinformasikan”.
               </p>
             </section>
-            <section className="panel">
+<section className="panel">
               <div className="section-heading">
-                <h2>Hitung Mundur</h2>
+                <h3>Hitung Mundur</h3>
               </div>
               <div className="countdown-field">
                 {field(
@@ -1918,9 +2025,12 @@ function SettingsForm({
                 Menuju {event.date}. Jika kosong, memakai pukul 00.00 WIB.
               </p>
             </section>
-            <section className="panel">
+              </section>
+              <section className="event-part" id="event-part-lokasi" data-settings-part="lokasi" hidden={part!=="lokasi"}>
+                <header className="event-part-heading"><h2 tabIndex={-1}>{eventSections.find(item=>item.id==="lokasi")!.title}</h2><p>{eventSections.find(item=>item.id==="lokasi")!.short}</p></header>
+<section className="panel">
               <div className="section-heading">
-                <h2>Lokasi Acara</h2>
+                <h3>Lokasi Acara</h3>
               </div>
               {field("venueName", "Nama tempat", 160, "Nama gedung atau lokasi acara")}
               {field(
@@ -1951,10 +2061,13 @@ function SettingsForm({
                 )}
               </div>
             </section>
-            <section className="panel gift-panel">
+              </section>
+              <section className="event-part" id="event-part-hadiah" data-settings-part="hadiah" hidden={part!=="hadiah"}>
+                <header className="event-part-heading"><h2 tabIndex={-1}>{eventSections.find(item=>item.id==="hadiah")!.title}</h2><p>{eventSections.find(item=>item.id==="hadiah")!.short}</p></header>
+<section className="panel gift-panel">
               <div className="section-heading">
                 <div>
-                  <h2>Informasi Hadiah</h2>
+                  <h3>Informasi Hadiah</h3>
                   <p>
                     Tampilkan rekening atau alamat pengiriman hadiah pada
                     undangan.
@@ -2137,21 +2250,85 @@ function SettingsForm({
                 </button>
               </fieldset>
             </section>
-          </fieldset>
-          <div className="form-footer">
-            <button className="primary" disabled={busy}>
-              {busy ? "Menyimpan…" : "Simpan detail acara"}
-            </button>
-            <p className="save-state" role="status">
-              {busy
-                ? "Menyimpan…"
-                : dirty
-                  ? "Perubahan belum disimpan"
-                  : "Pengaturan tersimpan"}
-            </p>
+              </section>
+              <section className="event-part" id="event-part-akses" data-settings-part="akses" hidden={part!=="akses"}>
+                <header className="event-part-heading"><h2 tabIndex={-1}>{eventSections.find(item=>item.id==="akses")!.title}</h2><p>{eventSections.find(item=>item.id==="akses")!.short}</p></header>
+<section className="panel">
+              <h3>Batas akses undangan</h3>
+              <p>
+                Berlaku untuk semua undangan dalam akun ini, kecuali undangan
+                yang diatur tanpa limit.
+              </p>
+              <div className="two-columns">
+                <label>
+                  Pembatasan browser
+                  <select
+                    name="deviceLimitEnabled"
+                    value={values.deviceLimitEnabled}
+                    onChange={(e) => {
+                      setValues({ ...values, deviceLimitEnabled: e.target.value });
+                      setDirty(true);
+                    }}
+                  >
+                    <option value="true">Aktif</option>
+                    <option value="false">Nonaktif — tanpa limit</option>
+                  </select>
+                </label>
+                <label>
+                  Maksimal browser per undangan
+                  <input
+                    name="deviceLimit"
+                    type="number"
+                    min="1"
+                    max="2147483647"
+                    step="1"
+                    required
+                    value={values.deviceLimit}
+                    onChange={(e) => {
+                      setValues({ ...values, deviceLimit: e.target.value });
+                      setDirty(true);
+                    }}
+                  />
+                </label>
+              </div>
+              <p className="help">
+                Riwayat akses tetap tersimpan dan browser baru tetap dicatat saat
+                limit nonaktif. Setelah limit diaktifkan kembali atau diturunkan,
+                browser yang sudah tercatat tetap bisa masuk; browser baru
+                mengikuti batas yang berlaku. Atur pengecualian melalui Edit Tamu.
+              </p>
+            </section>
+              </section>
+              <div className="event-part-pager">
+                <button type="button" disabled={busy || part===sections[0].id} onClick={()=>showPart(sections[sections.findIndex(item=>item.id===part)-1].id)}>Sebelumnya</button>
+                <span>Bagian {sections.findIndex(item=>item.id===part)+1} dari {sections.length}</span>
+                <button type="button" disabled={busy || part===sections.at(-1)!.id} onClick={()=>showPart(sections[sections.findIndex(item=>item.id===part)+1].id)}>Lanjut</button>
+              </div>
+            </fieldset>
+            <details className="event-overview">
+              <summary>Ringkasan isian</summary>
+              <div className="event-overview-content">
+                <h2>{values.partnerOneName} &amp; {values.partnerTwoName}</h2>
+                <dl>
+                  <div><dt>Tanggal acara</dt><dd>{event.date}</dd></div>
+                  <div><dt>Rangkaian acara</dt><dd>{values.ceremonyTitle || "Acara pertama"} · {values.ceremonyTime || "Waktu akan diinformasikan"}<br/>{values.receptionTitle || "Acara kedua"} · {values.receptionTime || "Waktu akan diinformasikan"}</dd></div>
+                  <div><dt>Tempat</dt><dd>{venueName}</dd></div>
+                  <div><dt>Tujuan countdown</dt><dd>{values.countdownTime || "00:00"} WIB · tanggal acara</dd></div>
+                  <div><dt>Informasi hadiah</dt><dd>{giftEnabled ? "Ditampilkan" : "Disembunyikan"} · {giftAccounts.length} informasi</dd></div>
+                  <div><dt>Batas akses</dt><dd>{values.deviceLimitEnabled==="false" ? "Tanpa limit global" : `${values.deviceLimit} browser per undangan`}</dd></div>
+                </dl>
+                <p>Ringkasan mengikuti isian saat ini. Tekan Simpan untuk menerapkan perubahan.</p>
+              </div>
+            </details>
           </div>
+
         </>
       )}
+      <div className={`settings-save-bar${dirty ? " has-changes" : ""}`}>
+        <div><p>{kind==="messages" ? "Simpan template, judul, dan deskripsi bersama. Gambar diunggah terpisah." : "Menyimpan semua bagian Detail Acara."}</p>
+          <span className="save-state" role="status">{busy ? "Menyimpan…" : dirty ? "Perubahan belum disimpan" : "Pengaturan tersimpan"}</span></div>
+        <button className="primary" disabled={busy}>{busy ? "Menyimpan…" : kind==="messages" ? "Simpan pesan dan pratinjau" : "Simpan detail acara"}</button>
+      </div>
     </form>
   );
 }
@@ -2391,7 +2568,7 @@ function App() {
                   aria-controls="navigation"
                   onClick={() => setNavigation(true)}
                 >
-                  ☰ Menu
+                  Menu
                 </button>
               </header>
               <div className="account-context">
@@ -2445,68 +2622,8 @@ function App() {
                   aria-labelledby="media-title"
                   hidden={page !== "media"}
                 >
-                  <header className="page-heading">
-                    <div>
-                      <h1 id="media-title" tabIndex={-1}>
-                        Foto &amp; Lagu
-                      </h1>
-                      <p>
-                        Kelola foto mempelai, galeri kenangan, dan musik latar
-                        undangan.
-                      </p>
-                    </div>
-                  </header>
-                  <p className="info-note">
-                    Foto JPG, PNG, WebP maksimal 12 MB diperkecil otomatis. Lagu
-                    MP3, M4A, AAC, WAV, OGG/Opus, FLAC, atau WebM audio maksimal
-                    25 MB. Pilih berkas, lalu tekan Unggah.
-                  </p>
-                  <section
-                    className="media-section"
-                    aria-labelledby="couple-title"
-                  >
-                    <div className="section-heading">
-                      <h2 id="couple-title">Foto Mempelai</h2>
-                      <span className="muted">2 slot foto</span>
-                    </div>
-                    <div id="couple-media" className="media-grid couple-grid">
-                      {mediaCard("groom", "Foto mempelai pertama")}
-                      {mediaCard("bride", "Foto mempelai kedua")}
-                    </div>
-                  </section>
-                  <section
-                    className="media-section"
-                    aria-labelledby="gallery-title"
-                  >
-                    <div className="section-heading">
-                      <h2 id="gallery-title">Galeri Foto Undangan</h2>
-                      <span className="tag">
-                        {
-                          Array.from(
-                            { length: 9 },
-                            (_, i) => content.media[`gallery${i + 1}`],
-                          ).filter(Boolean).length
-                        }
-                        /9 terpasang
-                      </span>
-                    </div>
-                    <div id="gallery-media" className="media-grid gallery-grid">
-                      {Array.from({ length: 9 }, (_, i) =>
-                        mediaCard(`gallery${i + 1}`, `Galeri ${i + 1}`),
-                      )}
-                    </div>
-                  </section>
-                  <section
-                    className="media-section"
-                    aria-labelledby="music-title"
-                  >
-                    <div className="section-heading">
-                      <h2 id="music-title">Musik Latar Belakang</h2>
-                    </div>
-                    <div id="music-media">
-                      {mediaCard("music", "Lagu undangan")}
-                    </div>
-                  </section>
+                  <MediaPage content={content} api={api} onContent={setContent} confirm={confirm} notice={notice} active={page==="media"}/>
+
                 </section>
                 <section
                   id="page-acara"

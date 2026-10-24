@@ -1,0 +1,1015 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-24T15:42:38.255039+00:00",
+  "title": "Design System: weddinvita comparison study",
+  "extensions": {
+    "colorMeta": {
+      "studio-background": {
+        "displayName": "Studio Background",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0008 106.47)",
+          "oklch(27% 0.0020 106.47)",
+          "oklch(39% 0.0032 106.47)",
+          "oklch(51% 0.0040 106.47)",
+          "oklch(63% 0.0040 106.47)",
+          "oklch(75% 0.0032 106.47)",
+          "oklch(87% 0.0018 106.47)",
+          "oklch(95% 0.0006 106.47)"
+        ]
+      },
+      "studio-surface": {
+        "displayName": "Studio Surface",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(27% 0.0000 89.88)",
+          "oklch(39% 0.0000 89.88)",
+          "oklch(51% 0.0000 89.88)",
+          "oklch(63% 0.0000 89.88)",
+          "oklch(75% 0.0000 89.88)",
+          "oklch(87% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
+      },
+      "studio-text": {
+        "displayName": "Studio Text",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0028 131.74)",
+          "oklch(27% 0.0070 131.74)",
+          "oklch(39% 0.0112 131.74)",
+          "oklch(51% 0.0140 131.74)",
+          "oklch(63% 0.0140 131.74)",
+          "oklch(75% 0.0112 131.74)",
+          "oklch(87% 0.0063 131.74)",
+          "oklch(95% 0.0021 131.74)"
+        ]
+      },
+      "studio-ink": {
+        "displayName": "Studio Ink",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0043 131.03)",
+          "oklch(27% 0.0107 131.03)",
+          "oklch(39% 0.0171 131.03)",
+          "oklch(51% 0.0214 131.03)",
+          "oklch(63% 0.0214 131.03)",
+          "oklch(75% 0.0171 131.03)",
+          "oklch(87% 0.0096 131.03)",
+          "oklch(95% 0.0032 131.03)"
+        ]
+      },
+      "studio-muted": {
+        "displayName": "Studio Muted",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0037 130.63)",
+          "oklch(27% 0.0094 130.63)",
+          "oklch(39% 0.0150 130.63)",
+          "oklch(51% 0.0187 130.63)",
+          "oklch(63% 0.0187 130.63)",
+          "oklch(75% 0.0150 130.63)",
+          "oklch(87% 0.0084 130.63)",
+          "oklch(95% 0.0028 130.63)"
+        ]
+      },
+      "studio-citrus": {
+        "displayName": "Studio Citrus",
+        "role": "primary",
+        "tonalRamp": [
+          "oklch(15% 0.0289 113.56)",
+          "oklch(27% 0.0723 113.56)",
+          "oklch(39% 0.1157 113.56)",
+          "oklch(51% 0.1447 113.56)",
+          "oklch(63% 0.1447 113.56)",
+          "oklch(75% 0.1157 113.56)",
+          "oklch(87% 0.0651 113.56)",
+          "oklch(95% 0.0217 113.56)"
+        ]
+      },
+      "studio-citrus-hover": {
+        "displayName": "Studio Citrus Hover",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0311 115.07)",
+          "oklch(27% 0.0777 115.07)",
+          "oklch(39% 0.1244 115.07)",
+          "oklch(51% 0.1555 115.07)",
+          "oklch(63% 0.1555 115.07)",
+          "oklch(75% 0.1244 115.07)",
+          "oklch(87% 0.0700 115.07)",
+          "oklch(95% 0.0233 115.07)"
+        ]
+      },
+      "studio-citrus-active": {
+        "displayName": "Studio Citrus Active",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0309 114.84)",
+          "oklch(27% 0.0773 114.84)",
+          "oklch(39% 0.1237 114.84)",
+          "oklch(51% 0.1547 114.84)",
+          "oklch(63% 0.1547 114.84)",
+          "oklch(75% 0.1237 114.84)",
+          "oklch(87% 0.0696 114.84)",
+          "oklch(95% 0.0232 114.84)"
+        ]
+      },
+      "studio-citrus-border": {
+        "displayName": "Studio Citrus Border",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0288 115.02)",
+          "oklch(27% 0.0719 115.02)",
+          "oklch(39% 0.1151 115.02)",
+          "oklch(51% 0.1438 115.02)",
+          "oklch(63% 0.1438 115.02)",
+          "oklch(75% 0.1151 115.02)",
+          "oklch(87% 0.0647 115.02)",
+          "oklch(95% 0.0216 115.02)"
+        ]
+      },
+      "studio-soft": {
+        "displayName": "Studio Soft",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0069 112.39)",
+          "oklch(27% 0.0171 112.39)",
+          "oklch(39% 0.0274 112.39)",
+          "oklch(51% 0.0343 112.39)",
+          "oklch(63% 0.0343 112.39)",
+          "oklch(75% 0.0274 112.39)",
+          "oklch(87% 0.0154 112.39)",
+          "oklch(95% 0.0051 112.39)"
+        ]
+      },
+      "studio-border": {
+        "displayName": "Studio Border",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0028 120.29)",
+          "oklch(27% 0.0069 120.29)",
+          "oklch(39% 0.0110 120.29)",
+          "oklch(51% 0.0138 120.29)",
+          "oklch(63% 0.0138 120.29)",
+          "oklch(75% 0.0110 120.29)",
+          "oklch(87% 0.0062 120.29)",
+          "oklch(95% 0.0021 120.29)"
+        ]
+      },
+      "studio-input-border": {
+        "displayName": "Studio Input Border",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0054 127.83)",
+          "oklch(27% 0.0135 127.83)",
+          "oklch(39% 0.0215 127.83)",
+          "oklch(51% 0.0269 127.83)",
+          "oklch(63% 0.0269 127.83)",
+          "oklch(75% 0.0215 127.83)",
+          "oklch(87% 0.0121 127.83)",
+          "oklch(95% 0.0040 127.83)"
+        ]
+      },
+      "studio-focus": {
+        "displayName": "Studio Focus",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0138 133.28)",
+          "oklch(27% 0.0346 133.28)",
+          "oklch(39% 0.0553 133.28)",
+          "oklch(51% 0.0692 133.28)",
+          "oklch(63% 0.0692 133.28)",
+          "oklch(75% 0.0553 133.28)",
+          "oklch(87% 0.0311 133.28)",
+          "oklch(95% 0.0104 133.28)"
+        ]
+      },
+      "studio-success": {
+        "displayName": "Studio Success",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0135 152.65)",
+          "oklch(27% 0.0338 152.65)",
+          "oklch(39% 0.0541 152.65)",
+          "oklch(51% 0.0676 152.65)",
+          "oklch(63% 0.0676 152.65)",
+          "oklch(75% 0.0541 152.65)",
+          "oklch(87% 0.0304 152.65)",
+          "oklch(95% 0.0101 152.65)"
+        ]
+      },
+      "studio-success-soft": {
+        "displayName": "Studio Success Soft",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0027 134.90)",
+          "oklch(27% 0.0067 134.90)",
+          "oklch(39% 0.0108 134.90)",
+          "oklch(51% 0.0135 134.90)",
+          "oklch(63% 0.0135 134.90)",
+          "oklch(75% 0.0108 134.90)",
+          "oklch(87% 0.0061 134.90)",
+          "oklch(95% 0.0020 134.90)"
+        ]
+      },
+      "fokus-background": {
+        "displayName": "Fokus Background",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0005 106.45)",
+          "oklch(27% 0.0013 106.45)",
+          "oklch(39% 0.0021 106.45)",
+          "oklch(51% 0.0026 106.45)",
+          "oklch(63% 0.0026 106.45)",
+          "oklch(75% 0.0021 106.45)",
+          "oklch(87% 0.0012 106.45)",
+          "oklch(95% 0.0004 106.45)"
+        ]
+      },
+      "fokus-surface": {
+        "displayName": "Fokus Surface",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(27% 0.0000 89.88)",
+          "oklch(39% 0.0000 89.88)",
+          "oklch(51% 0.0000 89.88)",
+          "oklch(63% 0.0000 89.88)",
+          "oklch(75% 0.0000 89.88)",
+          "oklch(87% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
+      },
+      "fokus-ink": {
+        "displayName": "Fokus Ink",
+        "role": "primary",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(27% 0.0000 89.88)",
+          "oklch(39% 0.0000 89.88)",
+          "oklch(51% 0.0000 89.88)",
+          "oklch(63% 0.0000 89.88)",
+          "oklch(75% 0.0000 89.88)",
+          "oklch(87% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
+      },
+      "fokus-muted": {
+        "displayName": "Fokus Muted",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(27% 0.0000 89.88)",
+          "oklch(39% 0.0000 89.88)",
+          "oklch(51% 0.0000 89.88)",
+          "oklch(63% 0.0000 89.88)",
+          "oklch(75% 0.0000 89.88)",
+          "oklch(87% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
+      },
+      "fokus-hover": {
+        "displayName": "Fokus Hover",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(27% 0.0000 89.88)",
+          "oklch(39% 0.0000 89.88)",
+          "oklch(51% 0.0000 89.88)",
+          "oklch(63% 0.0000 89.88)",
+          "oklch(75% 0.0000 89.88)",
+          "oklch(87% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
+      },
+      "fokus-active": {
+        "displayName": "Fokus Active",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0000 0.00)",
+          "oklch(27% 0.0000 0.00)",
+          "oklch(39% 0.0000 0.00)",
+          "oklch(51% 0.0000 0.00)",
+          "oklch(63% 0.0000 0.00)",
+          "oklch(75% 0.0000 0.00)",
+          "oklch(87% 0.0000 0.00)",
+          "oklch(95% 0.0000 0.00)"
+        ]
+      },
+      "fokus-soft": {
+        "displayName": "Fokus Soft",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0008 106.48)",
+          "oklch(27% 0.0020 106.48)",
+          "oklch(39% 0.0032 106.48)",
+          "oklch(51% 0.0040 106.48)",
+          "oklch(63% 0.0040 106.48)",
+          "oklch(75% 0.0032 106.48)",
+          "oklch(87% 0.0018 106.48)",
+          "oklch(95% 0.0006 106.48)"
+        ]
+      },
+      "fokus-border": {
+        "displayName": "Fokus Border",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0008 106.48)",
+          "oklch(27% 0.0020 106.48)",
+          "oklch(39% 0.0032 106.48)",
+          "oklch(51% 0.0040 106.48)",
+          "oklch(63% 0.0040 106.48)",
+          "oklch(75% 0.0032 106.48)",
+          "oklch(87% 0.0018 106.48)",
+          "oklch(95% 0.0006 106.48)"
+        ]
+      },
+      "fokus-input-border": {
+        "displayName": "Fokus Input Border",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0021 106.71)",
+          "oklch(27% 0.0052 106.71)",
+          "oklch(39% 0.0083 106.71)",
+          "oklch(51% 0.0104 106.71)",
+          "oklch(63% 0.0104 106.71)",
+          "oklch(75% 0.0083 106.71)",
+          "oklch(87% 0.0047 106.71)",
+          "oklch(95% 0.0016 106.71)"
+        ]
+      },
+      "fokus-tag": {
+        "displayName": "Fokus Tag",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0005 106.45)",
+          "oklch(27% 0.0013 106.45)",
+          "oklch(39% 0.0021 106.45)",
+          "oklch(51% 0.0027 106.45)",
+          "oklch(63% 0.0027 106.45)",
+          "oklch(75% 0.0021 106.45)",
+          "oklch(87% 0.0012 106.45)",
+          "oklch(95% 0.0004 106.45)"
+        ]
+      },
+      "fokus-tag-text": {
+        "displayName": "Fokus Tag Text",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(27% 0.0000 89.88)",
+          "oklch(39% 0.0000 89.88)",
+          "oklch(51% 0.0000 89.88)",
+          "oklch(63% 0.0000 89.88)",
+          "oklch(75% 0.0000 89.88)",
+          "oklch(87% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
+      },
+      "fokus-tag-active": {
+        "displayName": "Fokus Tag Active",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0011 106.50)",
+          "oklch(27% 0.0027 106.50)",
+          "oklch(39% 0.0043 106.50)",
+          "oklch(51% 0.0053 106.50)",
+          "oklch(63% 0.0053 106.50)",
+          "oklch(75% 0.0043 106.50)",
+          "oklch(87% 0.0024 106.50)",
+          "oklch(95% 0.0008 106.50)"
+        ]
+      },
+      "fokus-inspected": {
+        "displayName": "Fokus Inspected",
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0008 106.48)",
+          "oklch(27% 0.0020 106.48)",
+          "oklch(39% 0.0032 106.48)",
+          "oklch(51% 0.0040 106.48)",
+          "oklch(63% 0.0040 106.48)",
+          "oklch(75% 0.0032 106.48)",
+          "oklch(87% 0.0018 106.48)",
+          "oklch(95% 0.0006 106.48)"
+        ]
+      },
+      "studio-warning": {
+        "displayName": "Studio Warning",
+        "tonalRamp": [
+          "oklch(15% 0.0181 69.37)",
+          "oklch(27% 0.0452 69.37)",
+          "oklch(39% 0.0723 69.37)",
+          "oklch(51% 0.0904 69.37)",
+          "oklch(63% 0.0904 69.37)",
+          "oklch(75% 0.0723 69.37)",
+          "oklch(87% 0.0407 69.37)",
+          "oklch(95% 0.0136 69.37)"
+        ]
+      },
+      "studio-warning-soft": {
+        "displayName": "Studio Warning Soft",
+        "tonalRamp": [
+          "oklch(15% 0.0053 80.25)",
+          "oklch(27% 0.0133 80.25)",
+          "oklch(39% 0.0213 80.25)",
+          "oklch(51% 0.0266 80.25)",
+          "oklch(63% 0.0266 80.25)",
+          "oklch(75% 0.0213 80.25)",
+          "oklch(87% 0.0120 80.25)",
+          "oklch(95% 0.0040 80.25)"
+        ]
+      },
+      "studio-danger": {
+        "displayName": "Studio Danger",
+        "tonalRamp": [
+          "oklch(15% 0.0307 18.31)",
+          "oklch(27% 0.0766 18.31)",
+          "oklch(39% 0.1226 18.31)",
+          "oklch(51% 0.1533 18.31)",
+          "oklch(63% 0.1533 18.31)",
+          "oklch(75% 0.1226 18.31)",
+          "oklch(87% 0.0690 18.31)",
+          "oklch(95% 0.0230 18.31)"
+        ]
+      },
+      "studio-danger-soft": {
+        "displayName": "Studio Danger Soft",
+        "tonalRamp": [
+          "oklch(15% 0.0033 8.17)",
+          "oklch(27% 0.0082 8.17)",
+          "oklch(39% 0.0132 8.17)",
+          "oklch(51% 0.0164 8.17)",
+          "oklch(63% 0.0164 8.17)",
+          "oklch(75% 0.0132 8.17)",
+          "oklch(87% 0.0074 8.17)",
+          "oklch(95% 0.0025 8.17)"
+        ]
+      },
+      "fokus-danger": {
+        "displayName": "Fokus Danger",
+        "tonalRamp": [
+          "oklch(15% 0.0307 18.31)",
+          "oklch(27% 0.0766 18.31)",
+          "oklch(39% 0.1226 18.31)",
+          "oklch(51% 0.1533 18.31)",
+          "oklch(63% 0.1533 18.31)",
+          "oklch(75% 0.1226 18.31)",
+          "oklch(87% 0.0690 18.31)",
+          "oklch(95% 0.0230 18.31)"
+        ]
+      },
+      "fokus-danger-soft": {
+        "displayName": "Fokus Danger Soft",
+        "tonalRamp": [
+          "oklch(15% 0.0033 8.17)",
+          "oklch(27% 0.0082 8.17)",
+          "oklch(39% 0.0132 8.17)",
+          "oklch(51% 0.0164 8.17)",
+          "oklch(63% 0.0164 8.17)",
+          "oklch(75% 0.0132 8.17)",
+          "oklch(87% 0.0074 8.17)",
+          "oklch(95% 0.0025 8.17)"
+        ]
+      },
+      "studio-v2-primary": {
+        "displayName": "Studio V2 Primary",
+        "tonalRamp": [
+          "oklch(15% 0.0094 171.31)",
+          "oklch(27% 0.0236 171.31)",
+          "oklch(39% 0.0377 171.31)",
+          "oklch(51% 0.0471 171.31)",
+          "oklch(63% 0.0471 171.31)",
+          "oklch(75% 0.0377 171.31)",
+          "oklch(87% 0.0212 171.31)",
+          "oklch(95% 0.0071 171.31)"
+        ]
+      },
+      "studio-v2-primary-hover": {
+        "displayName": "Studio V2 Primary Hover",
+        "tonalRamp": [
+          "oklch(15% 0.0081 171.57)",
+          "oklch(27% 0.0203 171.57)",
+          "oklch(39% 0.0325 171.57)",
+          "oklch(51% 0.0407 171.57)",
+          "oklch(63% 0.0407 171.57)",
+          "oklch(75% 0.0325 171.57)",
+          "oklch(87% 0.0183 171.57)",
+          "oklch(95% 0.0061 171.57)"
+        ]
+      },
+      "studio-v2-primary-active": {
+        "displayName": "Studio V2 Primary Active",
+        "tonalRamp": [
+          "oklch(15% 0.0068 172.41)",
+          "oklch(27% 0.0170 172.41)",
+          "oklch(39% 0.0272 172.41)",
+          "oklch(51% 0.0341 172.41)",
+          "oklch(63% 0.0341 172.41)",
+          "oklch(75% 0.0272 172.41)",
+          "oklch(87% 0.0153 172.41)",
+          "oklch(95% 0.0051 172.41)"
+        ]
+      },
+      "studio-v2-soft": {
+        "displayName": "Studio V2 Soft",
+        "tonalRamp": [
+          "oklch(15% 0.0023 162.04)",
+          "oklch(27% 0.0058 162.04)",
+          "oklch(39% 0.0093 162.04)",
+          "oklch(51% 0.0116 162.04)",
+          "oklch(63% 0.0116 162.04)",
+          "oklch(75% 0.0093 162.04)",
+          "oklch(87% 0.0052 162.04)",
+          "oklch(95% 0.0017 162.04)"
+        ]
+      },
+      "studio-v2-on-primary": {
+        "displayName": "Studio V2 On Primary",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(27% 0.0000 89.88)",
+          "oklch(39% 0.0000 89.88)",
+          "oklch(51% 0.0000 89.88)",
+          "oklch(63% 0.0000 89.88)",
+          "oklch(75% 0.0000 89.88)",
+          "oklch(87% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
+      },
+      "studio-v2-on-primary-muted": {
+        "displayName": "Studio V2 On Primary Muted",
+        "tonalRamp": [
+          "oklch(15% 0.0052 161.90)",
+          "oklch(27% 0.0129 161.90)",
+          "oklch(39% 0.0207 161.90)",
+          "oklch(51% 0.0259 161.90)",
+          "oklch(63% 0.0259 161.90)",
+          "oklch(75% 0.0207 161.90)",
+          "oklch(87% 0.0116 161.90)",
+          "oklch(95% 0.0039 161.90)"
+        ]
+      },
+      "studio-v2-overview-muted": {
+        "displayName": "Studio V2 Overview Muted",
+        "tonalRamp": [
+          "oklch(15% 0.0077 163.67)",
+          "oklch(27% 0.0192 163.67)",
+          "oklch(39% 0.0308 163.67)",
+          "oklch(51% 0.0385 163.67)",
+          "oklch(63% 0.0385 163.67)",
+          "oklch(75% 0.0308 163.67)",
+          "oklch(87% 0.0173 163.67)",
+          "oklch(95% 0.0058 163.67)"
+        ]
+      },
+      "studio-v2-overview-border": {
+        "displayName": "Studio V2 Overview Border",
+        "tonalRamp": [
+          "oklch(15% 0.0049 159.07)",
+          "oklch(27% 0.0122 159.07)",
+          "oklch(39% 0.0196 159.07)",
+          "oklch(51% 0.0245 159.07)",
+          "oklch(63% 0.0245 159.07)",
+          "oklch(75% 0.0196 159.07)",
+          "oklch(87% 0.0110 159.07)",
+          "oklch(95% 0.0037 159.07)"
+        ]
+      },
+      "studio-v2-disabled": {
+        "displayName": "Studio V2 Disabled",
+        "tonalRamp": [
+          "oklch(15% 0.0017 157.08)",
+          "oklch(27% 0.0042 157.08)",
+          "oklch(39% 0.0066 157.08)",
+          "oklch(51% 0.0083 157.08)",
+          "oklch(63% 0.0083 157.08)",
+          "oklch(75% 0.0066 157.08)",
+          "oklch(87% 0.0037 157.08)",
+          "oklch(95% 0.0012 157.08)"
+        ]
+      },
+      "studio-v2-disabled-text": {
+        "displayName": "Studio V2 Disabled Text",
+        "tonalRamp": [
+          "oklch(15% 0.0039 162.17)",
+          "oklch(27% 0.0097 162.17)",
+          "oklch(39% 0.0155 162.17)",
+          "oklch(51% 0.0194 162.17)",
+          "oklch(63% 0.0194 162.17)",
+          "oklch(75% 0.0155 162.17)",
+          "oklch(87% 0.0087 162.17)",
+          "oklch(95% 0.0029 162.17)"
+        ]
+      },
+      "studio-v2-disabled-border": {
+        "displayName": "Studio V2 Disabled Border",
+        "tonalRamp": [
+          "oklch(15% 0.0029 155.55)",
+          "oklch(27% 0.0072 155.55)",
+          "oklch(39% 0.0115 155.55)",
+          "oklch(51% 0.0144 155.55)",
+          "oklch(63% 0.0144 155.55)",
+          "oklch(75% 0.0115 155.55)",
+          "oklch(87% 0.0065 155.55)",
+          "oklch(95% 0.0022 155.55)"
+        ]
+      },
+      "studio-event-overview": {
+        "displayName": "Studio Event Overview",
+        "tonalRamp": [
+          "oklch(15% 0.0040 112.93)",
+          "oklch(27% 0.0100 112.93)",
+          "oklch(39% 0.0159 112.93)",
+          "oklch(51% 0.0199 112.93)",
+          "oklch(63% 0.0199 112.93)",
+          "oklch(75% 0.0159 112.93)",
+          "oklch(87% 0.0090 112.93)",
+          "oklch(95% 0.0030 112.93)"
+        ]
+      },
+      "studio-event-overview-text": {
+        "displayName": "Studio Event Overview Text",
+        "tonalRamp": [
+          "oklch(15% 0.0078 128.23)",
+          "oklch(27% 0.0196 128.23)",
+          "oklch(39% 0.0314 128.23)",
+          "oklch(51% 0.0392 128.23)",
+          "oklch(63% 0.0392 128.23)",
+          "oklch(75% 0.0314 128.23)",
+          "oklch(87% 0.0176 128.23)",
+          "oklch(95% 0.0059 128.23)"
+        ]
+      },
+      "studio-event-overview-muted": {
+        "displayName": "Studio Event Overview Muted",
+        "tonalRamp": [
+          "oklch(15% 0.0079 126.30)",
+          "oklch(27% 0.0198 126.30)",
+          "oklch(39% 0.0317 126.30)",
+          "oklch(51% 0.0396 126.30)",
+          "oklch(63% 0.0396 126.30)",
+          "oklch(75% 0.0317 126.30)",
+          "oklch(87% 0.0178 126.30)",
+          "oklch(95% 0.0059 126.30)"
+        ]
+      },
+      "studio-event-overview-border": {
+        "displayName": "Studio Event Overview Border",
+        "tonalRamp": [
+          "oklch(15% 0.0075 119.01)",
+          "oklch(27% 0.0186 119.01)",
+          "oklch(39% 0.0298 119.01)",
+          "oklch(51% 0.0373 119.01)",
+          "oklch(63% 0.0373 119.01)",
+          "oklch(75% 0.0298 119.01)",
+          "oklch(87% 0.0168 119.01)",
+          "oklch(95% 0.0056 119.01)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "studio-headline": {
+        "displayName": "Studio Headline",
+        "purpose": "Local comparison role; keep the named alternative separate."
+      },
+      "studio-body": {
+        "displayName": "Studio Body",
+        "purpose": "Local comparison role; keep the named alternative separate."
+      },
+      "studio-data": {
+        "displayName": "Studio Data",
+        "purpose": "Local comparison role; keep the named alternative separate."
+      },
+      "studio-label": {
+        "displayName": "Studio Label",
+        "purpose": "Local comparison role; keep the named alternative separate."
+      },
+      "fokus-headline": {
+        "displayName": "Fokus Headline",
+        "purpose": "Local comparison role; keep the named alternative separate."
+      },
+      "fokus-body": {
+        "displayName": "Fokus Body",
+        "purpose": "Local comparison role; keep the named alternative separate."
+      },
+      "fokus-data": {
+        "displayName": "Fokus Data",
+        "purpose": "Local comparison role; keep the named alternative separate."
+      },
+      "fokus-label": {
+        "displayName": "Fokus Label",
+        "purpose": "Local comparison role; keep the named alternative separate."
+      },
+      "board-headline": {
+        "displayName": "Board Headline",
+        "purpose": "Local comparison role; keep the named alternative separate."
+      },
+      "studio-content-preview": {
+        "displayName": "Studio Content Preview",
+        "purpose": "Studio/V2 complete WhatsApp message body, 14/24px."
+      },
+      "studio-content-title": {
+        "displayName": "Studio Content Title",
+        "purpose": "Observed Studio/V2 message workspace typography; not the operational table type."
+      }
+    },
+    "shadows": [
+      {
+        "name": "inherited-dialog",
+        "value": "0 16px 48px #202B3D29",
+        "purpose": "Dialogs and notices; inherited overlay carryover, not a new palette decision."
+      }
+    ],
+    "motion": [
+      {
+        "name": "inherited-fast",
+        "value": "120ms",
+        "purpose": "Observed button background transition; removed for reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "desktop-inspector",
+        "value": "1200px"
+      },
+      {
+        "name": "menu-threshold",
+        "value": "899px"
+      },
+      {
+        "name": "compact",
+        "value": "599px"
+      },
+      {
+        "name": "wide-cap",
+        "value": "1600px"
+      }
+    ],
+    "scope": "Local comparison only; no production identity selected. OKLCH ramps are generated display swatches, not implemented state tokens. Snippets are static excerpts; interaction logic remains in prototype scripts. Local font assets are required for exact face rendering. Studio V2 is a requested local color comparison; shared event editor applies only to Studio and V2. Production approval remains unresolved.",
+    "eventEditor": {
+      "desktopColumns": "192px minmax(0,1fr) 272px",
+      "desktopGap": "32px",
+      "mediumColumns": "192px minmax(0,1fr)",
+      "mediumGap": "24px",
+      "compactGap": "16px",
+      "stickySaveBottom": "16px",
+      "compactStickySaveBottom": "8px",
+      "saveBarInitialPosition": "static",
+      "saveBarChangedPosition": "sticky",
+      "sharedBy": [
+        "studio",
+        "studio-v2"
+      ],
+      "source": [
+        "event-editor.css",
+        "event-editor.js",
+        "studio-v2.css"
+      ]
+    },
+    "contentEditors": {
+      "sharedBy": [
+        "studio",
+        "studio-v2"
+      ],
+      "accentAliases": {
+        "studio": {
+          "--content-accent": "studio-citrus",
+          "--content-on-accent": "studio-text",
+          "--content-soft": "studio-soft"
+        },
+        "studio-v2": {
+          "--content-accent": "studio-v2-primary",
+          "--content-on-accent": "studio-v2-on-primary",
+          "--content-soft": "studio-v2-soft"
+        }
+      },
+      "desktopMessageTracks": "minmax(0,1.12fr) minmax(0,1fr)",
+      "mediumMessageTracks": "stacked preview below editor",
+      "galleryEditorDesktop": "360px",
+      "galleryEditorMedium": "300px",
+      "galleryColumnsDesktop": 3,
+      "galleryColumnsCompact": 2,
+      "source": [
+        "content-editors.css",
+        "content-editors.js",
+        "section-navigation.js",
+        "event-editor.css"
+      ],
+      "snippetLimit": "Static excerpts only; keyboard/tab/file/upload behavior remains in the prototype scripts.",
+      "desktopMenuTrack": "192px minmax(0,1fr)",
+      "desktopMenuGap": "32px",
+      "mediumMenuGap": "24px",
+      "desktopMessageGap": "24px",
+      "navigation": "Shared sectionNavigation; ordinary aria-current=step buttons / native select below 900px",
+      "messagePreview": "Thumbnail, metadata title/description/domain and full message body always remain together",
+      "mediaVisibility": "Only selected section shown; nodes and files remain mounted"
+    }
+  },
+  "components": [
+    {
+      "name": "Studio primary button",
+      "kind": "button",
+      "refersTo": "studio-button-primary",
+      "description": "Observed ordinary primary; the Studio heading action alone uses a pill.",
+      "html": "<button class=\"ds-studio-primary\">Simpan perubahan</button>",
+      "css": ".ds-studio-primary{font:500 14px/1.5 Manrope,Inter,system-ui,sans-serif;color:#22261F;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:9px 12px;border:1px solid #B5C24A;border-radius:10px;background:#E5F078;color:#22261F;cursor:pointer;transition:background 120ms}.ds-studio-primary:hover{background:#D9E865}.ds-studio-primary:active{background:#CEDC59}.ds-studio-primary:focus-visible{outline:3px solid #354C24;outline-offset:3px;}@media(prefers-reduced-motion:reduce){.ds-studio-primary{transition:none}}"
+    },
+    {
+      "name": "Studio field",
+      "kind": "input",
+      "refersTo": "studio-input",
+      "description": "Native labeled field with observed control border and focus.",
+      "html": "<label class=\"ds-studio-label\" for=\"ds-studio-name\">Nama tamu<input id=\"ds-studio-name\" class=\"ds-studio-input\" placeholder=\"Nama tamu\"></label>",
+      "css": ".ds-studio-label{display:block;font:500 14px/1.5 Manrope,Inter,system-ui,sans-serif;color:#22261F;line-height:20px}.ds-studio-input{display:block;width:100%;max-width:360px;margin-top:8px;min-height:48px;box-sizing:border-box;padding:11px 12px;border:1px solid #7B8372;border-radius:10px;background:#FFFFFF;color:#22261F;font:400 16px/24px Manrope,Inter,system-ui,sans-serif}.ds-studio-input::placeholder{color:#5C6257}.ds-studio-input:focus-visible{outline:3px solid #354C24;outline-offset:3px;}"
+    },
+    {
+      "name": "Studio navigation",
+      "kind": "nav",
+      "refersTo": "studio-navigation",
+      "description": "Desktop top navigation; narrow layouts use the existing Menu dialog.",
+      "html": "<nav class=\"ds-studio-nav\" aria-label=\"Halaman CMS\"><a href=\"#tamu\" aria-current=\"page\">Tamu Undangan</a><a href=\"#pesan\">Pesan &amp; Preview</a></nav>",
+      "css": ".ds-studio-nav{display:flex;flex-wrap:wrap;gap:4px;background:#FAFAF7;padding:20px}.ds-studio-nav a{display:inline-flex;align-items:center;min-height:44px;padding:10px 16px;box-sizing:border-box;border-radius:8px;text-decoration:none;font:500 14px/1.5 Manrope,Inter,system-ui,sans-serif;color:#22261F}.ds-studio-nav a[aria-current]{background:transparent;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:12px}.ds-studio-nav a:hover{background:#F1F4DA}.ds-studio-nav a:focus-visible{outline:3px solid #354C24;outline-offset:3px}"
+    },
+    {
+      "name": "Studio status tag",
+      "kind": "chip",
+      "refersTo": "studio-tag-active",
+      "description": "Noninteractive labeled active state, not an action chip.",
+      "html": "<span class=\"ds-studio-tag\">Aktif</span>",
+      "css": ".ds-studio-tag{display:inline-flex;align-items:center;gap:4px;max-width:100%;padding:3px 8px;border-radius:6px;background:#EEF4EB;color:#315B3E;font:400 12px/18px Manrope,Inter,system-ui,sans-serif}"
+    },
+    {
+      "name": "Studio form panel",
+      "kind": "card",
+      "refersTo": "studio-panel",
+      "description": "Observed form/media panel, not the unframed guest table.",
+      "html": "<section class=\"ds-studio-panel\"><h2>Thumbnail tautan</h2><p>Thumbnail disimpan terpisah dari teks pesan.</p></section>",
+      "css": ".ds-studio-panel{background:#FFFFFF;border:1px solid #DFE2D8;border-radius:12px;padding:24px;color:#22261F;font:400 16px/24px Manrope,Inter,system-ui,sans-serif}.ds-studio-panel h2{margin:0 0 8px;font-size:20px;line-height:28px;font-weight:600;letter-spacing:-.015em}.ds-studio-panel p{margin:0;max-width:72ch;font-size:14px;line-height:22px;color:#5C6257}"
+    },
+    {
+      "name": "Fokus primary button",
+      "kind": "button",
+      "refersTo": "fokus-button-primary",
+      "description": "Observed ordinary primary; the Studio heading action alone uses a pill.",
+      "html": "<button class=\"ds-fokus-primary\">Simpan perubahan</button>",
+      "css": ".ds-fokus-primary{font:500 14px/1.5 Inter,system-ui,sans-serif;color:#171717;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:9px 12px;border:1px solid #171717;border-radius:8px;background:#171717;color:#FFFFFF;cursor:pointer;transition:background 120ms}.ds-fokus-primary:hover{background:#333333}.ds-fokus-primary:active{background:#000000}.ds-fokus-primary:focus-visible{outline:3px solid #171717;outline-offset:3px;}@media(prefers-reduced-motion:reduce){.ds-fokus-primary{transition:none}}"
+    },
+    {
+      "name": "Fokus field",
+      "kind": "input",
+      "refersTo": "fokus-input",
+      "description": "Native labeled field with observed control border and focus.",
+      "html": "<label class=\"ds-fokus-label\" for=\"ds-fokus-name\">Nama tamu<input id=\"ds-fokus-name\" class=\"ds-fokus-input\" placeholder=\"Nama tamu\"></label>",
+      "css": ".ds-fokus-label{display:block;font:500 14px/1.5 Inter,system-ui,sans-serif;color:#171717;line-height:20px}.ds-fokus-input{display:block;width:100%;max-width:360px;margin-top:8px;min-height:48px;box-sizing:border-box;padding:11px 12px;border:1px solid #82827B;border-radius:8px;background:#FFFFFF;color:#171717;font:400 16px/24px Inter,system-ui,sans-serif}.ds-fokus-input::placeholder{color:#626262}.ds-fokus-input:focus-visible{outline:3px solid #171717;outline-offset:3px;}"
+    },
+    {
+      "name": "Fokus navigation",
+      "kind": "nav",
+      "refersTo": "fokus-navigation",
+      "description": "Desktop top navigation; narrow layouts use the existing Menu dialog.",
+      "html": "<nav class=\"ds-fokus-nav\" aria-label=\"Halaman CMS\"><a href=\"#tamu\" aria-current=\"page\">Tamu Undangan</a><a href=\"#pesan\">Pesan &amp; Preview</a></nav>",
+      "css": ".ds-fokus-nav{display:flex;flex-wrap:wrap;gap:4px;background:#171717;padding:20px}.ds-fokus-nav a{display:inline-flex;align-items:center;min-height:44px;padding:10px 16px;box-sizing:border-box;border-radius:8px;text-decoration:none;font:500 14px/1.5 Inter,system-ui,sans-serif;color:#FFFFFF}.ds-fokus-nav a[aria-current]{background:#FFFFFF;color:#171717}.ds-fokus-nav a:hover{background:#333333;color:white}.ds-fokus-nav a:focus-visible{outline:3px solid #FFFFFF;outline-offset:3px}"
+    },
+    {
+      "name": "Fokus status tag",
+      "kind": "chip",
+      "refersTo": "fokus-tag-active",
+      "description": "Noninteractive labeled active state, not an action chip.",
+      "html": "<span class=\"ds-fokus-tag\">Aktif</span>",
+      "css": ".ds-fokus-tag{display:inline-flex;align-items:center;gap:4px;max-width:100%;padding:3px 8px;border-radius:6px;background:#E7E7E3;color:#171717;font:400 12px/18px Inter,system-ui,sans-serif}"
+    },
+    {
+      "name": "Fokus guest inspector",
+      "kind": "custom",
+      "refersTo": "fokus-inspector",
+      "description": "Existing guest details occupy the 304px desktop track; mobile uses a dialog.",
+      "html": "<aside class=\"ds-fokus-inspector\" aria-label=\"Detail tamu terpilih\"><h2 tabindex=\"-1\">Arunika &amp; keluarga</h2><dl><div><dt>Status undangan</dt><dd>Aktif</dd></div><div><dt>Jumlah orang</dt><dd>3</dd></div></dl><h3>Ucapan</h3><p>Selamat menempuh hidup baru.</p></aside>",
+      "css": ".ds-fokus-inspector{width:304px;max-width:100%;box-sizing:border-box;padding:24px;background:#FFFFFF;border-radius:12px;color:#171717;font:400 16px/24px Inter,system-ui,sans-serif}.ds-fokus-inspector h2{margin:0 0 12px;font-size:24px;line-height:32px;letter-spacing:-.025em;font-weight:600;overflow-wrap:anywhere}.ds-fokus-inspector dl{display:grid;grid-template-columns:1fr 1fr;gap:20px 12px;margin:0 0 24px;padding:20px 0;border-top:1px solid #DDDDDA;border-bottom:1px solid #DDDDDA}.ds-fokus-inspector dt{font-size:12px;line-height:18px;color:#626262;margin-bottom:4px}.ds-fokus-inspector dd{margin:0;font-weight:500}.ds-fokus-inspector h3{margin:0;font-size:16px;line-height:24px;font-weight:600}.ds-fokus-inspector p{margin:12px 0 24px;font-size:14px;line-height:22px;color:#626262;overflow-wrap:anywhere}.ds-fokus-inspector h2:focus-visible{outline:3px solid #171717;outline-offset:3px;}"
+    },
+    {
+      "name": "Studio V2 primary button",
+      "kind": "button",
+      "refersTo": "studio-v2-button-primary",
+      "description": "Color-only V2 primary; Studio geometry and Manrope remain.",
+      "html": "<button class=\"ds-studio-v2-primary\">Simpan perubahan</button>",
+      "css": ".ds-studio-v2-primary{font:500 14px/1.5 Manrope,Inter,system-ui,sans-serif;color:#FFFFFF;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:9px 12px;border:1px solid #183D32;border-radius:10px;background:#183D32;color:#FFFFFF;cursor:pointer;transition:background 120ms}.ds-studio-v2-primary:hover{background:#102F26}.ds-studio-v2-primary:active{background:#0B241D}.ds-studio-v2-primary:focus-visible{outline:3px solid #183D32;outline-offset:3px;}@media(prefers-reduced-motion:reduce){.ds-studio-v2-primary{transition:none}} .ds-studio-v2-primary:hover{border-color:#102F26}.ds-studio-v2-primary:active{border-color:#0B241D}.ds-studio-v2-primary:disabled{background:#E7EDE9;color:#59665F;border-color:#CED8D1;cursor:default}"
+    },
+    {
+      "name": "Studio event section",
+      "kind": "nav",
+      "refersTo": "studio-event-section-active",
+      "description": "Shared selected section button for Detail Acara, Pesan & Preview and Foto & Lagu; mobile uses the same labeled native select.",
+      "html": "<nav aria-label=\"Bagian Detail Acara\"><button type=\"button\" class=\"ds-studio-event-section\" aria-current=\"step\"><span>Pasangan &amp; keluarga</span><small>Nama mempelai dan orang tua</small></button></nav>",
+      "css": ".ds-studio-event-section{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;text-align:left;gap:4px;min-height:72px;padding:14px 12px;border:0;border-radius:10px;background:transparent;color:#22261F;font-family:Manrope,Inter,system-ui,sans-serif;cursor:pointer;transition:background 120ms}.ds-studio-event-section span{font-size:14px;line-height:20px;font-weight:600}.ds-studio-event-section small{font-size:12px;line-height:18px;color:#5C6257}.ds-studio-event-section:hover{background:#F1F4DA}.ds-studio-event-section[aria-current]{background:#E5F078;color:#22261F}.ds-studio-event-section[aria-current] small{color:#404926}.ds-studio-event-section:focus-visible{outline:3px solid #354C24;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-studio-event-section{transition:none}}"
+    },
+    {
+      "name": "Studio-V2 event section",
+      "kind": "nav",
+      "refersTo": "studio-v2-event-section-active",
+      "description": "Shared selected section button for Detail Acara, Pesan & Preview and Foto & Lagu; mobile uses the same labeled native select.",
+      "html": "<nav aria-label=\"Bagian Detail Acara\"><button type=\"button\" class=\"ds-studio-v2-event-section\" aria-current=\"step\"><span>Pasangan &amp; keluarga</span><small>Nama mempelai dan orang tua</small></button></nav>",
+      "css": ".ds-studio-v2-event-section{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;text-align:left;gap:4px;min-height:72px;padding:14px 12px;border:0;border-radius:10px;background:transparent;color:#22261F;font-family:Manrope,Inter,system-ui,sans-serif;cursor:pointer;transition:background 120ms}.ds-studio-v2-event-section span{font-size:14px;line-height:20px;font-weight:600}.ds-studio-v2-event-section small{font-size:12px;line-height:18px;color:#5C6257}.ds-studio-v2-event-section:hover{background:#E7F0EB}.ds-studio-v2-event-section[aria-current]{background:#183D32;color:#FFFFFF}.ds-studio-v2-event-section[aria-current] small{color:#D3E7DC}.ds-studio-v2-event-section:focus-visible{outline:3px solid #183D32;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-studio-v2-event-section{transition:none}}"
+    },
+    {
+      "name": "Studio V2 event overview",
+      "kind": "custom",
+      "refersTo": "studio-v2-event-overview",
+      "description": "Native disclosure reflects current inputs; script decides initial open state by viewport.",
+      "html": "<details class=\"ds-studio-v2-overview\"><summary>Ringkasan isian<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" aria-hidden=\"true\"><path d=\"m6 9 6 6 6-6\"/></svg></summary><div><h2>Arunika &amp; Bimantara</h2><dl><dt>Informasi hadiah</dt><dd>Ditampilkan · 1 informasi</dd></dl><p>Ringkasan mengikuti isian saat ini. Tekan Simpan untuk menerapkan perubahan.</p></div></details>",
+      "css": ".ds-studio-v2-overview{width:272px;max-width:100%;box-sizing:border-box;padding:20px;border-radius:12px;background:#E7F0EB;color:#183D32;font-family:Manrope,Inter,system-ui,sans-serif}.ds-studio-v2-overview>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;list-style:none;font-size:14px;line-height:22px;font-weight:600;cursor:pointer}.ds-studio-v2-overview>summary::-webkit-details-marker{display:none}.ds-studio-v2-overview[open]>summary svg{transform:rotate(180deg)}.ds-studio-v2-overview>summary:focus-visible{outline:3px solid #183D32;outline-offset:3px}.ds-studio-v2-overview h2{margin:16px 0 24px;font-size:22px;line-height:30px;letter-spacing:-.025em;overflow-wrap:anywhere}.ds-studio-v2-overview dl{margin:0}.ds-studio-v2-overview dt{font-size:12px;line-height:18px;color:#466154;margin-bottom:4px}.ds-studio-v2-overview dd{font-size:14px;line-height:22px;margin:0}.ds-studio-v2-overview p{font-size:12px;line-height:20px;margin-top:24px;padding-top:20px;border-top:1px solid #C6D8CD;color:#466154}"
+    },
+    {
+      "name": "Studio gallery slot",
+      "kind": "button",
+      "refersTo": "studio-gallery-tile",
+      "description": "Numbered gallery slot; static empty state with observed selected/focus treatment.",
+      "html": "<button type=\"button\" class=\"ds-studio-gallery-tile\" aria-label=\"Kelola Galeri 1, Belum diunggah\" aria-pressed=\"true\"><span class=\"ds-studio-gallery-tile-image\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" aria-hidden=\"true\"><path d=\"M12 5v14M5 12h14\"/></svg></span><span class=\"ds-studio-gallery-tile-caption\"><strong>Foto 1</strong><span>Belum diunggah</span></span></button>",
+      "css": ".ds-studio-gallery-tile{display:block;width:100%;padding:0;min-height:44px;text-align:left;border:1px solid #DFE2D8;border-radius:12px;overflow:hidden;background:#FFFFFF;color:#22261F;font:400 14px/20px Manrope,Inter,system-ui,sans-serif;cursor:pointer;transition:background 120ms}.ds-studio-gallery-tile:hover{background:#F1F4DA}.ds-studio-gallery-tile[aria-pressed=true]{outline:2px solid #252B20;outline-offset:2px}.ds-studio-gallery-tile:focus-visible{outline:3px solid #354C24;outline-offset:4px}.ds-studio-gallery-tile-image{aspect-ratio:4/3;min-height:90px;display:flex;align-items:center;justify-content:center;background:#F1F4DA;color:#252B20}.ds-studio-gallery-tile-caption{display:block;padding:12px 14px}.ds-studio-gallery-tile-caption strong{display:block;font-size:14px;line-height:20px;font-weight:600}.ds-studio-gallery-tile-caption>span{display:block;margin-top:2px;font-size:12px;line-height:18px;color:#5C6257}@media(max-width:599px){.ds-studio-gallery-tile-caption{padding:10px 12px}.ds-studio-gallery-tile-caption>span{min-height:36px}}@media(prefers-reduced-motion:reduce){.ds-studio-gallery-tile{transition:none}}"
+    },
+    {
+      "name": "Studio-V2 gallery slot",
+      "kind": "button",
+      "refersTo": "studio-v2-gallery-tile",
+      "description": "Numbered gallery slot; static empty state with observed selected/focus treatment.",
+      "html": "<button type=\"button\" class=\"ds-studio-v2-gallery-tile\" aria-label=\"Kelola Galeri 1, Belum diunggah\" aria-pressed=\"true\"><span class=\"ds-studio-v2-gallery-tile-image\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" aria-hidden=\"true\"><path d=\"M12 5v14M5 12h14\"/></svg></span><span class=\"ds-studio-v2-gallery-tile-caption\"><strong>Foto 1</strong><span>Belum diunggah</span></span></button>",
+      "css": ".ds-studio-v2-gallery-tile{display:block;width:100%;padding:0;min-height:44px;text-align:left;border:1px solid #DFE2D8;border-radius:12px;overflow:hidden;background:#FFFFFF;color:#22261F;font:400 14px/20px Manrope,Inter,system-ui,sans-serif;cursor:pointer;transition:background 120ms}.ds-studio-v2-gallery-tile:hover{background:#E7F0EB}.ds-studio-v2-gallery-tile[aria-pressed=true]{outline:2px solid #183D32;outline-offset:2px}.ds-studio-v2-gallery-tile:focus-visible{outline:3px solid #183D32;outline-offset:4px}.ds-studio-v2-gallery-tile-image{aspect-ratio:4/3;min-height:90px;display:flex;align-items:center;justify-content:center;background:#E7F0EB;color:#183D32}.ds-studio-v2-gallery-tile-caption{display:block;padding:12px 14px}.ds-studio-v2-gallery-tile-caption strong{display:block;font-size:14px;line-height:20px;font-weight:600}.ds-studio-v2-gallery-tile-caption>span{display:block;margin-top:2px;font-size:12px;line-height:18px;color:#5C6257}@media(max-width:599px){.ds-studio-v2-gallery-tile-caption{padding:10px 12px}.ds-studio-v2-gallery-tile-caption>span{min-height:36px}}@media(prefers-reduced-motion:reduce){.ds-studio-v2-gallery-tile{transition:none}}"
+    },
+    {
+      "name": "Studio final WhatsApp preview",
+      "kind": "card",
+      "refersTo": "studio-message-final-preview",
+      "description": "One complete fictional preview; metadata remains with the body when editor sections change.",
+      "html": "<div class=\"ds-studio-message-final\"><div class=\"ds-studio-message-final-metadata\"><div class=\"ds-studio-message-final-image\">Gambar belum diunggah</div><div class=\"ds-studio-message-final-meta-body\"><strong>Undangan Pernikahan Nara &amp; Dimas</strong><p>Sabtu, 12 Juni 2027 · Pendapa Arunika (contoh).</p><small>invitation.example · simulasi</small></div></div><p class=\"ds-studio-message-final-body\">Kepada Keluarga Arunika, kami mengundang Anda untuk hadir.\nhttps://invitation.example/u/CONTOH</p></div>",
+      "css": ".ds-studio-message-final{margin:24px 0 16px;padding:0;border-radius:12px;overflow:hidden;background:#F1F4DA;color:#22261F;font:400 16px/24px Manrope,Inter,system-ui,sans-serif}.ds-studio-message-final-metadata{margin:0;border:0;border-radius:0;background:rgba(0,0,0,.035)}.ds-studio-message-final-image{aspect-ratio:1200/630;display:grid;place-items:center;overflow:hidden;background:#F1F4DA;color:#5C6257;font-size:12px}.ds-studio-message-final-meta-body{padding:16px}.ds-studio-message-final-meta-body p{margin:8px 0;font-size:12px;line-height:18px;color:#5C6257;overflow-wrap:anywhere}.ds-studio-message-final-meta-body small{font-size:12px;line-height:18px;color:#5C6257}.ds-studio-message-final-body{padding:20px;margin:0;white-space:pre-wrap;overflow-wrap:anywhere;color:#22261F;font-size:14px;line-height:24px}"
+    },
+    {
+      "name": "Studio-V2 final WhatsApp preview",
+      "kind": "card",
+      "refersTo": "studio-v2-message-final-preview",
+      "description": "One complete fictional preview; metadata remains with the body when editor sections change.",
+      "html": "<div class=\"ds-studio-v2-message-final\"><div class=\"ds-studio-v2-message-final-metadata\"><div class=\"ds-studio-v2-message-final-image\">Gambar belum diunggah</div><div class=\"ds-studio-v2-message-final-meta-body\"><strong>Undangan Pernikahan Nara &amp; Dimas</strong><p>Sabtu, 12 Juni 2027 · Pendapa Arunika (contoh).</p><small>invitation.example · simulasi</small></div></div><p class=\"ds-studio-v2-message-final-body\">Kepada Keluarga Arunika, kami mengundang Anda untuk hadir.\nhttps://invitation.example/u/CONTOH</p></div>",
+      "css": ".ds-studio-v2-message-final{margin:24px 0 16px;padding:0;border-radius:12px;overflow:hidden;background:#E7F0EB;color:#22261F;font:400 16px/24px Manrope,Inter,system-ui,sans-serif}.ds-studio-v2-message-final-metadata{margin:0;border:0;border-radius:0;background:rgba(0,0,0,.035)}.ds-studio-v2-message-final-image{aspect-ratio:1200/630;display:grid;place-items:center;overflow:hidden;background:#E7F0EB;color:#5C6257;font-size:12px}.ds-studio-v2-message-final-meta-body{padding:16px}.ds-studio-v2-message-final-meta-body p{margin:8px 0;font-size:12px;line-height:18px;color:#5C6257;overflow-wrap:anywhere}.ds-studio-v2-message-final-meta-body small{font-size:12px;line-height:18px;color:#5C6257}.ds-studio-v2-message-final-body{padding:20px;margin:0;white-space:pre-wrap;overflow-wrap:anywhere;color:#22261F;font-size:14px;line-height:24px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Studio — an open preparation desk; Fokus — a guest review workspace",
+    "overview": "This records Studio and Fokus, plus the explicitly requested Studio V2 color variation, implemented in this folder. Studio combines warm paper, Manrope and citrus with a full-width guest table. Fokus combines Inter, monochrome navigation and a persistent guest inspector. Their names describe local study directions, not approved brand commitments. The original board recommends Studio provisionally. The user praised Studio and authorized a green V2 comparison and a redesigned Detail Acara preview; this is not final product or production approval.\n\nScope is this comparison study only. Product truth is inherited from [PRODUCT.md](../PRODUCT.md); direction and comparison rationale live in [BRIEF.md](BRIEF.md) and the [comparison report](../../../docs/weddinvita-cms-design-comparison.md). The frontmatter records reused observed values from `concepts.css`, `board.css`, `studio-v2.css`, `event-editor.css`, `event-editor.js`, `content-editors.css`, `content-editors.js`, `section-navigation.js` and inherited `../styles.css`. Prefixes keep alternatives separate even when values coincide. No rule here changes the baseline, application, or invitation theme. Indonesian copy remains warm, clear and calm; all data and interactions are fictional local simulations.",
+    "keyCharacteristics": [
+      "Studio: open table, warm white, Manrope and restrained citrus.",
+      "Fokus: monochrome master/detail with actions beside the selected guest.",
+      "Board: Studio-derived review surface with equally sized concept previews and synchronized page/device controls.",
+      "Studio V2: the same Studio geometry and functionality with the requested reference green.",
+      "Studio / V2 event editor: five freely selectable sections, current-input summary and one save scope.",
+      "Studio / V2 content editors: shared local section navigation, one complete WhatsApp preview and selected media sections preserve mounted draft/file state.",
+      "All studies: five available pages, semantic tables, native fields and explicit action feedback."
+    ],
+    "rules": [
+      {
+        "name": "The Separate Alternatives Rule",
+        "body": "Use one concept's prefixed tokens within its surface; the board's Studio-derived palette does not select or merge the production identity.",
+        "section": "colors"
+      },
+      {
+        "name": "The Selection Has One Job Rule",
+        "body": "Checkbox selection drives mass actions; inspecting a name drives guest details.",
+        "section": "components"
+      },
+      {
+        "name": "The One Event Save Rule",
+        "body": "Section navigation preserves the draft; Simpan detail acara applies to all five sections together.",
+        "section": "components"
+      },
+      {
+        "name": "The Complete Message Rule",
+        "body": "Keep thumbnail, link metadata/domain and the entire message body together in one final preview, whichever editor section is active.",
+        "section": "components"
+      },
+      {
+        "name": "The Text And Media Save Rule",
+        "body": "Saving message text covers template, title and description; thumbnail upload remains a separate action and cannot mark text saved.",
+        "section": "components"
+      },
+      {
+        "name": "The Same Media Node Rule",
+        "body": "Switching slots, disclosure or viewport moves or hides the existing MediaCard; it does not recreate file inputs or treat a selected file as installed media.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "**Do** keep Studio, Studio V2 and Fokus tokens distinct; V2 inherits Studio geometry, not Fokus topology.",
+      "**Do** preserve table comparison, labeled states and the distinction between invitations and people attending.",
+      "**Do** retain visible keyboard focus, native fields, contained table scrolling and reduced motion.",
+      "**Do** describe save, upload, copy and WhatsApp outcomes as prototype simulations.",
+      "**Do** preserve mounted text/file inputs and distinguish text save, chosen files and installed media."
+    ],
+    "donts": [
+      "**Don't** treat the board recommendation or requested V2 preview as production brand approval.",
+      "**Don't** turn inspector selection into mass checkbox selection.",
+      "**Don't** propagate study-specific layouts or inherited palette residue into the production system.",
+      "**Don't** infer new backend fields, publishing, analytics, automated messaging or measured usability gains from these screens."
+    ]
+  }
+}

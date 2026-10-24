@@ -1,0 +1,19 @@
+Studio V2 1440/tamu: visible, no overflow, reference primary #183D32
+Studio V2 1440/login: visible, no overflow, reference primary #183D32
+Studio V2 1440/pesan: visible, no overflow, reference primary #183D32
+Studio V2 1440/media: visible, no overflow, reference primary #183D32
+Studio V2 1440/acara: visible, no overflow, reference primary #183D32
+Studio V2 390/tamu: visible, no overflow, reference primary #183D32
+Studio V2 390/login: visible, no overflow, reference primary #183D32
+Studio V2 390/pesan: visible, no overflow, reference primary #183D32
+Studio V2 390/media: visible, no overflow, reference primary #183D32
+Studio V2 390/acara: visible, no overflow, reference primary #183D32
+Studio V2 320/tamu: visible, no overflow, reference primary #183D32
+Studio V2 320/login: visible, no overflow, reference primary #183D32
+Studio V2 320/pesan: visible, no overflow, reference primary #183D32
+Studio V2 320/media: visible, no overflow, reference primary #183D32
+Studio V2 320/acara: visible, no overflow, reference primary #183D32
+Comparison 1440: all5routes, desktop/mobile images and Coba links PASS
+Comparison 390: all5routes, desktop/mobile images and Coba links PASS
+Comparison 320: all5routes, desktop/mobile images and Coba links PASS
+Preview index redirects to Studio/Studio V2 board and switches route/device. No JS errors; local synthetic study only.

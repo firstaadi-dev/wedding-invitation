@@ -1,0 +1,22 @@
+/* Studio V2: geometri dan perilaku Studio tetap; aksen mengikuti referensi #183D32. */
+:root[data-variant=studio-v2]{--cms-color-primary:#183D32;--cms-color-primary-hover:#102F26;--cms-color-primary-active:#0B241D;--cms-color-primary-soft:#E7F0EB;--cms-color-focus:#183D32}
+[data-variant=studio-v2] .primary{background:#183D32;color:#FFFFFF;border-color:#183D32}
+[data-variant=studio-v2] .primary:hover{background:#102F26;border-color:#102F26}
+[data-variant=studio-v2] .primary:active{background:#0B241D;border-color:#0B241D}
+[data-variant=studio-v2] .primary:disabled{background:#E7EDE9;color:#59665F;border-color:#CED8D1}
+[data-variant=studio-v2] .danger.primary{background:#A12B3A;border-color:#A12B3A;color:#FFFFFF}
+[data-variant=studio-v2] .danger.primary:hover{background:#862230;border-color:#862230}
+[data-variant=studio-v2] .summary .people{background:#183D32}
+[data-variant=studio-v2] .summary .people span,[data-variant=studio-v2] .summary .people strong{color:#FFFFFF}
+[data-variant=studio-v2] .summary .people small{color:#D3E7DC}
+[data-variant=studio-v2] .event-section-buttons button:hover{background:#E7F0EB}
+[data-variant=studio-v2] .event-section-buttons button[aria-current]{background:#183D32;color:#FFFFFF}
+[data-variant=studio-v2] .event-section-buttons button[aria-current] small{color:#D3E7DC}
+[data-variant=studio-v2] .event-overview{background:#E7F0EB}
+[data-variant=studio-v2] .event-overview>summary,[data-variant=studio-v2] .event-overview-content h2,[data-variant=studio-v2] .event-overview-content dd{color:#183D32}
+[data-variant=studio-v2] .event-overview-content dt,[data-variant=studio-v2] .event-overview-content p{color:#466154}
+[data-variant=studio-v2] .event-overview-content p{border-color:#C6D8CD}
+[data-variant=studio-v2] .sidebar nav a:hover{background:#E7F0EB}
+[data-variant=studio-v2] tbody tr:hover{background:#F2F7F3}
+[data-variant=studio-v2] .media-placeholder,[data-variant=studio-v2] .map-placeholder{background:#EDF2EE}
+[data-variant=studio-v2] ::selection{background:#C8DDD1;color:#183D32}
