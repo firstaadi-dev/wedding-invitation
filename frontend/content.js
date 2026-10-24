@@ -14,6 +14,14 @@ async function load() {
   if (response.status === 401) {location.replace(location.pathname === '/preview' ? '/' : `${location.pathname}?access=1`);return;}
   if (!response.ok) throw new Error('Konten belum dapat dimuat. Muat ulang halaman.');
   const {tenantSlug,invitationId,guestName,settings,media,response:guestResponse,canRespond,responseToken:loadedToken} = await response.json();
+  if (media.music) {
+    audio = new Audio(media.music);audio.loop = true;audio.preload = 'auto';
+    music.disabled = false;music.classList.add('has-music');
+    music.setAttribute('aria-pressed','false');label(false);
+    audio.addEventListener('play',() => label(true));audio.addEventListener('pause',() => label(false));
+    audio.addEventListener('error',() => {music.title = 'Lagu gagal dimuat. Tekan untuk mencoba lagi.';music.setAttribute('aria-label',music.title);music.setAttribute('aria-pressed','false');});
+    audio.load();
+  }
   const eventDate = settings.eventDate || defaultEventDate;
   const venueName = settings.venueName?.trim() || defaultVenueName;
   const dateLabels = eventDateLabels(eventDate);
@@ -94,13 +102,6 @@ async function load() {
     frame.src = settings.mapEmbedUrl;frame.title = mapTitle(venueName);
     frame.loading = 'lazy';frame.referrerPolicy = 'strict-origin-when-cross-origin';frame.allowFullscreen = true;
     document.querySelector('.map-placeholder').replaceWith(frame);
-  }
-  if (media.music) {
-    audio = new Audio(media.music);audio.loop = true;audio.preload = 'none';
-    music.disabled = false;music.classList.add('has-music');
-    music.setAttribute('aria-pressed','false');label(false);
-    audio.addEventListener('play',() => label(true));audio.addEventListener('pause',() => label(false));
-    audio.addEventListener('error',() => {music.title = 'Lagu gagal dimuat. Tekan untuk mencoba lagi.';music.setAttribute('aria-label',music.title);music.setAttribute('aria-pressed','false');});
   }
 }
 function photo(src,alt) {
