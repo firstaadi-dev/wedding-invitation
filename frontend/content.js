@@ -18,9 +18,13 @@ async function load() {
     audio = new Audio(media.music);audio.loop = true;audio.preload = 'auto';
     music.disabled = false;music.classList.add('has-music');
     music.setAttribute('aria-pressed','false');label(false);
-    audio.addEventListener('play',() => label(true));audio.addEventListener('pause',() => label(false));
+    const onFirstScroll = () => {if (audio.paused) playMusic();};
+    window.addEventListener('scroll',onFirstScroll,{once:true,passive:true});
+    audio.addEventListener('play',() => {label(true);window.removeEventListener('scroll',onFirstScroll);});
+    audio.addEventListener('pause',() => label(false));
     audio.addEventListener('error',() => {music.title = 'Lagu gagal dimuat. Tekan untuk mencoba lagi.';music.setAttribute('aria-label',music.title);music.setAttribute('aria-pressed','false');});
     audio.load();
+    playMusic();
   }
   const eventDate = settings.eventDate || defaultEventDate;
   const venueName = settings.venueName?.trim() || defaultVenueName;
@@ -221,7 +225,7 @@ async function loadWishes(reset = false) {
 }
 moreWishes.addEventListener('click',() => loadWishes());
 music.addEventListener('click',() => {if (audio) audio.paused ? playMusic() : audio.pause();});
-document.querySelector('#open-invitation').addEventListener('click',() => {if(audio) playMusic();});
+document.querySelector('#open-invitation').addEventListener('click',() => {if(audio?.paused) playMusic();});
 load().catch(error => {
   responseStatus.textContent = 'Formulir belum dapat dimuat. Muat ulang halaman.';
   const message = document.createElement('p');message.className = 'content-error';message.setAttribute('role','alert');
