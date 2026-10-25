@@ -12,7 +12,7 @@
 .photo-placeholder.has-photo {position:relative;overflow:hidden;}
 .photo-placeholder.has-photo:after {display:none;}
 .photo-placeholder img {position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
-.location-paper iframe {width:100%;height:320px;min-width:200px;border:0;display:block;}
+.location-paper iframe {width:100%;height:320px;min-width:0;border:0;display:block;}
 .music-status.has-music:after {display:none;}
 .content-error {margin-top:20px;padding:12px;background:#531221;color:#fff;font-size:14px;}
 .guest-paper {width:min(100%,560px);margin:32px auto 0;padding:clamp(22px,5vw,36px);text-align:left;}
@@ -239,7 +239,9 @@ main {
   z-index:5;
   text-align:center;
   width:min(100%,900px);
+  min-width:0;
   margin:auto;
+  overflow-wrap:anywhere;
   transform-origin:center top;
 }
 
@@ -392,24 +394,12 @@ main {
   background-position:center 25%;
 }
 
-.ceremony-date {
-  font-family:var(--serif);
-  font-size:45px;
-  margin:25px 0 45px;
-  line-height:1.4;
-  color:#e3cfb0;
-}
-
-.ceremony-date span {
-  font-style:italic;
-}
-
 .event-grid {
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:30px;
   max-width:690px;
-  margin:auto;
+  margin:32px auto 0;
   perspective:1200px;
 }
 
@@ -433,12 +423,17 @@ main {
 
 .event-paper h3 {
   font-size:34px;
+  font-weight:500;
   margin:12px 0 22px;
   overflow-wrap:anywhere;
 }
 
 .event-paper p {
   font-size:16px;
+}
+
+.event-paper .event-venue {
+  line-height:1.6;
 }
 
 .event-paper .pending-time {
@@ -534,15 +529,15 @@ main {
   opacity:.6;
 }
 
-.gallery-scene .scene-copy {min-width:0;}
 .countdown {
-  margin:0 auto 48px;
-  max-width:420px;
+  margin:32px auto 0;
+  max-width:320px;
 }
-.countdown>p {font-size:13px;letter-spacing:.08em;margin-bottom:16px;color:#e3cfb0;}
-.countdown-units {display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-.countdown-units>div {padding:14px 4px;background:linear-gradient(145deg,#faf7f21c,#faf7f205);border:1px solid #e3cfb045;border-radius:14px;box-shadow:inset 0 1px 0 #fff2,0 12px 28px #020c0830;backdrop-filter:blur(8px);}
-.countdown-units strong {display:block;font-family:var(--serif);font-size:clamp(32px,5vw,44px);line-height:1.1;font-weight:500;font-variant-numeric:tabular-nums;}
+.countdown>p {font-size:13px;letter-spacing:.04em;margin-bottom:12px;color:#e3cfb0;}
+.countdown-units {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));}
+.countdown-units>div {padding:0 8px;}
+.countdown-units>div+div {border-left:1px solid #e3cfb045;}
+.countdown-units strong {display:block;font-family:var(--serif);font-size:32px;line-height:1.1;font-weight:500;font-variant-numeric:tabular-nums;}
 .countdown-units span {font-size:12px;color:#e3cfb0;}
 
 .gallery-album {max-width:650px;margin:40px auto 0;}
@@ -639,6 +634,12 @@ body.gallery-open {overflow:hidden;}
 }
 
 @media(max-width:600px) {
+  html {
+    scroll-snap-type:none;
+  }
+  .entrance-track,.scene {
+    scroll-snap-stop:normal;
+  }
   h1 {
     font-size:60px;
   }
@@ -665,6 +666,26 @@ body.gallery-open {overflow:hidden;}
   }
   h2 {
     font-size:47px;
+  }
+  .event-scene,.location-scene,.response-scene {
+    padding-block:72px;
+  }
+  .event-scene h2,.location-scene h2,.response-scene h2 {
+    font-size:clamp(32px,8.5vw,36px);
+    line-height:1.15;
+  }
+  .response-scene .introduction {
+    margin-block:20px;
+    line-height:1.75;
+  }
+  .response-scene .guest-paper {
+    margin-top:24px;
+  }
+  .response-scene .guest-button[type="submit"] {
+    width:100%;
+  }
+  .countdown-units strong {
+    font-size:28px;
   }
   .introduction {
     font-size:16px;
@@ -713,11 +734,11 @@ body.gallery-open {overflow:hidden;}
     gap:30px;
     max-width:280px;
   }
-  .ceremony-date {
-    font-size:38px;
+  .event-paper h3 {
+    font-size:clamp(30px,8vw,32px);
   }
-  .event-paper p {
-    font-size:16px;
+  .event-paper .pending-time {
+    font-size:clamp(22px,5.5vw,24px);
   }
   .location-paper {
     padding:24px;

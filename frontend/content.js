@@ -39,7 +39,6 @@ async function load() {
   document.querySelector('#partner-one-short').textContent = partners[0].split(/\s+/)[0];
   document.querySelector('#partner-two-short').textContent = partners[1].split(/\s+/)[0];
   document.querySelector('.envelope-date').textContent = dateLabels.short;
-  document.querySelector('.ceremony-date').textContent = dateLabels.full;
   document.querySelectorAll('.event-date').forEach(date => {date.textContent = dateLabels.full;});
   document.querySelectorAll('.event-venue').forEach(venue => {venue.textContent = venueName;});
   document.querySelector('#venue-name').textContent = venueName;
