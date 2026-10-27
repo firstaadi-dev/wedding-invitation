@@ -6,15 +6,15 @@ Alur repository: **main → feature branch → staging → main**.
 
 | Aktivitas | GitHub Actions | Deployment |
 | --- | --- | --- |
-| Push ke feature branch | Menunggu PR dibuka | Tidak ada |
-| PR feature → staging | Branch flow, tes, build kedua image, Required checks | Tidak ada |
+| Push ke feature branch | Tidak berjalan | Tidak ada |
+| PR feature → staging | Tidak berjalan | Tidak ada |
 | Merge/push ke staging | Tes, build/publikasi image yang berubah | Staging, jika `STAGING_VPS_DEPLOY_ENABLED=true` |
-| PR staging → main | Branch flow, tes, build kedua image, Required checks | Tidak ada |
+| PR staging → main | Tidak berjalan | Tidak ada |
 | Merge/push ke main | Tes, build/publikasi image yang berubah | Production, jika `VPS_DEPLOY_ENABLED=true` |
-| PR feature → main | Branch flow gagal | Tidak ada |
+| PR feature → main | Tidak berjalan; alur ini tidak diizinkan secara proses | Tidak ada |
 | Run workflow pada branch feature | Branch flow gagal | Tidak ada |
 
-Workflow: [deploy.yml](../.github/workflows/deploy.yml). Pemeriksaan branch: [branch_policy.py](../scripts/branch_policy.py). PR hanya diterima dengan target `staging` atau `main`; promosi ke `main` harus berasal dari branch `staging` repository ini. Nama feature branch tidak diwajibkan memakai prefix tertentu.
+Workflow: [deploy.yml](../.github/workflows/deploy.yml). Pemeriksaan branch: [branch_policy.py](../scripts/branch_policy.py). Workflow otomatis hanya berjalan pada push ke `staging` atau `main`, termasuk hasil merge PR. Target PR mengikuti proses tim: feature ke `staging`, lalu `staging` ke `main`; workflow tidak memeriksa asal branch PR karena trigger PR dinonaktifkan. Nama feature branch tidak diwajibkan memakai prefix tertentu.
 
 ## Mulai fitur baru
 
@@ -34,7 +34,7 @@ git commit -m "Implement nama fitur"
 git push -u origin feat/nama-fitur
 ```
 
-Di GitHub, buka PR dengan **base: staging** dan **compare: feat/nama-fitur**. Tunggu `Required checks` lulus sebelum merge.
+Di GitHub, buka PR dengan **base: staging** dan **compare: feat/nama-fitur**. Review perubahan sebelum merge; tes dan build berjalan setelah merge ke `staging`.
 
 ## Uji staging
 
@@ -52,15 +52,15 @@ Fitur berikutnya kembali dimulai dari `main` terbaru. Karena feature branch memb
 
 ## Pengaturan GitHub agar alur wajib diikuti
 
-Workflow menandai alur yang salah sebagai gagal. Agar GitHub menolak merge atau direct push yang melewati pemeriksaan, aktifkan branch protection/ruleset untuk **main** dan **staging**:
+Agar GitHub mewajibkan review PR dan membatasi direct push, aktifkan branch protection/ruleset untuk **main** dan **staging**:
 
 - Require a pull request before merging.
-- Require status checks to pass: pilih **Required checks** dari workflow **Build and deploy VPS**.
+- Jangan mewajibkan **Required checks** dari workflow ini sebelum merge: trigger PR dinonaktifkan sehingga check tersebut tidak berjalan pada PR.
 - Terapkan aturan juga untuk administrator/bypass bila alur perlu diwajibkan untuk seluruh pengguna.
 - Nonaktifkan force push dan penghapusan kedua branch.
 - Pertahankan metode merge commit; jangan mewajibkan linear history karena alur ini menggunakan merge commit.
 
-Setelah workflow pertama kali berjalan, nama status `Required checks` dapat dipilih pada pengaturan tersebut. Fitur branch protection repository private mengikuti paket GitHub akun/organisasi. Lihat [dokumentasi branch protection GitHub](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches).
+Fitur branch protection repository private mengikuti paket GitHub akun/organisasi. Lihat [dokumentasi branch protection GitHub](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches).
 
 Workflow YAML tidak mengubah pengaturan proteksi GitHub. Selama proteksi belum aktif, push langsung ke `main`/`staging` masih bisa memicu deployment; job branch flow tidak dapat membuktikan sebuah push berasal dari merge PR.
 
