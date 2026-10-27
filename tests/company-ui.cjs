@@ -23,6 +23,12 @@ const url = process.env.COMPANY_URL || 'http://127.0.0.1:5180/company';
       assert.equal(await page.locator('.access-path li').count(),2);
       assert(await page.locator('.access-allowed').innerText().then(text => text.includes('Tetap bisa dibuka')));
       assert(await page.locator('.access-blocked').innerText().then(text => text.includes('Akses ditolak')));
+      assert.equal(await page.locator('#invitation-lock .comparison-flow').count(),2);
+      assert.equal(await page.locator('.lock-comparison table').count(),0);
+      assert(await page.locator('.pin-flow h4').innerText().then(text => text.includes('Solusi undangan lain')));
+      assert(await page.locator('.invitation-lock-flow h4').innerText().then(text => text.includes('Weddinvita')));
+      assert.equal(await page.locator('.comparison-flow li').count(),6);
+      assert(await page.locator('.invitation-lock-flow').innerText().then(text => text.includes('Lock aktif, kuota 1 dari 1 browser terisi.')));
       for (const outcome of await page.locator('.access-outcomes > div').all()) {
         assert(await outcome.evaluate(el => {
           const column = el.getBoundingClientRect();

@@ -341,7 +341,7 @@ em {
 .lock-section {
   background: var(--green);
   color: #fafaf7;
-  padding-block: 83px 29px;
+  padding-block: 83px 64px;
 }
 .lock-layout {
   display: grid;
@@ -368,6 +368,87 @@ h2 {
 }
 .lock-copy strong {
   color: #fff;
+}
+.lock-comparison {
+  margin: 56px auto 0;
+  padding-top: 32px;
+  border-top: 1px solid #466154;
+}
+.lock-comparison h3 {
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+.lock-comparison > p {
+  max-width: 75ch;
+  color: #d3e7dc;
+  font-size: 14px;
+  line-height: 1.9;
+  margin: 0 0 24px;
+}
+.comparison-flows {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  margin-top: 32px;
+}
+.comparison-flow h4 {
+  font-size: 20px;
+  line-height: 1.5;
+  font-weight: 600;
+  margin: 0 0 28px;
+}
+.comparison-flow h4 span {
+  font-size: 14px;
+  font-weight: 400;
+  color: #d3e7dc;
+}
+.comparison-flow ol {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.comparison-flow li {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 32px;
+  position: relative;
+}
+.comparison-flow li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 40px;
+  bottom: 8px;
+  border-left: 1px solid #6d8e7e;
+}
+.comparison-flow li > svg {
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+}
+.comparison-flow strong {
+  display: block;
+  font-size: 14px;
+  line-height: 1.7;
+  font-weight: 600;
+}
+.comparison-flow li span {
+  display: block;
+  color: #d3e7dc;
+  font-size: 14px;
+  line-height: 1.8;
+  margin-top: 4px;
+}
+.comparison-flow .comparison-result {
+  padding-bottom: 0;
+}
+.pin-flow .comparison-result {
+  color: #efd4a5;
+}
+.invitation-lock-flow .comparison-result {
+  color: #c4d2a9;
 }
 .light-link {
   display: inline-flex;
@@ -494,14 +575,6 @@ h2 {
   padding: 5px 0;
   font-size: 12px;
   min-height: 44px;
-}
-.lock-footnote {
-  font-size: 12px;
-  color: #d3e7dc;
-  line-height: 1.8;
-  border-top: 1px solid #466154;
-  padding-top: 22px;
-  margin-top: 50px;
 }
 .features {
   padding-block: 95px;
@@ -772,7 +845,7 @@ footer > a:last-child {
   .access-gate span { margin-left: 30px; width: 100%; }
   .access-outcomes { column-gap: 16px; --branch-offset: 4px; }
   .lock-section {
-    padding-top: 48px;
+    padding-block: 48px 40px;
   }
   .lock-layout,
   .steps-layout,
@@ -790,8 +863,17 @@ footer > a:last-child {
   .lock-demo {
     padding: 23px;
   }
-  .lock-footnote {
-    margin-top: 30px;
+  .lock-comparison {
+    margin-top: 32px;
+    padding-top: 24px;
+  }
+  .comparison-flows {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .invitation-lock-flow {
+    padding-top: 28px;
+    border-top: 1px solid #466154;
   }
   .features {
     padding-block: 52px;
