@@ -14,7 +14,7 @@ import {
   invitationMessage,
   whatsappUrl,
 } from "../whatsapp.js";
-import { guestSummary, queryGuests, mediaType } from "../admin-data.js";
+import { guestSummary, queryGuests, mediaType, updateSelectedGuests } from "../admin-data.js";
 import { importRows, saveImportedGuests } from "../guest-import.js";
 import { defaultEventDate, defaultVenueName, eventDateLabels } from "../event.js";
 import type {
@@ -468,7 +468,7 @@ function GuestImport({api, refresh, onClose}: {api: API; refresh: () => Promise<
     <form onSubmit={submit}>
       <h2 id="guest-import-title">Import Excel</h2>
       <p>Gunakan sheet pertama dengan judul kolom <strong>Nama</strong> dan <strong>WhatsApp</strong>. Nama wajib diisi; WhatsApp boleh kosong. Baris kosong dilewati. Maksimal 1.000 tamu.</p>
-      <p className="help">Simpan nomor WhatsApp sebagai teks agar angka 0 di depan tetap ada. Import menambah tamu baru, termasuk nama yang sudah ada.</p>
+      <p className="help">Isi WhatsApp dengan angka berawalan kode negara, misalnya 628123456789. Kolom pada template memakai format angka tanpa desimal. Import menambah tamu baru, termasuk nama yang sudah ada.</p>
       <p><a href="/assets/template-tamu.xlsx" download="template-tamu.xlsx">Download template Excel</a></p>
       <label>File Excel (.xlsx, maksimal 5 MB)
         <input type="file" accept=".xlsx" disabled={busy || reading} onChange={e => { void read(e.target.files?.[0]); }} />
@@ -855,7 +855,7 @@ function GuestsPage({
     setSort("name-asc");
     resetPage();
   }
-  async function setActive(active: boolean) {
+  async function setActive(active: boolean | null) {
     if (!selected.length) return;
     const ids = [...selected];
     setBulkBusy(true);
@@ -863,32 +863,18 @@ function GuestsPage({
     try {
       if (
         !(await confirm(
-          active
+          active === null
+            ? `Hapus ${ids.length} tamu yang dipilih beserta tautan, seluruh akses, konfirmasi, dan ucapannya? Data tidak dapat dipulihkan.`
+            : active
             ? `${ids.length} undangan yang dipilih dapat kembali dibuka.`
             : `${ids.length} undangan yang dipilih tidak dapat dibuka dan semua akses saat ini dihentikan. Data tetap tersimpan.`,
-          `${active ? "Aktifkan" : "Nonaktifkan"} ${ids.length} undangan?`,
-          active ? "Aktifkan undangan" : "Nonaktifkan undangan",
+          active === null ? `Hapus ${ids.length} tamu?` : `${active ? "Aktifkan" : "Nonaktifkan"} ${ids.length} undangan?`,
+          active === null ? "Hapus tamu" : active ? "Aktifkan undangan" : "Nonaktifkan undangan",
         ))
       )
         return;
-      let done = 0,
-        failed = "";
-      for (let i = 0; i < ids.length; i += 4) {
-        const results = await Promise.allSettled(
-          ids
-            .slice(i, i + 4)
-            .map((id) => api(`/api/admin/guests/${id}`, "PATCH", { active })),
-        );
-        done += results.filter(
-          (result) => result.status === "fulfilled",
-        ).length;
-        setBulkProgress(done);
-        const failure = results.find((result) => result.status === "rejected");
-        if (failure?.status === "rejected") {
-          failed = errorMessage(failure.reason);
-          break;
-        }
-      }
+      const {done, error} = await updateSelectedGuests(ids, active, api, setBulkProgress);
+      let failed = error ? errorMessage(error) : "";
       try {
         await refresh();
       } catch (e) {
@@ -897,8 +883,8 @@ function GuestsPage({
       setSelected([]);
       notice(
         failed
-          ? `${done} dari ${ids.length} undangan diperbarui. ${failed}`
-          : `Status ${done} undangan disimpan.`,
+          ? `${done} dari ${ids.length} undangan ${active === null ? "dihapus" : "diperbarui"}. ${failed}`
+          : active === null ? `${done} tamu berhasil dihapus.` : `Status ${done} undangan disimpan.`,
         Boolean(failed),
       );
     } catch (e) {
@@ -929,6 +915,7 @@ function GuestsPage({
             </h1>
             <p>Kelola tautan undangan dan konfirmasi tamu.</p>
           </div>
+          <div className="guest-heading-actions">
           <button type="button" onClick={() => setImportOpen(true)} disabled={bulkBusy}>Import Excel</button>
           <button
             id="add-guest"
@@ -939,6 +926,7 @@ function GuestsPage({
           >
             + Tambah tamu
           </button>
+          </div>
         </header>
         {importOpen && <GuestImport api={api} refresh={refresh} onClose={() => setImportOpen(false)} />}
         <div className="guest-toolbar">
@@ -1079,6 +1067,14 @@ function GuestsPage({
                 Nonaktifkan
               </button>
               <button
+                className="danger"
+                type="button"
+                disabled={bulkBusy}
+                onClick={() => setActive(null)}
+              >
+                Hapus tamu
+              </button>
+              <button
                 className="quiet"
                 type="button"
                 disabled={bulkBusy}
@@ -1088,7 +1084,7 @@ function GuestsPage({
               </button>
               {bulkBusy && (
                 <span role="status">
-                  Menyimpan {bulkProgress}/{selected.length}…
+                  Memproses {bulkProgress}/{selected.length}…
                 </span>
               )}
             </div>

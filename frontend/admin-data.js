@@ -1,3 +1,19 @@
+export async function updateSelectedGuests(ids, active, api, progress) {
+  let done = 0;
+  for (let i = 0; i < ids.length; i += 4) {
+    const results = await Promise.allSettled(ids.slice(i, i + 4).map(id =>
+      active === null
+        ? api(`/api/admin/guests/${id}`, "DELETE")
+        : api(`/api/admin/guests/${id}`, "PATCH", {active}),
+    ));
+    done += results.filter(result => result.status === "fulfilled").length;
+    progress(done);
+    const failure = results.find(result => result.status === "rejected");
+    if (failure) return {done, error: failure.reason};
+  }
+  return {done, error: null};
+}
+
 export function guestSummary(guests) {
   const active = guests.filter((guest) => guest.active);
   const attending = active.filter(

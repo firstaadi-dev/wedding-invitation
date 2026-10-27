@@ -1,6 +1,30 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {guestSummary,findGuests,mediaType,queryGuests} from '../frontend/admin-data.js';
+import {guestSummary,findGuests,mediaType,queryGuests,updateSelectedGuests} from '../frontend/admin-data.js';
+
+test('bulk delete sends only selected IDs and reports partial failure before the next batch', async () => {
+  const calls = [], progress = [], failure = new Error('Delete failed');
+  const result = await updateSelectedGuests(['a','b','c','d','e'], null, async (...args) => {
+    calls.push(args);
+    if (args[0].endsWith('/b')) throw failure;
+  }, count => progress.push(count));
+  assert.deepEqual(calls, ['a','b','c','d'].map(id => [`/api/admin/guests/${id}`, 'DELETE']));
+  assert.deepEqual(result, {done:3,error:failure});
+  assert.deepEqual(progress, [3]);
+});
+
+test('bulk delete completes multiple batches and status actions retain PATCH payloads', async () => {
+  const calls = [], progress = [];
+  assert.deepEqual(await updateSelectedGuests(['a','b','c','d','e'], null,
+    async (...args) => calls.push(args), count => progress.push(count)), {done:5,error:null});
+  assert.equal(calls.length, 5);
+  assert.deepEqual(progress, [4,5]);
+  for (const active of [true,false]) {
+    const updates = [];
+    assert.deepEqual(await updateSelectedGuests(['a'], active, async (...args) => updates.push(args), () => {}), {done:1,error:null});
+    assert.deepEqual(updates, [['/api/admin/guests/a','PATCH',{active}]]);
+  }
+});
 
 test('CMS summary counts invitations separately from people, excluding inactive responses',() => {
   const guests = [
