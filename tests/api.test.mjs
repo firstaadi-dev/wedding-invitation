@@ -404,6 +404,17 @@ test('Neon-backed CMS and guest access end to end',async t => {
       let output = '';child.stdout.on('data',chunk => {output += chunk;});child.stderr.on('data',chunk => {output += chunk;});
       const [code] = await once(child,'close');console.log(output);assert.equal(code,0,output);
     });
+    await t.test('Postman collection saves independent dates and six supported message tokens',async () => {
+      const child = spawn('postman',['collection','run','postman/collections/Wedding Invitation API','-i','Save event date, venue, event times and official map embed URL','--env-var',`cmsBaseUrl=${base}`,'--env-var',`cmsOrigin=${cmsOrigin}`,'--env-var',`adminCookie=wedding_admin=${admin.wedding_admin}`,'--env-var',`csrf=${csrf}`,'--no-report-events'],{stdio:['ignore','pipe','pipe']});
+      let output='';child.stdout.on('data',c=>output+=c);child.stderr.on('data',c=>output+=c);
+      const [code]=await once(child,'close');console.log(output);assert.equal(code,0,output);
+      for (const key of ['ceremonyDate','receptionDate','countdownDate']) {
+        assert.equal((await adminRequest('/api/admin/content',{method:'PUT',data:{[key]:'2027-02-30'}})).response.status,400);
+      }
+      const cleared = await adminRequest('/api/admin/content',{method:'PUT',data:{ceremonyDate:'',receptionDate:'',countdownDate:'',ceremonyVenue:'',receptionVenue:''}});
+      assert.equal(cleared.response.status,200);
+      assert.equal(cleared.value.settings.eventDate,'2027-01-09');
+    });
     await t.test('Postman collection checks account and per-invitation limit controls',async () => {
       const child=spawn('postman',['collection','run','postman/collections/Wedding Invitation API','-i','Configure account browser limit','-i','Disable account browser limit','-i','Exempt invitation from browser limit','-i','Restore invitation browser limit','-i','Restore account browser limit','--env-var',`cmsBaseUrl=${base}`,'--env-var',`cmsOrigin=${cmsOrigin}`,'--env-var',`adminCookie=wedding_admin=${admin.wedding_admin}`,'--env-var',`csrf=${csrf}`,'--env-var',`limitGuestId=${guest.id}`,'--no-report-events'],{stdio:['ignore','pipe','pipe']});
       let output='';child.stdout.on('data',c=>output+=c);child.stderr.on('data',c=>output+=c);
@@ -519,7 +530,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal((await adminRequest('/api/admin/media/music',{method:'DELETE'})).response.status,200);
     });
     await t.test('global WhatsApp settings persist, stay private, and preview metadata is public and escaped',async () => {
-      const template = 'Yth. {nama},\nUndangan Firsta & Talitha:\n{link}';
+      const template = 'Yth. {nama},\n{tanggal} · {tempat}\n{jam_acara_1} · {jam_acara_2}\n{link}';
       const title = 'Firsta & Talitha <3 "Undangan"';
       const description = '22 November 2026 & keluarga';
       const saved = await adminRequest('/api/admin/content',{method:'PUT',data:{whatsappTemplate:template,linkPreviewTitle:title,linkPreviewDescription:description}});
@@ -534,7 +545,7 @@ test('Neon-backed CMS and guest access end to end',async t => {
         assert.ok(page.includes('property="og:description" content="22 November 2026 &amp; keluarga"'));
         assert.equal(page.includes(template),false);assert.equal(page.includes(token),false);
       }
-      for (const data of [{whatsappTemplate:''},{whatsappTemplate:123},{whatsappTemplate:'No link'},{whatsappTemplate:'{link} {unknown}'},{whatsappTemplate:'x'.repeat(4000)+'{link}'},{linkPreviewTitle:'x'.repeat(121)},{linkPreviewTitle:null},{linkPreviewDescription:'x'.repeat(301)}]) {
+      for (const data of [{whatsappTemplate:''},{whatsappTemplate:123},{whatsappTemplate:'No link'},{whatsappTemplate:'{link} {unknown}'},{whatsappTemplate:'{link} {jam_acara_3}'},{whatsappTemplate:'{link} {nama_mempelai_1}'},{whatsappTemplate:'x'.repeat(4000)+'{link}'},{linkPreviewTitle:'x'.repeat(121)},{linkPreviewTitle:null},{linkPreviewDescription:'x'.repeat(301)}]) {
         assert.equal((await adminRequest('/api/admin/content',{method:'PUT',data})).response.status,400);
       }
       const partial = await adminRequest('/api/admin/content',{method:'PUT',data:{receptionTitle:'Resepsi'}});

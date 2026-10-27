@@ -95,6 +95,26 @@ func TestValidation(t *testing.T) {
 	rejects(t, func() { validateSettings(map[string]any{"tenant_id": "other"}) }, 400)
 }
 
+func TestMessageTokensAndSeparateEventDates(t *testing.T) {
+	validateSettings(map[string]any{"whatsappTemplate": "{nama} {link} {tanggal} {tempat} {jam_acara_1} {jam_acara_2}"})
+	for _, key := range []string{"ceremonyDate", "receptionDate", "countdownDate"} {
+		validateSettings(map[string]any{key: "2027-01-09"})
+		validateSettings(map[string]any{key: ""})
+		for _, value := range []any{"2027-02-30", "2027-13-01", 20270109, nil} {
+			rejects(t, func() { validateSettings(map[string]any{key: value}) }, 400)
+		}
+	}
+	for _, key := range []string{"ceremonyVenue", "receptionVenue"} {
+		data := map[string]any{key: " Gedung Baru "}
+		validateSettings(data)
+		if data[key] != "Gedung Baru" {
+			t.Fatal("venue was not trimmed")
+		}
+		rejects(t, func() { validateSettings(map[string]any{key: strings.Repeat("x", 161)}) }, 400)
+	}
+	rejects(t, func() { validateSettings(map[string]any{"whatsappTemplate": "{link} {tanggal_acara_3}"}) }, 400)
+}
+
 func TestMetadataFallbacksHandleEmptyNamesAndCustomEventDate(t *testing.T) {
 	if firstWord("  \t", "Firsta Adi Pradana") != "Firsta" || firstWord("Talitha Syahda", "Other") != "Talitha" {
 		t.Fatal("metadata title fallback did not select a safe first word")
@@ -214,5 +234,13 @@ func TestRequestFailureLogIsStructuredAndSanitized(t *testing.T) {
 	logRequestFailure(r, errors.New("sensitive failure"))
 	if strings.Contains(output.String(), "sensitive failure") {
 		t.Fatal("panic message leaked")
+	}
+}
+
+func TestWhatsappTemplateSixTokensAndLimits(t *testing.T) {
+	validateSettings(map[string]any{"whatsappTemplate": "{nama} {link} {tanggal} {tempat} {jam_acara_1} {jam_acara_2}"})
+	validateSettings(map[string]any{"whatsappTemplate": strings.Repeat("x", 3994) + "{link}"})
+	for _, value := range []any{nil, 123, "", "   ", "{nama} {jam_acara_1}", "{link} {unknown}", "{link} {jam_acara_3}", "{link} {nama_mempelai_1}", "{link} {tanggal_acara_1}", "{link} {tempat_acara_1}", strings.Repeat("x", 3995) + "{link}"} {
+		rejects(t, func() { validateSettings(map[string]any{"whatsappTemplate": value}) }, 400)
 	}
 }

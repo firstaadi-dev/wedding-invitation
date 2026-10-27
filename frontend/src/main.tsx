@@ -14,6 +14,7 @@ import {
   invitationMessage,
   whatsappUrl,
   whatsappTokens,
+  whatsappEvent,
 } from "../whatsapp.js";
 import { guestSummary, queryGuests, mediaType, updateSelectedGuests } from "../admin-data.js";
 import { importRows, saveImportedGuests } from "../guest-import.js";
@@ -37,7 +38,7 @@ const pages = {
   acara: "Detail Acara",
 };
 type Page = keyof typeof pages;
-type EventContext = { date: string; venue: string; ceremonyTime?: string; receptionTime?: string };
+type EventContext = ReturnType<typeof whatsappEvent>;
 const currentPage = (): Page =>
   Object.hasOwn(pages, location.hash.slice(1))
     ? (location.hash.slice(1) as Page)
@@ -1838,11 +1839,7 @@ function SettingsForm({
     (kind === "messages" ? textSetting("eventDate", defaultEventDate) : values.eventDate) || defaultEventDate;
   const venueName =
     (kind === "messages" ? textSetting("venueName", defaultVenueName) : values.venueName).trim() || defaultVenueName;
-  const event = {
-    date:eventDateLabels(eventDate).full, venue:venueName,
-    ceremonyTime: kind === "messages" ? textSetting("ceremonyTime", "") : values.ceremonyTime,
-    receptionTime: kind === "messages" ? textSetting("receptionTime", "") : values.receptionTime,
-  };
+  const event = whatsappEvent(kind === "messages" ? content.settings : values);
   const previewTitle =
     values.linkPreviewTitle?.trim() ||
     `Undangan Pernikahan ${textSetting("partnerOneName", values.partnerOneName).trim().split(/\s+/)[0]} & ${textSetting("partnerTwoName", values.partnerTwoName).trim().split(/\s+/)[0]}`;
@@ -2067,6 +2064,8 @@ function SettingsForm({
                 </h3>
                 <div className="two-columns">
                   {field("ceremonyTitle", "Nama acara", 80, "Akad Nikah")}
+                  {field("ceremonyDate", "Tanggal acara pertama", 10, "", false, "date")}
+                  {field("ceremonyVenue", "Tempat acara pertama", 160, "Kosongkan untuk memakai tempat utama")}
                   {field(
                     "ceremonyTime",
                     "Jam acara pertama",
@@ -2081,6 +2080,8 @@ function SettingsForm({
                 </h3>
                 <div className="two-columns">
                   {field("receptionTitle", "Nama acara", 80, "Resepsi")}
+                  {field("receptionDate", "Tanggal acara kedua", 10, "", false, "date")}
+                  {field("receptionVenue", "Tempat acara kedua", 160, "Kosongkan untuk memakai tempat utama")}
                   {field(
                     "receptionTime",
                     "Jam acara kedua",
@@ -2090,7 +2091,7 @@ function SettingsForm({
                 </div>
               </div>
               <p className="help">
-                Jam kosong ditampilkan sebagai “Waktu akan diinformasikan”.
+                Tanggal dan tempat tiap acara boleh berbeda. Jika dikosongkan, memakai tanggal acara utama dan tempat utama. Jam kosong ditampilkan sebagai “Waktu akan diinformasikan”.
               </p>
             </section>
 <section className="panel">
@@ -2098,6 +2099,7 @@ function SettingsForm({
                 <h3>Hitung Mundur</h3>
               </div>
               <div className="countdown-field">
+                {field("countdownDate", "Tanggal tujuan hitung mundur", 10, "", false, "date")}
                 {field(
                   "countdownTime",
                   "Waktu tujuan hitung mundur (WIB)",
@@ -2108,7 +2110,7 @@ function SettingsForm({
                 )}
               </div>
               <p className="help">
-                Menuju {event.date}. Jika kosong, memakai pukul 00.00 WIB.
+                Menuju {eventDateLabels(values.countdownDate || eventDate).full}. Tanggal kosong memakai tanggal acara utama; waktu kosong memakai pukul 00.00 WIB.
               </p>
             </section>
               </section>
@@ -2397,9 +2399,9 @@ function SettingsForm({
                 <h2>{values.partnerOneName} &amp; {values.partnerTwoName}</h2>
                 <dl>
                   <div><dt>Tanggal acara</dt><dd>{event.date}</dd></div>
-                  <div><dt>Rangkaian acara</dt><dd>{values.ceremonyTitle || "Acara pertama"} · {values.ceremonyTime || "Waktu akan diinformasikan"}<br/>{values.receptionTitle || "Acara kedua"} · {values.receptionTime || "Waktu akan diinformasikan"}</dd></div>
+                  <div><dt>Rangkaian acara</dt><dd>{values.ceremonyTitle || "Acara pertama"} · {event.ceremonyDate} · {values.ceremonyTime || "Waktu akan diinformasikan"} · {event.ceremonyVenue}<br/>{values.receptionTitle || "Acara kedua"} · {event.receptionDate} · {values.receptionTime || "Waktu akan diinformasikan"} · {event.receptionVenue}</dd></div>
                   <div><dt>Tempat</dt><dd>{venueName}</dd></div>
-                  <div><dt>Tujuan countdown</dt><dd>{values.countdownTime || "00:00"} WIB · tanggal acara</dd></div>
+                  <div><dt>Tujuan countdown</dt><dd>{eventDateLabels(values.countdownDate || eventDate).full} · {values.countdownTime || "00:00"} WIB</dd></div>
                   <div><dt>Informasi hadiah</dt><dd>{giftEnabled ? "Ditampilkan" : "Disembunyikan"} · {giftAccounts.length} informasi</dd></div>
                   <div><dt>Batas akses</dt><dd>{values.deviceLimitEnabled==="false" ? "Tanpa limit global" : `${values.deviceLimit} browser per undangan`}</dd></div>
                 </dl>
@@ -2597,20 +2599,7 @@ function App() {
       notice={notice}
     />
   );
-  const eventContext = {
-    date: eventDateLabels(
-      typeof content?.settings.eventDate === "string"
-        ? content.settings.eventDate
-        : defaultEventDate,
-    ).full,
-    ceremonyTime: typeof content?.settings.ceremonyTime === "string" ? content.settings.ceremonyTime : "",
-    receptionTime: typeof content?.settings.receptionTime === "string" ? content.settings.receptionTime : "",
-    venue:
-      typeof content?.settings.venueName === "string" &&
-      content.settings.venueName.trim()
-        ? content.settings.venueName.trim()
-        : defaultVenueName,
-  };
+  const eventContext = whatsappEvent(content?.settings || {});
   const footer = (
     <div className="sidebar-footer">
       <a

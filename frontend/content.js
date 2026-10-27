@@ -1,5 +1,5 @@
 import {countdownParts} from './countdown.js';
-import {defaultEventDate, defaultVenueName, eventDateLabels, mapTitle} from './event.js';
+import {eventSchedule, eventDateLabels, mapTitle} from './event.js';
 import {playAudio} from './audio.js';
 const music = document.querySelector('.music-status');
 if (location.hash) location.replace(`${location.pathname}?access=1${location.hash}`);
@@ -26,8 +26,9 @@ async function load() {
     audio.load();
     playMusic();
   }
-  const eventDate = settings.eventDate || defaultEventDate;
-  const venueName = settings.venueName?.trim() || defaultVenueName;
+  const schedule = eventSchedule(settings);
+  const eventDate = schedule.date;
+  const venueName = schedule.venue;
   const dateLabels = eventDateLabels(eventDate);
   scope.set('tenant',invitationId || tenantSlug);
   responseToken = loadedToken;
@@ -39,8 +40,8 @@ async function load() {
   document.querySelector('#partner-one-short').textContent = partners[0].split(/\s+/)[0];
   document.querySelector('#partner-two-short').textContent = partners[1].split(/\s+/)[0];
   document.querySelector('.envelope-date').textContent = dateLabels.short;
-  document.querySelectorAll('.event-date').forEach(date => {date.textContent = dateLabels.full;});
-  document.querySelectorAll('.event-venue').forEach(venue => {venue.textContent = venueName;});
+  document.querySelectorAll('.event-date').forEach((date, i) => {date.textContent = eventDateLabels(i === 0 ? schedule.ceremonyDate : schedule.receptionDate).full;});
+  document.querySelectorAll('.event-venue').forEach((venue, i) => {venue.textContent = i === 0 ? schedule.ceremonyVenue : schedule.receptionVenue;});
   document.querySelector('#venue-name').textContent = venueName;
   for (const [id, key, fallback] of [
     ['partner-one-father', 'partnerOneFather', 'Bapak Nugroho Andang Hapsoro'],
@@ -66,7 +67,7 @@ async function load() {
   const times = document.querySelectorAll('.pending-time');
   times[0].textContent = settings.ceremonyTime || 'Waktu akan diinformasikan';
   times[1].textContent = settings.receptionTime || 'Waktu akan diinformasikan';
-  startCountdown(settings.countdownTime || '00:00', eventDate);
+  startCountdown(settings.countdownTime || '00:00', schedule.countdownDate);
   const gifts = document.querySelector('.gift-details');
   const accounts = settings.giftAccounts || [
     {bank:'blu by BCA Digital',number:'0033 1600 0000',owner:'Firsta Adi Pradana'},

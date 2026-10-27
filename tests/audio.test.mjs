@@ -1,3 +1,4 @@
+import {eventSchedule, eventDateLabels} from '../frontend/event.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {playAudio} from '../frontend/audio.js';
@@ -40,6 +41,7 @@ test('music tries autoplay, opening button, music button, and first scroll while
     node('#response-form').elements = {attendance:node('attendance'), guestCount:node('guestCount')};
     let release;
     let plays = 0;
+    let countdownTarget;
     const windowListeners = new Map();
     const scroll = () => {
       const listener = windowListeners.get('scroll');
@@ -51,7 +53,7 @@ test('music tries autoplay, opening button, music button, and first scroll while
         addEventListener(event, callback, options) {windowListeners.set(event, {callback, options});},
         removeEventListener(event) {windowListeners.delete(event);},
       },
-      document: {querySelector:node, querySelectorAll:() => [node('one'), node('two')], createElement:node},
+      document: {querySelector:node, querySelectorAll:selector => [node(selector+'one'), node(selector+'two')], createElement:node},
       location: {pathname:'/preview'}, URLSearchParams,
       fetch: url => url.startsWith('/api/invitation') ? new Promise(resolve => {release = resolve;}) : Promise.resolve({ok:true, json:async () => ({wishes:[]})}),
       Audio: class {
@@ -65,15 +67,20 @@ test('music tries autoplay, opening button, music button, and first scroll while
         }
         pause(){this.paused = true;this.listeners.pause();}
       },
-      playAudio, defaultEventDate:'2026-11-22', defaultVenueName:'Venue',
-      eventDateLabels:() => ({}), countdownParts:() => [], setInterval(){},
+      eventSchedule, playAudio, defaultEventDate:'2026-11-22', defaultVenueName:'Venue',
+      eventDateLabels, countdownParts:target => {countdownTarget = target; return [];}, setInterval(){},
     });
     assert.equal(node('#open-invitation').disabled, false);
     assert.equal(plays, 0);
-    release({ok:true, json:async () => ({media:trigger === 'no music' ? {} : {music:'/song.mp3'}, settings:{giftAccounts:[]}})});
+    release({ok:true, json:async () => ({media:trigger === 'no music' ? {} : {music:'/song.mp3'}, settings:{giftAccounts:[], eventDate:'2027-01-09',ceremonyDate:'2027-01-08',receptionDate:'2027-01-10',ceremonyVenue:'Rumah',receptionVenue:'Gedung',countdownDate:'2027-01-07',countdownTime:'09:00'}})});
     await new Promise(resolve => setImmediate(resolve));
     assert.equal(node('#open-invitation').disabled, false);
     assert.notEqual(node('#response-status').textContent, 'Formulir belum dapat dimuat. Muat ulang halaman.');
+    assert.equal(node('.event-dateone').textContent, 'Jumat, 8 Januari 2027');
+    assert.equal(node('.event-datetwo').textContent, 'Minggu, 10 Januari 2027');
+    assert.equal(node('.event-venueone').textContent, 'Rumah');
+    assert.equal(node('.event-venuetwo').textContent, 'Gedung');
+    assert.equal(countdownTarget, Date.parse('2027-01-07T09:00:00+07:00'));
     if (trigger === 'no music') {
       scroll();node('#open-invitation').listeners.click();
       assert.equal(plays, 0);

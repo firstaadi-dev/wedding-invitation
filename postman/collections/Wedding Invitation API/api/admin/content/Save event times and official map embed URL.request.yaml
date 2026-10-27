@@ -23,12 +23,17 @@ body:
       "ceremonyTime": "09.00 WIB",
       "receptionTime": "11.00–13.00 WIB",
       "eventDate": "2027-01-09",
+      "ceremonyDate": "2027-01-08",
+      "receptionDate": "2027-01-10",
+      "countdownDate": "2027-01-07",
+      "ceremonyVenue": "Rumah keluarga",
+      "receptionVenue": "Gedung resepsi",
       "venueName": "Gedung Baru, Jakarta",
       "mapEmbedUrl": "",
       "ceremonyTitle": "Akad",
       "receptionTitle": "Resepsi",
       "countdownTime": "09:00",
-      "whatsappTemplate": "Yth. {nama},\n{tanggal}\n{tempat}\n{link}",
+      "whatsappTemplate": "Yth. {nama},\n{tanggal} · {tempat}\n{jam_acara_1} · {jam_acara_2}\n{link}",
       "linkPreviewTitle": "Firsta & Talitha — Undangan",
       "linkPreviewDescription": "22 November 2026 · Arjuna Ballroom Alam Indah Resto."
     }
@@ -50,4 +55,8 @@ scripts:
       pm.test('Venue saved', () => pm.expect(settings.venueName).to.eql('Gedung Baru, Jakarta'));
       pm.test('Global message saved', () => pm.expect(settings.whatsappTemplate).to.include('{link}'));
       pm.test('Preview title saved', () => pm.expect(settings.linkPreviewTitle).to.eql('Firsta & Talitha — Undangan'));
+      for (const [key, value] of Object.entries({ceremonyDate:'2027-01-08', receptionDate:'2027-01-10', countdownDate:'2027-01-07', ceremonyVenue:'Rumah keluarga', receptionVenue:'Gedung resepsi'})) {
+        pm.test(key + ' saved independently', () => pm.expect(settings[key]).to.eql(value));
+      }
+      pm.test('Both event time tokens persist', () => pm.expect(settings.whatsappTemplate).to.include('{jam_acara_1}').and.include('{jam_acara_2}'));
       pm.collectionVariables.set('savedSettings', JSON.stringify(settings));

@@ -132,7 +132,7 @@ func validMap(v any) bool {
 	return err == nil && u.Scheme == "https" && u.Host == "www.google.com" && u.User == nil && strings.HasPrefix(u.Path, "/maps/embed")
 }
 func validateSettings(v map[string]any) {
-	only(v, "partnerOneName", "partnerTwoName", "partnerOneFather", "partnerOneMother", "partnerTwoFather", "partnerTwoMother", "giftEnabled", "giftAccounts", "ceremonyTitle", "receptionTitle", "ceremonyTime", "receptionTime", "countdownTime", "eventDate", "venueName", "mapEmbedUrl", "whatsappTemplate", "linkPreviewTitle", "linkPreviewDescription", "deviceLimitEnabled", "deviceLimit")
+	only(v, "partnerOneName", "partnerTwoName", "partnerOneFather", "partnerOneMother", "partnerTwoFather", "partnerTwoMother", "giftEnabled", "giftAccounts", "ceremonyTitle", "receptionTitle", "ceremonyTime", "receptionTime", "countdownTime", "countdownDate", "eventDate", "ceremonyDate", "receptionDate", "venueName", "ceremonyVenue", "receptionVenue", "mapEmbedUrl", "whatsappTemplate", "linkPreviewTitle", "linkPreviewDescription", "deviceLimitEnabled", "deviceLimit")
 	if raw, exists := v["deviceLimitEnabled"]; exists && raw != "true" && raw != "false" {
 		fail(400, "device_limit_enabled", "Pengaturan batas browser tidak valid.")
 	}
@@ -145,9 +145,9 @@ func validateSettings(v map[string]any) {
 	}
 	if raw, exists := v["whatsappTemplate"]; exists {
 		s, ok := raw.(string)
-		unknown := regexp.MustCompile(`\{(?:nama|link|tanggal|tempat)\}`).ReplaceAllString(s, "")
+		unknown := regexp.MustCompile(`\{(?:nama|link|tanggal|tempat|jam_acara_[12])\}`).ReplaceAllString(s, "")
 		if !ok || strings.TrimSpace(s) == "" || length(s) > 4000 || !strings.Contains(s, "{link}") || match(`\{([^{}]+)\}`, unknown) {
-			fail(400, "whatsapp_template", "Pesan maksimal 4000 karakter, wajib memuat {link}, dan hanya mendukung {nama}, {link}, {tanggal}, serta {tempat}.")
+			fail(400, "whatsapp_template", "Pesan maksimal 4000 karakter, wajib memuat {link}, dan hanya mendukung {nama}, {link}, {tanggal}, {tempat}, {jam_acara_1}, serta {jam_acara_2}.")
 		}
 	}
 	for key, max := range map[string]int{"linkPreviewTitle": 120, "linkPreviewDescription": 300} {
@@ -167,19 +167,23 @@ func validateSettings(v map[string]any) {
 			}
 		}
 	}
-	if raw, exists := v["eventDate"]; exists {
-		s, ok := raw.(string)
-		date, err := time.Parse("2006-01-02", s)
-		if !ok || (s != "" && (err != nil || date.Format("2006-01-02") != s)) {
-			fail(400, "event_date", "Tanggal acara tidak valid. Gunakan format YYYY-MM-DD.")
+	for _, key := range []string{"eventDate", "ceremonyDate", "receptionDate", "countdownDate"} {
+		if raw, exists := v[key]; exists {
+			s, ok := raw.(string)
+			date, err := time.Parse("2006-01-02", s)
+			if !ok || (s != "" && (err != nil || date.Format("2006-01-02") != s)) {
+				fail(400, "event_date", "Tanggal acara tidak valid. Gunakan format YYYY-MM-DD.")
+			}
 		}
 	}
-	if raw, exists := v["venueName"]; exists {
-		s, ok := raw.(string)
-		if !ok || length(strings.TrimSpace(s)) > 160 || match(`[\x00-\x1f]`, s) {
-			fail(400, "venue_name", "Nama tempat maksimal 160 karakter.")
+	for _, key := range []string{"venueName", "ceremonyVenue", "receptionVenue"} {
+		if raw, exists := v[key]; exists {
+			s, ok := raw.(string)
+			if !ok || length(strings.TrimSpace(s)) > 160 || match(`[\x00-\x1f]`, s) {
+				fail(400, "venue_name", "Nama tempat maksimal 160 karakter.")
+			}
+			v[key] = strings.TrimSpace(s)
 		}
-		v["venueName"] = strings.TrimSpace(s)
 	}
 	for _, key := range []string{"ceremonyTitle", "receptionTitle"} {
 		if raw, exists := v[key]; exists {

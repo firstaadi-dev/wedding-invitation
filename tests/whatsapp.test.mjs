@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {defaultWhatsappTemplate, invitationMessage, whatsappUrl, whatsappTokens} from '../frontend/whatsapp.js';
+import {defaultWhatsappTemplate, invitationMessage, whatsappUrl, whatsappEvent, whatsappTokens} from '../frontend/whatsapp.js';
 
 test('message editor offers only the six supported insertion choices', () => {
   assert.deepEqual(whatsappTokens, [
@@ -8,9 +8,32 @@ test('message editor offers only the six supported insertion choices', () => {
     ['tanggal', 'Tanggal Acara Utama'], ['tempat', 'Tempat Utama'],
     ['jam_acara_1', 'Jam Acara Pertama'], ['jam_acara_2', 'Jam Acara Kedua'],
   ]);
-  const event = {date:'Sabtu, 9 Januari 2027',venue:'Tempat Utama',ceremonyTime:'09.00 WIB',receptionTime:'11.00 WIB'};
+  const event = whatsappEvent({eventDate:'2027-01-09',venueName:'Tempat Utama',ceremonyTime:'09.00 WIB',receptionTime:'11.00 WIB'});
   assert.equal(invitationMessage(whatsappTokens.map(([key]) => `{${key}}`).join('\n'), {name:'Tamu',link:'https://invitation.example/u/code'}, event),
     'Tamu\nhttps://invitation.example/u/code\nSabtu, 9 Januari 2027\nTempat Utama\n09.00 WIB\n11.00 WIB');
+});
+
+test('saved message templates retain couple, parents and independently configured event tokens', () => {
+  const settings = {
+    partnerOneName:'Mempelai {link} Satu', partnerTwoName:'Mempelai Dua',
+    partnerOneFather:'Ayah Satu', partnerOneMother:'Ibu Satu', partnerTwoFather:'Ayah Dua', partnerTwoMother:'Ibu Dua',
+    eventDate:'2027-01-09', venueName:'Tempat Utama', ceremonyDate:'2027-01-08', receptionDate:'2027-01-10',
+    ceremonyTime:'09.00 WIB', receptionTime:'11.00–13.00 WIB', ceremonyVenue:'Rumah', receptionVenue:'Gedung',
+  };
+  const template = ['nama','link','tanggal','tempat','nama_mempelai_1','nama_mempelai_2',
+    'ayah_mempelai_1','ibu_mempelai_1','ayah_mempelai_2','ibu_mempelai_2',
+    'tanggal_acara_1','tanggal_acara_2','jam_acara_1','jam_acara_2','tempat_acara_1','tempat_acara_2']
+    .map(key => `{${key}}`).join('\n');
+  const guest = {name:'Tamu',phone:'628123456789',link:'https://invitation.example/u/code'};
+  const event = whatsappEvent(settings);
+  const result = invitationMessage(template,guest,event);
+  assert.equal(result, ['Tamu',guest.link,'Sabtu, 9 Januari 2027','Tempat Utama',
+    'Mempelai {link} Satu','Mempelai Dua','Ayah Satu','Ibu Satu','Ayah Dua','Ibu Dua',
+    'Jumat, 8 Januari 2027','Minggu, 10 Januari 2027','09.00 WIB','11.00–13.00 WIB','Rumah','Gedung'].join('\n'));
+  assert.equal(new URL(whatsappUrl(template,guest,event)).searchParams.get('text'),result);
+  const fallback = whatsappEvent({eventDate:'2027-01-09',venueName:'Tempat Utama',ceremonyDate:'',receptionVenue:''});
+  assert.equal(fallback.ceremonyDate,'Sabtu, 9 Januari 2027');
+  assert.equal(fallback.receptionVenue,'Tempat Utama');
 });
 
 test('WhatsApp message substitutes once and preserves names, line breaks and secret fragment URLs', () => {
