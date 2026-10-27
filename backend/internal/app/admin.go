@@ -32,10 +32,13 @@ Terima kasih atas doa restunya.
 Firsta & Talitha`
 
 func (a *App) content(ctx context.Context, q db, tenant string, admin bool) map[string]any {
-	s := row(ctx, q, "SELECT value FROM wedding.settings WHERE tenant_id=$1", tenant)
+	s := row(ctx, q, "SELECT s.value,a.billing_required FROM wedding.settings s JOIN wedding.tenants t ON t.id=s.tenant_id JOIN wedding.accounts a ON a.id=t.owner_id WHERE s.tenant_id=$1", tenant)
 	settings := map[string]any{}
 	if s != nil {
 		settings = s["value"].(map[string]any)
+		if s["billing_required"] == true {
+			selfServiceDefaults(settings)
+		}
 	}
 	if admin {
 		if settings["whatsappTemplate"] == nil {
@@ -285,6 +288,7 @@ func (a *App) admin(w http.ResponseWriter, r *http.Request) {
 	tenant := text(s["tenant_id"])
 	a.limited(w, r, "admin", 120, 60)
 	if path == "/api/admin/session" && method == "GET" {
+		a.reconcileSubscription(ctx, s)
 		jsonResponse(w, 200, map[string]any{"csrf": s["csrf"], "account": a.account(s)})
 		return
 	}
@@ -294,6 +298,7 @@ func (a *App) admin(w http.ResponseWriter, r *http.Request) {
 		jsonResponse(w, 200, map[string]bool{"ok": true})
 		return
 	}
+	requireAccess(s)
 	if path == "/api/admin/guests" {
 		if method == "GET" {
 			guests := rows(ctx, a.Pool, guestSelect+" WHERE g.tenant_id=$1 ORDER BY g.created_at DESC", tenant)

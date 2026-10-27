@@ -16,3 +16,5 @@ postman/.dependencies/
 frontend/dist/
 **/__pycache__/
 !.env.test.example
+
+!.env.staging.example

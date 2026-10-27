@@ -1,4 +1,8 @@
+export type Subscription = { active: boolean; required: boolean; expiresAt: string | null };
+export type Payment = {id:string;status:string;amount:number;checkoutUrl:string|null;expiresAt:string};
+export type Billing = {subscription:Subscription;price:number;months:number;available:boolean;payment:Payment|null};
 export type Account = {
+  subscription: Subscription;
   email: string;
   invitationOrigin: string;
   tenant: { id: string; slug: string; publicId: string; name: string };

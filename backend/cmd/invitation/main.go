@@ -123,7 +123,7 @@ func run() error {
 		return err
 	}
 	port := env("PORT", "5174")
-	a, err := app.New(pool, app.Config{CMSOrigin: os.Getenv("CMS_ORIGIN"), Origin: env("PUBLIC_ORIGIN", "http://127.0.0.1:"+port), Production: os.Getenv("NODE_ENV") == "production", TrustProxy: os.Getenv("TRUST_PROXY") == "1", PublicKey: os.Getenv("FINGERPRINT_PUBLIC_KEY"), SecretKey: os.Getenv("FINGERPRINT_SECRET_KEY"), Region: env("FINGERPRINT_REGION", "ap"), Endpoint: os.Getenv("FINGERPRINT_ENDPOINT"), Templates: env("TEMPLATE_DIR", "frontend/dist"), FingerprintOrigin: os.Getenv("FINGERPRINT_API_ORIGIN")})
+	a, err := app.New(pool, app.Config{MidtransServerKey: os.Getenv("MIDTRANS_SERVER_KEY"), MidtransEnv: env("MIDTRANS_ENV", "sandbox"), MidtransAPIOrigin: os.Getenv("MIDTRANS_API_ORIGIN"), CMSOrigin: os.Getenv("CMS_ORIGIN"), Origin: env("PUBLIC_ORIGIN", "http://127.0.0.1:"+port), Production: os.Getenv("NODE_ENV") == "production", TrustProxy: os.Getenv("TRUST_PROXY") == "1", PublicKey: os.Getenv("FINGERPRINT_PUBLIC_KEY"), SecretKey: os.Getenv("FINGERPRINT_SECRET_KEY"), Region: env("FINGERPRINT_REGION", "ap"), Endpoint: os.Getenv("FINGERPRINT_ENDPOINT"), Templates: env("TEMPLATE_DIR", "frontend/dist"), FingerprintOrigin: os.Getenv("FINGERPRINT_API_ORIGIN")})
 	if err != nil {
 		return err
 	}

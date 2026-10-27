@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "weddinvita API",
-    "version": "2.1.0",
+    "version": "3.0.0",
     "description": "Separate dashboard and invitation hosts. Admin APIs require the dashboard host and Origin; guest APIs require the invitation host and Origin. Cookies remain host-only, HttpOnly, SameSite=Strict and Secure in production. Dashboard preview remains on the dashboard host. New guest links use /u/{code}, a 27-character random bearer credential. GET/HEAD only return gated HTML and public event metadata; Fingerprint verification grants access. The stable random tenant UUID remains the canonical public event URL. Legacy fragment links remain compatible until the explicit all-account credential cutover."
   },
   "servers": [
@@ -23,6 +23,10 @@
     {
       "name": "Admin",
       "description": "Authenticated CMS"
+    },
+    {
+      "name": "Billing",
+      "description": "Self-service registration and Midtrans Snap QRIS checkout. IDR 199000 for 12 calendar months; server-verified payment activates access."
     }
   ],
   "paths": {
@@ -149,7 +153,7 @@
       "post": {
         "operationId": "login",
         "summary": "Login administrator",
-        "description": "Same-origin email and password login for an account provisioned by migration. No public registration. Scrypt verification; generic failure for unknown email and wrong password; HttpOnly SameSite=Strict cookie, Secure in production.",
+        "description": "Same-origin email and password login for an existing account. Unpaid self-service accounts receive a billing-only session. Scrypt verification; generic failure for unknown email and wrong password; HttpOnly SameSite=Strict cookie, Secure in production.",
         "tags": [
           "Admin"
         ],
@@ -672,6 +676,16 @@
                 }
               }
             }
+          },
+          "402": {
+            "description": "Subscription payment required or twelve-month access expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -780,6 +794,16 @@
           },
           "503": {
             "description": "Upstream/configuration unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Subscription payment required or twelve-month access expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -1541,6 +1565,16 @@
                 }
               }
             }
+          },
+          "402": {
+            "description": "Subscription payment required or twelve-month access expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1649,6 +1683,16 @@
           },
           "503": {
             "description": "Upstream/configuration unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Subscription payment required or twelve-month access expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -2898,7 +2942,8 @@
           "404": {
             "description": "Unknown invitation"
           }
-        }
+        },
+        "security": []
       }
     },
     "/{invitationId}": {
@@ -2931,7 +2976,8 @@
           "404": {
             "description": "Unknown invitation"
           }
-        }
+        },
+        "security": []
       }
     },
     "/preview": {
@@ -2951,7 +2997,12 @@
           "404": {
             "description": "No valid admin session"
           }
-        }
+        },
+        "security": [
+          {
+            "adminSession": []
+          }
+        ]
       }
     },
     "/u/{code}": {
@@ -3097,6 +3148,598 @@
             }
           }
         }
+      }
+    },
+    "/api/admin/register": {
+      "post": {
+        "operationId": "registerAccount",
+        "summary": "Create a pending account and an authenticated billing session",
+        "tags": [
+          "Billing"
+        ],
+        "servers": [
+          {
+            "url": "https://dashboard.domain.id",
+            "description": "CMS host"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSession"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 254
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 12,
+                    "maxLength": 1024
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                },
+                "required": [
+                  "email",
+                  "password",
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "description": "CMS Origin required. Creates tenant/settings atomically. Pending account may only read session/billing, pay, refresh payment, and logout; CMS and invitation routes require an active subscription. Existing email returns 409.",
+        "security": []
+      }
+    },
+    "/api/admin/billing": {
+      "get": {
+        "operationId": "readBilling",
+        "summary": "Read package, entitlement and latest checkout",
+        "tags": [
+          "Billing"
+        ],
+        "servers": [
+          {
+            "url": "https://dashboard.domain.id",
+            "description": "CMS host"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Billing"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "adminSession": []
+          }
+        ]
+      }
+    },
+    "/api/admin/billing/payments": {
+      "post": {
+        "operationId": "createCheckout",
+        "summary": "Create or reuse an owned Midtrans Snap checkout",
+        "tags": [
+          "Billing"
+        ],
+        "servers": [
+          {
+            "url": "https://dashboard.domain.id",
+            "description": "CMS host"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "description": "CMS session, Origin and X-CSRF-Token required. Price and duration are determined by server. Repeated checkout calls reuse the unexpired payment. Activation requires a matching IDR amount and settlement from authenticated Midtrans status API, never a browser redirect. Entitlement is applied once per paid order.",
+        "security": [
+          {
+            "adminSession": []
+          }
+        ]
+      }
+    },
+    "/api/admin/billing/refresh": {
+      "post": {
+        "operationId": "refreshPayment",
+        "summary": "Verify latest payment with Midtrans status API",
+        "tags": [
+          "Billing"
+        ],
+        "servers": [
+          {
+            "url": "https://dashboard.domain.id",
+            "description": "CMS host"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Billing"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "description": "CMS session, Origin and X-CSRF-Token required. Price and duration are determined by server. Repeated checkout calls reuse the unexpired payment. Activation requires a matching IDR amount and settlement from authenticated Midtrans status API, never a browser redirect. Entitlement is applied once per paid order.",
+        "security": [
+          {
+            "adminSession": []
+          }
+        ]
+      }
+    },
+    "/api/payments/midtrans/notification": {
+      "post": {
+        "operationId": "midtransNotification",
+        "summary": "Receive Midtrans notification and verify against server API",
+        "tags": [
+          "Billing"
+        ],
+        "servers": [
+          {
+            "url": "https://dashboard.domain.id",
+            "description": "CMS host"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "ok"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Validation, authentication, conflict, rate limit or provider unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "order_id",
+                  "status_code",
+                  "gross_amount",
+                  "signature_key"
+                ],
+                "properties": {
+                  "order_id": {
+                    "type": "string"
+                  },
+                  "status_code": {
+                    "type": "string"
+                  },
+                  "gross_amount": {
+                    "type": "string"
+                  },
+                  "signature_key": {
+                    "type": "string"
+                  },
+                  "transaction_status": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Public server webhook on CMS host; Origin/session/CSRF are not required. Verify SHA512(order_id + status_code + gross_amount + ServerKey) in constant time and fetch actual status from Midtrans. Match stored order, amount, currency, and environment. Duplicate/out-of-order delivery cannot extend access twice or regress settlement. Server failures return 503 for retry. Authenticated test/unrelated orders are acknowledged with 200 without changing entitlement. GET/HEAD return connectivity health only and cannot activate access.",
+        "security": []
+      },
+      "get": {
+        "operationId": "notificationHealth",
+        "summary": "Check webhook endpoint connectivity without changing payment state",
+        "tags": [
+          "Billing"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Endpoint reachable; this is not proof of payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "ok"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://dashboard.domain.id",
+            "description": "CMS host"
+          }
+        ]
       }
     }
   },
@@ -3292,7 +3935,8 @@
             "required": [
               "email",
               "tenant",
-              "invitationOrigin"
+              "invitationOrigin",
+              "subscription"
             ],
             "properties": {
               "email": {
@@ -3332,6 +3976,9 @@
                 "type": "string",
                 "format": "uri",
                 "description": "Configured invitation origin used to compose shared links; never inferred from the dashboard URL."
+              },
+              "subscription": {
+                "$ref": "#/components/schemas/Subscription"
               }
             }
           }
@@ -3817,6 +4464,112 @@
             "type": "boolean"
           }
         }
+      },
+      "Subscription": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "active",
+          "required",
+          "expiresAt"
+        ],
+        "additionalProperties": false
+      },
+      "Payment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "creating",
+              "pending",
+              "settlement",
+              "deny",
+              "cancel",
+              "expire",
+              "failure",
+              "refund",
+              "partial_refund"
+            ]
+          },
+          "amount": {
+            "type": "integer",
+            "enum": [
+              199000
+            ]
+          },
+          "checkoutUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "amount",
+          "checkoutUrl",
+          "expiresAt"
+        ],
+        "additionalProperties": false
+      },
+      "Billing": {
+        "type": "object",
+        "properties": {
+          "subscription": {
+            "$ref": "#/components/schemas/Subscription"
+          },
+          "price": {
+            "type": "integer",
+            "enum": [
+              199000
+            ]
+          },
+          "months": {
+            "type": "integer",
+            "enum": [
+              12
+            ]
+          },
+          "payment": {
+            "type": "object",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Payment"
+              }
+            ]
+          },
+          "available": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "subscription",
+          "price",
+          "months",
+          "payment",
+          "available"
+        ],
+        "additionalProperties": false
       }
     },
     "securitySchemes": {

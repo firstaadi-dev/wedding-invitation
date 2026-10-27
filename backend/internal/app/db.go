@@ -180,6 +180,22 @@ func Migrate(ctx context.Context, dsn, schema, passwordHash string) error {
 			return err
 		}
 	}
+	var billingApplied bool
+	if err = tx.QueryRow(ctx, "SELECT EXISTS(SELECT 1 FROM schema_migrations WHERE version=5)").Scan(&billingApplied); err != nil {
+		return err
+	}
+	if !billingApplied {
+		data, err := dbdata.Files.ReadFile("005-billing.sql")
+		if err != nil {
+			return err
+		}
+		if _, err = tx.Exec(ctx, string(data)); err != nil {
+			return err
+		}
+		if _, err = tx.Exec(ctx, "INSERT INTO schema_migrations(version) VALUES(5)"); err != nil {
+			return err
+		}
+	}
 	files, err := dbdata.Files.ReadDir("accounts")
 	if err != nil {
 		return err

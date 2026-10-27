@@ -1,0 +1,37 @@
+name: wedding-invitation-staging
+services:
+  frontend:
+    image: ${FRONTEND_IMAGE:?Set FRONTEND_IMAGE to a frontend commit image}
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:5273:8080'
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1:8080/healthz-frontend']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: '3'}
+  backend:
+    image: ${BACKEND_IMAGE:?Set BACKEND_IMAGE to a backend commit image}
+    restart: unless-stopped
+    env_file:
+      - path: ./app.env
+        format: raw
+    environment:
+      NODE_ENV: production
+      LISTEN_HOST: 0.0.0.0
+      PORT: '5174'
+      TRUST_PROXY: '1'
+    ports:
+      - '127.0.0.1:5274:5174'
+    healthcheck:
+      test: ['CMD', 'invitation', 'health']
+      interval: 10s
+      timeout: 20s
+      retries: 10
+      start_period: 20s
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: '3'}

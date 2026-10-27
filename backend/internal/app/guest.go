@@ -24,7 +24,7 @@ func (a *App) challenge(w http.ResponseWriter, r *http.Request) {
 	}
 	id, cookie := secret(), secret()
 	a.transaction(r.Context(), func(q db) any {
-		g := row(r.Context(), q, "SELECT * FROM wedding.guests WHERE token_hash=$1 AND active=1 FOR UPDATE", hash(token))
+		g := row(r.Context(), q, `SELECT g.* FROM wedding.guests g JOIN wedding.tenants t ON t.id=g.tenant_id JOIN wedding.accounts a ON a.id=t.owner_id WHERE token_hash=$1 AND g.active=1 AND a.active AND `+accessSQL+` FOR UPDATE OF g`, hash(token))
 		if g == nil {
 			fail(404, "invalid_link", "Tautan undangan tidak ditemukan atau sudah dinonaktifkan.")
 		}
@@ -98,7 +98,7 @@ func (a *App) verify(w http.ResponseWriter, r *http.Request) {
 	visitor := verifiedVisitor(a.fingerprintEvent(r, id), id, challenge, a.Config.Origin, time.Now())
 	token := secret()
 	a.transaction(ctx, func(q db) any {
-		g := row(ctx, q, `SELECT g.*,`+deviceLimitSQL+` AS "deviceLimit" FROM wedding.guests g JOIN wedding.settings s ON s.tenant_id=g.tenant_id WHERE g.id=$1 FOR UPDATE OF g FOR SHARE OF s`, c["guest_id"])
+		g := row(ctx, q, `SELECT g.*,`+deviceLimitSQL+` AS "deviceLimit" FROM wedding.guests g JOIN wedding.settings s ON s.tenant_id=g.tenant_id JOIN wedding.tenants t ON t.id=g.tenant_id JOIN wedding.accounts a ON a.id=t.owner_id WHERE g.id=$1 AND a.active AND `+accessSQL+` FOR UPDATE OF g FOR SHARE OF s`, c["guest_id"])
 		fresh := row(ctx, q, "SELECT * FROM wedding.challenges WHERE id=$1 AND expires_at>now() FOR UPDATE", challenge)
 		if g == nil || number(g["active"]) == 0 || g["version"] != c["version"] {
 			fail(404, "revoked", "Tautan sudah dinonaktifkan.")

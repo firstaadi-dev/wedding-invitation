@@ -34,7 +34,7 @@ async function load() {
   responseToken = loadedToken;
   document.querySelector('#guest-name').textContent = guestName;
   document.querySelector('#response-guest').textContent = guestName;
-  const partners = [settings.partnerOneName || 'Firsta Adi Pradana', settings.partnerTwoName || 'Talitha Syahda Arundatie'];
+  const partners = [settings.partnerOneName === '' ? 'Mempelai Pertama' : (settings.partnerOneName || 'Firsta Adi Pradana'), settings.partnerTwoName === '' ? 'Mempelai Kedua' : (settings.partnerTwoName || 'Talitha Syahda Arundatie')];
   document.querySelector('#partner-one-name').textContent = partners[0];
   document.querySelector('#partner-two-name').textContent = partners[1];
   document.querySelector('#partner-one-short').textContent = partners[0].split(/\s+/)[0];
@@ -50,7 +50,7 @@ async function load() {
     ['partner-two-mother', 'partnerTwoMother', 'Ibu Wuri Wahyuningsih'],
   ]) {
     const role = fallback.match(/^(Bapak|Ibu)/)[0];
-    document.querySelector(`#${id}`).textContent = `${role} ${settings[key] || fallback.slice(role.length).trim()}`;
+    document.querySelector(`#${id}`).textContent = settings[key] === '' ? '' : `${role} ${settings[key] || fallback.slice(role.length).trim()}`;
   }
   document.title = `Undangan Pernikahan ${partners[0].split(/\s+/)[0]} & ${partners[1].split(/\s+/)[0]}`;
   if (guestResponse) {

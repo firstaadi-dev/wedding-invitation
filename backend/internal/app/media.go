@@ -59,7 +59,7 @@ func (a *App) media(w http.ResponseWriter, r *http.Request) {
 	tenants := []string{}
 	if !preview {
 		for _, admin := range []bool{false, true} {
-			if s := a.session(r, admin); s != nil {
+			if s := a.session(r, admin); s != nil && hasAccess(s) {
 				tenants = append(tenants, text(s["tenant_id"]))
 			}
 		}
@@ -77,7 +77,7 @@ func (a *App) media(w http.ResponseWriter, r *http.Request) {
 	}
 	var m map[string]any
 	if preview {
-		m = row(r.Context(), a.Pool, "SELECT mime,data FROM wedding.media WHERE id=$1 AND slot='preview'", id)
+		m = row(r.Context(), a.Pool, `SELECT m.mime,m.data FROM wedding.media m JOIN wedding.tenants t ON t.id=m.tenant_id JOIN wedding.accounts a ON a.id=t.owner_id WHERE m.id=$1 AND m.slot='preview' AND a.active AND `+accessSQL, id)
 	} else {
 		m = row(r.Context(), a.Pool, "SELECT mime,data FROM wedding.media WHERE id=$1 AND tenant_id=ANY($2::uuid[])", id, tenants)
 	}

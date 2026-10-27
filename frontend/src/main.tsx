@@ -21,6 +21,8 @@ import { importRows, saveImportedGuests } from "../guest-import.js";
 import { defaultEventDate, defaultVenueName, eventDateLabels } from "../event.js";
 import type {
   Account,
+  Billing,
+  Payment,
   Session,
   Guest,
   Content,
@@ -227,6 +229,7 @@ function Login({
   api: API;
   onLogin: (s: Session) => Promise<void>;
 }) {
+  const [registering,setRegistering]=useState(location.hash==="#register");
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -236,7 +239,7 @@ function Login({
     setError("");
     try {
       const session = await api<Session>(
-        "/api/admin/login",
+        registering ? "/api/admin/register" : "/api/admin/login",
         "POST",
         Object.fromEntries(new FormData(form)),
       );
@@ -271,14 +274,15 @@ function Login({
       </section>
       <section className="login-form-side">
         <div className="login-panel">
-          <h2 id="login-title">Selamat datang</h2>
-          <p>Masuk untuk menyiapkan dan memantau undangan pernikahan Anda.</p>
+          <h2 id="login-title">{registering ? "Buat akun undangan" : "Selamat datang"}</h2>
+          <p>{registering ? "Rp199.000 untuk akses 12 bulan. Buat akun, bayar dengan QRIS, lalu siapkan undangan Anda." : "Masuk untuk menyiapkan dan memantau undangan pernikahan Anda."}</p>
           <form id="login" onSubmit={submit} aria-busy={busy}>
             {error && (
               <p id="login-error" className="form-error" role="alert">
                 {error}
               </p>
             )}
+            {registering && <label>Nama pasangan<input name="name" required maxLength={120} autoComplete="name" placeholder="Contoh: Adi & Talitha" disabled={busy}/></label>}
             <label>
               Email
               <input
@@ -296,24 +300,71 @@ function Login({
               <input
                 name="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete={registering ? "new-password" : "current-password"}
                 required
                 maxLength={1024}
-                placeholder="Masukkan kata sandi"
+                minLength={registering ? 12 : undefined}
+                placeholder={registering ? "Minimal 12 karakter" : "Masukkan kata sandi"}
                 disabled={busy}
               />
             </label>
             <button className="primary" type="submit" disabled={busy}>
-              {busy ? "Memeriksa…" : "Masuk ke akun"}
+              {busy ? "Memeriksa…" : registering ? "Buat akun & lanjut bayar" : "Masuk ke akun"}
               <span aria-hidden="true">→</span>
             </button>
           </form>
-          <p className="login-help">Akses khusus untuk pasangan pengantin.</p>
+          <p className="login-help">{registering ? "Sudah punya akun?" : "Belum punya akun?"} <button type="button" className="auth-switch" disabled={busy} onClick={()=>{setRegistering(!registering);setError("");history.replaceState(null,"",registering ? "#masuk" : "#register");}}>{registering ? "Masuk" : "Buat akun"}</button></p>
         </div>
         <p className="login-footer">weddinvita</p>
       </section>
     </main>
   );
+}
+function BillingScreen({api, onActivated, onLogout}: {api:API;onActivated:(s:Session)=>Promise<void>;onLogout:()=>void}) {
+  const [billing,setBilling]=useState<Billing>();
+  const [initialChecked,setInitialChecked]=useState(false);
+  const [busy,setBusy]=useState(false);
+  const [error,setError]=useState("");
+  const activated=useRef(onActivated); activated.current=onActivated;
+  useEffect(()=>{
+    let live=true,checking=false;
+    const check=async()=>{
+      if(checking)return;checking=true;
+      try {
+        const value=await api<Billing>("/api/admin/billing/refresh","POST",{});
+        if(!live)return;
+        setBilling(value);setError("");
+        if(value.subscription.active)await activated.current(await api<Session>("/api/admin/session"));
+      }catch(e){if(live)setError(errorMessage(e));}finally{checking=false;if(live)setInitialChecked(true);}
+    };
+    api<Billing>("/api/admin/billing").then(v=>{if(live)setBilling(v);}).catch(e=>{if(live)setError(errorMessage(e));});
+    void check(); const timer=setInterval(check,20000);
+    return ()=>{live=false;clearInterval(timer);};
+  },[api]);
+  async function pay(){
+    setBusy(true);setError("");
+    try{const p=await api<Payment>("/api/admin/billing/payments","POST",{});if(!p.checkoutUrl)throw new Error("Pembayaran sedang disiapkan. Coba lagi sebentar.");location.assign(p.checkoutUrl);}
+    catch(e){setError(errorMessage(e));setBusy(false);}
+  }
+  async function refresh(){setBusy(true);setError("");try{const b=await api<Billing>("/api/admin/billing/refresh","POST",{});setBilling(b);if(b.subscription.active)await onActivated(await api<Session>("/api/admin/session"));}catch(e){setError(errorMessage(e));}finally{setBusy(false);}}
+  if(!initialChecked) return <main className="billing-screen"><p role="status">Memeriksa status pembayaran…</p></main>;
+  const expired=!!billing?.subscription.expiresAt;
+  const status=billing?.payment?.status;
+  return <main className="billing-screen"><section className="panel billing-panel" aria-labelledby="billing-title">
+    <a href="/" className="login-wordmark">weddinvita</a>
+    <p className="eyebrow">{expired ? "Perpanjang undangan Anda" : "Akun Anda sudah dibuat"}</p>
+    <h1 id="billing-title">{expired ? "Aktifkan kembali akses Anda" : "Satu langkah lagi menuju undangan Anda"}</h1>
+    <p>Bayar dengan QRIS melalui Midtrans. Akses dashboard dan undangan aktif setelah pembayaran terkonfirmasi.</p>
+    <div className="billing-price"><strong>Rp199.000</strong><span>Akses 12 bulan sejak pembayaran dikonfirmasi</span></div>
+    <ul><li>Kelola detail acara, foto, musik, dan tamu</li><li>Tautan undangan personal dan pembatasan browser</li><li>Konfirmasi kehadiran dan ucapan tamu</li></ul>
+    <p>Tidak ada tagihan otomatis.</p>
+    {billing?.available===false && <p role="status">Pembayaran sedang disiapkan. Silakan coba lagi nanti.</p>}
+    {status && <p role="status">Status pembayaran: {({creating:"sedang disiapkan",pending:"menunggu pembayaran",settlement:"terkonfirmasi",expire:"kedaluwarsa",cancel:"dibatalkan",deny:"ditolak",failure:"belum berhasil",refund:"dikembalikan",partial_refund:"dikembalikan sebagian"} as Record<string,string>)[status] || status}.</p>}
+    {error && <p role="alert" className="form-error">{error}</p>}
+    <button className="primary" onClick={pay} disabled={busy || !billing?.available}>{busy ? "Memproses…" : "Bayar Rp199.000 dengan QRIS"}</button>
+    <button onClick={refresh} disabled={busy}>Saya sudah bayar · Periksa status</button>
+    <button className="auth-switch" onClick={onLogout} disabled={busy}>Keluar dari akun</button>
+  </section></main>;
 }
 function GuestEditor({
   guest,
@@ -2493,6 +2544,10 @@ function App() {
       if (token !== csrf.current)
         throw new Error("Sesi berubah. Silakan masuk kembali.");
       if (!response.ok) {
+        if(response.status===402){
+          const fresh=await fetch("/api/admin/session");
+          if(fresh.ok && token===csrf.current){const s=await fresh.json();csrf.current=s.csrf;setSession(s);if(!s.account.subscription.active)setContent(undefined);}
+        }
         if (response.status === 401 && path !== "/api/admin/login")
           clearSession();
         throw Object.assign(
@@ -2509,6 +2564,7 @@ function App() {
     setGuests(await api<Guest[]>("/api/admin/guests"));
   const signedIn = async (s: Session) => {
     csrf.current = s.csrf;
+    if(!s.account.subscription.active){setSession(s);setGuests([]);setContent(undefined);setLoading(false);return;}
     const [g, c] = await Promise.all([
       api<Guest[]>("/api/admin/guests"),
       api<Content>("/api/admin/content"),
@@ -2523,6 +2579,7 @@ function App() {
     api<Session>("/api/admin/session")
       .then(signedIn)
       .catch((e) => {
+        if(e.status===402){setLoading(false);return;}
         clearSession();
         if (e.status !== 401) notice(errorMessage(e), true);
       });
@@ -2542,7 +2599,7 @@ function App() {
   }, []);
   useEffect(() => {
     document.title = session
-      ? `weddinvita — ${pages[page]}`
+      ? (session.account.subscription.active ? `weddinvita — ${pages[page]}` : "weddinvita — Aktivasi akun")
       : "weddinvita — Masuk ke akun";
   }, [session, page]);
   const confirm: Confirm = (message, title, action) =>
@@ -2602,6 +2659,7 @@ function App() {
   const eventContext = whatsappEvent(content?.settings || {});
   const footer = (
     <div className="sidebar-footer">
+      {session?.account.subscription.expiresAt && <p className="help">Akses aktif sampai {new Date(session.account.subscription.expiresAt).toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric"})}</p>}
       <a
         className="preview-link"
         href="/preview"
@@ -2628,6 +2686,8 @@ function App() {
         </p>
       ) : !session ? (
         <Login api={api} onLogin={signedIn} />
+      ) : !session.account.subscription.active ? (
+        <BillingScreen api={api} onActivated={signedIn} onLogout={logout}/>
       ) : (
         content && (
           <div id="dashboard" className="dashboard">
