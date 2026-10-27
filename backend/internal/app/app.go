@@ -30,6 +30,7 @@ import (
 )
 
 type Config struct {
+	MidtransServerKey, MidtransEnv, MidtransAPIOrigin                                       string
 	Origin, CMSOrigin, Endpoint, PublicKey, SecretKey, Region, Templates, FingerprintOrigin string
 	Production, TrustProxy                                                                  bool
 }
@@ -151,7 +152,19 @@ func New(pool *pgxpool.Pool, c Config) (*App, error) {
 	if c.Templates == "" {
 		c.Templates = "frontend/dist"
 	}
-	return &App{pool, c, &http.Client{Timeout: 10 * time.Second}}, nil
+	if c.MidtransEnv == "" {
+		c.MidtransEnv = "sandbox"
+	}
+	if c.MidtransEnv != "sandbox" && c.MidtransEnv != "production" {
+		return nil, fmt.Errorf("MIDTRANS_ENV must be sandbox or production")
+	}
+	if c.MidtransAPIOrigin != "" {
+		u, e := url.Parse(c.MidtransAPIOrigin)
+		if e != nil || c.Production || c.MidtransEnv != "sandbox" || u.Scheme != "http" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || u.Path != "" || (u.Hostname() != "127.0.0.1" && u.Hostname() != "localhost") {
+			return nil, fmt.Errorf("MIDTRANS_API_ORIGIN is only allowed for local sandbox simulation")
+		}
+	}
+	return &App{pool, c, &http.Client{Timeout: 10 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}, nil
 }
 func (a *App) Handler() http.Handler {
 	r := chi.NewRouter()
@@ -233,11 +246,11 @@ func (a *App) session(r *http.Request, admin bool) map[string]any {
 	if err != nil || !match(`^[A-Za-z0-9_-]{43}$`, cookie.Value) {
 		return nil
 	}
-	return row(r.Context(), a.Pool, `SELECT s.token_hash,s.guest_id,s.version,s.csrf,s.account_id::text AS account_id,g.name,COALESCE(g.tenant_id,s.tenant_id)::text AS tenant_id,t.slug AS tenant_slug,t.public_id::text AS public_id,t.name AS tenant_name,a.email
+	return row(r.Context(), a.Pool, `SELECT s.token_hash,s.guest_id,s.version,s.csrf,s.account_id::text AS account_id,g.name,COALESCE(g.tenant_id,s.tenant_id)::text AS tenant_id,t.slug AS tenant_slug,t.public_id::text AS public_id,t.name AS tenant_name,a.email,owner.billing_required,owner.paid_until
  FROM wedding.sessions s LEFT JOIN wedding.guests g ON g.id=s.guest_id
  JOIN wedding.tenants t ON t.id=COALESCE(g.tenant_id,s.tenant_id)
  JOIN wedding.accounts owner ON owner.id=t.owner_id AND owner.active LEFT JOIN wedding.accounts a ON a.id=s.account_id
- WHERE s.token_hash=$1 AND s.expires_at>now() AND (($2 AND s.guest_id IS NULL AND a.active AND t.owner_id=a.id) OR (NOT $2 AND g.active=1 AND g.version=s.version))`, hash(cookie.Value), admin)
+ WHERE s.token_hash=$1 AND s.expires_at>now() AND (($2 AND s.guest_id IS NULL AND a.active AND t.owner_id=a.id) OR (NOT $2 AND g.active=1 AND g.version=s.version AND (NOT owner.billing_required OR owner.paid_until>now())))`, hash(cookie.Value), admin)
 }
 func (a *App) authorized(r *http.Request, admin, mutation bool) map[string]any {
 	s := a.session(r, admin)
@@ -259,7 +272,7 @@ func (a *App) invitationSession(r *http.Request) map[string]any {
 			s = a.session(r, true)
 		}
 	}
-	if s == nil {
+	if s == nil || !hasAccess(s) {
 		fail(401, "unauthorized", "Buka tautan undangan yang Anda terima.")
 	}
 	if r.URL.Query().Has("tenant") && !matchesTenant(r.URL.Query().Get("tenant"), s) {
@@ -311,7 +324,7 @@ func (a *App) limited(w http.ResponseWriter, r *http.Request, action string, max
 	}
 }
 func (a *App) account(s map[string]any) map[string]any {
-	return map[string]any{"email": s["email"], "invitationOrigin": a.Config.Origin, "tenant": map[string]any{"id": s["tenant_id"], "slug": s["tenant_slug"], "publicId": s["public_id"], "name": s["tenant_name"]}}
+	return map[string]any{"email": s["email"], "subscription": subscription(s), "invitationOrigin": a.Config.Origin, "tenant": map[string]any{"id": s["tenant_id"], "slug": s["tenant_slug"], "publicId": s["public_id"], "name": s["tenant_name"]}}
 }
 func logRequestFailure(r *http.Request, recovered any) {
 	method := r.Method
@@ -387,6 +400,16 @@ func (a *App) serve(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 	path, method := r.URL.Path, r.Method
+	if path == "/api/payments/midtrans/notification" {
+		if method == "GET" || method == "HEAD" {
+			jsonResponse(w, 200, map[string]bool{"ok": true})
+			return
+		}
+		if method == "POST" {
+			a.paymentNotification(w, r)
+			return
+		}
+	}
 	if !match(`^(GET|HEAD|POST|PUT|PATCH|DELETE)$`, method) {
 		fail(405, "method", "Metode tidak didukung.")
 	}
@@ -400,6 +423,14 @@ func (a *App) serve(w http.ResponseWriter, r *http.Request) {
 	}
 	if path == "/api/identification/config" && method == "GET" {
 		jsonResponse(w, 200, map[string]string{"endpoint": a.Config.Endpoint, "publicKey": a.Config.PublicKey, "region": a.Config.Region})
+		return
+	}
+	if path == "/api/admin/register" && method == "POST" {
+		a.register(w, r)
+		return
+	}
+	if path == "/api/admin/billing" || strings.HasPrefix(path, "/api/admin/billing/") {
+		a.billingRoute(w, r)
 		return
 	}
 	if path == "/api/admin/login" && method == "POST" {
@@ -491,7 +522,7 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 	if !emailOK || length(email) > 254 || !match(`^[^\s@]+@[^\s@]+\.[^\s@]+$`, strings.TrimSpace(email)) || !passwordOK || password == "" || length(password) > 1024 {
 		fail(400, "credentials", "Email atau kata sandi tidak valid.")
 	}
-	s := row(r.Context(), a.Pool, `SELECT a.id::text AS id,a.email,a.password_hash,t.id::text AS tenant_id,t.slug AS tenant_slug,t.public_id::text AS public_id,t.name AS tenant_name FROM wedding.accounts a JOIN wedding.tenants t ON t.owner_id=a.id WHERE a.email=$1 AND a.active`, strings.ToLower(strings.TrimSpace(email)))
+	s := row(r.Context(), a.Pool, `SELECT a.id::text AS id,a.email,a.password_hash,a.billing_required,a.paid_until,t.id::text AS tenant_id,t.slug AS tenant_slug,t.public_id::text AS public_id,t.name AS tenant_name FROM wedding.accounts a JOIN wedding.tenants t ON t.owner_id=a.id WHERE a.email=$1 AND a.active`, strings.ToLower(strings.TrimSpace(email)))
 	encoded := strings.Repeat("0", 32) + ":" + strings.Repeat("0", 128)
 	if s != nil {
 		encoded = text(s["password_hash"])
@@ -499,6 +530,7 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 	if !passwordMatches(password, encoded) || s == nil {
 		fail(401, "invalid_login", "Email atau kata sandi tidak sesuai.")
 	}
+	a.reconcileSubscription(r.Context(), s)
 	token, csrf := secret(), secret()
 	exec(r.Context(), a.Pool, `INSERT INTO wedding.sessions(token_hash,csrf,account_id,tenant_id,expires_at) VALUES($1,$2,$3,$4,now()+interval '8 hours')`, hash(token), csrf, s["id"], s["tenant_id"])
 	a.cookie(w, "wedding_admin", token, 28800)

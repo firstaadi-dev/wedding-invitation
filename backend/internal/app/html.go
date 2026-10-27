@@ -53,13 +53,13 @@ func (a *App) html(w http.ResponseWriter, r *http.Request) {
 			fail(404, "invalid_link", "Tautan undangan tidak ditemukan atau sudah dinonaktifkan.")
 		}
 		a.limited(w, r, "link", 120, 60)
-		g := row(r.Context(), a.Pool, `SELECT g.tenant_id::text AS tenant_id FROM wedding.guests g JOIN wedding.tenants t ON t.id=g.tenant_id JOIN wedding.accounts a ON a.id=t.owner_id WHERE g.token_hash=$1 AND g.active=1 AND a.active`, hash(path[3:]))
+		g := row(r.Context(), a.Pool, `SELECT g.tenant_id::text AS tenant_id FROM wedding.guests g JOIN wedding.tenants t ON t.id=g.tenant_id JOIN wedding.accounts a ON a.id=t.owner_id WHERE g.token_hash=$1 AND g.active=1 AND a.active AND `+accessSQL, hash(path[3:]))
 		if g == nil {
 			fail(404, "invalid_link", "Tautan undangan tidak ditemukan atau sudah dinonaktifkan.")
 		}
 		tenant, filename = text(g["tenant_id"]), "access.html"
 	} else if landing != nil {
-		t := row(r.Context(), a.Pool, "SELECT id::text AS id FROM wedding.tenants WHERE public_id=$1::uuid", landing[1])
+		t := row(r.Context(), a.Pool, "SELECT id::text AS id FROM wedding.tenants WHERE public_id=$1::uuid AND EXISTS(SELECT 1 FROM wedding.accounts a WHERE a.id=owner_id AND a.active AND "+accessSQL+")", landing[1])
 		if t == nil {
 			fail(404, "not_found", "Undangan tidak ditemukan.")
 		}
@@ -69,7 +69,7 @@ func (a *App) html(w http.ResponseWriter, r *http.Request) {
 			s = a.session(r, true)
 		}
 		filename = "access.html"
-		if !r.URL.Query().Has("access") && s != nil && s["tenant_id"] == tenant {
+		if !r.URL.Query().Has("access") && s != nil && hasAccess(s) && s["tenant_id"] == tenant {
 			filename = "index.html"
 		}
 	} else if path == "/" || path == "/index.html" {
@@ -78,14 +78,14 @@ func (a *App) html(w http.ResponseWriter, r *http.Request) {
 			s = a.session(r, true)
 		}
 		filename = "access.html"
-		if s != nil {
+		if s != nil && hasAccess(s) {
 			tenant = text(s["tenant_id"])
 			if !r.URL.Query().Has("access") {
 				filename = "index.html"
 			}
 		}
 	} else if path == "/preview" {
-		if s := a.session(r, true); s != nil {
+		if s := a.session(r, true); s != nil && hasAccess(s) {
 			filename = "index.html"
 			tenant = text(s["tenant_id"])
 		}
@@ -101,11 +101,14 @@ func (a *App) html(w http.ResponseWriter, r *http.Request) {
 			fail(404, "not_found", "Undangan tidak ditemukan.")
 		}
 	}
-	s := row(r.Context(), a.Pool, `SELECT s.value,m.id AS "previewId",t.public_id::text AS public_id FROM wedding.settings s JOIN wedding.tenants t ON t.id=s.tenant_id LEFT JOIN wedding.media m ON m.tenant_id=s.tenant_id AND m.slot='preview' WHERE s.tenant_id=$1`, tenant)
+	s := row(r.Context(), a.Pool, `SELECT s.value,a.billing_required,m.id AS "previewId",t.public_id::text AS public_id FROM wedding.settings s JOIN wedding.tenants t ON t.id=s.tenant_id JOIN wedding.accounts a ON a.id=t.owner_id LEFT JOIN wedding.media m ON m.tenant_id=s.tenant_id AND m.slot='preview' WHERE s.tenant_id=$1`, tenant)
 	if s == nil {
 		fail(404, "not_found", "Undangan tidak ditemukan.")
 	}
 	settings := s["value"].(map[string]any)
+	if s["billing_required"] == true {
+		selfServiceDefaults(settings)
+	}
 	eventDate, venue := text(settings["eventDate"]), strings.TrimSpace(text(settings["venueName"]))
 	if eventDate == "" {
 		eventDate = "2026-11-22"
@@ -115,7 +118,11 @@ func (a *App) html(w http.ResponseWriter, r *http.Request) {
 	}
 	title, description := text(settings["linkPreviewTitle"]), text(settings["linkPreviewDescription"])
 	if title == "" {
-		title = "Undangan Pernikahan " + firstWord(text(settings["partnerOneName"]), "Firsta Adi Pradana") + " & " + firstWord(text(settings["partnerTwoName"]), "Talitha Syahda Arundatie")
+		if s["billing_required"] == true {
+			title = "Undangan Pernikahan " + firstWord(text(settings["partnerOneName"]), "Mempelai Pertama") + " & " + firstWord(text(settings["partnerTwoName"]), "Mempelai Kedua")
+		} else {
+			title = "Undangan Pernikahan " + firstWord(text(settings["partnerOneName"]), "Firsta Adi Pradana") + " & " + firstWord(text(settings["partnerTwoName"]), "Talitha Syahda Arundatie")
+		}
 	}
 	if description == "" {
 		description = eventDateLabel(eventDate) + " · " + venue + "."

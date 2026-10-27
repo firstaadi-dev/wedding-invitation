@@ -1,0 +1,14 @@
+{
+  "$kind": "collection",
+  "description": "Registration -> Snap QRIS checkout -> verified activation. Generated from invitation OpenAPI billing operations.",
+  "variables": {
+    "cmsBaseUrl": "http://127.0.0.1:5174",
+    "cmsOrigin": "http://dashboard.localhost:5173",
+    "billingEmail": "",
+    "billingPassword": "",
+    "billingName": "Pasangan Uji",
+    "billingCookie": "",
+    "billingCsrf": "",
+    "notificationBody": "{}"
+  }
+}

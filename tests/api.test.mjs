@@ -67,7 +67,7 @@ test('version-one upgrade assigns stable opaque IDs without changing existing ow
     assert.equal((await client.query('SELECT password_hash FROM accounts')).rows[0].password_hash,passwordHash);
     await migrate(process.env.TEST_DATABASE_URL_UNPOOLED,schema);
     assert.deepEqual((await client.query('SELECT id,owner_id,slug,name,public_id FROM tenants')).rows[0],tenant);
-    assert.deepEqual((await client.query('SELECT version FROM schema_migrations ORDER BY version')).rows,[{version:1},{version:2},{version:3},{version:4}]);
+    assert.deepEqual((await client.query('SELECT version FROM schema_migrations ORDER BY version')).rows,[{version:1},{version:2},{version:3},{version:4},{version:5}]);
   }finally{await client.query('SET search_path TO public');await client.query(`DROP SCHEMA IF EXISTS ${schema} CASCADE`);client.release();await pool.end()}
 });
 
@@ -115,7 +115,7 @@ test('version-two UUIDv7 migration preserves every reference and rolls back on f
       const expected=before[table].map(r=>({...r}));
       for(const r of expected){
         if(table==='guests')r.unlimited=false;
-        if(table==='accounts')r.id=accountMap[r.id];
+        if(table==='accounts'){r.id=accountMap[r.id];r.billing_required=false;r.paid_until=null;}
         if(table==='tenants'){r.id=tenantMap[r.id];r.owner_id=accountMap[r.owner_id]}
         if(r.tenant_id)r.tenant_id=tenantMap[r.tenant_id];
         if(r.account_id)r.account_id=accountMap[r.account_id];
@@ -123,7 +123,7 @@ test('version-two UUIDv7 migration preserves every reference and rolls back on f
       assert.deepEqual(after[table],expected.sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b))),table);
     }
     const columns=(await client.query("SELECT data_type FROM information_schema.columns WHERE table_schema=$1 AND ((table_name='accounts' AND column_name='id') OR (table_name='tenants' AND column_name IN ('id','owner_id')) OR column_name IN ('tenant_id','account_id'))",[schema])).rows;
-    assert.equal(columns.length,8);assert.ok(columns.every(c=>c.data_type==='uuid'));
+    assert.equal(columns.length,9);assert.ok(columns.every(c=>c.data_type==='uuid'));
     await assert.rejects(client.query("INSERT INTO sessions(token_hash,account_id,tenant_id,csrf,expires_at) VALUES('wrong',$1,$2,'csrf',now()+interval '1 day')",[accountMap.firsta,tenantMap.second]),e=>e.code==='23503');
     await assert.rejects(client.query("INSERT INTO guests(id,name,token_hash,tenant_id) VALUES('orphan','Orphan','orphan',$1)",[randomUUID()]),e=>e.code==='23503');
     await migrate(process.env.TEST_DATABASE_URL_UNPOOLED,schema);

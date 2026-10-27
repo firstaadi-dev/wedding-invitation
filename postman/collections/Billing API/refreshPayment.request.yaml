@@ -1,0 +1,25 @@
+{
+  "$kind": "http-request",
+  "url": "{{cmsBaseUrl}}/api/admin/billing/refresh",
+  "method": "POST",
+  "description": "CMS session, Origin and X-CSRF-Token required. Price and duration are determined by server. Repeated checkout calls reuse the unexpired payment. Activation requires a matching IDR amount and settlement from authenticated Midtrans status API, never a browser redirect. Entitlement is applied once per paid order.",
+  "headers": {
+    "Accept": "application/json",
+    "Origin": "{{cmsOrigin}}",
+    "Cookie": "{{billingCookie}}",
+    "X-CSRF-Token": "{{billingCsrf}}",
+    "Content-Type": "application/json"
+  },
+  "order": 4000,
+  "body": {
+    "type": "json",
+    "content": "{}"
+  },
+  "scripts": [
+    {
+      "type": "afterResponse",
+      "language": "text/javascript",
+      "code": "pm.test('Request succeeds',()=>pm.response.to.have.status(200));\npm.test('Package is IDR 199000 for 12 months',()=>{pm.expect(pm.response.json().price).to.eql(199000);pm.expect(pm.response.json().months).to.eql(12);});"
+    }
+  ]
+}

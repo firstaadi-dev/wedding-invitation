@@ -1,0 +1,20 @@
+{
+  "$kind": "http-request",
+  "url": "{{cmsBaseUrl}}/api/admin/billing",
+  "method": "GET",
+  "description": "Read package, entitlement and latest checkout",
+  "headers": {
+    "Accept": "application/json",
+    "Origin": "{{cmsOrigin}}",
+    "Cookie": "{{billingCookie}}",
+    "X-CSRF-Token": "{{billingCsrf}}"
+  },
+  "order": 2000,
+  "scripts": [
+    {
+      "type": "afterResponse",
+      "language": "text/javascript",
+      "code": "pm.test('Request succeeds',()=>pm.response.to.have.status(200));\npm.test('Package is IDR 199000 for 12 months',()=>{pm.expect(pm.response.json().price).to.eql(199000);pm.expect(pm.response.json().months).to.eql(12);});"
+    }
+  ]
+}

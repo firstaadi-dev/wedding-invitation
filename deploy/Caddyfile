@@ -42,7 +42,7 @@
     }
 }
 {$CMS_DOMAIN} {
-    @backend path /api/admin/* /api/invitation /api/wishes /media/* /preview-image/* /preview /healthz
+    @backend path /api/payments/midtrans/notification /api/admin/* /api/invitation /api/wishes /media/* /preview-image/* /preview /healthz
     handle @backend {
         import backend
     }
@@ -55,7 +55,7 @@
     handle /company/dashboard {
         redir https://{$CMS_DOMAIN}/ 302
     }
-    @cms path /admin /admin/* /api/admin/* /preview
+    @cms path /admin /admin/* /api/admin/* /api/payments/* /preview
     handle @cms {
         respond "Not found" 404
     }

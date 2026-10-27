@@ -2217,3 +2217,14 @@ dialog form > label {
       border-color 0.15s;
   }
 }
+
+.auth-switch {border:0;background:transparent;text-decoration:underline;color:inherit;padding:.4rem;cursor:pointer;}
+.billing-screen {min-height:100dvh;display:grid;place-items:center;padding:clamp(20px,5vw,64px);background:var(--bg,#f7f5ef);}
+.billing-panel {width:100%;max-width:560px;padding:clamp(24px,5vw,48px);display:grid;gap:18px;}
+.billing-panel h1 {font-size:clamp(27px,5vw,38px);line-height:1.18;margin:0;}
+.billing-panel p {margin:0;line-height:1.6;}
+.billing-price {display:grid;gap:6px;border-block:1px solid #d7ded5;padding:24px 0;}
+.billing-price strong {font-size:36px;letter-spacing:-1px;}
+.billing-price span {font-size:14px;}
+.billing-panel ul {padding-left:20px;line-height:1.9;margin:0;}
+.billing-panel button {min-height:44px;}

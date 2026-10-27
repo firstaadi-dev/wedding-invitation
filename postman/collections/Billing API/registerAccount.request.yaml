@@ -1,0 +1,23 @@
+{
+  "$kind": "http-request",
+  "url": "{{cmsBaseUrl}}/api/admin/register",
+  "method": "POST",
+  "description": "CMS Origin required. Creates tenant/settings atomically. Pending account may only read session/billing, pay, refresh payment, and logout; CMS and invitation routes require an active subscription. Existing email returns 409.",
+  "headers": {
+    "Accept": "application/json",
+    "Origin": "{{cmsOrigin}}",
+    "Content-Type": "application/json"
+  },
+  "order": 1000,
+  "body": {
+    "type": "json",
+    "content": "{\"email\": \"{{billingEmail}}\", \"password\": \"{{billingPassword}}\", \"name\": \"{{billingName}}\"}"
+  },
+  "scripts": [
+    {
+      "type": "afterResponse",
+      "language": "text/javascript",
+      "code": "pm.test('Request succeeds',()=>pm.response.to.have.status(201));\nconst session=pm.response.json(); pm.collectionVariables.set('billingCookie',pm.response.headers.get('Set-Cookie').split(';')[0]); pm.collectionVariables.set('billingCsrf',session.csrf); pm.test('Account awaits payment',()=>pm.expect(session.account.subscription.active).to.eql(false));"
+    }
+  ]
+}

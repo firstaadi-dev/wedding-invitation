@@ -5,12 +5,12 @@ export default defineConfig({
   auth: false,
   // Branch policy: per-branch tuning
   branch: (branch) => {
-    if (branch.isDefault) {
-      // Default branch: no overrides, uses project defaults
+    if (branch.isDefault || branch.name === "staging") {
+      // Production and staging are persistent; use project defaults
       return {};
     }
     if (!branch.exists) {
-      // New non-default branches: auto-expire
+      // Other new non-default branches: auto-expire
       // Run `neon checkout <name>` to create a new branch with these settings
       return { ttl: "7d" };
     }
