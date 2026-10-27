@@ -29,13 +29,13 @@ Staging dibuat pada 27 Oktober 2026 sebagai branch **schema-only** dalam project
 
 Seluruh 12 tabel disalin tanpa baris dari production. Metadata lokal `wedding.schema_migrations` kemudian diisi versi 1–4 sesuai skema yang sudah disalin agar deploy tidak menjalankan ulang migrasi bootstrap. Pada saat salinan dibuat, sebelas tabel aplikasi kosong. Selanjutnya migrasi 5 menambahkan tabel pembayaran dan kolom langganan; akun uji Sandbox dibuat melalui pendaftaran mandiri pada 27 Oktober 2026. Perbandingan skema hanya menunjukkan normalisasi tanda kurung pada constraint `tenants_slug_check` yang setara.
 
-`.env.staging` lokal sudah berisi koneksi pooled dan direct branch ini; kredensial tidak dicatat dalam dokumentasi atau template. Database tes lokal tetap memakai konfigurasi tesnya. `ADMIN_PASSWORD_HASH` tidak diperlukan untuk branch ini karena baseline migrasi sudah tercatat. MIDTRANS_ENV staging harus `sandbox`; isi kredensial Fingerprint staging sebelum memeriksa alur tamu. Lihat [pembayaran Midtrans](midtrans-payments.md).
+`.env.staging` lokal sudah berisi koneksi pooled dan direct branch ini; kredensial tidak dicatat dalam dokumentasi atau template. Database tes lokal tetap memakai konfigurasi tesnya. `ADMIN_PASSWORD_HASH` tidak diperlukan untuk branch ini karena baseline migrasi sudah tercatat. MIDTRANS_ENV staging harus `sandbox`; gunakan kredensial Fingerprint yang sama dengan production dan izinkan origin staging sebelum memeriksa alur tamu. Lihat [pembayaran Midtrans](midtrans-payments.md).
 
 Jika membuat ulang, buat branch **schema-only** dari production pada project yang sama, pilih Auto-delete **Never**, periksa skema dan kekosongan tabel, lalu catat versi migrasi yang sudah tercakup. Jangan menjalankan perintah seed/reset tes pada staging. Branch bernama `staging` dikecualikan dari kebijakan TTL tujuh hari di `neon.ts`.
 
 `.env.staging` disiapkan lokal dan diabaikan Git; template yang dapat di-commit ada di [`.env.staging.example`](../.env.staging.example). Isi `DATABASE_URL` pooled dan `DATABASE_URL_UNPOOLED` direct dari branch Neon staging. Template belum berisi kredensial nyata. Gunakan data uji. Mode schema-only tidak menyalin akun, sesi, media, atau data tamu; mode data-and-schema ikut menyalinnya.
 
-Samakan `PUBLIC_ORIGIN` dan `CMS_ORIGIN` dengan domain staging pada Caddy. Isi kredensial Fingerprint untuk staging, izinkan origin invitation staging di Fingerprint, dan isi endpoint hanya setelah aktif. `ADMIN_PASSWORD_HASH` diperlukan untuk migration 1 pada database kosong; buat dengan `npm run admin:hash`. Database salinan yang sudah melewati migration 1 tetap memakai akun dan password salinannya. `NODE_ENV` tetap `production` agar cookie HTTPS dan perilaku aplikasi sesuai deployment VPS.
+Samakan `PUBLIC_ORIGIN` dan `CMS_ORIGIN` dengan domain staging pada Caddy. Gunakan nilai `FINGERPRINT_*` yang sama dengan production dan izinkan origin `https://invitation.weddinvita.cloud` di Fingerprint. `ADMIN_PASSWORD_HASH` diperlukan untuk migration 1 pada database kosong; buat dengan `npm run admin:hash`. Database salinan yang sudah melewati migration 1 tetap memakai akun dan password salinannya. `NODE_ENV` tetap `production` agar cookie HTTPS dan perilaku aplikasi sesuai deployment VPS.
 
 Di VPS, siapkan direktori (sesuaikan pemilik bila memakai user lain):
 
@@ -56,9 +56,9 @@ Workflow tidak mengunggah `.env.staging` dan tidak menimpa `app.env`. Compose me
 
 Default hostname di [Caddyfile staging](../deploy/Caddyfile.staging):
 
-- Company: `staging.weddinvita.id`
-- CMS: `dashboard.staging.weddinvita.id`
-- Invitation: `invitation.staging.weddinvita.id`
+- Company: `weddinvita.cloud`
+- CMS: `dashboard.weddinvita.cloud`
+- Invitation: `invitation.weddinvita.cloud`
 
 Arahkan ketiganya ke IP VPS. Jika domain berbeda, ganti hostname pada file tersebut dan origin di `.env.staging`, atau atur `STAGING_COMPANY_DOMAIN`, `STAGING_CMS_DOMAIN`, dan `STAGING_INVITATION_DOMAIN` pada service Caddy. Environment aplikasi di Compose tidak mengatur environment Caddy host.
 
@@ -105,7 +105,7 @@ Untuk deployment manual: **Actions → Build and deploy VPS → Run workflow →
 ```sh
 cd /opt/wedding-invitation-staging
 cat state.json
-curl --fail https://dashboard.staging.weddinvita.id/healthz
+curl --fail https://dashboard.weddinvita.cloud/healthz
 ```
 
 Periksa login CMS, preview, upload, dan tautan tamu staging. `/api/admin/session` serta `/preview` pada domain invitation harus menghasilkan 404. Health check tidak membuktikan DNS, sertifikat, dan identifikasi Fingerprint berfungsi; periksa alur browser setelah deployment pertama.
