@@ -108,10 +108,12 @@ jobs:
         with:
           go-version-file: backend/go.mod
           cache-dependency-path: backend/go.sum
+      - name: Use Ubuntu archive mirrors
+        run: sudo sed -i '\|://azure\.archive\.ubuntu\.com/|d' /etc/apt/apt-mirrors.txt
       - name: Install tools and dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libvips-dev ffmpeg
+          sudo apt-get install -y --no-install-recommends libvips-dev ffmpeg
           curl --fail --silent --show-error https://dl-cli.pstmn.io/install/linux64.sh -o /tmp/install-postman.sh
           sh /tmp/install-postman.sh
           npm ci
