@@ -13,6 +13,7 @@ import {
   defaultWhatsappTemplate,
   invitationMessage,
   whatsappUrl,
+  whatsappTokens,
 } from "../whatsapp.js";
 import { guestSummary, queryGuests, mediaType, updateSelectedGuests } from "../admin-data.js";
 import { importRows, saveImportedGuests } from "../guest-import.js";
@@ -36,7 +37,7 @@ const pages = {
   acara: "Detail Acara",
 };
 type Page = keyof typeof pages;
-type EventContext = { date: string; venue: string };
+type EventContext = { date: string; venue: string; ceremonyTime?: string; receptionTime?: string };
 const currentPage = (): Page =>
   Object.hasOwn(pages, location.hash.slice(1))
     ? (location.hash.slice(1) as Page)
@@ -1837,7 +1838,11 @@ function SettingsForm({
     (kind === "messages" ? textSetting("eventDate", defaultEventDate) : values.eventDate) || defaultEventDate;
   const venueName =
     (kind === "messages" ? textSetting("venueName", defaultVenueName) : values.venueName).trim() || defaultVenueName;
-  const event = {date:eventDateLabels(eventDate).full,venue:venueName};
+  const event = {
+    date:eventDateLabels(eventDate).full, venue:venueName,
+    ceremonyTime: kind === "messages" ? textSetting("ceremonyTime", "") : values.ceremonyTime,
+    receptionTime: kind === "messages" ? textSetting("receptionTime", "") : values.receptionTime,
+  };
   const previewTitle =
     values.linkPreviewTitle?.trim() ||
     `Undangan Pernikahan ${textSetting("partnerOneName", values.partnerOneName).trim().split(/\s+/)[0]} & ${textSetting("partnerTwoName", values.partnerTwoName).trim().split(/\s+/)[0]}`;
@@ -1894,19 +1899,21 @@ function SettingsForm({
                 </div>
                 <p>
                   Gunakan {"{nama}"} untuk nama tamu, {"{link}"} untuk tautan,
-                  {"{tanggal}"} untuk tanggal acara, dan {"{tempat}"} untuk tempat.
-                  Sertakan {"{link}"} agar tamu dapat membuka undangannya.
+                  {"{tanggal}"} untuk tanggal acara utama, dan {"{tempat}"} untuk tempat utama.
+                  Gunakan {"{jam_acara_1}"} untuk jam acara pertama dan {"{jam_acara_2}"} untuk jam acara kedua.
+                  Tanggal, tempat, dan jam mengikuti Detail Acara. Sertakan {"{link}"} agar tamu dapat membuka undangannya.
                 </p>
                 <div className="token-list">
                   <span>Sisipkan informasi acara:</span>
-                  {["{nama}", "{link}", "{tanggal}", "{tempat}"].map((token) => (
+                  {whatsappTokens.map(([key, label]) => (
                     <button
                       type="button"
-                      key={token}
-                      onClick={() => insertToken(token)}
-                      aria-label={`Sisipkan ${token}`}
+                      key={key}
+                      onClick={() => insertToken(`{${key}}`)}
+                      aria-label={`Sisipkan ${label}`}
+                      title={`{${key}}`}
                     >
-                      + <code>{token}</code>
+                      + {label}
                     </button>
                   ))}
                 </div>
@@ -2053,7 +2060,7 @@ function SettingsForm({
               <div className="section-heading">
                 <h3>Rangkaian Acara</h3>
               </div>
-              {field("eventDate", "Tanggal acara", 10, "", false, "date")}
+              {field("eventDate", "Tanggal acara utama", 10, "", false, "date")}
               <div className="event-group">
                 <h3>
                   <span>1</span>Acara pertama
@@ -2062,7 +2069,7 @@ function SettingsForm({
                   {field("ceremonyTitle", "Nama acara", 80, "Akad Nikah")}
                   {field(
                     "ceremonyTime",
-                    "Waktu acara",
+                    "Jam acara pertama",
                     80,
                     "Contoh: 09.00 WIB",
                   )}
@@ -2076,14 +2083,14 @@ function SettingsForm({
                   {field("receptionTitle", "Nama acara", 80, "Resepsi")}
                   {field(
                     "receptionTime",
-                    "Waktu acara",
+                    "Jam acara kedua",
                     80,
                     "Contoh: 11.00–13.00 WIB",
                   )}
                 </div>
               </div>
               <p className="help">
-                Waktu kosong ditampilkan sebagai “Waktu akan diinformasikan”.
+                Jam kosong ditampilkan sebagai “Waktu akan diinformasikan”.
               </p>
             </section>
 <section className="panel">
@@ -2111,7 +2118,7 @@ function SettingsForm({
               <div className="section-heading">
                 <h3>Lokasi Acara</h3>
               </div>
-              {field("venueName", "Nama tempat", 160, "Nama gedung atau lokasi acara")}
+              {field("venueName", "Tempat utama", 160, "Nama gedung atau lokasi acara")}
               {field(
                 "mapEmbedUrl",
                 "URL embed Google Maps",
@@ -2596,6 +2603,8 @@ function App() {
         ? content.settings.eventDate
         : defaultEventDate,
     ).full,
+    ceremonyTime: typeof content?.settings.ceremonyTime === "string" ? content.settings.ceremonyTime : "",
+    receptionTime: typeof content?.settings.receptionTime === "string" ? content.settings.receptionTime : "",
     venue:
       typeof content?.settings.venueName === "string" &&
       content.settings.venueName.trim()
