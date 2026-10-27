@@ -11,6 +11,12 @@
         Cache-Control no-cache
         Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self'; frame-src https://www.google.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
     }
+    redir /company/dashboard /admin 302
+    @company path /company /company/ /company.html
+    handle @company {
+        rewrite * /company.html
+        file_server
+    }
     @admin path / /admin /admin/
     handle @admin {
         rewrite * /admin.html

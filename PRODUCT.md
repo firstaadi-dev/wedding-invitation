@@ -1,0 +1,7 @@
+# Weddinvita
+
+Weddinvita is an Indonesian digital wedding invitation product. Couples manage event information, photos, music, individual guest links, WhatsApp message templates, attendance confirmations and guest wishes through an existing CMS. WhatsApp sending is manual. Accounts are provisioned by an administrator; there is no public registration or published price list in this repository.
+
+The company landing page at `/company` introduces the product to Indonesian couples planning their wedding. The user specifically requested emphasis on Invitation Lock and forwarded-link protection. The existing feature rejects new browsers after an active browser quota is full; it does not verify recipient identity or prevent a forwarded link from consuming an unused slot. The primary action explains and demonstrates this behavior; existing customers can open the CMS. An access-flow infographic explains Invitation Lock; the user rejected an unrepresentative sample invitation. Do not use a mock invitation as a substitute for the actual invitation design. Do not invent customer counts, testimonials, pricing, support contacts or delivery guarantees.
+
+Retain the established forest-green, warm-white and Manrope brand. Marketing may use the existing invitation artwork to demonstrate the product. Preserve invitation routes and CMS functionality. Scope is frontend presentation and static-page delivery, with no new APIs, checkout, signup or automatic WhatsApp sending. Verify desktop and mobile layouts, keyboard access, links and production build.

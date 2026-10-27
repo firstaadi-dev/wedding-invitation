@@ -10,6 +10,8 @@ export default defineConfig(({mode})=>{
       name: "admin-route",
       configureServer(server) {
         server.middlewares.use((req, _res, next) => {
+          req.url = req.url?.replace(/^\/company\/dashboard(?=\?|$)/, "/admin.html");
+          req.url = req.url?.replace(/^\/company\/?(?=\?|$)/, "/company.html");
           if(req.headers.host===cmsHost && /^\/(?:[?].*)?$/.test(req.url||"")) req.url="/admin.html";
           req.url = req.url?.replace(/^\/admin\/?(?=\?|$)/, "/admin.html");
           next();
@@ -22,6 +24,7 @@ export default defineConfig(({mode})=>{
     // Stable filenames keep Go's templates compatible with frontend-only deployments.
     rollupOptions: {
       input: {
+        company: resolve(import.meta.dirname, "company.html"),
         invitation: resolve(import.meta.dirname, "index.html"),
         access: resolve(import.meta.dirname, "access.html"),
         admin: resolve(import.meta.dirname, "admin.html"),
