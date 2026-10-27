@@ -15,13 +15,13 @@
         header_up -Forwarded
     }
 }
-{$STAGING_COMPANY_DOMAIN:staging.weddinvita.id} {
+{$STAGING_COMPANY_DOMAIN:weddinvita.cloud} {
     header X-Robots-Tag "noindex, nofollow, noarchive"
     handle / {
         redir * /company 302
     }
     handle /company/dashboard {
-        redir https://{$STAGING_CMS_DOMAIN:dashboard.staging.weddinvita.id}/ 302
+        redir https://{$STAGING_CMS_DOMAIN:dashboard.weddinvita.cloud}/ 302
     }
     @company path /company /company/ /company.html /assets/*
     handle @company {
@@ -31,7 +31,7 @@
         respond "Not found" 404
     }
 }
-{$STAGING_CMS_DOMAIN:dashboard.staging.weddinvita.id} {
+{$STAGING_CMS_DOMAIN:dashboard.weddinvita.cloud} {
     header X-Robots-Tag "noindex, nofollow, noarchive"
     @backend path /api/payments/midtrans/notification /api/admin/* /api/invitation /api/wishes /media/* /preview-image/* /preview /healthz
     handle @backend {
@@ -41,11 +41,11 @@
         import staging_frontend
     }
 }
-{$STAGING_INVITATION_DOMAIN:invitation.staging.weddinvita.id} {
+{$STAGING_INVITATION_DOMAIN:invitation.weddinvita.cloud} {
     header X-Robots-Tag "noindex, nofollow, noarchive"
     log_skip /u/*
     handle /company/dashboard {
-        redir https://{$STAGING_CMS_DOMAIN:dashboard.staging.weddinvita.id}/ 302
+        redir https://{$STAGING_CMS_DOMAIN:dashboard.weddinvita.cloud}/ 302
     }
     @cms path /admin /admin/* /api/admin/* /api/payments/* /preview
     handle @cms {
