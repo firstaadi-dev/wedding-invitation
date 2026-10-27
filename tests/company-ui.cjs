@@ -51,6 +51,14 @@ const url = process.env.COMPANY_URL || 'http://127.0.0.1:5180/company';
         const id = (await link.getAttribute('href')).slice(1);
         assert.equal(await page.locator(`[id="${id}"]`).count(),1,`missing target ${id}`);
       }
+      for (const link of await page.locator('.site-header nav a').all()) {
+        await link.click();
+        const header = await page.locator('.site-header').boundingBox();
+        const target = await page.locator(await link.getAttribute('href')).boundingBox();
+        assert(Math.abs(header.y) < 1, 'header stays at the viewport top after scrolling');
+        assert(target.y >= header.y + header.height, 'section target stays below the sticky header');
+      }
+      if (width === 1440 || width === 390) await page.screenshot({path:`.impeccable/review/sticky-${width}.png`});
       await page.evaluate(() => {document.activeElement.blur();window.scrollTo(0,0);});
       if (width === 1440 || width === 390) await page.screenshot({path:`.impeccable/review/${width === 1440 ? 'desktop' : 'mobile'}.png`,fullPage:true});
       if (width === 692) await page.locator('.access-graphic').screenshot({path:'.impeccable/review/user-692.png'});

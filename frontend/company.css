@@ -28,7 +28,7 @@
   --muted:#5c6257;
   --line:#dfe2d8;
   scroll-behavior: smooth;
-  scroll-padding-top: 28px;
+  scroll-padding-top: 132px;
   scrollbar-color: #7b8372 #fafaf7;
 }
 * {
@@ -85,6 +85,12 @@ svg {
   top: 12px;
 }
 .site-header {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: #fafaf7;
+}
+.header-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -784,10 +790,13 @@ footer > a:last-child {
   }
 }
 @media (max-width: 760px) {
+  :root {
+    scroll-padding-top: 166px;
+  }
   .wrap {
     width: calc(100% - 40px);
   }
-  .site-header {
+  .header-content {
     flex-wrap: wrap;
     min-height: 115px;
     padding-block: 20px 13px;
