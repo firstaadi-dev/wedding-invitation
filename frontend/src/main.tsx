@@ -15,6 +15,7 @@ import {
   whatsappUrl,
 } from "../whatsapp.js";
 import { guestSummary, queryGuests, mediaType } from "../admin-data.js";
+import { importRows, saveImportedGuests } from "../guest-import.js";
 import { defaultEventDate, defaultVenueName, eventDateLabels } from "../event.js";
 import type {
   Account,
@@ -429,6 +430,63 @@ function GuestEditor({
     </Modal>
   );
 }
+function GuestImport({api, refresh, onClose}: {api: API; refresh: () => Promise<void>; onClose: () => void}) {
+  const [guests, setGuests] = useState<{name: string; phone: string}[]>([]);
+  const [busy, setBusy] = useState(false), [reading, setReading] = useState(false);
+  const [error, setError] = useState(""), [saved, setSaved] = useState(0);
+  async function read(file?: File) {
+    setGuests([]);
+    setError("");
+    setSaved(0);
+    if (!file) return;
+    setReading(true);
+    try {
+      if (!/\.xlsx$/i.test(file.name) || file.size > 5 * 1024 * 1024)
+        throw new Error("Pilih file Excel .xlsx, maksimal 5 MB.");
+      const {readSheet} = await import("read-excel-file/browser");
+      setGuests(importRows(await readSheet(file, 1)));
+    } catch (e) {
+      setError(`File belum dapat dibaca. ${errorMessage(e)}`);
+    } finally {
+      setReading(false);
+    }
+  }
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    if (!guests.length || busy || reading) return;
+    setBusy(true);
+    setError("");
+    const result = await saveImportedGuests(guests,
+      (guest: {name: string; phone: string}) => api("/api/admin/guests", "POST", guest), (count: number) => setSaved(saved + count));
+    setGuests(guests.slice(result.saved));
+    let message = result.error ? `Import berhenti: ${errorMessage(result.error)} Periksa daftar tamu sebelum melanjutkan agar tidak ada duplikat.` : "";
+    try { await refresh(); } catch (e) { message += ` Daftar belum diperbarui: ${errorMessage(e)} Muat ulang halaman.`; }
+    setError(message);
+    setBusy(false);
+  }
+  return <Modal className="editor-dialog" label="guest-import-title" onClose={onClose} busy={busy || reading}>
+    <form onSubmit={submit}>
+      <h2 id="guest-import-title">Import Excel</h2>
+      <p>Gunakan sheet pertama dengan judul kolom <strong>Nama</strong> dan <strong>WhatsApp</strong>. Nama wajib diisi; WhatsApp boleh kosong. Baris kosong dilewati. Maksimal 1.000 tamu.</p>
+      <p className="help">Simpan nomor WhatsApp sebagai teks agar angka 0 di depan tetap ada. Import menambah tamu baru, termasuk nama yang sudah ada.</p>
+      <p><a href="/assets/template-tamu.xlsx" download="template-tamu.xlsx">Download template Excel</a></p>
+      <label>File Excel (.xlsx, maksimal 5 MB)
+        <input type="file" accept=".xlsx" disabled={busy || reading} onChange={e => { void read(e.target.files?.[0]); }} />
+      </label>
+      {reading && <p role="status">Membaca file…</p>}
+      {guests.length > 0 && <div>
+        <p>{guests.length} tamu siap diimport. Pratinjau {Math.min(5, guests.length)} baris pertama:</p>
+        <ul>{guests.slice(0, 5).map((guest, i) => <li key={i}>{guest.name} — {guest.phone || "Tanpa WhatsApp"}</li>)}</ul>
+      </div>}
+      {saved > 0 && <p role="status">{saved} tamu berhasil diimport.</p>}
+      {error && <p className="form-error" role="alert">{error}</p>}
+      <div className="dialog-actions">
+        <button type="button" onClick={onClose} disabled={busy || reading}>Tutup</button>
+        <button className="primary" disabled={busy || reading || !guests.length}>{busy ? "Mengimport…" : "Import tamu"}</button>
+      </div>
+    </form>
+  </Modal>;
+}
 function GuestRow({
   guest,
   template,
@@ -744,6 +802,7 @@ function GuestsPage({
     [filtersOpen, setFiltersOpen] = useState(false);
   const [bulkBusy, setBulkBusy] = useState(false),
     [bulkProgress, setBulkProgress] = useState(0);
+  const [importOpen, setImportOpen] = useState(false);
   const scroller = useRef<HTMLDivElement>(null),
     selectAll = useRef<HTMLInputElement>(null);
   const filtered = useMemo(
@@ -870,6 +929,7 @@ function GuestsPage({
             </h1>
             <p>Kelola tautan undangan dan konfirmasi tamu.</p>
           </div>
+          <button type="button" onClick={() => setImportOpen(true)} disabled={bulkBusy}>Import Excel</button>
           <button
             id="add-guest"
             className="primary"
@@ -880,6 +940,7 @@ function GuestsPage({
             + Tambah tamu
           </button>
         </header>
+        {importOpen && <GuestImport api={api} refresh={refresh} onClose={() => setImportOpen(false)} />}
         <div className="guest-toolbar">
           <label className="search-label">
             <span className="sr-only">Cari nama atau nomor WhatsApp</span>
