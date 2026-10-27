@@ -803,6 +803,27 @@ function GuestsPage({
   const [bulkBusy, setBulkBusy] = useState(false),
     [bulkProgress, setBulkProgress] = useState(0);
   const [importOpen, setImportOpen] = useState(false);
+  const [exportBusy, setExportBusy] = useState(false);
+  async function exportGuests() {
+    setExportBusy(true);
+    try {
+      const {guestExport} = await import('../guest-export.js');
+      const buffer = await guestExport(guests, template, event);
+      const url = URL.createObjectURL(new Blob([new Uint8Array(buffer)], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = 'daftar-tamu.xlsx';
+      document.body.append(anchor);
+      anchor.click();
+      anchor.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      notice(`${guests.length} tamu diexport. Status kirim dimulai dari false dan dapat diubah di Excel.`);
+    } catch (e) {
+      notice(errorMessage(e), true);
+    } finally {
+      setExportBusy(false);
+    }
+  }
   const scroller = useRef<HTMLDivElement>(null),
     selectAll = useRef<HTMLInputElement>(null);
   const filtered = useMemo(
@@ -916,6 +937,7 @@ function GuestsPage({
             <p>Kelola tautan undangan dan konfirmasi tamu.</p>
           </div>
           <div className="guest-heading-actions">
+          <button type="button" onClick={exportGuests} disabled={bulkBusy || exportBusy || !guests.length} title="Export seluruh tamu; status kirim dilacak di Excel">{exportBusy ? 'Mengexport…' : 'Export Excel'}</button>
           <button type="button" onClick={() => setImportOpen(true)} disabled={bulkBusy}>Import Excel</button>
           <button
             id="add-guest"
