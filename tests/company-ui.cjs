@@ -10,7 +10,7 @@ const url = process.env.COMPANY_URL || 'http://127.0.0.1:5180/company';
   page.on('pageerror', error => errors.push(error.message));
   fs.mkdirSync('.impeccable/review', {recursive:true});
   try {
-    for (const width of [1440, 768, 390, 320]) {
+    for (const width of [1440, 768, 692, 390, 320]) {
       await page.setViewportSize({width,height:900});
       const response = await page.goto(url);
       assert.equal(response.status(),200);
@@ -23,6 +23,14 @@ const url = process.env.COMPANY_URL || 'http://127.0.0.1:5180/company';
       assert.equal(await page.locator('.access-path li').count(),2);
       assert(await page.locator('.access-allowed').innerText().then(text => text.includes('Tetap bisa dibuka')));
       assert(await page.locator('.access-blocked').innerText().then(text => text.includes('Akses ditolak')));
+      for (const outcome of await page.locator('.access-outcomes > div').all()) {
+        assert(await outcome.evaluate(el => {
+          const column = el.getBoundingClientRect();
+          const icon = el.querySelector('svg').getBoundingClientRect();
+          const connector = parseFloat(getComputedStyle(el, '::before').left);
+          return Math.abs(icon.x + icon.width / 2 - column.x - connector) < 1;
+        }), 'branch connector and outcome icon must share a center');
+      }
       await page.locator('#try-lock').click();
       assert(await page.locator('#lock-result').isVisible());
       assert(await page.locator('#reset-lock').evaluate(el => el === document.activeElement));
@@ -39,6 +47,7 @@ const url = process.env.COMPANY_URL || 'http://127.0.0.1:5180/company';
       }
       await page.evaluate(() => {document.activeElement.blur();window.scrollTo(0,0);});
       if (width === 1440 || width === 390) await page.screenshot({path:`.impeccable/review/${width === 1440 ? 'desktop' : 'mobile'}.png`,fullPage:true});
+      if (width === 692) await page.locator('.access-graphic').screenshot({path:'.impeccable/review/user-692.png'});
       console.log(`PASS ${width}px: layout, access infographic, lock/reset, FAQ and section links`);
     }
     assert.equal((await page.request.get(new URL('/company/dashboard',url).href)).status(),200);

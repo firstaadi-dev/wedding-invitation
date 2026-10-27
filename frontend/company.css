@@ -303,6 +303,11 @@ em {
 .access-outcomes > div {
   position: relative;
   padding-top: 20px;
+  text-align: center;
+}
+.access-outcomes > div > svg {
+  display: block;
+  margin-inline: auto;
 }
 .access-outcomes > div::before {
   content: '';
