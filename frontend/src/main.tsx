@@ -1694,7 +1694,7 @@ function SettingsForm({
     deviceLimitEnabled: textSetting("deviceLimitEnabled", "true"),
     whatsappTemplate: textSetting("whatsappTemplate", defaultWhatsappTemplate),
     eventDate: textSetting("eventDate", defaultEventDate),
-    venueName: textSetting("venueName", defaultVenueName),
+    venueName: textSetting("venueName", ""),
     partnerOneName: textSetting("partnerOneName", ""),
     partnerTwoName: textSetting("partnerTwoName", ""),
     partnerOneFather: textSetting("partnerOneFather", ""),
@@ -2168,7 +2168,7 @@ function SettingsForm({
                 )}
               </div>
               <p className="help">
-                Menuju {eventDateLabels(values.countdownDate || eventDate).full}. Tanggal kosong memakai tanggal acara utama; waktu kosong memakai pukul 00.00 WIB.
+                {values.countdownDate || eventDate ? `Menuju ${eventDateLabels(values.countdownDate || eventDate).full}.` : "Hitung mundur tampil setelah tanggal ditentukan."} Tanggal kosong memakai tanggal acara utama; waktu kosong memakai pukul 00.00 WIB.
               </p>
             </section>
               </section>
@@ -2459,7 +2459,7 @@ function SettingsForm({
                   <div><dt>Tanggal acara</dt><dd>{event.date}</dd></div>
                   <div><dt>Rangkaian acara</dt><dd>{values.ceremonyTitle || "Acara pertama"} · {event.ceremonyDate} · {values.ceremonyTime || "Waktu akan diinformasikan"} · {event.ceremonyVenue}<br/>{values.receptionTitle || "Acara kedua"} · {event.receptionDate} · {values.receptionTime || "Waktu akan diinformasikan"} · {event.receptionVenue}</dd></div>
                   <div><dt>Tempat</dt><dd>{venueName}</dd></div>
-                  <div><dt>Tujuan countdown</dt><dd>{eventDateLabels(values.countdownDate || eventDate).full} · {values.countdownTime || "00:00"} WIB</dd></div>
+                  <div><dt>Tujuan countdown</dt><dd>{eventDateLabels(values.countdownDate || eventDate).full}{(values.countdownDate || eventDate) && ` · ${values.countdownTime || "00:00"} WIB`}</dd></div>
                   <div><dt>Informasi hadiah</dt><dd>{giftEnabled ? "Ditampilkan" : "Disembunyikan"} · {giftAccounts.length} informasi</dd></div>
                   <div><dt>Batas akses</dt><dd>{values.deviceLimitEnabled==="false" ? "Tanpa limit global" : `${values.deviceLimit} browser per undangan`}</dd></div>
                 </dl>

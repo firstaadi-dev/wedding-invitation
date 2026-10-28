@@ -1,4 +1,4 @@
-import {eventSchedule, eventDateLabels} from './event.js';
+import {eventSchedule, eventDateLabels, defaultVenueName} from './event.js';
 
 export const whatsappTokens = [
   ['nama', 'Nama Tamu'], ['link', 'Tautan Undangan'],
@@ -31,15 +31,15 @@ Terima kasih atas doa restunya.`;
 
 export function invitationMessage(template, guest, event = {}) {
   const values = {
-    nama:guest.name, link:guest.link, tanggal:event.date || 'Minggu, 22 November 2026', tempat:event.venue || 'Arjuna Ballroom, Alam Indah Resto',
+    nama:guest.name, link:guest.link, tanggal:event.date || 'Tanggal akan diinformasikan', tempat:event.venue || defaultVenueName,
     nama_mempelai_1:event.partnerOneName || '', nama_mempelai_2:event.partnerTwoName || '',
     ayah_mempelai_1:event.partnerOneFather || '', ibu_mempelai_1:event.partnerOneMother || '',
     ayah_mempelai_2:event.partnerTwoFather || '', ibu_mempelai_2:event.partnerTwoMother || '',
-    tanggal_acara_1:event.ceremonyDate || event.date || 'Minggu, 22 November 2026',
-    tanggal_acara_2:event.receptionDate || event.date || 'Minggu, 22 November 2026',
+    tanggal_acara_1:event.ceremonyDate || event.date || 'Tanggal akan diinformasikan',
+    tanggal_acara_2:event.receptionDate || event.date || 'Tanggal akan diinformasikan',
     jam_acara_1:event.ceremonyTime || 'Waktu akan diinformasikan', jam_acara_2:event.receptionTime || 'Waktu akan diinformasikan',
-    tempat_acara_1:event.ceremonyVenue || event.venue || 'Arjuna Ballroom, Alam Indah Resto',
-    tempat_acara_2:event.receptionVenue || event.venue || 'Arjuna Ballroom, Alam Indah Resto',
+    tempat_acara_1:event.ceremonyVenue || event.venue || defaultVenueName,
+    tempat_acara_2:event.receptionVenue || event.venue || defaultVenueName,
   };
   return template.replace(/\{([^{}]+)\}/g, (token, key) => Object.hasOwn(values, key) ? values[key] : token);
 }

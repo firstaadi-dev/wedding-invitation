@@ -66,3 +66,9 @@ test('missing names never fall back to another couple', () => {
   assert.equal(invitationMessage(template, {name:'Tamu',link:'https://example.invalid'}), '|||||');
   assert.doesNotMatch(defaultWhatsappTemplate, /Firsta|Talitha/);
 });
+
+test('unset event dates and locations use neutral messages', () => {
+  const guest = {name:'Tamu', link:'https://example.invalid'};
+  assert.equal(invitationMessage('{tanggal} | {tempat}', guest, whatsappEvent({})), 'Tanggal akan diinformasikan | Lokasi akan diinformasikan');
+  assert.equal(invitationMessage('{tanggal} | {tempat}', guest), 'Tanggal akan diinformasikan | Lokasi akan diinformasikan');
+});
