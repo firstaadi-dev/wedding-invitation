@@ -33,6 +33,30 @@ func run() error {
 		command = os.Args[1]
 	}
 	switch command {
+	case "migrate-firebase-account":
+		flags := flag.NewFlagSet("migrate-firebase-account", flag.ContinueOnError)
+		email := flags.String("email", "", "Legacy account email")
+		apply := flags.Bool("apply", false, "Perform migration (default is dry-run)")
+		if err := flags.Parse(os.Args[2:]); err != nil {
+			return err
+		}
+		if flags.NArg() != 0 || *email == "" {
+			return fmt.Errorf("specify --email and optionally --apply")
+		}
+		pool, err := app.Database(ctx, os.Getenv("DATABASE_URL_UNPOOLED"))
+		if err != nil {
+			return err
+		}
+		defer pool.Close()
+		if err = app.MigrateLegacyFirebase(ctx, pool, os.Getenv("FIREBASE_PROJECT_ID"), os.Getenv("FIREBASE_CREDENTIALS_JSON"), *email, *apply); err != nil {
+			return err
+		}
+		if *apply {
+			fmt.Println("Account migrated; the user must verify their email.")
+		} else {
+			fmt.Println("Dry-run passed; no account changed.")
+		}
+		return nil
 	case "rotate-links":
 		flags := flag.NewFlagSet("rotate-links", flag.ContinueOnError)
 		apply := flags.Bool("apply", false, "Replace legacy links across all accounts and revoke guest sessions/devices")
