@@ -230,6 +230,8 @@ function Login({
   onLogin: (s: Session) => Promise<void>;
 }) {
   const [registering,setRegistering]=useState(location.hash==="#register");
+  const [recovering,setRecovering]=useState(false);
+  const [message,setMessage]=useState("");
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -238,6 +240,11 @@ function Login({
     setBusy(true);
     setError("");
     try {
+      if(recovering){
+        await api("/api/admin/password-reset","POST",Object.fromEntries(new FormData(form)));
+        setMessage("Jika alamat ini memiliki akun Firebase Weddinvita, tautan pemulihan akan dikirim. Periksa inbox dan spam. Untuk akun lama yang belum dimigrasikan, hubungi support@weddinvita.id.");
+        return;
+      }
       const session = await api<Session>(
         registering ? "/api/admin/register" : "/api/admin/login",
         "POST",
@@ -274,8 +281,9 @@ function Login({
       </section>
       <section className="login-form-side">
         <div className="login-panel">
-          <h2 id="login-title">{registering ? "Buat akun undangan" : "Selamat datang"}</h2>
-          <p>{registering ? "Rp199.000 untuk akses 12 bulan. Buat akun, bayar dengan QRIS, lalu siapkan undangan Anda." : "Masuk untuk menyiapkan dan memantau undangan pernikahan Anda."}</p>
+          <h2 id="login-title">{recovering ? "Atur ulang kata sandi" : registering ? "Buat akun undangan" : "Selamat datang"}</h2>
+          <p>{recovering ? "Masukkan email akun Anda untuk meminta tautan pemulihan." : registering ? "Rp199.000 untuk akses 12 bulan. Buat akun, bayar dengan QRIS, lalu siapkan undangan Anda." : "Masuk untuk menyiapkan dan memantau undangan pernikahan Anda."}</p>
+          {message && <p role="status" className="info-note">{message}</p>}
           <form id="login" onSubmit={submit} aria-busy={busy}>
             {error && (
               <p id="login-error" className="form-error" role="alert">
@@ -295,7 +303,7 @@ function Login({
                 disabled={busy}
               />
             </label>
-            <label>
+            {!recovering && <label>
               Kata sandi
               <input
                 name="password"
@@ -303,22 +311,34 @@ function Login({
                 autoComplete={registering ? "new-password" : "current-password"}
                 required
                 maxLength={1024}
-                minLength={registering ? 12 : undefined}
-                placeholder={registering ? "Minimal 12 karakter" : "Masukkan kata sandi"}
+                minLength={registering ? 8 : undefined}
+                pattern={registering ? "(?=.*[A-Z])(?=.*[0-9])(?=.*[\\x21-\\x2f\\x3a-\\x40\\x5b-\\x60\\x7b-\\x7e]).{8,1024}" : undefined}
+                aria-describedby={registering ? "password-requirements" : undefined}
+                placeholder={registering ? "8+ karakter, kapital, angka dan simbol" : "Masukkan kata sandi"}
                 disabled={busy}
               />
-            </label>
+              {registering && <span id="password-requirements" className="help">Minimal 8 karakter, satu huruf kapital (A–Z), satu angka (0–9), dan satu simbol seperti !, @, atau #.</span>}
+            </label>}
+            {registering && <label className="legal-consent"><input type="checkbox" name="acceptedTerms" value="2026-10-28" required disabled={busy}/><span>Saya menyetujui <a href="/terms" target="_blank" rel="noopener">Syarat Layanan</a>, termasuk kebijakan No Refund dengan hak konsumen yang tetap berlaku, dan telah membaca <a href="/privacy" target="_blank" rel="noopener">Kebijakan Privasi</a>.</span></label>}
             <button className="primary" type="submit" disabled={busy}>
-              {busy ? "Memeriksa…" : registering ? "Buat akun & lanjut bayar" : "Masuk ke akun"}
+              {busy ? "Memeriksa…" : recovering ? "Kirim tautan pemulihan" : registering ? "Buat akun & lanjut bayar" : "Masuk ke akun"}
               <span aria-hidden="true">→</span>
             </button>
           </form>
-          <p className="login-help">{registering ? "Sudah punya akun?" : "Belum punya akun?"} <button type="button" className="auth-switch" disabled={busy} onClick={()=>{setRegistering(!registering);setError("");history.replaceState(null,"",registering ? "#masuk" : "#register");}}>{registering ? "Masuk" : "Buat akun"}</button></p>
+          <p className="login-help">{recovering ? "Sudah ingat kata sandinya?" : registering ? "Sudah punya akun?" : "Belum punya akun?"} <button type="button" className="auth-switch" disabled={busy} onClick={()=>{setRegistering(recovering ? false : !registering);setRecovering(false);setError("");setMessage("");history.replaceState(null,"",registering || recovering ? "#masuk" : "#register");}}>{recovering || registering ? "Masuk" : "Buat akun"}</button></p>
+          {!registering && !recovering && <p className="login-help"><button type="button" className="auth-switch" disabled={busy} onClick={()=>{setRecovering(true);setError("");setMessage("");}}>Lupa kata sandi?</button></p>}
+          <p className="login-help"><a href="/terms">Syarat layanan</a> · <a href="/privacy">Privasi</a> · <a href="mailto:support@weddinvita.id">Bantuan</a></p>
         </div>
         <p className="login-footer">weddinvita</p>
       </section>
     </main>
   );
+}
+function VerificationScreen({api,session,onVerified,onLogout}:{api:API;session:Session;onVerified:(s:Session)=>Promise<void>;onLogout:()=>void}){
+  const [busy,setBusy]=useState(false),[error,setError]=useState(""),[message,setMessage]=useState(session.emailSent===false ? "Email verifikasi belum terkirim. Gunakan tombol Kirim ulang email untuk mencoba lagi." : "Buka tautan verifikasi di email Anda, lalu periksa status di sini. Periksa folder spam jika belum terlihat.");
+  async function check(){setBusy(true);setError("");try{const s=await api<Session>("/api/admin/session");if(!s.account.verificationRequired)await onVerified(s);else setMessage("Email belum terverifikasi. Buka tautan verifikasi yang dikirim ke alamat akun Anda.");}catch(e){setError(errorMessage(e));}finally{setBusy(false);}}
+  async function resend(){setBusy(true);setError("");try{await api("/api/admin/verification-email","POST",{});setMessage("Email verifikasi dikirim. Periksa inbox dan spam, lalu pilih Saya sudah verifikasi.");}catch(e){setError(errorMessage(e));}finally{setBusy(false);}}
+  return <main className="billing-screen"><section className="panel billing-panel" aria-labelledby="verification-title"><a href="/" className="login-wordmark">weddinvita</a><h1 id="verification-title">Verifikasi email Anda</h1><p>Alamat akun: <strong>{session.account.email}</strong></p><p>Verifikasi diperlukan sebelum pembayaran dan akses undangan.</p><p role="status">{message}</p>{error && <p role="alert" className="form-error">{error}</p>}<button className="primary" disabled={busy} onClick={check}>Saya sudah verifikasi · Periksa status</button><button disabled={busy} onClick={resend}>Kirim ulang email</button><a href="mailto:support@weddinvita.id">Hubungi bantuan</a><button className="auth-switch" disabled={busy} onClick={onLogout}>Keluar dari akun</button></section></main>;
 }
 function BillingScreen({api, onActivated, onLogout}: {api:API;onActivated:(s:Session)=>Promise<void>;onLogout:()=>void}) {
   const [billing,setBilling]=useState<Billing>();
@@ -2564,7 +2584,7 @@ function App() {
     setGuests(await api<Guest[]>("/api/admin/guests"));
   const signedIn = async (s: Session) => {
     csrf.current = s.csrf;
-    if(!s.account.subscription.active){setSession(s);setGuests([]);setContent(undefined);setLoading(false);return;}
+    if(s.account.verificationRequired || !s.account.subscription.active){setSession(s);setGuests([]);setContent(undefined);setLoading(false);return;}
     const [g, c] = await Promise.all([
       api<Guest[]>("/api/admin/guests"),
       api<Content>("/api/admin/content"),
@@ -2686,6 +2706,8 @@ function App() {
         </p>
       ) : !session ? (
         <Login api={api} onLogin={signedIn} />
+      ) : session.account.verificationRequired ? (
+        <VerificationScreen api={api} session={session} onVerified={signedIn} onLogout={logout}/>
       ) : !session.account.subscription.active ? (
         <BillingScreen api={api} onActivated={signedIn} onLogout={logout}/>
       ) : (

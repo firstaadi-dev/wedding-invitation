@@ -1,0 +1,13 @@
+# Firebase Auth dan email staging
+
+Project Firebase `weddinvita-8ef46` dipakai khusus staging; web app terdaftar sebagai Weddinvita Web. Buat project production terpisah nanti. Neon tetap menyimpan data aplikasi. Akun lama tetap menggunakan password hash lokal sampai migrasi identitas yang direncanakan secara eksplisit; email yang sama tidak otomatis menautkan akun.
+
+Auth Email/Password aktif; password minimal 8 karakter, setidaknya satu kapital ASCII, satu angka, dan satu simbol. Email wajib diverifikasi sebelum pembayaran. Firebase mengelola password reset dan mencabut sesi lama. Resend mengirim email verifikasi, pemulihan, serta konfirmasi pembayaran. Link verifikasi/reset adalah kredensial sementara: jangan dicatat dalam log.
+
+Isi `FIREBASE_PROJECT_ID`, `FIREBASE_WEB_API_KEY`, `FIREBASE_CREDENTIALS_JSON`, dan `RESEND_API_KEY` pada `app.env` staging di VPS. Isi JSON service account sebagai satu baris tanpa tanda kutip luar menggunakan format raw Compose; file dan direktori harus hanya dapat dibaca pengelola. Jangan commit private key, API key Resend, atau `app.env`. Pastikan domain pengirim terverifikasi di Resend. `EMAIL_FROM` default `Weddinvita <no-reply@weddinvita.id>` dan `EMAIL_REPLY_TO` default `support@weddinvita.id`.
+
+Migrasi 6 harus diterapkan melalui prosedur deployment backend. Konfirmasi pembayaran dimasukkan ke antrean dalam transaksi aktivasi; gangguan Resend tidak membatalkan akses. Retry otomatis berhenti setelah 23 jam karena masa deduplikasi Resend terbatas; periksa antrean lebih lama secara manual sebelum mengirim ulang. Record email terkirim dibersihkan setelah 30 hari. Email verifikasi dapat dikirim ulang pengguna; reset tidak mengungkap apakah akun ada atau masih memakai metode lama.
+
+Setelah deployment, uji dengan akun dan inbox staging yang dikendalikan tim: daftar, verifikasi email, bayar dengan Midtrans Sandbox, dan uji pemulihan kata sandi. Jangan gunakan akun/data pelanggan production. CI memakai Firebase Auth Emulator, Postman Resend simulation dan database Postgres 18 disposable; tidak mengirim email nyata.
+
+Syarat layanan, privasi dan cookie ada di `/terms`, `/privacy`, dan `/cookie-policy`. Permintaan penutupan akun/data ditangani melalui support setelah verifikasi identitas; jangan menghapus catatan transaksi yang masih wajib disimpan. Kebijakan No Refund tidak menghapus hak konsumen yang diwajibkan hukum dan perlu ditinjau penasihat hukum sebelum launch.

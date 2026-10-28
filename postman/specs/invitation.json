@@ -153,7 +153,7 @@
       "post": {
         "operationId": "login",
         "summary": "Login administrator",
-        "description": "Same-origin email and password login for an existing account. Unpaid self-service accounts receive a billing-only session. Scrypt verification; generic failure for unknown email and wrong password; HttpOnly SameSite=Strict cookie, Secure in production.",
+        "description": "Email/password login. Firebase accounts authenticate with Firebase; legacy accounts keep scrypt authentication until explicit migration. Firebase session revocation and email verification are checked server-side. No account linking based solely on an email match.",
         "tags": [
           "Admin"
         ],
@@ -3153,7 +3153,7 @@
     "/api/admin/register": {
       "post": {
         "operationId": "registerAccount",
-        "summary": "Create a pending account and an authenticated billing session",
+        "summary": "Register a Firebase-backed account awaiting email verification",
         "tags": [
           "Billing"
         ],
@@ -3169,7 +3169,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminSession"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/AdminSession"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "emailSent": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "emailSent"
+                      ]
+                    }
+                  ]
                 }
               }
             }
@@ -3249,26 +3264,35 @@
                   },
                   "password": {
                     "type": "string",
-                    "minLength": 12,
-                    "maxLength": 1024
+                    "minLength": 8,
+                    "maxLength": 1024,
+                    "pattern": "^(?=.*[A-Z])(?=.*[0-9])(?=.*[\\x21-\\x2f\\x3a-\\x40\\x5b-\\x60\\x7b-\\x7e]).{8,1024}$",
+                    "description": "At least 8 characters, one uppercase ASCII letter, one digit, and one symbol. Firebase enforces the same policy for password resets."
                   },
                   "name": {
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 120
+                  },
+                  "acceptedTerms": {
+                    "type": "string",
+                    "enum": [
+                      "2026-10-28"
+                    ]
                   }
                 },
                 "required": [
                   "email",
                   "password",
-                  "name"
+                  "name",
+                  "acceptedTerms"
                 ],
                 "additionalProperties": false
               }
             }
           }
         },
-        "description": "CMS Origin required. Creates tenant/settings atomically. Pending account may only read session/billing, pay, refresh payment, and logout; CMS and invitation routes require an active subscription. Existing email returns 409.",
+        "description": "Creates an email/password Firebase identity, then Neon account/tenant/session. Requires acceptedTerms=2026-10-28. New accounts cannot pay or use CMS until Firebase verifies their email. Existing legacy accounts remain on their prior auth mechanism; no automatic linking by email. Requires configured Firebase and Resend. Verification email delivery failure leaves the account available to resend, with emailSent=false.",
         "security": []
       }
     },
@@ -3456,7 +3480,6 @@
               "schema": {
                 "type": "object",
                 "properties": {},
-                "required": [],
                 "additionalProperties": false
               }
             }
@@ -3562,7 +3585,6 @@
               "schema": {
                 "type": "object",
                 "properties": {},
-                "required": [],
                 "additionalProperties": false
               }
             }
@@ -3740,6 +3762,208 @@
             "description": "CMS host"
           }
         ]
+      }
+    },
+    "/api/admin/password-reset": {
+      "post": {
+        "operationId": "requestPasswordReset",
+        "summary": "Request a Firebase password reset email without exposing whether an account exists",
+        "tags": [
+          "Authentication"
+        ],
+        "servers": [
+          {
+            "url": "https://dashboard.domain.id",
+            "description": "CMS host"
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 254
+                  }
+                },
+                "required": [
+                  "email"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request processed; password reset always uses the same generic response for valid addresses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "ok"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request, authentication, rate limit or configured service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Invalid request, authentication, rate limit or configured service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Invalid request, authentication, rate limit or configured service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Invalid request, authentication, rate limit or configured service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requires CMS Origin. Rate limited by IP and normalized email. Valid addresses always receive the same generic response for absent, legacy or Firebase identities. A legacy identity is not migrated and does not receive a Firebase reset email."
+      }
+    },
+    "/api/admin/verification-email": {
+      "post": {
+        "operationId": "resendVerificationEmail",
+        "summary": "Send a fresh verification email to the signed-in Firebase account",
+        "tags": [
+          "Authentication"
+        ],
+        "servers": [
+          {
+            "url": "https://dashboard.domain.id",
+            "description": "CMS host"
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request processed; password reset always uses the same generic response for valid addresses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "ok"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request, authentication, rate limit or configured service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid request, authentication, rate limit or configured service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Invalid request, authentication, rate limit or configured service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Invalid request, authentication, rate limit or configured service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Invalid request, authentication, rate limit or configured service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "adminSession": []
+          }
+        ],
+        "description": "Requires CMS Origin, valid admin cookie and X-CSRF-Token. Sends only to the account email; no recipient in request body."
       }
     }
   },
@@ -3936,7 +4160,9 @@
               "email",
               "tenant",
               "invitationOrigin",
-              "subscription"
+              "subscription",
+              "authProvider",
+              "verificationRequired"
             ],
             "properties": {
               "email": {
@@ -3979,6 +4205,18 @@
               },
               "subscription": {
                 "$ref": "#/components/schemas/Subscription"
+              },
+              "authProvider": {
+                "type": "string",
+                "enum": [
+                  "legacy",
+                  "firebase"
+                ],
+                "description": "Legacy identities are not linked by email automatically."
+              },
+              "verificationRequired": {
+                "type": "boolean",
+                "description": "True until Firebase reports ownership of the account email verified. Legacy account migration is deferred."
               }
             }
           }

@@ -10,6 +10,25 @@ export async function freePort() {
   await new Promise((resolve) => server.close(resolve));
   return port;
 }
+
+export async function startEmailSimulation() {
+  const port=await freePort();
+  const child=spawn('postman',['simulation','run','postman/simulations/account-email.sim.yaml','--port',String(port),'--output','ndjson','--no-history'],{detached:true,stdio:['ignore','pipe','pipe']});
+  let log='';
+  for(const pipe of [child.stdout,child.stderr])pipe.on('data',chunk=>{log+=chunk;});
+  async function stop(){
+    if(child.exitCode!==null)return;
+    try{process.kill(-child.pid,'SIGINT');}catch{}
+    await once(child,'close');
+  }
+  try{
+    await ready(child,/"event":"listening"/);
+    const event=log.split('\n').map(line=>{try{return JSON.parse(line);}catch{return {};}}).find(x=>x.event==='listening');
+    const origin=event?.mocks?.find(x=>x.routeKey==='resend')?.address;
+    if(!origin)throw new Error('Resend simulation did not publish a local address');
+    return {origin,stop};
+  }catch(error){await stop();throw error;}
+}
 function ready(child, pattern) {
   return new Promise((resolve, reject) => {
     let output = "";

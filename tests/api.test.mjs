@@ -67,7 +67,7 @@ test('version-one upgrade assigns stable opaque IDs without changing existing ow
     assert.equal((await client.query('SELECT password_hash FROM accounts')).rows[0].password_hash,passwordHash);
     await migrate(process.env.TEST_DATABASE_URL_UNPOOLED,schema);
     assert.deepEqual((await client.query('SELECT id,owner_id,slug,name,public_id FROM tenants')).rows[0],tenant);
-    assert.deepEqual((await client.query('SELECT version FROM schema_migrations ORDER BY version')).rows,[{version:1},{version:2},{version:3},{version:4},{version:5}]);
+    assert.deepEqual((await client.query('SELECT version FROM schema_migrations ORDER BY version')).rows,[{version:1},{version:2},{version:3},{version:4},{version:5},{version:6}]);
   }finally{await client.query('SET search_path TO public');await client.query(`DROP SCHEMA IF EXISTS ${schema} CASCADE`);client.release();await pool.end()}
 });
 
@@ -115,7 +115,8 @@ test('version-two UUIDv7 migration preserves every reference and rolls back on f
       const expected=before[table].map(r=>({...r}));
       for(const r of expected){
         if(table==='guests')r.unlimited=false;
-        if(table==='accounts'){r.id=accountMap[r.id];r.billing_required=false;r.paid_until=null;}
+        if(table==='sessions')r.firebase_auth_time=null;
+        if(table==='accounts'){r.id=accountMap[r.id];r.billing_required=false;r.paid_until=null;r.firebase_uid=null;r.terms_version=null;r.terms_accepted_at=null;}
         if(table==='tenants'){r.id=tenantMap[r.id];r.owner_id=accountMap[r.owner_id]}
         if(r.tenant_id)r.tenant_id=tenantMap[r.tenant_id];
         if(r.account_id)r.account_id=accountMap[r.account_id];

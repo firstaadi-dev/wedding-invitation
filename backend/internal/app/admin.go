@@ -298,6 +298,7 @@ func (a *App) admin(w http.ResponseWriter, r *http.Request) {
 		jsonResponse(w, 200, map[string]bool{"ok": true})
 		return
 	}
+	requireVerified(s)
 	requireAccess(s)
 	if path == "/api/admin/guests" {
 		if method == "GET" {

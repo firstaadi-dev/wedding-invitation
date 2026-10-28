@@ -123,7 +123,7 @@ func run() error {
 		return err
 	}
 	port := env("PORT", "5174")
-	a, err := app.New(pool, app.Config{MidtransServerKey: os.Getenv("MIDTRANS_SERVER_KEY"), MidtransEnv: env("MIDTRANS_ENV", "sandbox"), MidtransAPIOrigin: os.Getenv("MIDTRANS_API_ORIGIN"), CMSOrigin: os.Getenv("CMS_ORIGIN"), Origin: env("PUBLIC_ORIGIN", "http://127.0.0.1:"+port), Production: os.Getenv("NODE_ENV") == "production", TrustProxy: os.Getenv("TRUST_PROXY") == "1", PublicKey: os.Getenv("FINGERPRINT_PUBLIC_KEY"), SecretKey: os.Getenv("FINGERPRINT_SECRET_KEY"), Region: env("FINGERPRINT_REGION", "ap"), Endpoint: os.Getenv("FINGERPRINT_ENDPOINT"), Templates: env("TEMPLATE_DIR", "frontend/dist"), FingerprintOrigin: os.Getenv("FINGERPRINT_API_ORIGIN")})
+	a, err := app.New(pool, app.Config{FirebaseProjectID: os.Getenv("FIREBASE_PROJECT_ID"), FirebaseAPIKey: os.Getenv("FIREBASE_WEB_API_KEY"), FirebaseCredentialsJSON: os.Getenv("FIREBASE_CREDENTIALS_JSON"), ResendAPIKey: os.Getenv("RESEND_API_KEY"), ResendAPIOrigin: os.Getenv("RESEND_API_ORIGIN"), EmailFrom: os.Getenv("EMAIL_FROM"), EmailReplyTo: os.Getenv("EMAIL_REPLY_TO"), MidtransServerKey: os.Getenv("MIDTRANS_SERVER_KEY"), MidtransEnv: env("MIDTRANS_ENV", "sandbox"), MidtransAPIOrigin: os.Getenv("MIDTRANS_API_ORIGIN"), CMSOrigin: os.Getenv("CMS_ORIGIN"), Origin: env("PUBLIC_ORIGIN", "http://127.0.0.1:"+port), Production: os.Getenv("NODE_ENV") == "production", TrustProxy: os.Getenv("TRUST_PROXY") == "1", PublicKey: os.Getenv("FINGERPRINT_PUBLIC_KEY"), SecretKey: os.Getenv("FINGERPRINT_SECRET_KEY"), Region: env("FINGERPRINT_REGION", "ap"), Endpoint: os.Getenv("FINGERPRINT_ENDPOINT"), Templates: env("TEMPLATE_DIR", "frontend/dist"), FingerprintOrigin: os.Getenv("FINGERPRINT_API_ORIGIN")})
 	if err != nil {
 		return err
 	}
@@ -140,6 +140,8 @@ func run() error {
 	log.Printf("Invitation server ready on %s; Postgres connected.", listener.Addr())
 	ticker := time.NewTicker(time.Hour)
 	defer ticker.Stop()
+	emailTicker := time.NewTicker(time.Minute)
+	defer emailTicker.Stop()
 	for {
 		select {
 		case <-ctx.Done():
@@ -151,8 +153,12 @@ func run() error {
 				return err
 			}
 			return nil
+		case <-emailTicker.C:
+			if err := a.DeliverPaymentEmails(ctx); err != nil {
+				log.Print("Payment email delivery pending; retry scheduled.")
+			}
 		case <-ticker.C:
-			if _, err = pool.Exec(ctx, `DELETE FROM wedding.sessions WHERE expires_at<now(); DELETE FROM wedding.challenges WHERE expires_at<now(); DELETE FROM wedding.rate_limits WHERE expires_at<now(); DELETE FROM wedding.used_events WHERE created_at<now()-interval '1 day'`); err != nil {
+			if _, err = pool.Exec(ctx, `DELETE FROM wedding.sessions WHERE expires_at<now(); DELETE FROM wedding.challenges WHERE expires_at<now(); DELETE FROM wedding.rate_limits WHERE expires_at<now(); DELETE FROM wedding.used_events WHERE created_at<now()-interval '1 day'; DELETE FROM wedding.payment_emails WHERE sent_at<now()-interval '30 days'`); err != nil {
 				log.Print("Session cleanup failed.")
 			}
 		}

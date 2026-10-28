@@ -5,13 +5,23 @@ import {createHash,randomUUID} from 'node:crypto';
 import {once} from 'node:events';
 import {spawn} from 'node:child_process';
 import {database,migrate,command,binary} from './support/db.mjs';
+import {startEmailSimulation} from './support/server.mjs';
 
 if(process.env.TEST_DATABASE_DISPOSABLE!=='1' || !process.env.TEST_DATABASE_URL_UNPOOLED) throw new Error('Billing tests require a disposable isolated test database.');
 const dbURL=process.env.TEST_DATABASE_URL_UNPOOLED;
 if([process.env.DATABASE_URL,process.env.DATABASE_URL_UNPOOLED].filter(Boolean).includes(dbURL)) throw new Error('Application database must differ from test database.');
 const origin='http://dashboard.localhost:5173', publicOrigin='http://invitation.localhost:5173';
 const serverKey='SB-Mid-server-billing-test';
-const password='billing-test-password';
+const password='Billing-test123!' ;
+const firebaseHost=process.env.FIREBASE_AUTH_EMULATOR_HOST;
+if(!firebaseHost || !/^(127\.0\.0\.1|localhost):\d+$/.test(firebaseHost)) throw new Error('Billing tests require the local Firebase Auth emulator.');
+const emailSimulation=process.env.TEST_EMAIL_ORIGIN?undefined:await startEmailSimulation();
+const emailOrigin=process.env.TEST_EMAIL_ORIGIN || emailSimulation.origin;
+if(!emailOrigin || !/^http:\/\/(127\.0\.0\.1|localhost):\d+\/resend$/.test(emailOrigin)) throw new Error('Billing tests require the local Postman Resend simulation.');
+async function messages(){return (await fetch(emailOrigin+'/__messages')).json();}
+async function emailFailure(enabled){await fetch(emailOrigin+'/__failure',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled})});}
+async function applyCode(code,extra={}){const r=await fetch('http://'+firebaseHost+'/identitytoolkit.googleapis.com/v1/accounts:update?key=emulator-key',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({oobCode:code,...extra})});return {status:r.status,value:await r.json()};}
+
 async function listen(server){server.listen(0,'127.0.0.1');await once(server,'listening');return `http://127.0.0.1:${server.address().port}`;}
 async function waitServer(child){let log='';await new Promise((resolve,reject)=>{const timeout=setTimeout(()=>reject(new Error(log)),15000);for(const pipe of [child.stdout,child.stderr])pipe.on('data',b=>{log+=b;if(log.includes('Invitation server ready')){clearTimeout(timeout);resolve();}});child.once('exit',code=>{clearTimeout(timeout);reject(new Error(`Backend exited ${code}: ${log}`));});});}
 function signature(order,amount='199000.00',status='200'){return createHash('sha512').update(order+status+amount+serverKey).digest('hex');}
@@ -38,15 +48,16 @@ test('register -> Snap QRIS -> verified 12-month access; adversarial payment lif
  try{
   const encoded=(await command(['hash'],{},password)).trim();await migrate(dbURL,'wedding',encoded);
   await migrate(dbURL,'wedding');
+  await pool.query("UPDATE wedding.accounts SET password_hash=$1 WHERE email='firstaadip16@gmail.com' AND firebase_uid IS NULL",[encoded]);
   await pool.query('DELETE FROM wedding.rate_limits');
   assert.equal((await pool.query("SELECT billing_required FROM wedding.accounts WHERE email='firstaadip16@gmail.com'")).rows[0].billing_required,false);
   const upstream=await listen(midtrans);
   const socket=createServer();const base=await listen(socket);await new Promise(r=>socket.close(r));
-  backend=spawn(binary,['serve'],{env:{...process.env,DATABASE_URL:dbURL,DATABASE_URL_UNPOOLED:dbURL,PORT:new URL(base).port,PUBLIC_ORIGIN:publicOrigin,CMS_ORIGIN:origin,NODE_ENV:'development',MIDTRANS_ENV:'sandbox',MIDTRANS_SERVER_KEY:serverKey,MIDTRANS_API_ORIGIN:upstream,FINGERPRINT_PUBLIC_KEY:'test',FINGERPRINT_SECRET_KEY:'test',TEMPLATE_DIR:'frontend/dist'},stdio:['ignore','pipe','pipe']});
+  backend=spawn(binary,['serve'],{env:{...process.env,DATABASE_URL:dbURL,DATABASE_URL_UNPOOLED:dbURL,PORT:new URL(base).port,PUBLIC_ORIGIN:publicOrigin,CMS_ORIGIN:origin,FIREBASE_PROJECT_ID:'demo-weddinvita',FIREBASE_WEB_API_KEY:'emulator-key',FIREBASE_CREDENTIALS_JSON:'',RESEND_API_KEY:'test-email-key',RESEND_API_ORIGIN:emailOrigin,NODE_ENV:'development',MIDTRANS_ENV:'sandbox',MIDTRANS_SERVER_KEY:serverKey,MIDTRANS_API_ORIGIN:upstream,FINGERPRINT_PUBLIC_KEY:'test',FINGERPRINT_SECRET_KEY:'test',TEMPLATE_DIR:'frontend/dist'},stdio:['ignore','pipe','pipe']});
   await waitServer(backend);
-  async function runContract(names,extra={}){
-   const variables={cmsBaseUrl:base,cmsOrigin:origin,billingCookie:first.cookie,billingCsrf:first.csrf,billingEmail:`contract-${randomUUID()}@example.com`,billingPassword:password,billingName:"Pasangan Uji",...extra};
-   const args=['collection','run','postman/collections/Billing API',...names.flatMap(n=>['-i',n]),...Object.entries(variables).flatMap(([k,v])=>['--env-var',`${k}=${v}`]),'--no-report-events'];
+  async function runContract(names,extra={},collection='Billing API'){
+   const variables={cmsBaseUrl:base,cmsOrigin:origin,billingCookie:first.cookie,billingCsrf:first.csrf,billingEmail:`contract-${randomUUID()}@example.com`,billingPassword:password,billingName:"Pasangan Uji",accountEmail:`missing-${randomUUID()}@example.com`,accountCookie:first.cookie,accountCsrf:first.csrf,...extra};
+   const args=['collection','run','postman/collections/'+collection,...names.flatMap(n=>['-i',n]),...Object.entries(variables).flatMap(([k,v])=>['--env-var',`${k}=${v}`]),'--no-report-events'];
    const child=spawn('postman',args,{stdio:['ignore','pipe','pipe']});let output='';for(const p of [child.stdout,child.stderr])p.on('data',b=>{output+=b;});const [code]=await once(child,'close');console.log(output);assert.equal(code,0,output);
   }
   const users=[];
@@ -54,19 +65,34 @@ test('register -> Snap QRIS -> verified 12-month access; adversarial payment lif
    const response=await fetch(base+path,{method,headers:{...(originHeader?{Origin:originHeader}:{}),...(data!==undefined?{'Content-Type':'application/json'}:{}),...(cookie?{Cookie:cookie}:{}),...(csrf?{'X-CSRF-Token':csrf}:{})},body:data===undefined?undefined:JSON.stringify(data)});
    const type=response.headers.get('content-type')||'';return {status:response.status,headers:response.headers,value:type.includes('application/json')?await response.json():await response.text()};
   }
-  async function register(){const email=`billing-${randomUUID()}@example.com`;const r=await request('/api/admin/register',{method:'POST',data:{email,password,name:'Pasangan Uji'}});assert.equal(r.status,201,JSON.stringify(r.value));const user={email,cookie:r.headers.getSetCookie()[0].split(';')[0],csrf:r.value.csrf,session:r.value};users.push(user);return user;}
-  const first=await register();
+  async function verify(user){
+   const message=(await messages()).findLast(m=>m.payload.to.includes(user.email) && m.payload.subject.includes('verifikasi'));
+   assert.ok(message,'verification delivered through Resend HTTP simulation');
+   const line=message.payload.text.split('\n').find(l=>l.startsWith('Verifikasi email: '));
+   const link=new URL(line.slice('Verifikasi email: '.length));
+   assert.equal((await applyCode(link.searchParams.get('oobCode'))).status,200);
+   assert.equal((await request('/api/admin/session',user)).value.account.verificationRequired,false);
+  }
+  async function register(verifyNow=true){const email=`billing-${randomUUID()}@example.com`;const r=await request('/api/admin/register',{method:'POST',data:{email,password,name:'Pasangan Uji',acceptedTerms:'2026-10-28'}});assert.equal(r.status,201,JSON.stringify(r.value));const user={email,cookie:r.headers.getSetCookie()[0].split(';')[0],csrf:r.value.csrf,session:r.value};users.push(user);if(verifyNow)await verify(user);return user;}
+  const first=await register(false);
   const own=(path,method='GET',data)=>request(path,{...first,method,data});
   async function notify(id,overrides={}){return request('/api/payments/midtrans/notification',{method:'POST',originHeader:'',data:{order_id:id,status_code:'200',gross_amount:'199000.00',signature_key:signature(id),transaction_status:'settlement',...overrides}});}
   await t.test('registration is validated and pending account cannot use CMS or preview',async()=>{
    assert.equal(first.session.account.subscription.active,false);
    assert.equal((await request('/api/admin/register',{method:'POST',originHeader:'https://attacker.example',data:{}})).status,403);
    assert.equal((await request('/api/admin/register',{method:'POST',data:{email:'invalid',password,name:'Test'}})).status,400);
-   assert.equal((await request('/api/admin/register',{method:'POST',data:{email:first.email,password,name:'Test'}})).status,409);
-   assert.equal((await own('/api/admin/guests')).status,402);
+   assert.equal((await request('/api/admin/register',{method:'POST',data:{email:first.email,password,name:'Test',acceptedTerms:'2026-10-28'}})).status,409);
+   assert.equal(first.session.account.verificationRequired,true);
+   const stored=(await pool.query('SELECT password_hash,firebase_uid,terms_version FROM wedding.accounts WHERE email=$1',[first.email])).rows[0];
+   assert.equal(stored.password_hash,null);assert.ok(stored.firebase_uid);assert.equal(stored.terms_version,'2026-10-28');
+   assert.equal((await own('/api/admin/guests')).status,403);
+   assert.equal((await own('/api/admin/billing/payments','POST',{})).status,403);
    assert.equal((await own('/preview')).status,404);
    assert.equal((await own('/'+first.session.account.tenant.publicId)).status,404);
    const login=await request('/api/admin/login',{method:'POST',data:{email:first.email,password}});assert.equal(login.status,200);assert.equal(login.value.account.subscription.active,false);
+   await runContract(['requestPasswordReset','resendVerificationEmail'],{},'Account API');
+   await verify(first);
+   assert.equal((await own('/api/admin/guests')).status,402);
   });
   let checkout;
   await t.test('server price, CSRF, QRIS and retry reuse',async()=>{
@@ -99,11 +125,19 @@ test('register -> Snap QRIS -> verified 12-month access; adversarial payment lif
   await t.test('settlement activates exactly once for 12 calendar months',async()=>{
    // Midtrans has settled, but no notification/refresh has reached our database.
    assert.equal((await own('/api/admin/billing')).value.subscription.active,false);
+   await emailFailure(true);
    const login=await request('/api/admin/login',{method:'POST',data:{email:first.email,password}});
    assert.equal(login.status,200);assert.equal(login.value.account.subscription.active,true,'login must reconcile before returning the payment screen');
    const loginUntil=login.value.account.subscription.expiresAt;
+   assert.equal((await pool.query('SELECT sent_at FROM wedding.payment_emails WHERE payment_id=$1',[checkout.id])).rows[0].sent_at,null);
    const all=await Promise.all([notify(checkout.id),notify(checkout.id),own('/api/admin/billing/refresh','POST',{})]);assert.ok(all.every(r=>r.status===200),JSON.stringify(all));
-   const billing=(await own('/api/admin/billing')).value;assert.equal(billing.subscription.active,true);assert.equal(billing.months,12);until=billing.subscription.expiresAt;assert.equal(until,loginUntil);
+   const billing=(await own('/api/admin/billing')).value;assert.equal(billing.subscription.active,true);
+   assert.equal((await pool.query('SELECT count(*)::integer AS n FROM wedding.payment_emails WHERE payment_id=$1',[checkout.id])).rows[0].n,1);
+   await emailFailure(false);
+   await pool.query("UPDATE wedding.payment_emails SET next_attempt_at=now()-interval '1 second' WHERE payment_id=$1",[checkout.id]);
+   await own('/api/admin/billing/refresh','POST',{});
+   const receipt=(await messages()).filter(m=>m.key==='payment-confirmed/'+checkout.id);assert.equal(receipt.length,1,'durable confirmation retries once after provider recovery');
+   await notify(checkout.id);assert.equal((await messages()).filter(m=>m.key==='payment-confirmed/'+checkout.id).length,1,'duplicate webhook does not duplicate email');assert.equal(billing.months,12);until=billing.subscription.expiresAt;assert.equal(until,loginUntil);
    const delta=(await pool.query("SELECT abs(extract(epoch FROM (a.paid_until-(p.activated_at+interval '12 months')))) AS delta FROM wedding.payments p JOIN wedding.accounts a ON a.id=p.account_id WHERE p.id=$1",[checkout.id])).rows[0].delta;assert.ok(Number(delta)<1);
    assert.equal((await own('/api/admin/guests')).status,200);
    const content=(await own('/api/admin/content')).value;
@@ -154,8 +188,25 @@ test('register -> Snap QRIS -> verified 12-month access; adversarial payment lif
    await pool.query("UPDATE wedding.payments SET expires_at=now()-interval '1 second' WHERE id=$1",[p.id]);
    snapFailure=false;const retry=await own('/api/admin/billing/payments','POST',{});assert.equal(retry.status,200);assert.notEqual(retry.value.id,p.id);
   });
+  await t.test('password reset is generic, password-proof binding protects legacy, and reset revokes sessions',async()=>{
+   await pool.query('DELETE FROM wedding.rate_limits');
+   const legacy=await request('/api/admin/register',{method:'POST',data:{email:'firstaadip16@gmail.com',password,name:'Test',acceptedTerms:'2026-10-28'}});assert.equal(legacy.status,409);
+   const legacyLogin=await request('/api/admin/login',{method:'POST',data:{email:'firstaadip16@gmail.com',password}});assert.equal(legacyLogin.status,200);assert.equal(legacyLogin.value.account.authProvider,'legacy');
+   const reset=async email=>request('/api/admin/password-reset',{method:'POST',data:{email}});
+   const before=(await messages()).length;
+   const absent=await reset('missing-'+randomUUID()+'@example.com'),old=await reset('firstaadip16@gmail.com');
+   assert.equal(absent.status,200);assert.deepEqual(absent.value,old.value);assert.equal((await messages()).length,before);
+   const changed=await reset(first.email);assert.equal(changed.status,200);assert.deepEqual(changed.value,absent.value);
+   const mail=(await messages()).findLast(m=>m.payload.to.includes(first.email) && m.payload.subject.startsWith('Atur ulang'));
+   assert.ok(mail);const line=mail.payload.text.split('\n').find(l=>l.startsWith('Atur ulang kata sandi: '));const code=new URL(line.slice('Atur ulang kata sandi: '.length)).searchParams.get('oobCode');
+   const r=await fetch('http://'+firebaseHost+'/identitytoolkit.googleapis.com/v1/accounts:resetPassword?key=emulator-key',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({oobCode:code,newPassword:'A-new-long-test123!'})});assert.equal(r.status,200);
+   assert.equal((await own('/api/admin/session')).status,401,'password reset revokes pre-reset application sessions');
+   assert.equal((await request('/api/admin/login',{method:'POST',data:{email:first.email,password}})).status,401);
+   assert.equal((await request('/api/admin/login',{method:'POST',data:{email:first.email,password:'A-new-long-test123!'}})).status,200);
+  });
  }finally{
   if(backend){backend.kill('SIGTERM');await once(backend,'close');}
+  if(emailSimulation)await emailSimulation.stop();
   midtrans.closeAllConnections();await new Promise(r=>midtrans.close(r));await pool.end();
  }
 });

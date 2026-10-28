@@ -1,0 +1,9 @@
+version: 1
+slug: resend-fixture
+protocol: http
+name: Resend fixture
+interceptRequests: true
+scenarios:
+  - name: default
+    default: true
+    path: ./default.js
