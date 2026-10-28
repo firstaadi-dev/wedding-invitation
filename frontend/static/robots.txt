@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /company
+Allow: /assets/
+Disallow: /api/
+Disallow: /admin
+Disallow: /preview
+Disallow: /u/
+Disallow: /media/
+Disallow: /preview-image/
+
+Sitemap: https://weddinvita.id/sitemap.xml

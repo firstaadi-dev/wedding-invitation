@@ -22,6 +22,10 @@
         rewrite * /admin.html
         file_server
     }
+    @crawler path /robots.txt /sitemap.xml
+    handle @crawler {
+        file_server
+    }
     @assets path /assets/*
     handle @assets {
         file_server
