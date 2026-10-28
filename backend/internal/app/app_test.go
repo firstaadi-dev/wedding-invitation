@@ -116,13 +116,13 @@ func TestMessageTokensAndSeparateEventDates(t *testing.T) {
 }
 
 func TestMetadataFallbacksHandleEmptyNamesAndCustomEventDate(t *testing.T) {
-	if firstWord("  \t", "Firsta Adi Pradana") != "Firsta" || firstWord("Talitha Syahda", "Other") != "Talitha" {
+	if firstWord("  \t", "Mempelai Pertama") != "Mempelai Pertama" || firstWord("Talitha Syahda", "Other") != "Talitha" {
 		t.Fatal("metadata title fallback did not select a safe first word")
 	}
 	if got := eventDateLabel("2026-11-22"); got != "Minggu, 22 November 2026" {
 		t.Fatalf("unexpected Indonesian event date: %q", got)
 	}
-	if got := eventDateLabel("invalid"); got != "Minggu, 22 November 2026" {
+	if got := eventDateLabel("invalid"); got != "Tanggal akan diinformasikan" {
 		t.Fatalf("invalid stored date did not use the legacy default: %q", got)
 	}
 }
@@ -242,5 +242,17 @@ func TestWhatsappTemplateSixTokensAndLimits(t *testing.T) {
 	validateSettings(map[string]any{"whatsappTemplate": strings.Repeat("x", 3994) + "{link}"})
 	for _, value := range []any{nil, 123, "", "   ", "{nama} {jam_acara_1}", "{link} {unknown}", "{link} {jam_acara_3}", "{link} {nama_mempelai_1}", "{link} {tanggal_acara_1}", "{link} {tempat_acara_1}", strings.Repeat("x", 3995) + "{link}"} {
 		rejects(t, func() { validateSettings(map[string]any{"whatsappTemplate": value}) }, 400)
+	}
+}
+
+func TestEventTemplateNamesFollowSettingsAndEscapeHTML(t *testing.T) {
+	template := "<h1>{{PARTNER_ONE}} & {{PARTNER_TWO}}</h1> {{EVENT_DATE}}"
+	got := renderEventTemplate(template, "2027-01-09", map[string]any{"partnerOneName": "<Nara> Kirana", "partnerTwoName": "Dimas Aditya"})
+	if got != "<h1>&lt;Nara&gt; & Dimas</h1> Sabtu, 9 Januari 2027" {
+		t.Fatalf("unexpected event template: %s", got)
+	}
+	got = renderEventTemplate(template, "2027-01-09", map[string]any{})
+	if got != "<h1>Mempelai Pertama & Mempelai Kedua</h1> Sabtu, 9 Januari 2027" {
+		t.Fatalf("unexpected empty event template: %s", got)
 	}
 }

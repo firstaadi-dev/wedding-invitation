@@ -1623,13 +1623,13 @@ function SettingsForm({
     deviceLimitEnabled: textSetting("deviceLimitEnabled", "true"),
     whatsappTemplate: textSetting("whatsappTemplate", defaultWhatsappTemplate),
     eventDate: textSetting("eventDate", defaultEventDate),
-    venueName: textSetting("venueName", defaultVenueName),
-    partnerOneName: textSetting("partnerOneName", "Firsta Adi Pradana"),
-    partnerTwoName: textSetting("partnerTwoName", "Talitha Syahda Arundatie"),
-    partnerOneFather: textSetting("partnerOneFather", "Nugroho Andang Hapsoro"),
-    partnerOneMother: textSetting("partnerOneMother", "Arieta Rahmasari"),
-    partnerTwoFather: textSetting("partnerTwoFather", "Sudaryatno"),
-    partnerTwoMother: textSetting("partnerTwoMother", "Wuri Wahyuningsih"),
+    venueName: textSetting("venueName", ""),
+    partnerOneName: textSetting("partnerOneName", ""),
+    partnerTwoName: textSetting("partnerTwoName", ""),
+    partnerOneFather: textSetting("partnerOneFather", ""),
+    partnerOneMother: textSetting("partnerOneMother", ""),
+    partnerTwoFather: textSetting("partnerTwoFather", ""),
+    partnerTwoMother: textSetting("partnerTwoMother", ""),
   }));
   const [busy, setBusy] = useState(false),
     [dirty, setDirty] = useState(false);
@@ -1661,20 +1661,7 @@ function SettingsForm({
       ? (content.settings.giftAccounts.map((item) =>
           item.type === "address" ? item : { ...item, type: "account" },
         ) as GiftOption[])
-      : [
-          {
-            type: "account",
-            bank: "blu by BCA Digital",
-            number: "0033 1600 0000",
-            owner: "Firsta Adi Pradana",
-          },
-          {
-            type: "account",
-            bank: "Bank Mandiri",
-            number: "1350018340537",
-            owner: "TALITHA SYAHDA ARUND",
-          },
-        ],
+      : []
   );
   const field = (
     name: string,
@@ -2110,7 +2097,7 @@ function SettingsForm({
                 )}
               </div>
               <p className="help">
-                Menuju {eventDateLabels(values.countdownDate || eventDate).full}. Tanggal kosong memakai tanggal acara utama; waktu kosong memakai pukul 00.00 WIB.
+                {values.countdownDate || eventDate ? `Menuju ${eventDateLabels(values.countdownDate || eventDate).full}.` : "Hitung mundur tampil setelah tanggal ditentukan."} Tanggal kosong memakai tanggal acara utama; waktu kosong memakai pukul 00.00 WIB.
               </p>
             </section>
               </section>
@@ -2401,7 +2388,7 @@ function SettingsForm({
                   <div><dt>Tanggal acara</dt><dd>{event.date}</dd></div>
                   <div><dt>Rangkaian acara</dt><dd>{values.ceremonyTitle || "Acara pertama"} · {event.ceremonyDate} · {values.ceremonyTime || "Waktu akan diinformasikan"} · {event.ceremonyVenue}<br/>{values.receptionTitle || "Acara kedua"} · {event.receptionDate} · {values.receptionTime || "Waktu akan diinformasikan"} · {event.receptionVenue}</dd></div>
                   <div><dt>Tempat</dt><dd>{venueName}</dd></div>
-                  <div><dt>Tujuan countdown</dt><dd>{eventDateLabels(values.countdownDate || eventDate).full} · {values.countdownTime || "00:00"} WIB</dd></div>
+                  <div><dt>Tujuan countdown</dt><dd>{eventDateLabels(values.countdownDate || eventDate).full}{(values.countdownDate || eventDate) && ` · ${values.countdownTime || "00:00"} WIB`}</dd></div>
                   <div><dt>Informasi hadiah</dt><dd>{giftEnabled ? "Ditampilkan" : "Disembunyikan"} · {giftAccounts.length} informasi</dd></div>
                   <div><dt>Batas akses</dt><dd>{values.deviceLimitEnabled==="false" ? "Tanpa limit global" : `${values.deviceLimit} browser per undangan`}</dd></div>
                 </dl>
@@ -2445,6 +2432,11 @@ function App() {
     (message: string, error = false) => setStatus({ message, error }),
     [],
   );
+  useEffect(() => {
+    if (!status || status.error) return;
+    const timer = setTimeout(() => setStatus(undefined), 3000);
+    return () => clearTimeout(timer);
+  }, [status]);
   const clearSession = useCallback(() => {
     csrf.current = "";
     pendingConfirmation.current?.(false);

@@ -16,14 +16,19 @@ func escapeHTML(s string) string {
 func firstWord(value, fallback string) string {
 	words := strings.Fields(value)
 	if len(words) == 0 {
-		words = strings.Fields(fallback)
+		return fallback
 	}
 	return words[0]
+}
+func renderEventTemplate(template, eventDate string, settings map[string]any) string {
+	return strings.NewReplacer("{{EVENT_DATE}}", escapeHTML(eventDateLabel(eventDate)),
+		"{{PARTNER_ONE}}", escapeHTML(firstWord(text(settings["partnerOneName"]), "Mempelai Pertama")),
+		"{{PARTNER_TWO}}", escapeHTML(firstWord(text(settings["partnerTwoName"]), "Mempelai Kedua"))).Replace(template)
 }
 func eventDateLabel(value string) string {
 	date, err := time.Parse("2006-01-02", value)
 	if err != nil {
-		date, _ = time.Parse("2006-01-02", "2026-11-22")
+		return "Tanggal akan diinformasikan"
 	}
 	months := [...]string{"Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"}
 	weekdays := [...]string{"Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"}
@@ -107,15 +112,12 @@ func (a *App) html(w http.ResponseWriter, r *http.Request) {
 	}
 	settings := s["value"].(map[string]any)
 	eventDate, venue := text(settings["eventDate"]), strings.TrimSpace(text(settings["venueName"]))
-	if eventDate == "" {
-		eventDate = "2026-11-22"
-	}
 	if venue == "" {
-		venue = "Arjuna Ballroom, Alam Indah Resto"
+		venue = "Lokasi akan diinformasikan"
 	}
 	title, description := text(settings["linkPreviewTitle"]), text(settings["linkPreviewDescription"])
 	if title == "" {
-		title = "Undangan Pernikahan " + firstWord(text(settings["partnerOneName"]), "Firsta Adi Pradana") + " & " + firstWord(text(settings["partnerTwoName"]), "Talitha Syahda Arundatie")
+		title = "Undangan Pernikahan " + firstWord(text(settings["partnerOneName"]), "Mempelai Pertama") + " & " + firstWord(text(settings["partnerTwoName"]), "Mempelai Kedua")
 	}
 	if description == "" {
 		description = eventDateLabel(eventDate) + " · " + venue + "."
@@ -139,7 +141,7 @@ func (a *App) html(w http.ResponseWriter, r *http.Request) {
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="%s">`, escapeHTML(a.Config.Origin), id, title)
 	}
-	html := strings.ReplaceAll(string(file), "{{EVENT_DATE}}", escapeHTML(eventDateLabel(eventDate)))
+	html := renderEventTemplate(string(file), eventDate, settings)
 	result := regexp.MustCompile(`<title>.*?</title>`).ReplaceAllStringFunc(html, func(string) string { return metadata })
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Content-Length", fmt.Sprint(len(result)))

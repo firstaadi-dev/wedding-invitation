@@ -552,12 +552,23 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal(partial.value.settings.whatsappTemplate,template);
       const cleared = await adminRequest('/api/admin/content',{method:'PUT',data:{linkPreviewTitle:'',linkPreviewDescription:''}});
       assert.equal(cleared.response.status,200);
-      assert.ok((await request('/')).value.includes('property="og:title" content="Undangan Pernikahan Firsta &amp; Talitha"'));
+      assert.ok((await request('/')).value.includes('property="og:title" content="Undangan Pernikahan Mempelai Pertama &amp; Mempelai Kedua"'));
       const changedEvent = await adminRequest('/api/admin/content',{method:'PUT',data:{partnerOneName:'  ',partnerTwoName:'',linkPreviewTitle:'',linkPreviewDescription:'',eventDate:'2027-01-09',venueName:'Gedung Baru'}});
       assert.equal(changedEvent.response.status,200);
       const page = await request('/u/'+token);
       assert.equal(page.response.status,200);
-      assert.ok(page.value.includes('<title>Undangan Pernikahan Firsta &amp; Talitha</title>'));
+      assert.ok(page.value.includes('<title>Undangan Pernikahan Mempelai Pertama &amp; Mempelai Kedua</title>'));
+      assert.ok(page.value.includes('<h1>Mempelai Pertama <em>&</em> Mempelai Kedua</h1>'));
+      await adminRequest('/api/admin/content',{method:'PUT',data:{eventDate:'',venueName:''}});
+      const blankEvent = await request('/u/'+token);
+      assert.ok(blankEvent.value.includes('Tanggal akan diinformasikan · Lokasi akan diinformasikan.'));
+      assert.ok(!blankEvent.value.includes('Arjuna Ballroom'));
+      await adminRequest('/api/admin/content',{method:'PUT',data:{partnerOneName:'Nara <Satu>',partnerTwoName:'Dimas & Dua'}});
+      const named = await request('/u/'+token);
+      assert.ok(named.value.includes('<h1>Nara <em>&</em> Dimas</h1>'));
+      assert.ok(named.value.includes('<title>Undangan Pernikahan Nara &amp; Dimas</title>'));
+      await adminRequest('/api/admin/content',{method:'PUT',data:{partnerOneName:'<Nara>',partnerTwoName:'Dimas'}});
+      assert.ok((await request('/u/'+token)).value.includes('<h1>&lt;Nara&gt; <em>&</em> Dimas</h1>'));
       assert.ok(page.value.includes('property="og:description" content="Sabtu, 9 Januari 2027 · Gedung Baru."'));
     });
     await t.test('preview thumbnails are public JPEGs, replace safely, and cannot expose private media',async () => {

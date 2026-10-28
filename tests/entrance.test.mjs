@@ -60,14 +60,16 @@ const page = readFileSync(new URL('../frontend/index.html', import.meta.url), 'u
 assert.doesNotMatch(page, /<nav\b|hamburger|bottom-nav/i);
 assert.equal((page.match(/class="trees trees-left"/g) || []).length, 8);
 assert.equal((page.match(/class="trees trees-right"/g) || []).length, 8);
-assert.match(page, /Firsta Adi Pradana/);
-assert.match(page, /Talitha Syahda Arundatie/);
-assert.match(page, /22 November 2026/);
+assert.match(page, /Mempelai Pertama/);
+assert.match(page, /Mempelai Kedua/);
+assert.doesNotMatch(page, /Firsta|Talitha|Nugroho|Arieta|Sudaryatno|Wuri/);
+assert.match(page, /Tanggal akan diinformasikan/);
+assert.match(page, /Lokasi akan diinformasikan/);
+assert.doesNotMatch(page, /22 November 2026|Arjuna Ballroom/);
 assert.doesNotMatch(page, /Buka Google Maps|maps\.app\.goo\.gl/);
 assert.doesNotMatch(page, /Beserta keluarga besar|class="farewell-date"/);
 
 
-for (const name of ['Nugroho Andang Hapsoro', 'Arieta Rahmasari', 'Sudaryatno', 'Wuri Wahyuningsih']) assert.match(page, new RegExp(name));
 assert.match(page, /Buka undangan/);
 assert.doesNotMatch(page, /Undangan Pernikahan · Adat Solo|class="full-names"/);
 assert.match(page, /lang="ar" dir="rtl"/);
@@ -78,6 +80,6 @@ assert.match(gifts, /<summary class="guest-button">[\s\S]*?<span>Berbagi tanda k
 assert.equal((gifts.match(/class="guest-paper gift-paper"/g) || []).length,1);
 assert.match(gifts, /id="gift-accounts"/);
 const content = readFileSync(new URL('../frontend/content.js', import.meta.url), 'utf8');
-for (const account of ['0033 1600 0000','1350018340537']) assert.ok(content.includes(account));
+assert.doesNotMatch(content, /Firsta|Talitha|Nugroho|Arieta|Sudaryatno|Wuri|0033 1600 0000|1350018340537/);
 
 console.log('Lolos: parallax, transisi section 3D, kartu berulang saat masuk layar dari kedua arah scroll, fallback tanpa observer, dan konten undangan.');

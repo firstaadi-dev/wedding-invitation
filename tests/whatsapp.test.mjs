@@ -60,3 +60,15 @@ test('empty event times have readable fallbacks', () => {
   assert.equal(invitationMessage('{jam_acara_1} / {jam_acara_2}', {name:'Tamu',link:'https://example.invalid'}),
     'Waktu akan diinformasikan / Waktu akan diinformasikan');
 });
+
+test('missing names never fall back to another couple', () => {
+  const template = '{nama_mempelai_1}|{nama_mempelai_2}|{ayah_mempelai_1}|{ibu_mempelai_1}|{ayah_mempelai_2}|{ibu_mempelai_2}';
+  assert.equal(invitationMessage(template, {name:'Tamu',link:'https://example.invalid'}), '|||||');
+  assert.doesNotMatch(defaultWhatsappTemplate, /Firsta|Talitha/);
+});
+
+test('unset event dates and locations use neutral messages', () => {
+  const guest = {name:'Tamu', link:'https://example.invalid'};
+  assert.equal(invitationMessage('{tanggal} | {tempat}', guest, whatsappEvent({})), 'Tanggal akan diinformasikan | Lokasi akan diinformasikan');
+  assert.equal(invitationMessage('{tanggal} | {tempat}', guest), 'Tanggal akan diinformasikan | Lokasi akan diinformasikan');
+});
