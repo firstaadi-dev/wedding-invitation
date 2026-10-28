@@ -27,9 +27,7 @@ Kami mengundang Bapak/Ibu/Saudara/i untuk hadir dalam pernikahan kami.
 Informasi acara dan konfirmasi kehadiran tersedia melalui undangan berikut:
 {link}
 
-Terima kasih atas doa restunya.
-
-Firsta & Talitha`
+Terima kasih atas doa restunya.`
 
 func (a *App) content(ctx context.Context, q db, tenant string, admin bool) map[string]any {
 	s := row(ctx, q, "SELECT value FROM wedding.settings WHERE tenant_id=$1", tenant)
