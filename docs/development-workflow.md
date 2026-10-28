@@ -7,14 +7,14 @@ Alur repository: **main → feature branch → staging → main**.
 | Aktivitas | GitHub Actions | Deployment |
 | --- | --- | --- |
 | Push ke feature branch | Tidak berjalan | Tidak ada |
-| PR feature → staging | Tidak berjalan | Tidak ada |
+| PR feature → staging | Validasi alur branch, tes, build kedua image | Tidak ada |
 | Merge/push ke staging | Tes, build/publikasi image yang berubah | Staging, jika `STAGING_VPS_DEPLOY_ENABLED=true` |
-| PR staging → main | Tidak berjalan | Tidak ada |
+| PR staging → main | Validasi alur branch, tes, build kedua image | Tidak ada |
 | Merge/push ke main | Tes, build/publikasi image yang berubah | Production, jika `VPS_DEPLOY_ENABLED=true` |
-| PR feature → main | Tidak berjalan; alur ini tidak diizinkan secara proses | Tidak ada |
+| PR feature → main | Branch flow gagal | Tidak ada |
 | Run workflow pada branch feature | Branch flow gagal | Tidak ada |
 
-Workflow: [deploy.yml](../.github/workflows/deploy.yml). Pemeriksaan branch: [branch_policy.py](../scripts/branch_policy.py). Workflow otomatis hanya berjalan pada push ke `staging` atau `main`, termasuk hasil merge PR. Target PR mengikuti proses tim: feature ke `staging`, lalu `staging` ke `main`; workflow tidak memeriksa asal branch PR karena trigger PR dinonaktifkan. Nama feature branch tidak diwajibkan memakai prefix tertentu.
+Workflow: [deploy.yml](../.github/workflows/deploy.yml). Pemeriksaan branch: [branch_policy.py](../scripts/branch_policy.py). PR ke `staging` atau `main` menjalankan tes dan build tanpa memublikasikan image atau mengakses server deployment. Push ke kedua branch tetap menjalankan pemeriksaan dan deployment sesuai gate. Nama feature branch tidak diwajibkan memakai prefix tertentu.
 
 ## Mulai fitur baru
 
@@ -34,7 +34,7 @@ git commit -m "Implement nama fitur"
 git push -u origin feat/nama-fitur
 ```
 
-Di GitHub, buka PR dengan **base: staging** dan **compare: feat/nama-fitur**. Review perubahan sebelum merge; tes dan build berjalan setelah merge ke `staging`.
+Di GitHub, buka PR dengan **base: staging** dan **compare: feat/nama-fitur**. Review perubahan dan tunggu **Required checks** lulus sebelum merge; tes dan build berjalan lagi setelah merge ke `staging`.
 
 ## Uji staging
 
@@ -55,7 +55,7 @@ Fitur berikutnya kembali dimulai dari `main` terbaru. Karena feature branch memb
 Agar GitHub mewajibkan review PR dan membatasi direct push, aktifkan branch protection/ruleset untuk **main** dan **staging**:
 
 - Require a pull request before merging.
-- Jangan mewajibkan **Required checks** dari workflow ini sebelum merge: trigger PR dinonaktifkan sehingga check tersebut tidak berjalan pada PR.
+- Wajibkan status check **Required checks** dari GitHub Actions sebelum merge. Aktifkan setelah workflow ini tersedia pada branch tujuan dan check pernah berjalan pada PR; periksa juga aturan yang sudah ada sebelum mengubahnya.
 - Terapkan aturan juga untuk administrator/bypass bila alur perlu diwajibkan untuk seluruh pengguna.
 - Nonaktifkan force push dan penghapusan kedua branch.
 - Pertahankan metode merge commit; jangan mewajibkan linear history karena alur ini menggunakan merge commit.
