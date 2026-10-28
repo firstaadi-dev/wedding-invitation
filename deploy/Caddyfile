@@ -33,7 +33,7 @@
     handle /company/dashboard {
         redir https://{$CMS_DOMAIN}/ 302
     }
-    @company path /company /company/ /company.html /assets/*
+    @company path /company /company/ /company.html /robots.txt /sitemap.xml /assets/*
     handle @company {
         import frontend
     }

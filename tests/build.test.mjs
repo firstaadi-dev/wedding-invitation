@@ -12,3 +12,13 @@ test('Go template assets have stable entry names and all local references exist'
 test('default WhatsApp message stays identical between Go and browser',async()=>{
  const source=await readFile('backend/internal/app/admin.go','utf8');assert.ok(source.includes('`'+defaultWhatsappTemplate+'`'));
 });
+test('sitemap and structured data describe the public company page',async()=>{
+ const html=await readFile('frontend/dist/company.html','utf8');
+ const sitemap=await readFile('frontend/dist/sitemap.xml','utf8');
+ const urls=[...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match=>match[1]);
+ assert.deepEqual(urls,['https://weddinvita.id/company']);
+ assert.ok(html.includes('<link rel="canonical" href="https://weddinvita.id/company">'));
+ const structured=JSON.parse(html.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)[1]);
+ assert.equal(structured['@type'],'Organization');
+ assert.equal(structured.url,urls[0]);
+});
