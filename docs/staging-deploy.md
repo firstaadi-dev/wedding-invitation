@@ -1,6 +1,6 @@
 # Staging pada VPS yang sama
 
-Branch `staging` menjalankan workflow `Build and deploy VPS` saat push. Workflow memeriksa tes, membangun image commit SHA di GHCR, lalu melakukan deployment hanya jika repository variable `STAGING_VPS_DEPLOY_ENABLED=true`. Branch `main` memakai konfigurasi production. Pull request dan push ke branch feature tidak memicu workflow.
+Branch `staging` menjalankan workflow `Build and deploy VPS` saat push. Workflow memeriksa tes, membangun image commit SHA di GHCR, lalu melakukan deployment hanya jika repository variable `STAGING_VPS_DEPLOY_ENABLED=true`. Branch `main` memakai konfigurasi production. Pull request ke `staging` atau `main` menjalankan pemeriksaan dan build tanpa publikasi image atau deployment; push ke branch feature tidak memicu workflow.
 
 | Konfigurasi | Production | Staging |
 | --- | --- | --- |
