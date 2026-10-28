@@ -1,0 +1,23 @@
+{
+  "$kind": "http-request",
+  "url": "{{cmsBaseUrl}}/api/admin/register",
+  "method": "POST",
+  "description": "Register through Firebase email/password. Consent version is required. New session awaits verification before billing. Existing legacy accounts are not linked or migrated.",
+  "headers": {
+    "Accept": "application/json",
+    "Origin": "{{cmsOrigin}}",
+    "Content-Type": "application/json"
+  },
+  "order": 1000,
+  "body": {
+    "type": "json",
+    "content": "{\"email\": \"{{billingEmail}}\", \"password\": \"{{billingPassword}}\", \"name\": \"{{billingName}}\", \"acceptedTerms\": \"2026-10-28\"}"
+  },
+  "scripts": [
+    {
+      "type": "afterResponse",
+      "language": "text/javascript",
+      "code": "pm.test('Request succeeds',()=>pm.response.to.have.status(201));\nconst session=pm.response.json(); pm.collectionVariables.set('billingCookie',pm.response.headers.get('Set-Cookie').split(';')[0]); pm.collectionVariables.set('billingCsrf',session.csrf); pm.test('Account awaits payment',()=>pm.expect(session.account.subscription.active).to.eql(false));\npm.test('Firebase verification is required',()=>{pm.expect(session.account.authProvider).to.eql('firebase');pm.expect(session.account.verificationRequired).to.eql(true);});"
+    }
+  ]
+}

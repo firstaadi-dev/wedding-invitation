@@ -98,10 +98,17 @@ async function load() {
   });
   renderGallery(media);
   if (settings.mapEmbedUrl) {
-    const frame = document.createElement('iframe');
-    frame.src = settings.mapEmbedUrl;frame.title = mapTitle(venueName);
-    frame.loading = 'lazy';frame.referrerPolicy = 'strict-origin-when-cross-origin';frame.allowFullscreen = true;
-    document.querySelector('.map-placeholder').replaceWith(frame);
+    const placeholder = document.querySelector('.map-placeholder');
+    const description = document.createElement('p');
+    description.textContent = 'Memuat peta menghubungkan browser Anda ke Google Maps. Undangan tetap dapat dibaca tanpa memuat peta.';
+    const button = document.createElement('button');button.type = 'button';button.className = 'button';button.textContent = 'Muat peta Google Maps';
+    button.addEventListener('click', () => {
+      const frame = document.createElement('iframe');
+      frame.src = settings.mapEmbedUrl;frame.title = mapTitle(venueName);frame.tabIndex = 0;
+      frame.referrerPolicy = 'no-referrer';frame.allowFullscreen = true;
+      placeholder.replaceWith(frame);frame.focus();
+    }, {once:true});
+    placeholder.replaceChildren(description, button);
   }
 }
 function photo(src,alt) {

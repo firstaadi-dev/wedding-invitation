@@ -85,7 +85,7 @@ npm run test:deploy
 
 ## Hosting
 
-Untuk VPS Ubuntu 24.04 dengan repo GitHub private, lihat [setup GitHub Actions dan deployment Docker](docs/vps-deploy.md). Workflow build/tes berjalan pada pull request dan `main`; deploy VPS baru aktif setelah `VPS_DEPLOY_ENABLED=true` dan repository secrets diisi.
+Untuk VPS Ubuntu 24.04 dengan repo GitHub private, lihat [setup GitHub Actions dan deployment Docker](docs/vps-deploy.md). Workflow build/tes berjalan pada pull request, `main`, dan `staging`; deploy production aktif setelah `VPS_DEPLOY_ENABLED=true` dan repository secrets diisi. Untuk staging pada VPS yang sama, ikuti [panduan staging](docs/staging-deploy.md); deployment staging memakai gate `STAGING_VPS_DEPLOY_ENABLED` tersendiri.
 
 Repository: https://github.com/firstaadi-dev/wedding-invitation
 
@@ -104,3 +104,11 @@ Scroll berhenti di batas section dengan native scroll snap; section panjang teta
 - [Status dan bukti verifikasi](docs/stitch-results.md)
 
 Nama kedua acara, tanggal, nama tempat, dan jam acara bisa diubah melalui CMS. Countdown memakai tanggal dan jam tujuan WIB yang dapat diatur (bawaan 22 November 2026 pukul 00.00). Template WhatsApp mendukung token tanggal serta tempat agar pesan mengikuti pengaturan acara. Migrasi memperluas slot galeri tanpa menghapus foto lama. Peta embed dapat diisi di CMS; tamu membuka Google Maps melalui tombol di embed peta. Perangkat mobile fisik, performa jaringan seluler dan runtime reduced motion belum diuji. Safari desktop telah melewati verifikasi tamu produksi dan membuka segel. Bukti build/test/runtime serta status custom subdomain tersedia di dokumen verifikasi.
+
+## Pendaftaran dan pembayaran
+
+Buat akun di CMS, bayar Rp199.000 melalui Midtrans Snap (QRIS), lalu gunakan undangan selama 12 bulan. Akun mandiri belum dapat mengakses CMS/undangan sebelum pembayaran terverifikasi. Setup, endpoint webhook, dan uji Sandbox ada di [panduan pembayaran](docs/midtrans-payments.md).
+
+## Alur pengerjaan
+
+Gunakan **main → feature branch → staging → main**: mulai fitur dari main terbaru, PR ke staging untuk pengujian, lalu PR staging ke main untuk release. Workflow memeriksa arah PR dan menjalankan tes/build sebelum deployment. Detail perintah dan branch protection ada di [panduan alur kerja](docs/development-workflow.md).

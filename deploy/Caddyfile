@@ -33,7 +33,7 @@
     handle /company/dashboard {
         redir https://{$CMS_DOMAIN}/ 302
     }
-    @company path /company /company/ /company.html /assets/*
+    @company path /company /company/ /company.html /terms /terms/ /privacy /privacy/ /cookie-policy /cookie-policy/ /refund-policy /acceptable-use /robots.txt /sitemap.xml /assets/*
     handle @company {
         import frontend
     }
@@ -42,7 +42,7 @@
     }
 }
 {$CMS_DOMAIN} {
-    @backend path /api/admin/* /api/invitation /api/wishes /media/* /preview-image/* /preview /healthz
+    @backend path /api/payments/midtrans/notification /api/admin/* /api/invitation /api/wishes /media/* /preview-image/* /preview /healthz
     handle @backend {
         import backend
     }
@@ -55,14 +55,14 @@
     handle /company/dashboard {
         redir https://{$CMS_DOMAIN}/ 302
     }
-    @cms path /admin /admin/* /api/admin/* /preview
+    @cms path /admin /admin/* /api/admin/* /api/payments/* /preview
     handle @cms {
         respond "Not found" 404
     }
     handle /assets/* {
         import frontend
     }
-    @company path /company /company/ /company.html
+    @company path /company /company/ /company.html /terms /terms/ /privacy /privacy/ /cookie-policy /cookie-policy/ /refund-policy /acceptable-use /robots.txt /sitemap.xml
     handle @company {
         import frontend
     }

@@ -74,7 +74,7 @@ Ambil host key dengan `ssh-keyscan`, lalu bandingkan fingerprint menggunakan con
 
 Set repository variable `VPS_DEPLOY_ENABLED=true` setelah VPS siap. Tanpa variable itu, image dari `main` tetap diterbitkan, tetapi VPS tidak disentuh. Pastikan kedua package `REPO-frontend` dan `REPO-backend` tetap private dan mengizinkan Actions repository ini. `GITHUB_TOKEN` menerbitkan image; token VPS hanya menariknya. Batasi akses tulis repository/workflow karena workflow memakai secrets.
 
-Pull request menjalankan build kedua image, tes Go, helper undangan, tes deployment, dan integrasi/Postman pada PostgreSQL disposable di CI. Image PR tidak dipublikasikan. Publikasi serta deployment hanya dari `main`.
+Pull request menjalankan build kedua image, tes Go, helper undangan, tes deployment, dan integrasi/Postman pada PostgreSQL disposable di CI. Image PR tidak dipublikasikan. Publikasi serta deployment mendukung `main` dan `staging`, dengan gate serta direktori terpisah. Lihat [panduan staging](staging-deploy.md) untuk persiapan staging pada VPS yang sama.
 
 ## Pemilihan deployment
 

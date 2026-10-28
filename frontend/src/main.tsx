@@ -21,6 +21,8 @@ import { importRows, saveImportedGuests } from "../guest-import.js";
 import { defaultEventDate, defaultVenueName, eventDateLabels } from "../event.js";
 import type {
   Account,
+  Billing,
+  Payment,
   Session,
   Guest,
   Content,
@@ -227,6 +229,9 @@ function Login({
   api: API;
   onLogin: (s: Session) => Promise<void>;
 }) {
+  const [registering,setRegistering]=useState(location.hash==="#register");
+  const [recovering,setRecovering]=useState(false);
+  const [message,setMessage]=useState("");
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -235,8 +240,13 @@ function Login({
     setBusy(true);
     setError("");
     try {
+      if(recovering){
+        await api("/api/admin/password-reset","POST",Object.fromEntries(new FormData(form)));
+        setMessage("Jika alamat ini memiliki akun Firebase Weddinvita, tautan pemulihan akan dikirim. Periksa inbox dan spam. Untuk akun lama yang belum dimigrasikan, hubungi support@weddinvita.id.");
+        return;
+      }
       const session = await api<Session>(
-        "/api/admin/login",
+        registering ? "/api/admin/register" : "/api/admin/login",
         "POST",
         Object.fromEntries(new FormData(form)),
       );
@@ -271,14 +281,16 @@ function Login({
       </section>
       <section className="login-form-side">
         <div className="login-panel">
-          <h2 id="login-title">Selamat datang</h2>
-          <p>Masuk untuk menyiapkan dan memantau undangan pernikahan Anda.</p>
+          <h2 id="login-title">{recovering ? "Atur ulang kata sandi" : registering ? "Buat akun undangan" : "Selamat datang"}</h2>
+          <p>{recovering ? "Masukkan email akun Anda untuk meminta tautan pemulihan." : registering ? "Rp199.000 untuk akses 12 bulan. Buat akun, bayar dengan QRIS, lalu siapkan undangan Anda." : "Masuk untuk menyiapkan dan memantau undangan pernikahan Anda."}</p>
+          {message && <p role="status" className="info-note">{message}</p>}
           <form id="login" onSubmit={submit} aria-busy={busy}>
             {error && (
               <p id="login-error" className="form-error" role="alert">
                 {error}
               </p>
             )}
+            {registering && <label>Nama pasangan<input name="name" required maxLength={120} autoComplete="name" placeholder="Contoh: Nama kedua mempelai" disabled={busy}/></label>}
             <label>
               Email
               <input
@@ -291,29 +303,88 @@ function Login({
                 disabled={busy}
               />
             </label>
-            <label>
+            {!recovering && <label>
               Kata sandi
               <input
                 name="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete={registering ? "new-password" : "current-password"}
                 required
                 maxLength={1024}
-                placeholder="Masukkan kata sandi"
+                minLength={registering ? 8 : undefined}
+                pattern={registering ? "(?=.*[A-Z])(?=.*[0-9])(?=.*[\\x21-\\x2f\\x3a-\\x40\\x5b-\\x60\\x7b-\\x7e]).{8,1024}" : undefined}
+                aria-describedby={registering ? "password-requirements" : undefined}
+                placeholder={registering ? "8+ karakter, kapital, angka dan simbol" : "Masukkan kata sandi"}
                 disabled={busy}
               />
-            </label>
+              {registering && <span id="password-requirements" className="help">Minimal 8 karakter, satu huruf kapital (A–Z), satu angka (0–9), dan satu simbol seperti !, @, atau #.</span>}
+            </label>}
+            {registering && <label className="legal-consent"><input type="checkbox" name="acceptedTerms" value="2026-10-28" required disabled={busy}/><span>Saya menyetujui <a href="/terms" target="_blank" rel="noopener">Syarat Layanan</a>, termasuk kebijakan No Refund dengan hak konsumen yang tetap berlaku, dan telah membaca <a href="/privacy" target="_blank" rel="noopener">Kebijakan Privasi</a>.</span></label>}
             <button className="primary" type="submit" disabled={busy}>
-              {busy ? "Memeriksa…" : "Masuk ke akun"}
+              {busy ? "Memeriksa…" : recovering ? "Kirim tautan pemulihan" : registering ? "Buat akun & lanjut bayar" : "Masuk ke akun"}
               <span aria-hidden="true">→</span>
             </button>
           </form>
-          <p className="login-help">Akses khusus untuk pasangan pengantin.</p>
+          <p className="login-help">{recovering ? "Sudah ingat kata sandinya?" : registering ? "Sudah punya akun?" : "Belum punya akun?"} <button type="button" className="auth-switch" disabled={busy} onClick={()=>{setRegistering(recovering ? false : !registering);setRecovering(false);setError("");setMessage("");history.replaceState(null,"",registering || recovering ? "#masuk" : "#register");}}>{recovering || registering ? "Masuk" : "Buat akun"}</button></p>
+          {!registering && !recovering && <p className="login-help"><button type="button" className="auth-switch" disabled={busy} onClick={()=>{setRecovering(true);setError("");setMessage("");}}>Lupa kata sandi?</button></p>}
+          <p className="login-help"><a href="/terms">Syarat layanan</a> · <a href="/privacy">Privasi</a> · <a href="mailto:support@weddinvita.id">Bantuan</a></p>
         </div>
         <p className="login-footer">weddinvita</p>
       </section>
     </main>
   );
+}
+function VerificationScreen({api,session,onVerified,onLogout}:{api:API;session:Session;onVerified:(s:Session)=>Promise<void>;onLogout:()=>void}){
+  const [busy,setBusy]=useState(false),[error,setError]=useState(""),[message,setMessage]=useState(session.emailSent===false ? "Email verifikasi belum terkirim. Gunakan tombol Kirim ulang email untuk mencoba lagi." : "Buka tautan verifikasi di email Anda, lalu periksa status di sini. Periksa folder spam jika belum terlihat.");
+  async function check(){setBusy(true);setError("");try{const s=await api<Session>("/api/admin/session");if(!s.account.verificationRequired)await onVerified(s);else setMessage("Email belum terverifikasi. Buka tautan verifikasi yang dikirim ke alamat akun Anda.");}catch(e){setError(errorMessage(e));}finally{setBusy(false);}}
+  async function resend(){setBusy(true);setError("");try{await api("/api/admin/verification-email","POST",{});setMessage("Email verifikasi dikirim. Periksa inbox dan spam, lalu pilih Saya sudah verifikasi.");}catch(e){setError(errorMessage(e));}finally{setBusy(false);}}
+  return <main className="billing-screen"><section className="panel billing-panel" aria-labelledby="verification-title"><a href="/" className="login-wordmark">weddinvita</a><h1 id="verification-title">Verifikasi email Anda</h1><p>Alamat akun: <strong>{session.account.email}</strong></p><p>Verifikasi diperlukan sebelum pembayaran dan akses undangan.</p><p role="status">{message}</p>{error && <p role="alert" className="form-error">{error}</p>}<button className="primary" disabled={busy} onClick={check}>Saya sudah verifikasi · Periksa status</button><button disabled={busy} onClick={resend}>Kirim ulang email</button><a href="mailto:support@weddinvita.id">Hubungi bantuan</a><button className="auth-switch" disabled={busy} onClick={onLogout}>Keluar dari akun</button></section></main>;
+}
+function BillingScreen({api, onActivated, onLogout}: {api:API;onActivated:(s:Session)=>Promise<void>;onLogout:()=>void}) {
+  const [billing,setBilling]=useState<Billing>();
+  const [initialChecked,setInitialChecked]=useState(false);
+  const [busy,setBusy]=useState(false);
+  const [error,setError]=useState("");
+  const activated=useRef(onActivated); activated.current=onActivated;
+  useEffect(()=>{
+    let live=true,checking=false;
+    const check=async()=>{
+      if(checking)return;checking=true;
+      try {
+        const value=await api<Billing>("/api/admin/billing/refresh","POST",{});
+        if(!live)return;
+        setBilling(value);setError("");
+        if(value.subscription.active)await activated.current(await api<Session>("/api/admin/session"));
+      }catch(e){if(live)setError(errorMessage(e));}finally{checking=false;if(live)setInitialChecked(true);}
+    };
+    api<Billing>("/api/admin/billing").then(v=>{if(live)setBilling(v);}).catch(e=>{if(live)setError(errorMessage(e));});
+    void check(); const timer=setInterval(check,20000);
+    return ()=>{live=false;clearInterval(timer);};
+  },[api]);
+  async function pay(){
+    setBusy(true);setError("");
+    try{const p=await api<Payment>("/api/admin/billing/payments","POST",{});if(!p.checkoutUrl)throw new Error("Pembayaran sedang disiapkan. Coba lagi sebentar.");location.assign(p.checkoutUrl);}
+    catch(e){setError(errorMessage(e));setBusy(false);}
+  }
+  async function refresh(){setBusy(true);setError("");try{const b=await api<Billing>("/api/admin/billing/refresh","POST",{});setBilling(b);if(b.subscription.active)await onActivated(await api<Session>("/api/admin/session"));}catch(e){setError(errorMessage(e));}finally{setBusy(false);}}
+  if(!initialChecked) return <main className="billing-screen"><p role="status">Memeriksa status pembayaran…</p></main>;
+  const expired=!!billing?.subscription.expiresAt;
+  const status=billing?.payment?.status;
+  return <main className="billing-screen"><section className="panel billing-panel" aria-labelledby="billing-title">
+    <a href="/" className="login-wordmark">weddinvita</a>
+    <p className="eyebrow">{expired ? "Perpanjang undangan Anda" : "Akun Anda sudah dibuat"}</p>
+    <h1 id="billing-title">{expired ? "Aktifkan kembali akses Anda" : "Satu langkah lagi menuju undangan Anda"}</h1>
+    <p>Bayar dengan QRIS melalui Midtrans. Akses dashboard dan undangan aktif setelah pembayaran terkonfirmasi.</p>
+    <div className="billing-price"><strong>Rp199.000</strong><span>Akses 12 bulan sejak pembayaran dikonfirmasi</span></div>
+    <ul><li>Kelola detail acara, foto, musik, dan tamu</li><li>Tautan undangan personal dan pembatasan browser</li><li>Konfirmasi kehadiran dan ucapan tamu</li></ul>
+    <p>Tidak ada tagihan otomatis.</p>
+    {billing?.available===false && <p role="status">Pembayaran sedang disiapkan. Silakan coba lagi nanti.</p>}
+    {status && <p role="status">Status pembayaran: {({creating:"sedang disiapkan",pending:"menunggu pembayaran",settlement:"terkonfirmasi",expire:"kedaluwarsa",cancel:"dibatalkan",deny:"ditolak",failure:"belum berhasil",refund:"dikembalikan",partial_refund:"dikembalikan sebagian"} as Record<string,string>)[status] || status}.</p>}
+    {error && <p role="alert" className="form-error">{error}</p>}
+    <button className="primary" onClick={pay} disabled={busy || !billing?.available}>{busy ? "Memproses…" : "Bayar Rp199.000 dengan QRIS"}</button>
+    <button onClick={refresh} disabled={busy}>Saya sudah bayar · Periksa status</button>
+    <button className="auth-switch" onClick={onLogout} disabled={busy}>Keluar dari akun</button>
+  </section></main>;
 }
 function GuestEditor({
   guest,
@@ -2480,6 +2551,10 @@ function App() {
       if (token !== csrf.current)
         throw new Error("Sesi berubah. Silakan masuk kembali.");
       if (!response.ok) {
+        if(response.status===402){
+          const fresh=await fetch("/api/admin/session");
+          if(fresh.ok && token===csrf.current){const s=await fresh.json();csrf.current=s.csrf;setSession(s);if(!s.account.subscription.active)setContent(undefined);}
+        }
         if (response.status === 401 && path !== "/api/admin/login")
           clearSession();
         throw Object.assign(
@@ -2496,6 +2571,7 @@ function App() {
     setGuests(await api<Guest[]>("/api/admin/guests"));
   const signedIn = async (s: Session) => {
     csrf.current = s.csrf;
+    if(s.account.verificationRequired || !s.account.subscription.active){setSession(s);setGuests([]);setContent(undefined);setLoading(false);return;}
     const [g, c] = await Promise.all([
       api<Guest[]>("/api/admin/guests"),
       api<Content>("/api/admin/content"),
@@ -2510,6 +2586,7 @@ function App() {
     api<Session>("/api/admin/session")
       .then(signedIn)
       .catch((e) => {
+        if(e.status===402){setLoading(false);return;}
         clearSession();
         if (e.status !== 401) notice(errorMessage(e), true);
       });
@@ -2529,7 +2606,7 @@ function App() {
   }, []);
   useEffect(() => {
     document.title = session
-      ? `weddinvita — ${pages[page]}`
+      ? (session.account.subscription.active ? `weddinvita — ${pages[page]}` : "weddinvita — Aktivasi akun")
       : "weddinvita — Masuk ke akun";
   }, [session, page]);
   const confirm: Confirm = (message, title, action) =>
@@ -2589,6 +2666,7 @@ function App() {
   const eventContext = whatsappEvent(content?.settings || {});
   const footer = (
     <div className="sidebar-footer">
+      {session?.account.subscription.expiresAt && <p className="help">Akses aktif sampai {new Date(session.account.subscription.expiresAt).toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric"})}</p>}
       <a
         className="preview-link"
         href="/preview"
@@ -2615,6 +2693,10 @@ function App() {
         </p>
       ) : !session ? (
         <Login api={api} onLogin={signedIn} />
+      ) : session.account.verificationRequired ? (
+        <VerificationScreen api={api} session={session} onVerified={signedIn} onLogout={logout}/>
+      ) : !session.account.subscription.active ? (
+        <BillingScreen api={api} onActivated={signedIn} onLogout={logout}/>
       ) : (
         content && (
           <div id="dashboard" className="dashboard">

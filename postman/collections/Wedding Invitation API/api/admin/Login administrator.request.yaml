@@ -1,5 +1,5 @@
 $kind: http-request
-description: Same-origin JSON only. Email identifies the tenant account; password verified using its scrypt hash. No public registration. Sets HttpOnly SameSite=Strict cookie, Secure in production. Rate limited.
+description: Same-origin JSON only. Email identifies the tenant account; password verified using its scrypt hash. Pending self-service accounts can log in to pay; CMS access requires an active entitlement. Sets HttpOnly SameSite=Strict cookie, Secure in production. Rate limited.
 url: "{{cmsBaseUrl}}/api/admin/login"
 method: POST
 headers:

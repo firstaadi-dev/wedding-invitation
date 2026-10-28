@@ -1,6 +1,6 @@
 # Account Migrations
 
-Public registration is disabled: no registration endpoint or page exists.
+Self-service registration uses `/api/admin/register` and requires payment before CMS access. This provisioning command is for administrator-managed accounts; it preserves legacy access (`billing_required=false`). See [Midtrans billing](../../../docs/midtrans-payments.md).
 
 Copy `customer.example.json` to a new `.json` file in this directory and set its email, unique slug, name and password hash environment variable. Example files are skipped. Generate the hash with `npm run admin:hash` (password on stdin), put it in the named environment variable, and run `npm run db:migrate` with a direct database connection. Keep plaintext passwords and password hashes out of Git.
 

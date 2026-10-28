@@ -22,6 +22,20 @@
         rewrite * /admin.html
         file_server
     }
+    @legal path /terms /privacy /cookie-policy
+    handle @legal {
+        rewrite * {path}.html
+        file_server
+    }
+    redir /terms/ /terms 308
+    redir /privacy/ /privacy 308
+    redir /cookie-policy/ /cookie-policy 308
+    redir /refund-policy /terms#refund 308
+    redir /acceptable-use /terms#acceptable-use 308
+    @crawler path /robots.txt /sitemap.xml
+    handle @crawler {
+        file_server
+    }
     @assets path /assets/*
     handle @assets {
         file_server

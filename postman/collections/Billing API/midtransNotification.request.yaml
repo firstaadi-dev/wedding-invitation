@@ -1,0 +1,22 @@
+{
+  "$kind": "http-request",
+  "url": "{{cmsBaseUrl}}/api/payments/midtrans/notification",
+  "method": "POST",
+  "description": "Public server webhook on CMS host; Origin/session/CSRF are not required. Verify SHA512(order_id + status_code + gross_amount + ServerKey) in constant time and fetch actual status from Midtrans. Match stored order, amount, currency, and environment. Duplicate/out-of-order delivery cannot extend access twice or regress settlement. Server failures return 503 for retry. Authenticated test/unrelated orders are acknowledged with 200 without changing entitlement. GET/HEAD return connectivity health only and cannot activate access.",
+  "headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "order": 5000,
+  "body": {
+    "type": "json",
+    "content": "{{notificationBody}}"
+  },
+  "scripts": [
+    {
+      "type": "afterResponse",
+      "language": "text/javascript",
+      "code": "pm.test('Request succeeds',()=>pm.response.to.have.status(200));"
+    }
+  ]
+}

@@ -955,3 +955,16 @@ footer > a:last-child {
     scroll-behavior: auto;
   }
 }
+
+.legal-content { max-width: 900px; padding-block: 64px; }
+.legal-eyebrow { color: var(--muted, #5c6257); font-size: 13px; }
+.legal-content h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.15; margin-block: 16px 24px; }
+.legal-intro { font-size: 19px; line-height: 1.7; }
+.legal-index { display: flex; flex-wrap: wrap; gap: 12px 24px; padding-block: 24px; border-block: 1px solid #dfe2d8; }
+.legal-content section { margin-top: 40px; scroll-margin-top: 100px; }
+.legal-content h2 { font-size: 23px; line-height: 1.4; }
+.legal-content p, .legal-content li { line-height: 1.85; overflow-wrap: anywhere; }
+.legal-content li + li { margin-top: 10px; }
+.legal-content a, footer nav a { text-decoration: underline; text-underline-offset: 4px; }
+footer nav { display: flex; flex-wrap: wrap; gap: 12px 24px; }
+@media (max-width: 760px) { .legal-content { padding-block: 36px; } .legal-intro { font-size: 17px; } }

@@ -16,3 +16,8 @@ postman/.dependencies/
 frontend/dist/
 **/__pycache__/
 !.env.test.example
+
+!.env.staging.example
+
+# Firebase Admin private keys must never enter Git.
+*firebase-adminsdk*.json

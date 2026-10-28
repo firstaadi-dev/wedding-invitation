@@ -1,9 +1,16 @@
+export type Subscription = { active: boolean; required: boolean; expiresAt: string | null };
+export type Payment = {id:string;status:string;amount:number;checkoutUrl:string|null;expiresAt:string};
+export type Billing = {subscription:Subscription;price:number;months:number;available:boolean;payment:Payment|null};
 export type Account = {
+  authProvider: "legacy" | "firebase";
+  verificationRequired: boolean;
+  subscription: Subscription;
   email: string;
   invitationOrigin: string;
   tenant: { id: string; slug: string; publicId: string; name: string };
 };
-export type Session = { csrf: string; account: Account };
+export type Session = {
+  emailSent?: boolean; csrf: string; account: Account };
 export type Attendance = "attending" | "not_attending" | "unsure";
 export type Guest = {
   id: string;

@@ -1,0 +1,23 @@
+{
+  "$kind": "http-request",
+  "method": "POST",
+  "url": "{{cmsBaseUrl}}/api/admin/verification-email",
+  "headers": {
+    "Origin": "{{cmsOrigin}}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "Cookie": "{{accountCookie}}",
+    "X-CSRF-Token": "{{accountCsrf}}"
+  },
+  "body": {
+    "type": "json",
+    "content": "{}"
+  },
+  "scripts": [
+    {
+      "type": "afterResponse",
+      "language": "text/javascript",
+      "code": "pm.test('Request accepted',()=>pm.response.to.have.status(200));\npm.test('No action link or credential in response',()=>pm.expect(pm.response.json()).to.deep.eql({ok:true}));"
+    }
+  ]
+}
