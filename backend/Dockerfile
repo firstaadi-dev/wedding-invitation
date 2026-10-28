@@ -1,20 +1,20 @@
-FROM node:22-trixie-slim AS templates
+FROM node:22-alpine3.23 AS templates
 WORKDIR /frontend
 COPY frontend/package*.json ./
 RUN npm ci
 COPY frontend/ ./
 RUN npm run build
 
-FROM golang:1.26-trixie AS build
-RUN apt-get update && apt-get install -y --no-install-recommends libvips-dev && rm -rf /var/lib/apt/lists/*
+FROM golang:1.26-alpine3.23 AS build
+RUN apk add --no-cache build-base pkgconf vips-dev
 WORKDIR /build
 COPY backend/go.* ./
 RUN go mod download
 COPY backend/ ./
 RUN go build -trimpath -o /invitation ./cmd/invitation
 
-FROM debian:trixie-slim
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libvips42t64 ffmpeg && rm -rf /var/lib/apt/lists/*
+FROM alpine:3.23
+RUN apk add --no-cache ca-certificates vips ffmpeg
 WORKDIR /app
 COPY --from=build /invitation /usr/local/bin/invitation
 COPY --from=templates /frontend/dist/index.html /frontend/dist/access.html /app/templates/

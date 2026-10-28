@@ -1,4 +1,4 @@
-FROM node:22-trixie-slim AS build
+FROM node:22-alpine3.23 AS build
 WORKDIR /build
 COPY frontend/package*.json ./
 RUN npm ci
