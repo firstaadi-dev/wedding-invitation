@@ -12,6 +12,7 @@ export default defineConfig(({mode})=>{
         server.middlewares.use((req, _res, next) => {
           req.url = req.url?.replace(/^\/company\/dashboard(?=\?|$)/, "/admin.html");
           req.url = req.url?.replace(/^\/company\/?(?=\?|$)/, "/company.html");
+          req.url = req.url?.replace(/^\/(terms|privacy|cookie-policy)\/?(?=\?|$)/, "/$1.html");
           if(req.headers.host===cmsHost && /^\/(?:[?].*)?$/.test(req.url||"")) req.url="/admin.html";
           req.url = req.url?.replace(/^\/admin\/?(?=\?|$)/, "/admin.html");
           next();
@@ -25,6 +26,9 @@ export default defineConfig(({mode})=>{
     rollupOptions: {
       input: {
         company: resolve(import.meta.dirname, "company.html"),
+        terms: resolve(import.meta.dirname, "terms.html"),
+        privacy: resolve(import.meta.dirname, "privacy.html"),
+        "cookie-policy": resolve(import.meta.dirname, "cookie-policy.html"),
         invitation: resolve(import.meta.dirname, "index.html"),
         access: resolve(import.meta.dirname, "access.html"),
         admin: resolve(import.meta.dirname, "admin.html"),

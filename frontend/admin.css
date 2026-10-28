@@ -2228,3 +2228,7 @@ dialog form > label {
 .billing-price span {font-size:14px;}
 .billing-panel ul {padding-left:20px;line-height:1.9;margin:0;}
 .billing-panel button {min-height:44px;}
+
+.login-panel .legal-consent { display:flex; align-items:flex-start; gap:12px; font-size:13px; line-height:1.7; font-weight:400; }
+.login-panel .legal-consent input { width:20px; min-width:20px; height:20px; margin-top:3px; padding:0; }
+.login-help a, .legal-consent a { color:inherit; text-decoration:underline; text-underline-offset:3px; }

@@ -14,6 +14,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/mail"
 	"net/url"
 	"os"
 	"regexp"
@@ -22,6 +23,7 @@ import (
 	"time"
 	"unicode/utf16"
 
+	firebaseauth "firebase.google.com/go/v4/auth"
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -30,11 +32,14 @@ import (
 )
 
 type Config struct {
+	FirebaseProjectID, FirebaseAPIKey, FirebaseCredentialsJSON                              string
+	ResendAPIKey, ResendAPIOrigin, EmailFrom, EmailReplyTo                                  string
 	MidtransServerKey, MidtransEnv, MidtransAPIOrigin                                       string
 	Origin, CMSOrigin, Endpoint, PublicKey, SecretKey, Region, Templates, FingerprintOrigin string
 	Production, TrustProxy                                                                  bool
 }
 type App struct {
+	Auth   *firebaseauth.Client
 	Pool   *pgxpool.Pool
 	Config Config
 	Client *http.Client
@@ -164,7 +169,29 @@ func New(pool *pgxpool.Pool, c Config) (*App, error) {
 			return nil, fmt.Errorf("MIDTRANS_API_ORIGIN is only allowed for local sandbox simulation")
 		}
 	}
-	return &App{pool, c, &http.Client{Timeout: 10 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}, nil
+	if c.EmailFrom == "" {
+		c.EmailFrom = "Weddinvita <no-reply@weddinvita.id>"
+	}
+	if c.EmailReplyTo == "" {
+		c.EmailReplyTo = "support@weddinvita.id"
+	}
+	if _, err := mail.ParseAddress(c.EmailFrom); err != nil {
+		return nil, fmt.Errorf("EMAIL_FROM is invalid")
+	}
+	if _, err := mail.ParseAddress(c.EmailReplyTo); err != nil {
+		return nil, fmt.Errorf("EMAIL_REPLY_TO is invalid")
+	}
+	if c.ResendAPIOrigin != "" {
+		u, e := url.Parse(c.ResendAPIOrigin)
+		if e != nil || c.Production || u.Scheme != "http" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || (u.Hostname() != "127.0.0.1" && u.Hostname() != "localhost") {
+			return nil, fmt.Errorf("RESEND_API_ORIGIN is only allowed for local email simulation")
+		}
+	}
+	a := &App{Pool: pool, Config: c, Client: &http.Client{Timeout: 10 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}
+	if err := a.configureFirebase(); err != nil {
+		return nil, err
+	}
+	return a, nil
 }
 func (a *App) Handler() http.Handler {
 	r := chi.NewRouter()
@@ -246,11 +273,15 @@ func (a *App) session(r *http.Request, admin bool) map[string]any {
 	if err != nil || !match(`^[A-Za-z0-9_-]{43}$`, cookie.Value) {
 		return nil
 	}
-	return row(r.Context(), a.Pool, `SELECT s.token_hash,s.guest_id,s.version,s.csrf,s.account_id::text AS account_id,g.name,COALESCE(g.tenant_id,s.tenant_id)::text AS tenant_id,t.slug AS tenant_slug,t.public_id::text AS public_id,t.name AS tenant_name,a.email,owner.billing_required,owner.paid_until
+	s := row(r.Context(), a.Pool, `SELECT s.firebase_auth_time,a.firebase_uid,s.token_hash,s.guest_id,s.version,s.csrf,s.account_id::text AS account_id,g.name,COALESCE(g.tenant_id,s.tenant_id)::text AS tenant_id,t.slug AS tenant_slug,t.public_id::text AS public_id,t.name AS tenant_name,a.email,owner.billing_required,owner.paid_until
  FROM wedding.sessions s LEFT JOIN wedding.guests g ON g.id=s.guest_id
  JOIN wedding.tenants t ON t.id=COALESCE(g.tenant_id,s.tenant_id)
  JOIN wedding.accounts owner ON owner.id=t.owner_id AND owner.active LEFT JOIN wedding.accounts a ON a.id=s.account_id
  WHERE s.token_hash=$1 AND s.expires_at>now() AND (($2 AND s.guest_id IS NULL AND a.active AND t.owner_id=a.id) OR (NOT $2 AND g.active=1 AND g.version=s.version AND (NOT owner.billing_required OR owner.paid_until>now())))`, hash(cookie.Value), admin)
+	if s != nil && admin && !a.firebaseSession(r.Context(), s) {
+		return nil
+	}
+	return s
 }
 func (a *App) authorized(r *http.Request, admin, mutation bool) map[string]any {
 	s := a.session(r, admin)
@@ -317,14 +348,21 @@ func (a *App) limited(w http.ResponseWriter, r *http.Request, action string, max
 	if ip == "" {
 		ip = "unknown"
 	}
-	value := row(r.Context(), a.Pool, `INSERT INTO wedding.rate_limits(key,hits,expires_at) VALUES($1,1,now()+$2*interval '1 second') ON CONFLICT(key) DO UPDATE SET hits=CASE WHEN rate_limits.expires_at<now() THEN 1 ELSE rate_limits.hits+1 END, expires_at=CASE WHEN rate_limits.expires_at<now() THEN EXCLUDED.expires_at ELSE rate_limits.expires_at END RETURNING hits`, hash(action+":"+ip), seconds)
+	a.limitedKey(w, r, action+":"+ip, maximum, seconds)
+}
+func (a *App) limitedKey(w http.ResponseWriter, r *http.Request, key string, maximum, seconds int) {
+	value := row(r.Context(), a.Pool, `INSERT INTO wedding.rate_limits(key,hits,expires_at) VALUES($1,1,now()+$2*interval '1 second') ON CONFLICT(key) DO UPDATE SET hits=CASE WHEN rate_limits.expires_at<now() THEN 1 ELSE rate_limits.hits+1 END, expires_at=CASE WHEN rate_limits.expires_at<now() THEN EXCLUDED.expires_at ELSE rate_limits.expires_at END RETURNING hits`, hash(key), seconds)
 	if number(value["hits"]) > maximum {
 		w.Header().Set("Retry-After", fmt.Sprint(seconds))
 		fail(429, "rate_limit", "Terlalu banyak percobaan. Silakan tunggu sebentar.")
 	}
 }
 func (a *App) account(s map[string]any) map[string]any {
-	return map[string]any{"email": s["email"], "subscription": subscription(s), "invitationOrigin": a.Config.Origin, "tenant": map[string]any{"id": s["tenant_id"], "slug": s["tenant_slug"], "publicId": s["public_id"], "name": s["tenant_name"]}}
+	provider := "legacy"
+	if text(s["firebase_uid"]) != "" {
+		provider = "firebase"
+	}
+	return map[string]any{"authProvider": provider, "verificationRequired": verificationRequired(s), "email": s["email"], "subscription": subscription(s), "invitationOrigin": a.Config.Origin, "tenant": map[string]any{"id": s["tenant_id"], "slug": s["tenant_slug"], "publicId": s["public_id"], "name": s["tenant_name"]}}
 }
 func logRequestFailure(r *http.Request, recovered any) {
 	method := r.Method
@@ -425,6 +463,14 @@ func (a *App) serve(w http.ResponseWriter, r *http.Request) {
 		jsonResponse(w, 200, map[string]string{"endpoint": a.Config.Endpoint, "publicKey": a.Config.PublicKey, "region": a.Config.Region})
 		return
 	}
+	if path == "/api/admin/password-reset" && method == "POST" {
+		a.passwordReset(w, r)
+		return
+	}
+	if path == "/api/admin/verification-email" && method == "POST" {
+		a.resendVerification(w, r)
+		return
+	}
 	if path == "/api/admin/register" && method == "POST" {
 		a.register(w, r)
 		return
@@ -522,17 +568,26 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 	if !emailOK || length(email) > 254 || !match(`^[^\s@]+@[^\s@]+\.[^\s@]+$`, strings.TrimSpace(email)) || !passwordOK || password == "" || length(password) > 1024 {
 		fail(400, "credentials", "Email atau kata sandi tidak valid.")
 	}
-	s := row(r.Context(), a.Pool, `SELECT a.id::text AS id,a.email,a.password_hash,a.billing_required,a.paid_until,t.id::text AS tenant_id,t.slug AS tenant_slug,t.public_id::text AS public_id,t.name AS tenant_name FROM wedding.accounts a JOIN wedding.tenants t ON t.owner_id=a.id WHERE a.email=$1 AND a.active`, strings.ToLower(strings.TrimSpace(email)))
+	s := row(r.Context(), a.Pool, `SELECT a.id::text AS id,a.email,a.password_hash,a.firebase_uid,a.billing_required,a.paid_until,t.id::text AS tenant_id,t.slug AS tenant_slug,t.public_id::text AS public_id,t.name AS tenant_name FROM wedding.accounts a JOIN wedding.tenants t ON t.owner_id=a.id WHERE a.email=$1 AND a.active`, strings.ToLower(strings.TrimSpace(email)))
 	encoded := strings.Repeat("0", 32) + ":" + strings.Repeat("0", 128)
 	if s != nil {
 		encoded = text(s["password_hash"])
 	}
-	if !passwordMatches(password, encoded) || s == nil {
+	if s != nil && text(s["firebase_uid"]) != "" {
+		token := a.firebasePassword(r.Context(), strings.ToLower(strings.TrimSpace(email)), password)
+		if token.UID != text(s["firebase_uid"]) {
+			fail(401, "invalid_login", "Email atau kata sandi tidak sesuai.")
+		}
+		s["firebase_auth_time"] = token.AuthTime
+		if !a.firebaseSession(r.Context(), s) {
+			fail(401, "invalid_login", "Email atau kata sandi tidak sesuai.")
+		}
+	} else if !passwordMatches(password, encoded) || s == nil {
 		fail(401, "invalid_login", "Email atau kata sandi tidak sesuai.")
 	}
 	a.reconcileSubscription(r.Context(), s)
 	token, csrf := secret(), secret()
-	exec(r.Context(), a.Pool, `INSERT INTO wedding.sessions(token_hash,csrf,account_id,tenant_id,expires_at) VALUES($1,$2,$3,$4,now()+interval '8 hours')`, hash(token), csrf, s["id"], s["tenant_id"])
+	exec(r.Context(), a.Pool, `INSERT INTO wedding.sessions(token_hash,csrf,account_id,tenant_id,expires_at,firebase_auth_time) VALUES($1,$2,$3,$4,now()+interval '8 hours',$5)`, hash(token), csrf, s["id"], s["tenant_id"], s["firebase_auth_time"])
 	a.cookie(w, "wedding_admin", token, 28800)
 	jsonResponse(w, 200, map[string]any{"csrf": csrf, "account": a.account(s)})
 }

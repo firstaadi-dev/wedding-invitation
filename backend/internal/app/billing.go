@@ -8,10 +8,13 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	firebaseauth "firebase.google.com/go/v4/auth"
 )
 
 const packagePrice = 199000
@@ -26,8 +29,11 @@ func subscription(s map[string]any) map[string]any {
 	}
 	return map[string]any{"required": required, "active": active, "expiresAt": s["paid_until"]}
 }
-func hasAccess(s map[string]any) bool { return s != nil && subscription(s)["active"] == true }
+func hasAccess(s map[string]any) bool {
+	return s != nil && !verificationRequired(s) && subscription(s)["active"] == true
+}
 func requireAccess(s map[string]any) {
+	requireVerified(s)
 	if !hasAccess(s) {
 		fail(402, "payment_required", "Aktifkan akses undangan dengan pembayaran Rp199.000 untuk 12 bulan.")
 	}
@@ -47,18 +53,33 @@ func selfServiceDefaults(settings map[string]any) {
 func (a *App) register(w http.ResponseWriter, r *http.Request) {
 	a.limited(w, r, "register", 5, 900)
 	_, v := body(w, r, 8192, false)
-	only(v, "email", "password", "name")
+	only(v, "email", "password", "name", "acceptedTerms")
 	email := strings.ToLower(strings.TrimSpace(text(v["email"])))
 	password := text(v["password"])
-	if length(email) > 254 || !match(`^[^\s@]+@[^\s@]+\.[^\s@]+$`, email) || length(password) < 12 || length(password) > 1024 {
-		fail(400, "registration", "Gunakan email valid dan kata sandi 12–1024 karakter.")
+	if length(email) > 254 || !match(`^[^\s@]+@[^\s@]+\.[^\s@]+$`, email) || !validAccountPassword(password) {
+		fail(400, "registration", "Gunakan email valid dan kata sandi 8–1024 karakter, minimal satu huruf kapital, satu angka, dan satu simbol.")
 	}
 	name := validName(v["name"])
-	encoded, err := PasswordHash(password)
-	must(err)
+	if text(v["acceptedTerms"]) != termsVersion {
+		fail(400, "terms_required", "Baca dan setujui syarat layanan untuk membuat akun.")
+	}
+	a.requireFirebaseEmail()
+	if row(r.Context(), a.Pool, `SELECT id FROM wedding.accounts WHERE email=$1`, email) != nil {
+		fail(409, "email_exists", "Email sudah terdaftar. Silakan masuk ke akun Anda.")
+	}
+	_, err := a.Auth.CreateUser(r.Context(), (&firebaseauth.UserToCreate{}).Email(email).Password(password).DisplayName(name))
+	if err != nil && !firebaseauth.IsEmailAlreadyExists(err) {
+		fail(503, "auth_unavailable", "Akun belum dapat dibuat. Silakan coba lagi.")
+	}
+	// A timed-out Neon write may leave an identity; retry proves its password and UID instead of linking by email alone.
+	identity := a.firebasePassword(r.Context(), email, password)
+	if strings.ToLower(text(identity.Claims["email"])) != email {
+		fail(401, "invalid_login", "Email akun belum dapat diverifikasi.")
+	}
 	token, csrf := secret(), secret()
+	var account map[string]any
 	result := a.transaction(r.Context(), func(q db) any {
-		s := row(r.Context(), q, `INSERT INTO wedding.accounts(email,password_hash,billing_required) VALUES($1,$2,true) ON CONFLICT(email) DO NOTHING RETURNING id::text AS account_id,email,billing_required,paid_until`, email, encoded)
+		s := row(r.Context(), q, `INSERT INTO wedding.accounts(email,password_hash,firebase_uid,billing_required,terms_version,terms_accepted_at) VALUES($1,NULL,$2,true,$3,now()) ON CONFLICT DO NOTHING RETURNING id::text AS account_id,email,firebase_uid,billing_required,paid_until`, email, identity.UID, termsVersion)
 		if s == nil {
 			fail(409, "email_exists", "Email sudah terdaftar. Silakan masuk ke akun Anda.")
 		}
@@ -66,10 +87,16 @@ func (a *App) register(w http.ResponseWriter, r *http.Request) {
 		for k, v := range t {
 			s[k] = v
 		}
+		s["firebase_auth_time"] = identity.AuthTime
+		if !a.firebaseSession(r.Context(), s) {
+			fail(401, "invalid_login", "Sesi akun belum dapat diverifikasi.")
+		}
 		exec(r.Context(), q, `INSERT INTO wedding.settings(tenant_id) VALUES($1)`, s["tenant_id"])
-		exec(r.Context(), q, `INSERT INTO wedding.sessions(token_hash,csrf,account_id,tenant_id,expires_at) VALUES($1,$2,$3,$4,now()+interval '8 hours')`, hash(token), csrf, s["account_id"], s["tenant_id"])
+		exec(r.Context(), q, `INSERT INTO wedding.sessions(token_hash,csrf,account_id,tenant_id,expires_at,firebase_auth_time) VALUES($1,$2,$3,$4,now()+interval '8 hours',$5)`, hash(token), csrf, s["account_id"], s["tenant_id"], identity.AuthTime)
+		account = s
 		return map[string]any{"csrf": csrf, "account": a.account(s)}
-	})
+	}).(map[string]any)
+	result["emailSent"] = a.verificationEmail(r.Context(), account) == nil
 	a.cookie(w, "wedding_admin", token, 28800)
 	jsonResponse(w, 201, result)
 }
@@ -77,7 +104,7 @@ func (a *App) register(w http.ResponseWriter, r *http.Request) {
 // Resolve a delayed/missing webhook before deciding which screen login should open.
 // Provider outages must not prevent authentication; the billing page can retry.
 func (a *App) reconcileSubscription(ctx context.Context, s map[string]any) {
-	if s == nil || hasAccess(s) || !a.paymentAvailable() {
+	if s == nil || verificationRequired(s) || hasAccess(s) || !a.paymentAvailable() {
 		return
 	}
 	account := s["account_id"]
@@ -160,6 +187,7 @@ func (a *App) billing(ctx context.Context, s map[string]any) map[string]any {
 }
 func (a *App) billingRoute(w http.ResponseWriter, r *http.Request) {
 	s := a.authorized(r, true, r.Method != "GET")
+	requireVerified(s)
 	if r.Method == "GET" && r.URL.Path == "/api/admin/billing" {
 		jsonResponse(w, 200, a.billing(r.Context(), s))
 		return
@@ -310,8 +338,9 @@ func (a *App) syncPayment(ctx context.Context, id string) {
 		if next == "settlement" && p["activated_at"] == nil {
 			// The account row lock makes two different paid orders additive, while the
 			// payment row lock makes duplicate webhook/refresh delivery idempotent.
-			account := row(ctx, q, `UPDATE wedding.accounts SET paid_until=GREATEST(COALESCE(paid_until,now()),now())+interval '12 months' WHERE id=$1 RETURNING paid_until`, p["account_id"])
+			account := row(ctx, q, `UPDATE wedding.accounts SET paid_until=GREATEST(COALESCE(paid_until,now()),now())+interval '12 months' WHERE id=$1 RETURNING paid_until,email`, p["account_id"])
 			exec(ctx, q, `UPDATE wedding.payments SET activated_at=now(),access_ends_at=$2 WHERE id=$1`, id, account["paid_until"])
+			a.queuePaymentEmail(ctx, q, id, account)
 		}
 		exec(ctx, q, `UPDATE wedding.payments SET status=$2,transaction_id=COALESCE(NULLIF($3,''),transaction_id),updated_at=now() WHERE id=$1`, id, next, text(value["transaction_id"]))
 		if next == "refund" {
@@ -319,4 +348,7 @@ func (a *App) syncPayment(ctx context.Context, id string) {
 		}
 		return nil
 	})
+	if err := a.DeliverPaymentEmails(ctx); err != nil {
+		log.Print("Payment confirmation email pending; retry scheduled.")
+	}
 }

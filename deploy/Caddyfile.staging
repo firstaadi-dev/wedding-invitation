@@ -23,7 +23,7 @@
     handle /company/dashboard {
         redir https://{$STAGING_CMS_DOMAIN:dashboard.weddinvita.cloud}/ 302
     }
-    @company path /company /company/ /company.html /assets/*
+    @company path /company /company/ /company.html /terms /terms/ /privacy /privacy/ /cookie-policy /cookie-policy/ /refund-policy /acceptable-use /robots.txt /sitemap.xml /assets/*
     handle @company {
         import staging_frontend
     }
@@ -54,7 +54,7 @@
     handle /assets/* {
         import staging_frontend
     }
-    @company path /company /company/ /company.html
+    @company path /company /company/ /company.html /terms /terms/ /privacy /privacy/ /cookie-policy /cookie-policy/ /refund-policy /acceptable-use /robots.txt /sitemap.xml
     handle @company {
         import staging_frontend
     }

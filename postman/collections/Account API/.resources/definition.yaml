@@ -1,0 +1,11 @@
+{
+  "$kind": "collection",
+  "description": "Email verification and reset contract. Firebase Auth and Resend are configured only on the backend.",
+  "variables": {
+    "cmsBaseUrl": "http://127.0.0.1:5174",
+    "cmsOrigin": "http://dashboard.localhost:5173",
+    "accountEmail": "",
+    "accountCookie": "",
+    "accountCsrf": ""
+  }
+}

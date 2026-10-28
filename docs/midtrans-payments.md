@@ -48,7 +48,7 @@ Kontrak: [`postman/specs/invitation.json`](../postman/specs/invitation.json). Ko
 
 | Endpoint | Kegunaan |
 | --- | --- |
-| `POST /api/admin/register` | Daftar nama pasangan, email, password minimal 12 karakter; membuat tenant, settings, dan sesi |
+| `POST /api/admin/register` | Daftar nama pasangan, email, password minimal 8 karakter dengan huruf kapital, angka, dan simbol; menerima syarat layanan dan memverifikasi email sebelum checkout; membuat tenant, settings, dan sesi |
 | `GET /api/admin/billing` | Membaca paket, masa akses, dan pembayaran terakhir milik akun |
 | `POST /api/admin/billing/payments` | Membuat/memakai ulang checkout Snap; body `{}` |
 | `POST /api/admin/billing/refresh` | Meminta status server Midtrans; body `{}` |
