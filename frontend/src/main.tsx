@@ -2503,6 +2503,11 @@ function App() {
     (message: string, error = false) => setStatus({ message, error }),
     [],
   );
+  useEffect(() => {
+    if (!status || status.error) return;
+    const timer = setTimeout(() => setStatus(undefined), 3000);
+    return () => clearTimeout(timer);
+  }, [status]);
   const clearSession = useCallback(() => {
     csrf.current = "";
     pendingConfirmation.current?.(false);
