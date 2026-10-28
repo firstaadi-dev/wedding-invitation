@@ -27,16 +27,14 @@ Kami mengundang Bapak/Ibu/Saudara/i untuk hadir dalam pernikahan kami.
 Informasi acara dan konfirmasi kehadiran tersedia melalui undangan berikut:
 {link}
 
-Terima kasih atas doa restunya.
-
-Firsta & Talitha`;
+Terima kasih atas doa restunya.`;
 
 export function invitationMessage(template, guest, event = {}) {
   const values = {
     nama:guest.name, link:guest.link, tanggal:event.date || 'Minggu, 22 November 2026', tempat:event.venue || 'Arjuna Ballroom, Alam Indah Resto',
-    nama_mempelai_1:event.partnerOneName || 'Firsta Adi Pradana', nama_mempelai_2:event.partnerTwoName || 'Talitha Syahda Arundatie',
-    ayah_mempelai_1:event.partnerOneFather || 'Nugroho Andang Hapsoro', ibu_mempelai_1:event.partnerOneMother || 'Arieta Rahmasari',
-    ayah_mempelai_2:event.partnerTwoFather || 'Sudaryatno', ibu_mempelai_2:event.partnerTwoMother || 'Wuri Wahyuningsih',
+    nama_mempelai_1:event.partnerOneName || '', nama_mempelai_2:event.partnerTwoName || '',
+    ayah_mempelai_1:event.partnerOneFather || '', ibu_mempelai_1:event.partnerOneMother || '',
+    ayah_mempelai_2:event.partnerTwoFather || '', ibu_mempelai_2:event.partnerTwoMother || '',
     tanggal_acara_1:event.ceremonyDate || event.date || 'Minggu, 22 November 2026',
     tanggal_acara_2:event.receptionDate || event.date || 'Minggu, 22 November 2026',
     jam_acara_1:event.ceremonyTime || 'Waktu akan diinformasikan', jam_acara_2:event.receptionTime || 'Waktu akan diinformasikan',
