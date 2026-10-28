@@ -111,6 +111,8 @@ function photo(src,alt) {
 }
 function startCountdown(time, date) {
   const target = Date.parse(`${date}T${time}:00+07:00`);
+  if (!Number.isFinite(target)) return;
+  document.querySelector('.countdown').hidden = false;
   const numbers = document.querySelectorAll('.countdown-units strong');
   const update = () => {
     countdownParts(target).forEach((value,index) => {numbers[index].textContent = String(value).padStart(2,'0');});

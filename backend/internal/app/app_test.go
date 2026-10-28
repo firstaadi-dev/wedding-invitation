@@ -122,7 +122,7 @@ func TestMetadataFallbacksHandleEmptyNamesAndCustomEventDate(t *testing.T) {
 	if got := eventDateLabel("2026-11-22"); got != "Minggu, 22 November 2026" {
 		t.Fatalf("unexpected Indonesian event date: %q", got)
 	}
-	if got := eventDateLabel("invalid"); got != "Minggu, 22 November 2026" {
+	if got := eventDateLabel("invalid"); got != "Tanggal akan diinformasikan" {
 		t.Fatalf("invalid stored date did not use the legacy default: %q", got)
 	}
 }

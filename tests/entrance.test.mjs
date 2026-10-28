@@ -63,7 +63,9 @@ assert.equal((page.match(/class="trees trees-right"/g) || []).length, 8);
 assert.match(page, /Mempelai Pertama/);
 assert.match(page, /Mempelai Kedua/);
 assert.doesNotMatch(page, /Firsta|Talitha|Nugroho|Arieta|Sudaryatno|Wuri/);
-assert.match(page, /22 November 2026/);
+assert.match(page, /Tanggal akan diinformasikan/);
+assert.match(page, /Lokasi akan diinformasikan/);
+assert.doesNotMatch(page, /22 November 2026|Arjuna Ballroom/);
 assert.doesNotMatch(page, /Buka Google Maps|maps\.app\.goo\.gl/);
 assert.doesNotMatch(page, /Beserta keluarga besar|class="farewell-date"/);
 

@@ -28,7 +28,7 @@ func renderEventTemplate(template, eventDate string, settings map[string]any) st
 func eventDateLabel(value string) string {
 	date, err := time.Parse("2006-01-02", value)
 	if err != nil {
-		date, _ = time.Parse("2006-01-02", "2026-11-22")
+		return "Tanggal akan diinformasikan"
 	}
 	months := [...]string{"Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"}
 	weekdays := [...]string{"Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"}
@@ -112,11 +112,8 @@ func (a *App) html(w http.ResponseWriter, r *http.Request) {
 	}
 	settings := s["value"].(map[string]any)
 	eventDate, venue := text(settings["eventDate"]), strings.TrimSpace(text(settings["venueName"]))
-	if eventDate == "" {
-		eventDate = "2026-11-22"
-	}
 	if venue == "" {
-		venue = "Arjuna Ballroom, Alam Indah Resto"
+		venue = "Lokasi akan diinformasikan"
 	}
 	title, description := text(settings["linkPreviewTitle"]), text(settings["linkPreviewDescription"])
 	if title == "" {
