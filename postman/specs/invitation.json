@@ -4380,7 +4380,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 4000,
-            "description": "Global WhatsApp message. Supports {nama}, {link}, {tanggal}, {tempat}, {jam_acara_1}, {jam_acara_2}; {link} is required. Values follow event settings. Admin-only."
+            "description": "Global WhatsApp message. Supports {nama}, {link}, {tanggal}, {tempat}, {jam_acara_1}, {jam_acara_2}; {link} is required. Values follow event settings. The default message has no fixed couple signature. Admin-only."
           },
           "linkPreviewTitle": {
             "type": "string",

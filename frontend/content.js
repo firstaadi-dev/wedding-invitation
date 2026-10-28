@@ -34,25 +34,24 @@ async function load() {
   responseToken = loadedToken;
   document.querySelector('#guest-name').textContent = guestName;
   document.querySelector('#response-guest').textContent = guestName;
-  const partners = [settings.partnerOneName === '' ? 'Mempelai Pertama' : (settings.partnerOneName || 'Firsta Adi Pradana'), settings.partnerTwoName === '' ? 'Mempelai Kedua' : (settings.partnerTwoName || 'Talitha Syahda Arundatie')];
+  const partners = [settings.partnerOneName?.trim() || 'Mempelai Pertama', settings.partnerTwoName?.trim() || 'Mempelai Kedua'];
   document.querySelector('#partner-one-name').textContent = partners[0];
   document.querySelector('#partner-two-name').textContent = partners[1];
-  document.querySelector('#partner-one-short').textContent = partners[0].split(/\s+/)[0];
-  document.querySelector('#partner-two-short').textContent = partners[1].split(/\s+/)[0];
+  document.querySelector('#partner-one-short').textContent = settings.partnerOneName?.trim() ? partners[0].split(/\s+/)[0] : partners[0];
+  document.querySelector('#partner-two-short').textContent = settings.partnerTwoName?.trim() ? partners[1].split(/\s+/)[0] : partners[1];
   document.querySelector('.envelope-date').textContent = dateLabels.short;
   document.querySelectorAll('.event-date').forEach((date, i) => {date.textContent = eventDateLabels(i === 0 ? schedule.ceremonyDate : schedule.receptionDate).full;});
   document.querySelectorAll('.event-venue').forEach((venue, i) => {venue.textContent = i === 0 ? schedule.ceremonyVenue : schedule.receptionVenue;});
   document.querySelector('#venue-name').textContent = venueName;
   for (const [id, key, fallback] of [
-    ['partner-one-father', 'partnerOneFather', 'Bapak Nugroho Andang Hapsoro'],
-    ['partner-one-mother', 'partnerOneMother', 'Ibu Arieta Rahmasari'],
-    ['partner-two-father', 'partnerTwoFather', 'Bapak Sudaryatno'],
-    ['partner-two-mother', 'partnerTwoMother', 'Ibu Wuri Wahyuningsih'],
+    ['partner-one-father', 'partnerOneFather', 'Bapak'],
+    ['partner-one-mother', 'partnerOneMother', 'Ibu'],
+    ['partner-two-father', 'partnerTwoFather', 'Bapak'],
+    ['partner-two-mother', 'partnerTwoMother', 'Ibu'],
   ]) {
-    const role = fallback.match(/^(Bapak|Ibu)/)[0];
-    document.querySelector(`#${id}`).textContent = settings[key] === '' ? '' : `${role} ${settings[key] || fallback.slice(role.length).trim()}`;
+    document.querySelector(`#${id}`).textContent = settings[key]?.trim() ? `${fallback} ${settings[key].trim()}` : '';
   }
-  document.title = `Undangan Pernikahan ${partners[0].split(/\s+/)[0]} & ${partners[1].split(/\s+/)[0]}`;
+  document.title = `Undangan Pernikahan ${document.querySelector('#partner-one-short').textContent} & ${document.querySelector('#partner-two-short').textContent}`;
   if (guestResponse) {
     for (const key of ['attendance','message']) responseForm.elements[key].value = guestResponse[key];
     responseForm.elements.guestCount.value = guestResponse.guestCount || 1;
@@ -69,10 +68,7 @@ async function load() {
   times[1].textContent = settings.receptionTime || 'Waktu akan diinformasikan';
   startCountdown(settings.countdownTime || '00:00', schedule.countdownDate);
   const gifts = document.querySelector('.gift-details');
-  const accounts = settings.giftAccounts || [
-    {bank:'blu by BCA Digital',number:'0033 1600 0000',owner:'Firsta Adi Pradana'},
-    {bank:'Bank Mandiri',number:'1350018340537',owner:'TALITHA SYAHDA ARUND'},
-  ];
+  const accounts = settings.giftAccounts || [];
   gifts.hidden = settings.giftEnabled === 'false' || !accounts.length;
   const giftContainer = document.querySelector('#gift-accounts');
   giftContainer.replaceChildren(...accounts.map(account => {

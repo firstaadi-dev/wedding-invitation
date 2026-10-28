@@ -290,7 +290,7 @@ function Login({
                 {error}
               </p>
             )}
-            {registering && <label>Nama pasangan<input name="name" required maxLength={120} autoComplete="name" placeholder="Contoh: Adi & Talitha" disabled={busy}/></label>}
+            {registering && <label>Nama pasangan<input name="name" required maxLength={120} autoComplete="name" placeholder="Contoh: Nama kedua mempelai" disabled={busy}/></label>}
             <label>
               Email
               <input
@@ -1695,12 +1695,12 @@ function SettingsForm({
     whatsappTemplate: textSetting("whatsappTemplate", defaultWhatsappTemplate),
     eventDate: textSetting("eventDate", defaultEventDate),
     venueName: textSetting("venueName", defaultVenueName),
-    partnerOneName: textSetting("partnerOneName", "Firsta Adi Pradana"),
-    partnerTwoName: textSetting("partnerTwoName", "Talitha Syahda Arundatie"),
-    partnerOneFather: textSetting("partnerOneFather", "Nugroho Andang Hapsoro"),
-    partnerOneMother: textSetting("partnerOneMother", "Arieta Rahmasari"),
-    partnerTwoFather: textSetting("partnerTwoFather", "Sudaryatno"),
-    partnerTwoMother: textSetting("partnerTwoMother", "Wuri Wahyuningsih"),
+    partnerOneName: textSetting("partnerOneName", ""),
+    partnerTwoName: textSetting("partnerTwoName", ""),
+    partnerOneFather: textSetting("partnerOneFather", ""),
+    partnerOneMother: textSetting("partnerOneMother", ""),
+    partnerTwoFather: textSetting("partnerTwoFather", ""),
+    partnerTwoMother: textSetting("partnerTwoMother", ""),
   }));
   const [busy, setBusy] = useState(false),
     [dirty, setDirty] = useState(false);
@@ -1732,20 +1732,7 @@ function SettingsForm({
       ? (content.settings.giftAccounts.map((item) =>
           item.type === "address" ? item : { ...item, type: "account" },
         ) as GiftOption[])
-      : [
-          {
-            type: "account",
-            bank: "blu by BCA Digital",
-            number: "0033 1600 0000",
-            owner: "Firsta Adi Pradana",
-          },
-          {
-            type: "account",
-            bank: "Bank Mandiri",
-            number: "1350018340537",
-            owner: "TALITHA SYAHDA ARUND",
-          },
-        ],
+      : []
   );
   const field = (
     name: string,
