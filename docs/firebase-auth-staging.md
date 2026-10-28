@@ -1,6 +1,10 @@
 # Firebase Auth dan email staging
 
-Project Firebase `weddinvita-8ef46` dipakai khusus staging; web app terdaftar sebagai Weddinvita Web. Buat project production terpisah nanti. Neon tetap menyimpan data aplikasi. Akun lama tetap menggunakan password hash lokal sampai migrasi identitas yang direncanakan secara eksplisit; email yang sama tidak otomatis menautkan akun.
+Project Firebase `weddinvita-8ef46` dipakai khusus staging; web app terdaftar sebagai Weddinvita Web. Buat project production terpisah nanti. Neon tetap menyimpan data aplikasi. Akun lama yang belum dimigrasikan tetap menggunakan password hash lokal; email yang sama tidak otomatis menautkan akun.
+
+Migrasi identitas staging dilakukan per akun dengan `invitation migrate-firebase-account --email EMAIL` (dry-run) lalu tambah `--apply`. Gunakan hanya koneksi database staging; perintah membatasi project Firebase ke `weddinvita-8ef46`. Email Firebase yang sudah ada adalah konflik, bukan identitas yang otomatis ditautkan. Migrasi mencabut sesi admin, mempertahankan ID akun dan tenant, serta mewajibkan verifikasi email setelah login. Password lama tetap berlaku meski belum memenuhi aturan password baru; reset berikutnya memakai aturan baru. Backup hash lama yang aman dan daftar akun untuk pemulihan diperlukan sebelum menjalankan migrasi.
+
+Jika ada kegagalan setelah reservasi UID Firebase, jangan mengulang atau menghapus UID secara otomatis: periksa apakah transaksi database sudah commit dan apakah akun Firebase masih disabled. Jika akun Neon sudah ditautkan, aktifkan UID yang sama setelah memverifikasi kecocokannya; jika belum, periksa identitas cadangan yang dinonaktifkan dan hapus hanya setelah memastikan tidak digunakan. Jangan gunakan migrasi ini untuk production tanpa rancangan dan pengujian cutover tersendiri.
 
 Auth Email/Password aktif; password minimal 8 karakter, setidaknya satu kapital ASCII, satu angka, dan satu simbol. Email wajib diverifikasi sebelum pembayaran. Firebase mengelola password reset dan mencabut sesi lama. Resend mengirim email verifikasi, pemulihan, serta konfirmasi pembayaran. Link verifikasi/reset adalah kredensial sementara: jangan dicatat dalam log.
 
