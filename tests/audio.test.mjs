@@ -28,7 +28,7 @@ test('music tries autoplay, opening button, music button, and first scroll while
   const page = readFileSync(new URL('../frontend/index.html', import.meta.url), 'utf8');
   assert.doesNotMatch(page, /<button\b[^>]*id="open-invitation"[^>]* disabled>/);
   const source = readFileSync(new URL('../frontend/content.js', import.meta.url), 'utf8').replace(/^import .*;\n/gm, '');
-  for (const trigger of ['autoplay', 'opening', 'music', 'scroll', 'no music']) {
+  for (const trigger of ['autoplay', 'opening', 'music', 'scroll', 'no music', 'no date']) {
     const nodes = new Map();
     function node(selector) {
       if (!nodes.has(selector)) nodes.set(selector, {
@@ -72,10 +72,16 @@ test('music tries autoplay, opening button, music button, and first scroll while
     });
     assert.equal(node('#open-invitation').disabled, false);
     assert.equal(plays, 0);
-    release({ok:true, json:async () => ({media:trigger === 'no music' ? {} : {music:'/song.mp3'}, settings:{giftAccounts:[], eventDate:'2027-01-09',ceremonyDate:'2027-01-08',receptionDate:'2027-01-10',ceremonyVenue:'Rumah',receptionVenue:'Gedung',countdownDate:'2027-01-07',countdownTime:'09:00'}})});
+    release({ok:true, json:async () => ({media:trigger === 'no music' ? {} : {music:'/song.mp3'}, settings:trigger === 'no date' ? {giftAccounts:[]} : {giftAccounts:[], eventDate:'2027-01-09',ceremonyDate:'2027-01-08',receptionDate:'2027-01-10',ceremonyVenue:'Rumah',receptionVenue:'Gedung',countdownDate:'2027-01-07',countdownTime:'09:00'}})});
     await new Promise(resolve => setImmediate(resolve));
     assert.equal(node('#open-invitation').disabled, false);
     assert.notEqual(node('#response-status').textContent, 'Formulir belum dapat dimuat. Muat ulang halaman.');
+    if (trigger === 'no date') {
+      assert.equal(countdownTarget, undefined);
+      assert.equal(node('.event-dateone').textContent, 'Tanggal akan diinformasikan');
+      assert.equal(node('.event-venueone').textContent, 'Lokasi akan diinformasikan');
+      continue;
+    }
     assert.equal(node('.event-dateone').textContent, 'Jumat, 8 Januari 2027');
     assert.equal(node('.event-datetwo').textContent, 'Minggu, 10 Januari 2027');
     assert.equal(node('.event-venueone').textContent, 'Rumah');
