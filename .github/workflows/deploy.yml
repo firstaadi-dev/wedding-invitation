@@ -80,7 +80,6 @@ jobs:
   verify:
     needs: branch-policy
     runs-on: ubuntu-24.04
-    container: golang:1.26-alpine3.23
     timeout-minutes: 20
     services:
       postgres:
@@ -88,13 +87,14 @@ jobs:
         env:
           POSTGRES_PASSWORD: invitation-test
           POSTGRES_DB: invitation_test
+        ports: ['5432:5432']
         options: >-
           --health-cmd "pg_isready -U postgres"
           --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       TEST_DATABASE_DISPOSABLE: '1'
-      TEST_DATABASE_URL: postgresql://postgres:invitation-test@postgres:5432/invitation_test?sslmode=disable
-      TEST_DATABASE_URL_UNPOOLED: postgresql://postgres:invitation-test@postgres:5432/invitation_test?sslmode=disable
+      TEST_DATABASE_URL: postgresql://postgres:invitation-test@127.0.0.1:5432/invitation_test?sslmode=disable
+      TEST_DATABASE_URL_UNPOOLED: postgresql://postgres:invitation-test@127.0.0.1:5432/invitation_test?sslmode=disable
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -103,13 +103,21 @@ jobs:
         with:
           path: ~/.npm
           key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json', 'frontend/package-lock.json') }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
       - uses: actions/setup-go@v6
         with:
           go-version-file: backend/go.mod
           cache-dependency-path: backend/go.sum
+      - name: Use Ubuntu archive mirrors
+        run: sudo sed -i '\|://azure\.archive\.ubuntu\.com/|d' /etc/apt/apt-mirrors.txt
       - name: Install tools and dependencies
         run: |
-          apk add --no-cache build-base ffmpeg git icu-data-full nodejs npm python3 vips-dev
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libvips-dev ffmpeg
+          curl --fail --silent --show-error https://dl-cli.pstmn.io/install/linux64.sh -o /tmp/install-postman.sh
+          sh /tmp/install-postman.sh
           npm ci
           npm ci --prefix frontend
       - run: npm run build
