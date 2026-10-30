@@ -88,7 +88,7 @@ const NavIcon = ({ index }: { index: number }) =>
     </svg>,
   ][index];
 const Brand = () => (
-  <a className="brand" href="#tamu" aria-label="weddinvita — Tamu Undangan">weddinvita</a>
+  <a className="brand" href="#tamu" aria-label="weddinvita — Tamu Undangan"><img src="/assets/weddinvita-logo.svg" alt="" width="32" height="32"/>weddinvita</a>
 );
 type EditorSection = { id: string; title: string; short: string };
 const eventSections: EditorSection[] = [
@@ -266,7 +266,7 @@ function Login({
     >
       <section className="login-story" aria-labelledby="login-story-title">
         <a href="/" className="login-wordmark">
-          weddinvita
+          <img src="/assets/weddinvita-logo.svg" alt="" width="32" height="32"/>weddinvita
         </a>
         <div className="login-statement">
           <h1 id="login-story-title">
@@ -338,7 +338,7 @@ function VerificationScreen({api,session,onVerified,onLogout}:{api:API;session:S
   const [busy,setBusy]=useState(false),[error,setError]=useState(""),[message,setMessage]=useState(session.emailSent===false ? "Email verifikasi belum terkirim. Gunakan tombol Kirim ulang email untuk mencoba lagi." : "Buka tautan verifikasi di email Anda, lalu periksa status di sini. Periksa folder spam jika belum terlihat.");
   async function check(){setBusy(true);setError("");try{const s=await api<Session>("/api/admin/session");if(!s.account.verificationRequired)await onVerified(s);else setMessage("Email belum terverifikasi. Buka tautan verifikasi yang dikirim ke alamat akun Anda.");}catch(e){setError(errorMessage(e));}finally{setBusy(false);}}
   async function resend(){setBusy(true);setError("");try{await api("/api/admin/verification-email","POST",{});setMessage("Email verifikasi dikirim. Periksa inbox dan spam, lalu pilih Saya sudah verifikasi.");}catch(e){setError(errorMessage(e));}finally{setBusy(false);}}
-  return <main className="billing-screen"><section className="panel billing-panel" aria-labelledby="verification-title"><a href="/" className="login-wordmark">weddinvita</a><h1 id="verification-title">Verifikasi email Anda</h1><p>Alamat akun: <strong>{session.account.email}</strong></p><p>Verifikasi diperlukan sebelum pembayaran dan akses undangan.</p><p role="status">{message}</p>{error && <p role="alert" className="form-error">{error}</p>}<button className="primary" disabled={busy} onClick={check}>Saya sudah verifikasi · Periksa status</button><button disabled={busy} onClick={resend}>Kirim ulang email</button><a href="mailto:support@weddinvita.id">Hubungi bantuan</a><button className="auth-switch" disabled={busy} onClick={onLogout}>Keluar dari akun</button></section></main>;
+  return <main className="billing-screen"><section className="panel billing-panel" aria-labelledby="verification-title"><a href="/" className="login-wordmark"><img src="/assets/weddinvita-logo.svg" alt="" width="32" height="32"/>weddinvita</a><h1 id="verification-title">Verifikasi email Anda</h1><p>Alamat akun: <strong>{session.account.email}</strong></p><p>Verifikasi diperlukan sebelum pembayaran dan akses undangan.</p><p role="status">{message}</p>{error && <p role="alert" className="form-error">{error}</p>}<button className="primary" disabled={busy} onClick={check}>Saya sudah verifikasi · Periksa status</button><button disabled={busy} onClick={resend}>Kirim ulang email</button><a href="mailto:support@weddinvita.id">Hubungi bantuan</a><button className="auth-switch" disabled={busy} onClick={onLogout}>Keluar dari akun</button></section></main>;
 }
 function BillingScreen({api, onActivated, onLogout}: {api:API;onActivated:(s:Session)=>Promise<void>;onLogout:()=>void}) {
   const [billing,setBilling]=useState<Billing>();
@@ -371,7 +371,7 @@ function BillingScreen({api, onActivated, onLogout}: {api:API;onActivated:(s:Ses
   const expired=!!billing?.subscription.expiresAt;
   const status=billing?.payment?.status;
   return <main className="billing-screen"><section className="panel billing-panel" aria-labelledby="billing-title">
-    <a href="/" className="login-wordmark">weddinvita</a>
+    <a href="/" className="login-wordmark"><img src="/assets/weddinvita-logo.svg" alt="" width="32" height="32"/>weddinvita</a>
     <p className="eyebrow">{expired ? "Perpanjang undangan Anda" : "Akun Anda sudah dibuat"}</p>
     <h1 id="billing-title">{expired ? "Aktifkan kembali akses Anda" : "Satu langkah lagi menuju undangan Anda"}</h1>
     <p>Bayar dengan QRIS melalui Midtrans. Akses dashboard dan undangan aktif setelah pembayaran terkonfirmasi.</p>

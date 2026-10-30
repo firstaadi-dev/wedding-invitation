@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import sharp from 'sharp';
 import {defaultWhatsappTemplate} from '../frontend/whatsapp.js';
 test('Go template assets have stable entry names and all local references exist',async()=>{
  for(const [file,entry] of [['index.html','invitation'],['access.html','access'],['admin.html','admin'],['company.html','company']]){
@@ -26,4 +27,19 @@ test('sitemap matches public canonical pages and organization data survives the 
  assert.equal(structured['@type'],'Organization');
  assert.equal(structured.url,urls[0]);
  assert.equal(structured.email,'support@weddinvita.id');
+ assert.deepEqual(structured.logo,{'@type':'ImageObject',url:'https://weddinvita.id/assets/weddinvita-logo.png',width:512,height:512});
+});
+test('brand icons survive the build at crawlable stable URLs on every entry',async()=>{
+ for(const file of ['company','terms','privacy','cookie-policy','index','access','admin']){
+  const html=await readFile(`frontend/dist/${file}.html`,'utf8');
+  for(const [rel,path] of [['icon','favicon.png'],['icon','weddinvita-logo.svg'],['apple-touch-icon','apple-touch-icon.png']]){
+   assert.match(html,new RegExp(`<link[^>]+rel="${rel}"[^>]+href="/assets/${path.replaceAll('.','\\.')}"`));
+  }
+ }
+ for(const [file,size] of [['favicon.png',96],['apple-touch-icon.png',180],['weddinvita-logo.png',512]]){
+  const {width,height,format}=await sharp(`frontend/dist/assets/${file}`).metadata();
+  assert.equal(format,'png');assert.equal(width,size);assert.equal(height,size);
+ }
+ const robots=await readFile('frontend/dist/robots.txt','utf8');
+ assert.ok(robots.includes('Allow: /assets/'));
 });
