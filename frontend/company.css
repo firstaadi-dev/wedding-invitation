@@ -974,3 +974,9 @@ footer > a:last-child {
 .legal-content a, footer nav a { text-decoration: underline; text-underline-offset: 4px; }
 footer nav { display: flex; flex-wrap: wrap; gap: 12px 24px; }
 @media (max-width: 760px) { .legal-content { padding-block: 36px; } .legal-intro { font-size: 17px; } }
+
+@media (max-width: 380px) {
+  :root {
+    scroll-padding-top: 210px;
+  }
+}
