@@ -23,7 +23,7 @@ Pertahankan rasio 1:1, warna, dan celah di tengah simbol. Pada UI, simbol beruku
 
 ## Verifikasi dan batas
 
-Build frontend dan empat tes `tests/build.test.mjs` lulus, termasuk ukuran PNG, tautan favicon pada setiap entry, dan metadata logo setelah build. Pratinjau raster diperiksa pada ukuran pemakaian kecil. Layout website melalui browser belum diverifikasi karena lingkungan membatasi server lokal dan browser. Belum ada deployment atau permintaan indexing.
+Build frontend dan empat tes `tests/build.test.mjs` lulus, termasuk ukuran PNG, tautan favicon pada setiap entry, dan metadata logo setelah build. Pratinjau raster diperiksa pada ukuran pemakaian kecil. Pengujian browser halaman perusahaan lulus pada lebar 320, 390, 692, 768, dan 1440 px, termasuk navigasi anchor di bawah header sticky. Status deployment mengikuti workflow GitHub Actions; tampilan di hasil pencarian belum diverifikasi.
 
 Implementasi mengikuti [panduan favicon Google](https://developers.google.com/search/docs/appearance/favicon-in-search/) dan [logo Organization](https://developers.google.com/search/docs/appearance/structured-data/organization). Sesudah deployment, Google perlu merayapi ulang situs; pemunculan ikon atau logo di hasil pencarian tetap ditentukan Google. Pengaturan noindex staging tetap berlaku.
 

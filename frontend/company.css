@@ -961,3 +961,9 @@ footer > a:last-child {
     scroll-behavior: auto;
   }
 }
+
+@media (max-width: 380px) {
+  :root {
+    scroll-padding-top: 210px;
+  }
+}
