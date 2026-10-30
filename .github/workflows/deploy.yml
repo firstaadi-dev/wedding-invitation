@@ -1,9 +1,8 @@
 name: Build and deploy VPS
 
 on:
-  pull_request:
   push:
-    branches: [main]
+    branches: [main, staging]
   workflow_dispatch:
     inputs:
       service:
@@ -15,12 +14,35 @@ on:
 permissions:
   contents: read
 
+env:
+  DEPLOY_DIRECTORY: ${{ github.ref == 'refs/heads/staging' && '/opt/wedding-invitation-staging' || '/opt/wedding-invitation' }}
+  COMPOSE_FILE: ${{ github.ref == 'refs/heads/staging' && 'deploy/compose.staging.yaml' || 'deploy/compose.yaml' }}
+
 concurrency:
   group: vps-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
+  branch-policy:
+    name: Branch flow
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Validate deployment branch
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_BRANCH: ${{ github.base_ref }}
+          HEAD_BRANCH: ${{ github.head_ref }}
+          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          REPOSITORY: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+        run: python3 scripts/branch_policy.py
+
   changes:
+    needs: branch-policy
     runs-on: ubuntu-24.04
     outputs:
       frontend: ${{ steps.detect.outputs.frontend }}
@@ -32,19 +54,19 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Read last successful deployment
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.VPS_DEPLOY_ENABLED == 'true'
+        if: github.event_name != 'pull_request' && ((github.ref == 'refs/heads/main' && vars.VPS_DEPLOY_ENABLED == 'true') || (github.ref == 'refs/heads/staging' && vars.STAGING_VPS_DEPLOY_ENABLED == 'true'))
         env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          VPS_HOST: ${{ github.ref == 'refs/heads/staging' && (secrets.STAGING_VPS_HOST || secrets.VPS_HOST) || secrets.VPS_HOST }}
+          VPS_USER: ${{ github.ref == 'refs/heads/staging' && (secrets.STAGING_VPS_USER || secrets.VPS_USER) || secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ github.ref == 'refs/heads/staging' && (secrets.STAGING_VPS_SSH_KEY || secrets.VPS_SSH_KEY) || secrets.VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ github.ref == 'refs/heads/staging' && (secrets.STAGING_VPS_KNOWN_HOSTS || secrets.VPS_KNOWN_HOSTS) || secrets.VPS_KNOWN_HOSTS }}
         run: |
           install -d -m 700 ~/.ssh
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
           trap 'rm -f ~/.ssh/id_ed25519 ~/.ssh/known_hosts' EXIT
-          ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=15 "$VPS_USER@$VPS_HOST" 'if test -f /opt/wedding-invitation/state.json; then cat /opt/wedding-invitation/state.json; else echo "{}"; fi' > /tmp/deploy-state.json
+          ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=15 "$VPS_USER@$VPS_HOST" "if test -f '$DEPLOY_DIRECTORY/state.json'; then cat '$DEPLOY_DIRECTORY/state.json'; else echo '{}'; fi" > /tmp/deploy-state.json
       - name: Select images
         id: detect
         env:
@@ -56,6 +78,7 @@ jobs:
           python3 scripts/changes.py --base "$BASE" --target "$GITHUB_SHA" --force "$FORCE" >> "$GITHUB_OUTPUT"
 
   verify:
+    needs: branch-policy
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     services:
@@ -76,6 +99,10 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json', 'frontend/package-lock.json') }}
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
@@ -83,10 +110,12 @@ jobs:
         with:
           go-version-file: backend/go.mod
           cache-dependency-path: backend/go.sum
+      - name: Use Ubuntu archive mirrors
+        run: sudo sed -i '\|://azure\.archive\.ubuntu\.com/|d' /etc/apt/apt-mirrors.txt
       - name: Install tools and dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libvips-dev ffmpeg
+          sudo apt-get install -y --no-install-recommends libvips-dev ffmpeg
           curl --fail --silent --show-error https://dl-cli.pstmn.io/install/linux64.sh -o /tmp/install-postman.sh
           sh /tmp/install-postman.sh
           npm ci
@@ -95,9 +124,27 @@ jobs:
       - run: npm test
       - run: npm run test:integration
 
-  images:
+  frontend-cache:
     needs: [changes, verify]
-    if: needs.changes.outputs.services != '[]'
+    if: needs.changes.outputs.frontend == 'true' && needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+        with:
+          context: .
+          file: frontend/Dockerfile
+          target: build
+          cache-from: type=gha,scope=${{ github.ref_name }}-frontend-build
+          cache-to: type=gha,mode=max,scope=${{ github.ref_name }}-frontend-build
+
+  images:
+    needs: [changes, verify, frontend-cache]
+    if: always() && needs.changes.result == 'success' && needs.verify.result == 'success' && (needs.frontend-cache.result == 'success' || needs.frontend-cache.result == 'skipped') && needs.changes.outputs.services != '[]'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     permissions:
@@ -117,7 +164,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SERVICE: ${{ matrix.service }}
-          PUBLISH: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+          PUBLISH: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging') && github.event_name != 'pull_request' }}
         run: |
           IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}-$SERVICE:$GITHUB_SHA"
           echo "tag=$IMAGE" >> "$GITHUB_OUTPUT"
@@ -131,13 +178,36 @@ jobs:
           file: ${{ matrix.service }}/Dockerfile
           labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
           tags: ${{ steps.image.outputs.tag }}
-          push: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
-          cache-from: type=gha,scope=${{ matrix.service }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+          push: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging') && github.event_name != 'pull_request' }}
+          cache-from: |
+            type=gha,scope=${{ github.ref_name }}-${{ matrix.service }}
+            type=gha,scope=${{ github.ref_name }}-frontend-build
+          cache-to: type=gha,mode=min,scope=${{ github.ref_name }}-${{ matrix.service }}
+
+  checks:
+    name: Required checks
+    if: always()
+    needs: [branch-policy, changes, verify, frontend-cache, images]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Require valid branch flow, tests and image builds
+        env:
+          BRANCH_RESULT: ${{ needs.branch-policy.result }}
+          CHANGES_RESULT: ${{ needs.changes.result }}
+          VERIFY_RESULT: ${{ needs.verify.result }}
+          CACHE_RESULT: ${{ needs.frontend-cache.result }}
+          IMAGES_RESULT: ${{ needs.images.result }}
+        run: |
+          test "$BRANCH_RESULT" = success
+          test "$CHANGES_RESULT" = success
+          test "$VERIFY_RESULT" = success
+          test "$CACHE_RESULT" = success || test "$CACHE_RESULT" = skipped
+          test "$IMAGES_RESULT" = success || test "$IMAGES_RESULT" = skipped
 
   deploy:
-    needs: [changes, images]
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.VPS_DEPLOY_ENABLED == 'true'
+    needs: [changes, images, checks]
+    if: github.event_name != 'pull_request' && ((github.ref == 'refs/heads/main' && vars.VPS_DEPLOY_ENABLED == 'true') || (github.ref == 'refs/heads/staging' && vars.STAGING_VPS_DEPLOY_ENABLED == 'true'))
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -146,10 +216,10 @@ jobs:
           persist-credentials: false
       - name: Deploy selected services
         env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          VPS_HOST: ${{ github.ref == 'refs/heads/staging' && (secrets.STAGING_VPS_HOST || secrets.VPS_HOST) || secrets.VPS_HOST }}
+          VPS_USER: ${{ github.ref == 'refs/heads/staging' && (secrets.STAGING_VPS_USER || secrets.VPS_USER) || secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ github.ref == 'refs/heads/staging' && (secrets.STAGING_VPS_SSH_KEY || secrets.VPS_SSH_KEY) || secrets.VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ github.ref == 'refs/heads/staging' && (secrets.STAGING_VPS_KNOWN_HOSTS || secrets.VPS_KNOWN_HOSTS) || secrets.VPS_KNOWN_HOSTS }}
           FRONTEND: ${{ needs.changes.outputs.frontend }}
           BACKEND: ${{ needs.changes.outputs.backend }}
         run: |
@@ -163,5 +233,6 @@ jobs:
           backend_image=''
           if [ "$FRONTEND" = true ]; then frontend_image="ghcr.io/${GITHUB_REPOSITORY,,}-frontend:$GITHUB_SHA"; fi
           if [ "$BACKEND" = true ]; then backend_image="ghcr.io/${GITHUB_REPOSITORY,,}-backend:$GITHUB_SHA"; fi
-          scp "${ssh_options[@]}" deploy/compose.yaml deploy/deploy.py "$VPS_USER@$VPS_HOST:/opt/wedding-invitation/"
-          ssh "${ssh_options[@]}" "$VPS_USER@$VPS_HOST" "python3 /opt/wedding-invitation/deploy.py --commit '$GITHUB_SHA' --frontend '$frontend_image' --backend '$backend_image'"
+          scp "${ssh_options[@]}" "$COMPOSE_FILE" "$VPS_USER@$VPS_HOST:$DEPLOY_DIRECTORY/compose.yaml"
+          scp "${ssh_options[@]}" deploy/deploy.py "$VPS_USER@$VPS_HOST:$DEPLOY_DIRECTORY/deploy.py"
+          ssh "${ssh_options[@]}" "$VPS_USER@$VPS_HOST" "python3 '$DEPLOY_DIRECTORY/deploy.py' --directory '$DEPLOY_DIRECTORY' --commit '$GITHUB_SHA' --frontend '$frontend_image' --backend '$backend_image'"

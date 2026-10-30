@@ -53,8 +53,6 @@ sudo caddy validate --config /etc/caddy/Caddyfile
 sudo systemctl reload caddy
 ```
 
-Untuk sitemap dan robots pada domain perusahaan, perubahan `deploy/Caddyfile` perlu diterapkan juga pada konfigurasi Caddy **host**: tambahkan `/robots.txt` dan `/sitemap.xml` ke matcher company yang sudah ada, pertahankan konfigurasi domain dan redaksi log lainnya, lalu validasi dan reload seperti di atas. Workflow deployment container tidak memperbarui Caddy host. Setelah frontend baru tersedia, periksa kedua URL melalui HTTPS. Karena perubahan `deploy/Caddyfile` termasuk jalur deployment, classifier saat ini memilih kedua image dan menjalankan perintah migrasi backend yang ada; tidak ada migrasi baru dalam perubahan SEO ini.
-
 Caddy menimpa `X-Forwarded-For` dan `X-Real-IP`, serta menghapus `Forwarded`. Compose hanya mempublikasikan port 5173 dan 5174 ke `127.0.0.1`. Jangan membuka port tersebut ke internet. Menambahkan proxy/CDN lain memerlukan pengaturan IP terpercaya tersendiri.
 
 Pada perpindahan dari monolit, simpan salinan Compose lama dan tag image sehat. Deploy pertama membangun kedua image. Setelah migrasi berhasil, `up --remove-orphans` menghentikan/menghapus service `app` lama dalam project Compose `wedding-invitation` agar port backend dapat dipakai. Atur Caddy host untuk routing baru pada cutover ini. Ada jeda singkat; routing baru dan service baru harus siap bersama. Tidak ada data Neon yang dipindah. Migrasi versi 2 menambahkan ID publik acak tanpa mengubah link/hash/sesi lama. Jika domain lama telah dibagikan, pertahankan DNS/HTTPS dan redirect host lama ke `https://invitation.domain.id{uri}` agar path dan fragment lama tetap bisa digunakan. Alihkan `/admin` lama ke `https://dashboard.domain.id/` secara terpisah. Jangan mematikan domain lama sebelum masa kompatibilitas selesai.
@@ -76,7 +74,7 @@ Ambil host key dengan `ssh-keyscan`, lalu bandingkan fingerprint menggunakan con
 
 Set repository variable `VPS_DEPLOY_ENABLED=true` setelah VPS siap. Tanpa variable itu, image dari `main` tetap diterbitkan, tetapi VPS tidak disentuh. Pastikan kedua package `REPO-frontend` dan `REPO-backend` tetap private dan mengizinkan Actions repository ini. `GITHUB_TOKEN` menerbitkan image; token VPS hanya menariknya. Batasi akses tulis repository/workflow karena workflow memakai secrets.
 
-Pull request menjalankan build kedua image, tes Go, helper undangan, tes deployment, dan integrasi/Postman pada PostgreSQL disposable di CI. Image PR tidak dipublikasikan. Publikasi serta deployment hanya dari `main`.
+Pull request tidak menjalankan workflow. Setelah push atau merge ke `main` atau `staging`, CI menjalankan tes Go, helper undangan, tes deployment, dan integrasi/Postman pada PostgreSQL disposable, lalu membangun image yang diperlukan. Jika kedua image dibangun, tahap build frontend memakai cache bersama. Publikasi serta deployment memakai gate dan direktori terpisah. Lihat [panduan staging](staging-deploy.md) untuk persiapan staging pada VPS yang sama.
 
 ## Pemilihan deployment
 

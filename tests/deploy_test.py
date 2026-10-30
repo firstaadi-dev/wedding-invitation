@@ -19,6 +19,12 @@ OLD='b'*40
 FE='ghcr.io/example/invitation-frontend:'+SHA
 BE='ghcr.io/example/invitation-backend:'+SHA
 class DeploymentTests(unittest.TestCase):
+    def test_docker_images_share_frontend_build_stage(self):
+        frontend=(ROOT/'frontend/Dockerfile').read_text().split('\nFROM ',1)[0].splitlines()
+        backend=(ROOT/'backend/Dockerfile').read_text().split('\nFROM ',1)[0].splitlines()
+        self.assertEqual(frontend[0].split(' AS ')[0],backend[0].split(' AS ')[0])
+        self.assertEqual(frontend[1:],backend[1:])
+
     def test_trigger_matrix(self):
         for paths,want in [(['frontend/src/main.tsx'],(True,False)),(['frontend/Dockerfile'],(True,False)),(['frontend/README.md','backend/db/accounts/README.md'],(False,False)),(['frontend/content.js','frontend/styles.css','frontend/static/assets/a.webp'],(True,False)),(['backend/internal/app/app.go'],(False,True)),(['backend/go.mod'],(False,True)),(['backend/db/accounts/customer.json'],(False,True)),(['frontend/index.html'],(True,True)),(['frontend/access.html'],(True,True)),(['frontend/package-lock.json'],(True,True)),(['frontend/vite.config.js'],(True,True)),(['deploy/compose.yaml'],(True,True)),(['docs/vps-deploy.md','README.md'],(False,False)),(['tests/api.test.mjs'],(False,False))]:
             with self.subTest(paths=paths):self.assertEqual(changes.classify(paths),want)
