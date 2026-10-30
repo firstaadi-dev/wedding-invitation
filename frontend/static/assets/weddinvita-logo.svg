@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <title>weddinvita — Dua Lipatan</title>
+  <rect width="64" height="64" rx="16" fill="#183d32"/>
+  <path d="M14 18 30 26V46L14 38Z" fill="#fafaf7"/>
+  <path d="M34 26 50 18V38L34 46Z" fill="#d3e7dc"/>
+</svg>

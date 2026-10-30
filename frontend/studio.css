@@ -146,7 +146,9 @@ h3 {
 }
 .sidebar .brand,
 .brand {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-size: 24px;
   font-weight: 700;
   letter-spacing: -.04em;
@@ -1181,6 +1183,10 @@ h3 {
   }
 }
 .login-wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: start;
   font-size: 24px;
   letter-spacing: -.04em;
 }
@@ -1503,4 +1509,11 @@ h3 {
   .two-columns {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+.brand img,
+.login-wordmark img {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
 }
