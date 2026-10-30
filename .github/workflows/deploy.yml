@@ -120,7 +120,7 @@ jobs:
           sh /tmp/install-postman.sh
           npm ci
           npm ci --prefix frontend
-      - run: npm run build --prefix frontend
+      - run: npm run build
       - run: npm test
       - run: npm run test:integration
 
