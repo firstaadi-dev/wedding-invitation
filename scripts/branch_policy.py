@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
-"""Validate the repository's main -> feature -> staging -> main flow."""
+"""Validate deployments and feature pull requests to staging or main."""
 import os
 import sys
 
 
 def validate(event, *, base='', head='', head_repository='', repository='', ref=''):
     if event == 'pull_request':
-        if base == 'main':
-            if head != 'staging' or head_repository != repository:
-                raise ValueError('Pull requests to main must come from staging in this repository.')
-        elif base == 'staging':
+        if base in ('main', 'staging'):
             if not head or head in ('main', 'staging'):
-                raise ValueError('Pull requests to staging must come from a feature branch.')
+                raise ValueError('Pull requests must come from a feature branch.')
+            if base == 'main' and (not repository or head_repository != repository):
+                raise ValueError('Pull requests to main must come from this repository.')
         else:
             raise ValueError('Pull requests must target staging or main.')
     elif event in ('push', 'workflow_dispatch'):

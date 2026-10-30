@@ -13,17 +13,16 @@ REPO = 'firstaadi-dev/wedding-invitation'
 
 
 class BranchPolicyTests(unittest.TestCase):
-    def test_feature_pull_requests_target_staging(self):
-        for name in ('feat/midtrans', 'feature/payment', 'fix/login'):
-            with self.subTest(name=name):
-                policy.validate('pull_request', base='staging', head=name,
+    def test_feature_pull_requests_target_either_environment(self):
+        for base in ('main', 'staging'):
+            for name in ('feat/midtrans', 'feature/payment', 'fix/login'):
+                with self.subTest(base=base, name=name):
+                    policy.validate('pull_request', base=base, head=name,
                                 head_repository=REPO, repository=REPO)
 
-    def test_main_requires_staging_from_the_same_repository(self):
-        policy.validate('pull_request', base='main', head='staging',
-                        head_repository=REPO, repository=REPO)
-        for name, repository in (('feat/payment', REPO), ('main', REPO),
-                                 ('staging', 'other/fork'), ('staging', '')):
+    def test_main_requires_feature_from_the_same_repository(self):
+        for name, repository in (('main', REPO), ('staging', REPO),
+                                 ('feat/payment', 'other/fork'), ('feat/payment', '')):
             with self.subTest(name=name, repository=repository):
                 with self.assertRaises(ValueError):
                     policy.validate('pull_request', base='main', head=name,
@@ -48,14 +47,13 @@ class BranchPolicyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             policy.validate('pull_request', base='release', head='feat/payment')
 
-    def test_workflow_cli_exits_nonzero_for_a_direct_feature_release(self):
+    def test_workflow_cli_accepts_a_direct_feature_release(self):
         environment = {**os.environ, 'EVENT_NAME': 'pull_request',
                        'BASE_BRANCH': 'main', 'HEAD_BRANCH': 'feat/payment',
                        'HEAD_REPOSITORY': REPO, 'REPOSITORY': REPO}
         result = subprocess.run(['python3', str(SCRIPT)], env=environment,
                                 capture_output=True, text=True)
-        self.assertEqual(result.returncode, 1)
-        self.assertIn('must come from staging', result.stderr)
+        self.assertEqual(result.returncode, 0)
 
 
 if __name__ == '__main__':

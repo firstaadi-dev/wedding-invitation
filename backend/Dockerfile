@@ -1,5 +1,5 @@
 FROM node:22-bookworm-slim AS templates
-WORKDIR /frontend
+WORKDIR /build
 COPY frontend/package*.json ./
 RUN npm ci
 COPY frontend/ ./
@@ -17,7 +17,7 @@ FROM debian:trixie-slim
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libvips42t64 ffmpeg && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=build /invitation /usr/local/bin/invitation
-COPY --from=templates /frontend/dist/index.html /frontend/dist/access.html /app/templates/
+COPY --from=templates /build/dist/index.html /build/dist/access.html /app/templates/
 ENV NODE_ENV=production LISTEN_HOST=0.0.0.0 PORT=5174 TEMPLATE_DIR=/app/templates
 USER 1000:1000
 EXPOSE 5174

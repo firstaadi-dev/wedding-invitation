@@ -1,6 +1,6 @@
 # Staging pada VPS yang sama
 
-Branch `staging` menjalankan workflow `Build and deploy VPS` saat push. Workflow memeriksa tes, membangun image commit SHA di GHCR, lalu melakukan deployment hanya jika repository variable `STAGING_VPS_DEPLOY_ENABLED=true`. Branch `main` memakai konfigurasi production. Pull request ke `staging` atau `main` menjalankan pemeriksaan dan build tanpa publikasi image atau deployment; push ke branch feature tidak memicu workflow.
+Branch `staging` menjalankan workflow `Build and deploy VPS` saat push. Workflow memeriksa tes, membangun image commit SHA di GHCR, lalu melakukan deployment hanya jika repository variable `STAGING_VPS_DEPLOY_ENABLED=true`. Branch `main` memakai konfigurasi production. Pull request dan push ke branch feature tidak memicu workflow.
 
 | Konfigurasi | Production | Staging |
 | --- | --- | --- |
@@ -79,7 +79,7 @@ sudo systemctl reload caddy
 
 ## 3. GitHub Actions
 
-Alur kerja: **main → feature branch → staging → main**. Feature masuk staging lewat PR; release ke main hanya menerima PR dari staging. Panduan Git dan branch protection ada di [alur pengerjaan](development-workflow.md).
+Alur kerja: **main → feature branch**, lalu feature masuk `staging` dan `main` melalui PR terpisah. Panduan Git dan branch protection ada di [alur pengerjaan](development-workflow.md).
 
 Persyaratan Docker, Compose 2.30+, Python, akun deployment, dan login GHCR di VPS mengikuti [panduan VPS](vps-deploy.md). Karena memakai package GHCR yang sama dengan tag SHA berbeda, akun VPS harus dapat menarik package frontend dan backend repository ini.
 
