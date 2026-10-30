@@ -86,7 +86,7 @@ const NavIcon = ({ index }: { index: number }) =>
     </svg>,
   ][index];
 const Brand = () => (
-  <a className="brand" href="#tamu" aria-label="weddinvita — Tamu Undangan">weddinvita</a>
+  <a className="brand" href="#tamu" aria-label="weddinvita — Tamu Undangan"><img src="/assets/weddinvita-logo.svg" alt="" width="32" height="32"/>weddinvita</a>
 );
 type EditorSection = { id: string; title: string; short: string };
 const eventSections: EditorSection[] = [
@@ -256,7 +256,7 @@ function Login({
     >
       <section className="login-story" aria-labelledby="login-story-title">
         <a href="/" className="login-wordmark">
-          weddinvita
+          <img src="/assets/weddinvita-logo.svg" alt="" width="32" height="32"/>weddinvita
         </a>
         <div className="login-statement">
           <h1 id="login-story-title">
