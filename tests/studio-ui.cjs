@@ -41,7 +41,8 @@ createRoot(document.getElementById("root")!).render(<StudioFixture/>);
 (async()=>{
  const source=fs.readFileSync(path.join(root,'frontend/src/main.tsx'),'utf8').replace('createRoot(document.getElementById("root")!).render(<App />);',fixture);
  await esbuild.build({stdin:{contents:source,resolveDir:path.join(root,'frontend/src'),loader:'tsx',sourcefile:'studio-fixture.tsx'},bundle:true,outfile:path.join(out,'fixture.js'),loader:{'.ttf':'file'},jsx:'automatic'});
- fs.writeFileSync(path.join(out,'index.html'),'<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="fixture.css"><div id="root"></div><script src="fixture.js"></script></html>');
+ const imagePolicy=fs.readFileSync(path.join(root,'frontend/Caddyfile'),'utf8').match(/img-src [^;]+/)[0];
+ fs.writeFileSync(path.join(out,'index.html'),`<!doctype html><html lang="id"><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${imagePolicy}"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="fixture.css"><div id="root"></div><script src="fixture.js"></script></html>`);
  const browser=await chromium.launch({channel:'chrome',headless:true});
  const errors=[];
  try{
