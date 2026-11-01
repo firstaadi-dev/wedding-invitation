@@ -1,3 +1,8 @@
+export function photoFrame(slot, narrow = false) {
+  if (slot === "groom" || slot === "bride") return {kind: "portrait", ratio: narrow ? 225 / 280 : 246 / 250};
+  return slot === "preview" ? {kind: "message", ratio: 1200 / 630} : {kind: "gallery", ratio: 4 / 5};
+}
+
 export function cropRectangle(width, height, ratio, zoom, x, y) {
   const aspect = ratio || width / height;
   const cropWidth = Math.min(width, height * aspect) / zoom;
