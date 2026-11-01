@@ -1,6 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {cropRectangle, cropPhoto} from '../frontend/image-crop.js';
+import {cropRectangle, cropPhoto, photoFrame} from '../frontend/image-crop.js';
+
+test('crop frames follow the current invitation theme and message dimensions', () => {
+  for (const slot of ['groom','bride']) {
+    assert.deepEqual(photoFrame(slot), {kind:'portrait',ratio:246/250});
+    assert.deepEqual(photoFrame(slot,true), {kind:'portrait',ratio:225/280});
+  }
+  for (let i=1;i<=9;i++) assert.deepEqual(photoFrame(`gallery${i}`), {kind:'gallery',ratio:4/5});
+  assert.deepEqual(photoFrame('preview'), {kind:'message',ratio:1200/630});
+});
 
 test('original ratio preserves the whole image without zoom', async () => {
   const rectangle = cropRectangle(1200, 800, 0, 1, 50, 50);

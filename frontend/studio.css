@@ -1,3 +1,5 @@
+@import "./photo-frame.css";
+
 @font-face {
   font-family: Manrope;
   src: url(./assets/fonts/manrope-regular.ttf);
@@ -1000,10 +1002,38 @@ h3 {
 .photo-crop .help {
   margin: 0 0 16px;
 }
+.photo-crop-scene {
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px;
+  padding: 20px;
+  background: linear-gradient(#0b211b99, #0b211bdd), url('/assets/joglo-forest.webp') center/cover;
+  border-radius: 8px;
+}
+.photo-crop-paper {
+  min-width: 0;
+  width: 100%;
+}
+.photo-crop-scene[data-frame="portrait"] .photo-crop-paper {
+  max-width: 280px;
+  padding: 18px 14px;
+  background: #faf7f2;
+  border-radius: 4px;
+}
+.photo-crop-caption {
+  margin: 14px 0 0;
+  text-align: center;
+  overflow-wrap: anywhere;
+  font: 24px/1.2 Georgia, serif;
+  color: #30271f;
+}
+.photo-crop-scene[data-frame="message"] {
+  background: #efeae2;
+}
 .photo-crop-frame {
   position: relative;
   overflow: hidden;
-  margin: 0 auto 16px;
+  margin: 0 auto;
   background: #EDF2EE;
   border: 1px solid var(--cms-color-input-border);
   cursor: grab;
@@ -1042,6 +1072,7 @@ h3 {
 }
 .couple-grid {
   gap: 20px;
+  align-items: start;
 }
 .couple-grid .couple-photo-card {
   display: grid;
