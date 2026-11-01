@@ -164,7 +164,7 @@ func run() error {
 	log.Printf("Invitation server ready on %s; Postgres connected.", listener.Addr())
 	ticker := time.NewTicker(time.Hour)
 	defer ticker.Stop()
-	emailTicker := time.NewTicker(time.Minute)
+	emailTicker := time.NewTicker(2 * time.Hour)
 	defer emailTicker.Stop()
 	for {
 		select {
