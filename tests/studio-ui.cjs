@@ -8,7 +8,7 @@ const {chromium}=require('playwright');
 const esbuild=require('../frontend/node_modules/esbuild');
 const root=path.resolve(__dirname,'..');
 const out=fs.mkdtempSync(path.join(os.tmpdir(),'studio-ui-'));
-const shots=path.join(root,'design/cms-alternate/comparison/production-screenshots');
+const shots=process.env.STUDIO_SCREENSHOTS || path.join(root,'design/cms-alternate/comparison/production-screenshots');
 fs.mkdirSync(shots,{recursive:true});
 const fixture=`
 const fixtureAccount:Account={email:"studio@example.invalid",invitationOrigin:"https://invitation.example",tenant:{id:"demo",slug:"demo",publicId:"demo",name:"Nara & Dimas"}};
@@ -18,6 +18,7 @@ function StudioFixture(){
  const [content,setContent]=useState(fixtureContent);const [page,setPage]=useState<Page>(currentPage);
  useEffect(()=>{const listener=()=>setPage(currentPage());addEventListener("hashchange",listener);return()=>removeEventListener("hashchange",listener);},[]);
  const api:API=async<T,>(url:string,method?:string,value?:unknown)=>{
+  (window as any).__lastFile=value;
   (window as any).__calls.push({url,method,value:value instanceof File?value.name:value});
   if((window as any).__fail){(window as any).__fail=false;throw new Error("Unggah belum berhasil. Coba lagi.");}
   await new Promise(resolve=>setTimeout(resolve,60));
@@ -39,8 +40,10 @@ createRoot(document.getElementById("root")!).render(<StudioFixture/>);
 `;
 (async()=>{
  const source=fs.readFileSync(path.join(root,'frontend/src/main.tsx'),'utf8').replace('createRoot(document.getElementById("root")!).render(<App />);',fixture);
- await esbuild.build({stdin:{contents:source,resolveDir:path.join(root,'frontend/src'),loader:'tsx',sourcefile:'studio-fixture.tsx'},bundle:true,outfile:path.join(out,'fixture.js'),loader:{'.ttf':'file'},jsx:'automatic'});
- fs.writeFileSync(path.join(out,'index.html'),'<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="fixture.css"><div id="root"></div><script src="fixture.js"></script></html>');
+ await esbuild.build({stdin:{contents:source,resolveDir:path.join(root,'frontend/src'),loader:'tsx',sourcefile:'studio-fixture.tsx'},bundle:true,outfile:path.join(out,'fixture.js'),loader:{'.ttf':'file','.webp':'file'},plugins:[{name:'static-assets',setup(build){build.onResolve({filter:/^\/assets\//},args=>({path:path.join(root,'frontend/static',args.path)}));}}],jsx:'automatic'});
+ await esbuild.build({entryPoints:[path.join(root,'frontend/styles.css')],bundle:true,outfile:path.join(out,'invitation.css'),loader:{'.webp':'file'},plugins:[{name:'static-assets',setup(build){build.onResolve({filter:/^\/assets\//},args=>({path:path.join(root,'frontend/static',args.path)}));}}]});
+ const imagePolicy=fs.readFileSync(path.join(root,'frontend/Caddyfile'),'utf8').match(/img-src [^;]+/)[0];
+ fs.writeFileSync(path.join(out,'index.html'),`<!doctype html><html lang="id"><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${imagePolicy}"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="fixture.css"><div id="root"></div><script src="fixture.js"></script></html>`);
  const browser=await chromium.launch({channel:'chrome',headless:true});
  const errors=[];
  try{
@@ -52,6 +55,15 @@ createRoot(document.getElementById("root")!).render(<StudioFixture/>);
   async function choose(prefix,id){if(page.viewportSize().width<900)await page.locator(`#${prefix}-section-select`).selectOption(id);else await page.locator(`#page-${prefix==='message'?'pesan':prefix==='event'?'acara':'media'} [data-section="${id}"]`).click();}
   async function capture(name){await page.evaluate(()=>{document.activeElement?.blur();scrollTo(0,0)});await page.screenshot({path:path.join(shots,name+'.png'),fullPage:true});}
   async function overflow(){assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'page overflow');}
+  const invitation=await browser.newPage();
+  const template=fs.readFileSync(path.join(root,'frontend/index.html'),'utf8').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<link\b[^>]*>/gi,'').replace('</head>',`<style>${fs.readFileSync(path.join(out,'invitation.css'),'utf8')}</style></head>`);
+  for(const width of [1440,390,320]){
+   await invitation.setViewportSize({width,height:1000});await invitation.setContent(template);
+   const frame=invitation.locator('.photo-placeholder.invitation-portrait-frame').first();
+   const appearance=await frame.evaluate(el=>({ratio:el.offsetWidth/el.offsetHeight,radius:getComputedStyle(el).borderTopLeftRadius}));
+   assert(Math.abs(appearance.ratio-(width>600?246/250:225/280))<.01,'public portrait ratio must match the crop');assert.equal(appearance.radius,'150px');
+  }
+  await invitation.close();
   for(const width of [1440,390,320]){
    for(const route of ['tamu','pesan','media','acara','login']){
     await load(route,width);await overflow();
@@ -75,14 +87,59 @@ createRoot(document.getElementById("root")!).render(<StudioFixture/>);
    if(width<900){await page.getByRole('button',{name:'Tutup editor foto'}).click();assert(await page.locator('[data-gallery-slot="gallery2"]').evaluate(el=>el===document.activeElement));}
    await page.locator('[data-gallery-slot="gallery3"]').click();
    if(width<900)await page.keyboard.press('Escape');
-   await page.locator('[data-gallery-slot="gallery2"]').click();assert.equal(await page.locator('[data-slot="gallery2"] input').evaluate(el=>el.files[0].name),'demo.png');
+   await page.locator('[data-gallery-slot="gallery2"]').click();assert.equal(await page.locator('[data-slot="gallery2"] input[type=file]').evaluate(el=>el.files[0].name),'demo.png');
    await page.evaluate(()=>window.__fail=true);
    await page.locator('[data-slot="gallery2"] button.primary').click();await page.getByText('Unggah belum berhasil. Coba lagi.',{exact:true}).waitFor();
-   assert.equal(await page.locator('[data-slot="gallery2"] input').evaluate(el=>el.files[0].name),'demo.png');
+   assert.equal(await page.locator('[data-slot="gallery2"] input[type=file]').evaluate(el=>el.files[0].name),'demo.png');
    await page.locator('[data-slot="gallery2"] button.primary').click();await page.locator('[data-slot="gallery2"] .media-state').getByText('Terpasang',{exact:true}).waitFor();
    if(width<900)await page.getByRole('button',{name:'Tutup editor foto'}).click();
    await choose('media','music');assert(!(await page.locator('#media-part-gallery').isVisible()));await overflow();if(width!==320)await capture(`media-music-${width}`);
    console.log(`Studio V2 ${width}: full WA bubble in both sections, selected-only media, gallery File retention/retry/focus, all routes overflow PASS`);
+  }
+  // Inspect the actual exported pixels, not only the crop controls.
+  for(const width of [1440,390,320]){
+   for(const slot of ['groom','bride','gallery1','preview']){
+    await load(slot==='preview'?'pesan':'media',width);
+    if(slot==='preview')await choose('message','link');
+    else if(slot==='gallery1'){await choose('media','gallery');await page.locator('[data-gallery-slot="gallery1"]').click();}
+    else await page.locator(`[data-slot="${slot}"] .couple-edit-button`).click();
+    const card=page.locator(`[data-slot="${slot}"]`);
+    const photo=await page.evaluate(()=>{const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=800;const ctx=canvas.getContext('2d');for(const [i,color] of ['red','green','blue'].entries()){ctx.fillStyle=color;ctx.fillRect(i*400,0,400,800);}return canvas.toDataURL('image/png').split(',')[1];});
+    await card.locator('input[type=file]').setInputFiles({name:'bands.png',mimeType:'image/png',buffer:Buffer.from(photo,'base64')});
+    await card.locator('.photo-crop-frame img').waitFor();
+    assert.equal(await card.locator('.photo-crop input[type=range]').count(),1);assert.equal(await card.locator('.photo-crop select').count(),0);
+    assert.equal(await card.getByLabel('Posisi horizontal').count(),0);assert.equal(await card.getByLabel('Posisi vertikal').count(),0);
+    const zoom=card.getByRole('slider').first();await zoom.press('Home');for(let i=0;i<10;i++)await zoom.press('ArrowRight');
+    const frame=card.locator('.photo-crop-frame');await frame.scrollIntoViewIfNeeded();const bounds=await frame.boundingBox();
+    const before=await frame.locator('img').evaluate(img=>({left:parseFloat(img.style.left),top:parseFloat(img.style.top)}));
+    await page.mouse.move(bounds.x+bounds.width/2,bounds.y+bounds.height/2);await page.mouse.down();await page.mouse.move(bounds.x+bounds.width/2-40,bounds.y+bounds.height/2-20,{steps:4});await page.mouse.up();
+    const after=await frame.locator('img').evaluate(img=>({left:parseFloat(img.style.left),top:parseFloat(img.style.top)}));
+    assert(after.left<before.left,'drag should move the horizontal crop');assert(after.top<before.top,'drag should move the vertical crop');
+    for(let i=0;i<10;i++){await frame.press('Shift+ArrowRight');await frame.press('Shift+ArrowUp');}
+    const position=await frame.locator('img').getAttribute('style');
+    if(slot==='groom' || slot==='bride'){assert.equal(await frame.evaluate(el=>getComputedStyle(el).borderTopLeftRadius),'150px');assert.equal(await card.locator('.photo-crop-caption').innerText(),slot==='groom'?'Nara Pramesti':'Dimas Aditya');}
+    await overflow();
+    if(width===1440 && slot==='groom')assert(await page.locator('[data-slot=bride]').evaluate(el=>el.getBoundingClientRect().height)<300,'opening a crop must not stretch the adjacent couple card');
+    if(width===390)await capture(`crop-${slot}-${width}`);
+    if(slot==='gallery1'){
+     await page.evaluate(()=>window.__fail=true);await card.locator('button.primary').click();
+     await card.getByText('Unggah belum berhasil. Coba lagi.',{exact:true}).waitFor();
+     assert.equal(await zoom.inputValue(),'2');assert.equal(await frame.locator('img').getAttribute('style'),position);
+    }
+    await card.locator('button.primary').click();await card.locator('.media-state').getByText('Terpasang',{exact:true}).waitFor();
+    const output=await page.evaluate(async()=>{const bitmap=await createImageBitmap(window.__lastFile);const canvas=document.createElement('canvas');canvas.width=bitmap.width;canvas.height=bitmap.height;const ctx=canvas.getContext('2d');ctx.drawImage(bitmap,0,0);const pixel=Array.from(ctx.getImageData(bitmap.width-10,10,1,1).data);bitmap.close();return {width:canvas.width,height:canvas.height,pixel,name:window.__lastFile.name,type:window.__lastFile.type};});
+    assert.equal(output.width,slot==='preview'?600:slot==='gallery1'?320:width>600?394:321);assert.equal(output.height,slot==='preview'?315:400);
+    assert(output.pixel[2]>220 && output.pixel[0]<30,'crop should export the blue band');assert.match(output.name,/-crop\.(webp|png)$/);assert.match(output.type,/^image\/(webp|png)$/);
+    assert.equal(await card.locator('.photo-crop').count(),0);
+    // Cancelling and corrupt images must not replace the installed photo.
+    const installed=await card.locator(':scope > img').getAttribute('src');
+    await card.locator('input[type=file]').setInputFiles({name:'bands.png',mimeType:'image/png',buffer:Buffer.from(photo,'base64')});await card.locator('.photo-crop-frame').waitFor();
+    await card.getByRole('button',{name:'Reset crop',exact:true}).click();assert.equal(await card.getByRole('slider').first().inputValue(),'1');
+    await card.getByRole('button',{name:'Batal pilihan',exact:true}).click();assert(await card.locator('input[type=file]').evaluate(input=>input===document.activeElement));assert.equal(await card.locator(':scope > img').getAttribute('src'),installed);assert(await card.locator('button.primary').isDisabled());
+    await card.locator('input[type=file]').setInputFiles({name:'broken.png',mimeType:'image/png',buffer:Buffer.from('invalid image')});
+    await card.getByText('Foto tidak dapat dibaca. Pilih foto JPG, PNG, atau WebP yang valid.',{exact:true}).waitFor();assert(await card.locator('button.primary').isDisabled());assert.equal(await card.locator(':scope > img').getAttribute('src'),installed);
+   }
+   console.log(`Photo crop ${width}: both couple slots, gallery and message preview export correct pixels; retry/reset/cancel/invalid-file PASS`);
   }
   await load('pesan',390);
   await page.locator('[name=whatsappTemplate]').fill('Pesan tanpa link');
@@ -97,12 +154,12 @@ createRoot(document.getElementById("root")!).render(<StudioFixture/>);
   // The preview image upload is independent from the text save, and is visible with the full body.
   await load('pesan',390);await page.locator('[name=whatsappTemplate]').fill('Draft {link}');await choose('message','link');
   const exampleImage=await page.evaluate(()=>{const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=630;const ctx=canvas.getContext('2d');ctx.fillStyle='#D3E7DC';ctx.fillRect(0,0,1200,630);ctx.fillStyle='#183D32';ctx.textAlign='center';ctx.font='600 64px Manrope';ctx.fillText('Nara & Dimas',600,300);ctx.font='32px Manrope';ctx.fillText('Gambar contoh · 12 Desember 2026',600,370);return canvas.toDataURL('image/png').split(',')[1];});
-  await page.locator('[data-slot=preview] input').setInputFiles({name:'preview.png',mimeType:'image/png',buffer:Buffer.from(exampleImage,'base64')});
+  await page.locator('[data-slot=preview] input[type=file]').setInputFiles({name:'preview.png',mimeType:'image/png',buffer:Buffer.from(exampleImage,'base64')});
   await page.locator('[data-slot=preview] button.primary').click();await page.locator('[data-slot=preview] .media-state').getByText('Terpasang',{exact:true}).waitFor();
   assert.equal((await page.evaluate(()=>window.__calls)).length,1);await page.getByText('Perubahan belum disimpan',{exact:true}).waitFor();
   await page.getByRole('button',{name:'Pratinjau final',exact:true}).click();await page.locator('.wa-bubble .link-image img').waitFor();assert((await page.locator('.wa-bubble').innerText()).includes('Draft https://invitation.example/u/'));
   await capture('pesan-final-with-image-390');
-  await load('media',390);await choose('media','music');await page.locator('[data-slot=music] input').setInputFiles(path.join(root,'tests/fixtures/silence.mp3'));await page.locator('[data-slot=music] button.primary').click();await page.locator('[data-slot=music] audio').waitFor();
+  await load('media',390);await choose('media','music');await page.locator('[data-slot=music] input[type=file]').setInputFiles(path.join(root,'tests/fixtures/silence.mp3'));await page.locator('[data-slot=music] button.primary').click();await page.locator('[data-slot=music] audio').waitFor();
   await page.locator('[data-slot=music] audio').evaluate(async audio=>{audio.load();await audio.play();});
   await choose('media','couple');assert(await page.locator('[data-slot=music] audio').evaluate(audio=>audio.paused));
   await choose('media','music');await page.locator('[data-slot=music] audio').evaluate(audio=>audio.play());await page.evaluate(()=>location.hash='tamu');await page.waitForFunction(()=>document.querySelector('[data-slot=music] audio').paused);
