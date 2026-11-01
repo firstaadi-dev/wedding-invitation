@@ -572,6 +572,9 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.ok(page.value.includes('property="og:description" content="Sabtu, 9 Januari 2027 · Gedung Baru."'));
     });
     await t.test('preview thumbnails are public JPEGs, replace safely, and cannot expose private media',async () => {
+      const child=spawn('postman',['collection','run','postman/collections/Wedding Invitation API','-i','Upload RGB preview photo','--env-var',`cmsBaseUrl=${base}`,'--env-var',`cmsOrigin=${cmsOrigin}`,'--env-var',`adminCookie=wedding_admin=${admin.wedding_admin}`,'--env-var',`csrf=${csrf}`,'--env-var','previewPhotoFile=tests/fixtures/preview-rgb.png','--working-dir',process.cwd(),'--no-report-events'],{stdio:['ignore','pipe','pipe']});
+      let output='';child.stdout.on('data',c=>output+=c);child.stderr.on('data',c=>output+=c);
+      const [code]=await once(child,'close');console.log(output);assert.equal(code,0,output);
       const photo = await sharp({create:{width:60,height:90,channels:4,background:'#183d32'}}).png().toBuffer();
       const upload = data => fetch(base+'/api/admin/media/preview',{method:'PUT',headers:{Origin:cmsOrigin,Cookie:`wedding_admin=${admin.wedding_admin}`,'X-CSRF-Token':csrf,'Content-Type':'image/png'},body:data});
       assert.equal((await fetch(base+'/api/admin/media/preview',{method:'PUT',headers:{Origin:cmsOrigin,'Content-Type':'image/png'},body:photo})).status,401);

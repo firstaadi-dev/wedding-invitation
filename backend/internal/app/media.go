@@ -35,8 +35,10 @@ func processImage(data []byte, preview bool) ([]byte, string, error) {
 		if err = image.Thumbnail(1200, 630, vips.InterestingCentre); err != nil {
 			return nil, "", err
 		}
-		if err = image.Flatten(&vips.Color{R: 250, G: 247, B: 242}); err != nil {
-			return nil, "", err
+		if image.HasAlpha() {
+			if err = image.Flatten(&vips.Color{R: 250, G: 247, B: 242}); err != nil {
+				return nil, "", err
+			}
 		}
 		params := vips.NewJpegExportParams()
 		params.Quality = 85
