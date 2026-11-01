@@ -1,0 +1,25 @@
+$kind: http-request
+name: Upload RGB preview photo
+description: A PNG without an alpha channel must produce a public JPEG preview.
+url: '{{cmsBaseUrl}}/api/admin/media/preview'
+method: PUT
+order: 1700
+headers:
+  - key: Origin
+    value: '{{cmsOrigin}}'
+  - key: Cookie
+    value: '{{adminCookie}}'
+  - key: X-CSRF-Token
+    value: '{{csrf}}'
+  - key: Content-Type
+    value: image/png
+body:
+  type: file
+  content:
+    src: '{{previewPhotoFile}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('RGB photo preview upload succeeds', () => pm.response.to.have.status(200));
+      pm.test('Preview has a public thumbnail URL', () => pm.expect(pm.response.json().media.preview).to.match(/^\/preview-image\/[a-f0-9-]{36}$/));

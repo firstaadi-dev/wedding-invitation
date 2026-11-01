@@ -1700,7 +1700,7 @@
       "put": {
         "operationId": "uploadMedia",
         "summary": "Upload or replace a photo or background audio",
-        "description": "Raw binary body, no multipart. Photos up to 12 MiB, decoded/re-encoded by libvips. Audio up to 25 MiB: MP3 (including consecutive leading ID3v2 tags), M4A/MP4 audio, AAC, WAV, OGG/Opus, FLAC and WebM audio. MP3 is validated and preserved; other audio is decoded and converted to MP3 for browser playback. Converted output must also fit 25 MiB. Malformed audio returns 415, oversized input/output 413 and a processing timeout 503. Failed uploads preserve existing media. The preview slot creates a public 1200\u00d7630 JPEG; other media remains session-protected. All resources are scoped to the authenticated tenant.",
+        "description": "Raw binary body, no multipart. Photos up to 12 MiB, decoded/re-encoded by libvips. RGB, grayscale and transparent photos are supported; preview transparency is composited over the invitation background. Audio up to 25 MiB: MP3 (including consecutive leading ID3v2 tags), M4A/MP4 audio, AAC, WAV, OGG/Opus, FLAC and WebM audio. MP3 is validated and preserved; other audio is decoded and converted to MP3 for browser playback. Converted output must also fit 25 MiB. Malformed audio returns 415, oversized input/output 413 and a processing timeout 503. Failed uploads preserve existing media. The preview slot creates a public 1200\u00d7630 JPEG; other media remains session-protected. All resources are scoped to the authenticated tenant.",
         "tags": [
           "Admin"
         ],
