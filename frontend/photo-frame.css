@@ -1,0 +1,17 @@
+.invitation-portrait-frame {
+  aspect-ratio: 246 / 250;
+  border-radius: 150px 150px 2px 2px;
+  overflow: hidden;
+}
+.invitation-gallery-frame {
+  aspect-ratio: 4 / 5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.invitation-message-frame {
+  aspect-ratio: 1200 / 630;
+  overflow: hidden;
+}
+@media (max-width: 600px) {
+  .invitation-portrait-frame { aspect-ratio: 225 / 280; }
+}

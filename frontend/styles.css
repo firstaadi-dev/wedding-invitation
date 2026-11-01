@@ -1,3 +1,5 @@
+@import "./photo-frame.css";
+
 :root {
   --forest:#183d32;
   --forest-dark:#0b211b;
@@ -375,6 +377,8 @@ main {
 .arch,.arch:after {
   border-radius:150px 150px 2px 2px;
 }
+
+.photo-placeholder.invitation-portrait-frame {min-height:0;}
 
 .leaf-mark {
   font-family:Georgia,serif;

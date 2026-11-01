@@ -17,6 +17,7 @@ import {
   whatsappEvent,
 } from "../whatsapp.js";
 import { guestSummary, queryGuests, mediaType, updateSelectedGuests } from "../admin-data.js";
+import { cropRectangle, cropPhoto, photoFrame } from "../image-crop.js";
 import { importRows, saveImportedGuests } from "../guest-import.js";
 import { defaultEventDate, defaultVenueName, eventDateLabels } from "../event.js";
 import type {
@@ -1390,10 +1391,10 @@ function MediaPage({content, api, onContent, confirm, notice, active}: {
     setPart(id);
     requestAnimationFrame(()=>document.getElementById(`media-part-${id}`)?.querySelector<HTMLElement>("h2")?.focus());
   }
-  const card=(key:string,title:string,compact=false)=><MediaCard key={key} slot={key} title={title} src={content.media[key]} api={api} onContent={onContent} confirm={confirm} notice={notice} compact={compact} active={active && part==="music"} onStateChange={reportState}/>;
+  const card=(key:string,title:string,compact=false)=><MediaCard key={key} slot={key} title={title} caption={compact ? String(content.settings[key==="groom" ? "partnerOneName" : "partnerTwoName"] || title) : undefined} src={content.media[key]} api={api} onContent={onContent} confirm={confirm} notice={notice} compact={compact} active={active && part==="music"} onStateChange={reportState}/>;
   return <>
     <header className="page-heading"><div><h1 id="media-title" tabIndex={-1}>Foto &amp; Lagu</h1><p>Foto pasangan, koleksi galeri, dan musik. Kelola satu per satu dengan jelas.</p></div></header>
-    <p className="media-format-note">2 foto pasangan · 9 foto galeri · 1 lagu. Foto JPG, PNG, WebP maksimal 12 MiB. Audio MP3, M4A, AAC, WAV, OGG/Opus, FLAC, WebM maksimal 25 MiB. Pilih berkas, lalu Unggah.</p>
+    <p className="media-format-note">2 foto pasangan · 9 foto galeri · 1 lagu. Foto JPG, PNG, WebP maksimal 12 MiB. Audio MP3, M4A, AAC, WAV, OGG/Opus, FLAC, WebM maksimal 25 MiB. Pilih foto, atur crop, lalu Unggah.</p>
     <div className="settings-workspace media-workspace">
       <SectionNavigation sections={mediaSections} current={part} onChange={showPart} prefix="media" disabled={galleryBusy && dialogOpen}/>
       <div className="media-content-column">
@@ -1434,6 +1435,7 @@ function MediaPage({content, api, onContent, confirm, notice, active}: {
 function MediaCard({
   slot,
   title,
+  caption,
   src,
   api,
   onContent,
@@ -1448,6 +1450,7 @@ function MediaCard({
   onStateChange?: (slot:string, state:MediaState)=>void;
   slot: string;
   title: string;
+  caption?: string;
   src?: string;
   api: API;
   onContent: (c: Content) => void;
@@ -1462,6 +1465,42 @@ function MediaCard({
   const audio = useRef<HTMLAudioElement>(null);
   const music = slot === "music";
   const [expanded, setExpanded] = useState(false);
+  const [narrow, setNarrow] = useState(()=>matchMedia("(max-width:600px)").matches);
+  const frame = photoFrame(slot, narrow);
+  const initialCrop = {zoom: 1, x: 50, y: 50};
+  const [crop, setCrop] = useState(initialCrop);
+  const [photo, setPhoto] = useState<{file:File; image:HTMLImageElement; url:string}>();
+  const drag = useRef<{clientX:number; clientY:number; x:number; y:number} | undefined>(undefined);
+  const image = photo?.file === file ? photo?.image : undefined;
+  const rectangle = image ? cropRectangle(image.naturalWidth, image.naturalHeight, frame.ratio, crop.zoom, crop.x, crop.y) : undefined;
+  useEffect(()=>{
+    const query = matchMedia("(max-width:600px)");
+    const sync = ()=>setNarrow(query.matches);
+    query.addEventListener("change", sync);
+    return ()=>query.removeEventListener("change", sync);
+  }, []);
+  useEffect(() => {
+    if (!file || music) return;
+    let cancelled = false;
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      if (cancelled) return;
+      if (!image.naturalWidth || !image.naturalHeight || image.naturalWidth * image.naturalHeight > 40000000) {
+        setFeedback("Resolusi foto maksimal 40 megapiksel. Pilih foto yang lebih kecil.");
+        setError(true);
+        return;
+      }
+      setPhoto({file, image, url});
+    };
+    image.onerror = () => {
+      if (cancelled) return;
+      setFeedback("Foto tidak dapat dibaca. Pilih foto JPG, PNG, atau WebP yang valid.");
+      setError(true);
+    };
+    image.src = url;
+    return () => { cancelled = true; URL.revokeObjectURL(url); };
+  }, [file, music]);
   useEffect(()=>{ if(!active) audio.current?.pause(); },[active]);
   useEffect(()=>{onStateChange?.(slot,{busy, label:busy ? "Memproses…" : error ? "Periksa berkas" : file ? "Berkas dipilih" : src ? "Terpasang" : "Belum diunggah"});},[slot,busy,error,file,src,onStateChange]);
   useEffect(() => () => audio.current?.pause(), []);
@@ -1469,6 +1508,9 @@ function MediaCard({
     setFeedback("");
     setError(false);
     setFile(undefined);
+    setPhoto(undefined);
+    setCrop(initialCrop);
+    drag.current = undefined;
     try {
       mediaType(file, music);
       setFile(file);
@@ -1497,16 +1539,20 @@ function MediaCard({
     setError(false);
     setFeedback(method === "PUT" ? "Mengunggah berkas…" : "Menghapus media…");
     try {
-      const type = method === "PUT" ? mediaType(file, music) : undefined;
+      const upload = method === "PUT" && file
+        ? !music && image && rectangle ? await cropPhoto(image, rectangle, file) : file
+        : undefined;
+      const type = method === "PUT" ? mediaType(upload, music) : undefined;
       const content = await api<Content>(
         `/api/admin/media/${slot}`,
         method,
-        method === "PUT" ? file : undefined,
+        upload,
         type,
       );
       audio.current?.pause();
       onContent(content);
       setFile(undefined);
+      setPhoto(undefined);
       if (input.current) input.current.value = "";
       setFeedback("");
       notice(`${title} ${method === "PUT" ? "disimpan" : "dihapus"}.`);
@@ -1561,15 +1607,64 @@ function MediaCard({
         />
       </label>
       <p className="file-name">{file?.name || "Belum ada berkas dipilih"}</p>
+      {file && !music && (image && rectangle ? (
+        <fieldset className="photo-crop" disabled={busy} aria-describedby={`crop-help-${slot}`}>
+          <legend>Atur crop foto</legend>
+          <p className="help" id={`crop-help-${slot}`}>Pratinjau sesuai {frame.kind === "portrait" ? "bingkai foto pasangan pada tema undangan" : frame.kind === "gallery" ? "foto utama galeri pada tema undangan" : "gambar tautan pesan"}. Geser foto untuk mengatur posisi, atau fokuskan foto lalu gunakan tombol panah.</p>
+          <div className="photo-crop-scene" data-frame={frame.kind}>
+          <div className="photo-crop-paper">
+          <div className={`photo-crop-frame invitation-${frame.kind}-frame`} role="group" aria-label={`Atur posisi ${title}`} aria-describedby={`crop-help-${slot}`} tabIndex={busy ? -1 : 0}
+            onKeyDown={e=>{
+              if (busy || !["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key)) return;
+              e.preventDefault();
+              const step = e.shiftKey ? 10 : 1;
+              setCrop(previous=>({...previous,
+                x: Math.max(0, Math.min(100, previous.x + (e.key === "ArrowRight" ? step : e.key === "ArrowLeft" ? -step : 0))),
+                y: Math.max(0, Math.min(100, previous.y + (e.key === "ArrowDown" ? step : e.key === "ArrowUp" ? -step : 0))),
+              }));
+            }}
+            style={{aspectRatio: rectangle.width / rectangle.height, width:`min(100%, ${Math.min(320, 280 * rectangle.width / rectangle.height)}px)`}}
+            onPointerDown={e=>{
+              if (busy || e.button !== 0) return;
+              e.currentTarget.setPointerCapture(e.pointerId);
+              drag.current = {clientX:e.clientX, clientY:e.clientY, x:crop.x, y:crop.y};
+            }}
+            onPointerMove={e=>{
+              if (busy || !drag.current) return;
+              const bounds = e.currentTarget.getBoundingClientRect();
+              const start = drag.current;
+              const horizontal = image.naturalWidth - rectangle.width;
+              const vertical = image.naturalHeight - rectangle.height;
+              setCrop(previous=>({...previous,
+                x: horizontal > 0 ? Math.max(0, Math.min(100, start.x - (e.clientX-start.clientX) / bounds.width * rectangle.width / horizontal * 100)) : 50,
+                y: vertical > 0 ? Math.max(0, Math.min(100, start.y - (e.clientY-start.clientY) / bounds.height * rectangle.height / vertical * 100)) : 50,
+              }));
+            }}
+            onPointerUp={()=>{drag.current=undefined;}}
+            onPointerCancel={()=>{drag.current=undefined;}}
+            onLostPointerCapture={()=>{drag.current=undefined;}}>
+            <img src={photo!.url} alt="" draggable={false} style={{
+              width:`${image.naturalWidth / rectangle.width * 100}%`, height:`${image.naturalHeight / rectangle.height * 100}%`,
+              left:`${-rectangle.x / rectangle.width * 100}%`, top:`${-rectangle.y / rectangle.height * 100}%`,
+            }}/>
+          </div>
+          {frame.kind === "portrait" && <p className="photo-crop-caption">{caption || title}</p>}
+          </div>
+          </div>
+          <label>Perbesar ({crop.zoom.toFixed(1)}×)<input type="range" min="1" max="3" step="0.1" value={crop.zoom} onChange={e=>setCrop({...crop,zoom:Number(e.target.value)})}/></label>
+          <button type="button" onClick={()=>setCrop(initialCrop)}>Reset crop</button>
+        </fieldset>
+      ) : !error && <p role="status">Menyiapkan foto…</p>)}
       <div className="media-actions">
         <button
           type="button"
           className="primary"
-          disabled={busy || !file}
+          disabled={busy || !file || (!music && !image)}
           onClick={() => update("PUT")}
         >
           {src ? "Ganti" : "Unggah"}
         </button>
+        {file && !music && <button type="button" disabled={busy} onClick={()=>{select();if(input.current){input.current.value="";input.current.focus();}}}>Batal pilihan</button>}
         {src && (
           <button
             type="button"

@@ -1,3 +1,5 @@
+@import "./photo-frame.css";
+
 @font-face {
   font-family: Manrope;
   src: url(./assets/fonts/manrope-regular.ttf);
@@ -986,12 +988,91 @@ h3 {
 .media-controls .media-actions {
   margin-top: 12px;
 }
+.photo-crop {
+  min-width: 0;
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.photo-crop legend {
+  padding: 0 6px;
+  font-weight: 600;
+}
+.photo-crop .help {
+  margin: 0 0 16px;
+}
+.photo-crop-scene {
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px;
+  padding: 20px;
+  background: linear-gradient(#0b211b99, #0b211bdd), url('/assets/joglo-forest.webp') center/cover;
+  border-radius: 8px;
+}
+.photo-crop-paper {
+  min-width: 0;
+  width: 100%;
+}
+.photo-crop-scene[data-frame="portrait"] .photo-crop-paper {
+  max-width: 280px;
+  padding: 18px 14px;
+  background: #faf7f2;
+  border-radius: 4px;
+}
+.photo-crop-caption {
+  margin: 14px 0 0;
+  text-align: center;
+  overflow-wrap: anywhere;
+  font: 24px/1.2 Georgia, serif;
+  color: #30271f;
+}
+.photo-crop-scene[data-frame="message"] {
+  background: #efeae2;
+}
+.photo-crop-frame {
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto;
+  background: #EDF2EE;
+  border: 1px solid var(--cms-color-input-border);
+  cursor: grab;
+  touch-action: none;
+}
+.photo-crop-frame:active {
+  cursor: grabbing;
+}
+.photo-crop-frame img {
+  position: absolute;
+  max-width: none;
+  pointer-events: none;
+  user-select: none;
+}
+.photo-crop-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent 33%, #ffffff60 33%, #ffffff60 calc(33% + 1px), transparent calc(33% + 1px), transparent 66%, #ffffff60 66%, #ffffff60 calc(66% + 1px), transparent calc(66% + 1px)), linear-gradient(to bottom, transparent 33%, #ffffff60 33%, #ffffff60 calc(33% + 1px), transparent calc(33% + 1px), transparent 66%, #ffffff60 66%, #ffffff60 calc(66% + 1px), transparent calc(66% + 1px));
+}
+.photo-crop label {
+  display: block;
+}
+.photo-crop input[type="range"] {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--forest);
+}
 .media-card .file-name {
   overflow-wrap: anywhere;
   white-space: normal;
 }
 .couple-grid {
   gap: 20px;
+  align-items: start;
 }
 .couple-grid .couple-photo-card {
   display: grid;
