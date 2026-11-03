@@ -95,6 +95,7 @@ const eventSections: EditorSection[] = [
   {id:"waktu",title:"Acara & waktu",short:"Tanggal, rangkaian, countdown"},
   {id:"lokasi",title:"Lokasi acara",short:"Tempat dan Google Maps"},
   {id:"hadiah",title:"Hadiah",short:"Rekening atau alamat pengiriman"},
+  {id:"tampilan",title:"Tampilan undangan",short:"Efek fade-in saat scroll"},
   {id:"akses",title:"Akses undangan",short:"Pengaturan limit akses"},
 ];
 const messageSections: EditorSection[] = [
@@ -1745,6 +1746,7 @@ function SettingsForm({
     ) as Record<string, string>),
     deviceLimit: textSetting("deviceLimit", "3"),
     deviceLimitEnabled: textSetting("deviceLimitEnabled", "true"),
+    fadeInMode: textSetting("fadeInMode", "once"),
     whatsappTemplate: textSetting("whatsappTemplate", defaultWhatsappTemplate),
     eventDate: textSetting("eventDate", defaultEventDate),
     venueName: textSetting("venueName", ""),
@@ -2473,6 +2475,23 @@ function SettingsForm({
               </fieldset>
             </section>
               </section>
+              <section className="event-part" id="event-part-tampilan" data-settings-part="tampilan" hidden={part!=="tampilan"}>
+                <header className="event-part-heading"><h2 tabIndex={-1}>Tampilan undangan</h2><p>Efek fade-in saat scroll</p></header>
+                <section className="panel">
+                  <label>
+                    Efek fade-in
+                    <select name="fadeInMode" value={values.fadeInMode} aria-describedby="fade-in-help" onChange={event=>{
+                      setValues({...values,fadeInMode:event.target.value});
+                      setDirty(true);
+                    }}>
+                      <option value="disabled">Nonaktif</option>
+                      <option value="once">Aktif sekali</option>
+                      <option value="repeat">Aktif bolak-balik</option>
+                    </select>
+                  </label>
+                  <p className="help" id="fade-in-help">Atur kemunculan kartu saat masuk layar. Mode sekali membuat kartu tetap terlihat setelah muncul; mode bolak-balik mengulang efek setiap kartu masuk layar. Preferensi kurangi gerakan pada perangkat tetap diutamakan.</p>
+                </section>
+              </section>
               <section className="event-part" id="event-part-akses" data-settings-part="akses" hidden={part!=="akses"}>
                 <header className="event-part-heading"><h2 tabIndex={-1}>{eventSections.find(item=>item.id==="akses")!.title}</h2><p>{eventSections.find(item=>item.id==="akses")!.short}</p></header>
 <section className="panel">
@@ -2537,6 +2556,7 @@ function SettingsForm({
                   <div><dt>Tempat</dt><dd>{venueName}</dd></div>
                   <div><dt>Tujuan countdown</dt><dd>{eventDateLabels(values.countdownDate || eventDate).full}{(values.countdownDate || eventDate) && ` · ${values.countdownTime || "00:00"} WIB`}</dd></div>
                   <div><dt>Informasi hadiah</dt><dd>{giftEnabled ? (giftDisplay === "open" ? "Langsung terbuka" : "Tersembunyi dulu") : "Disembunyikan"} · {giftAccounts.length} informasi</dd></div>
+                  <div><dt>Efek fade-in</dt><dd>{values.fadeInMode === "disabled" ? "Nonaktif" : values.fadeInMode === "repeat" ? "Aktif bolak-balik" : "Aktif sekali"}</dd></div>
                   <div><dt>Batas akses</dt><dd>{values.deviceLimitEnabled==="false" ? "Tanpa limit global" : `${values.deviceLimit} browser per undangan`}</dd></div>
                 </dl>
                 <p>Ringkasan mengikuti isian saat ini. Tekan Simpan untuk menerapkan perubahan.</p>

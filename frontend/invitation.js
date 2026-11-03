@@ -6,6 +6,24 @@ export function sectionProgress(top, viewport) {
   return 1 - Math.min(1, Math.max(0, top / Math.max(1, viewport)));
 }
 
+export function configureFadeIn(mode = 'once') {
+  if (mode === 'disabled' || typeof IntersectionObserver === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const observer = new IntersectionObserver(entries => {
+    for (const {target,isIntersecting} of entries) {
+      if (mode === 'repeat') target.classList.toggle('is-revealed',isIntersecting);
+      else if (isIntersecting) {
+        target.classList.add('is-revealed');
+        observer.unobserve(target);
+      }
+    }
+  });
+  document.querySelectorAll('.portrait-paper,.countdown,.event-paper,.location-paper,.gallery-album,.guest-paper,.wishes-area').forEach((card,index) => {
+    card.classList.add('reveal-card');
+    if (index % 2) card.classList.add('reveal-right');
+    observer.observe(card);
+  });
+}
+
 if (typeof document !== 'undefined') {
   const cover = document.querySelector('.entrance-track');
   const picture = document.querySelector('.entrance-picture');
@@ -21,22 +39,6 @@ if (typeof document !== 'undefined') {
   }));
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let frame = null;
-
-  if (typeof IntersectionObserver !== 'undefined') {
-    const observer = new IntersectionObserver(entries => {
-      for (const {target,isIntersecting} of entries) {
-        if (isIntersecting) {
-          target.classList.add('is-revealed');
-          observer.unobserve(target);
-        }
-      }
-    });
-    document.querySelectorAll('.portrait-paper,.countdown,.event-paper,.location-paper,.gallery-album,.guest-paper,.wishes-area').forEach((card,index) => {
-      card.classList.add('reveal-card');
-      if (index % 2) card.classList.add('reveal-right');
-      observer.observe(card);
-    });
-  }
 
   function render() {
     frame = null;

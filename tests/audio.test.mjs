@@ -67,7 +67,7 @@ test('music tries autoplay, opening button, music button, and first scroll while
         }
         pause(){this.paused = true;this.listeners.pause();}
       },
-      eventSchedule, playAudio, defaultEventDate:'2026-11-22', defaultVenueName:'Venue',
+      eventSchedule, playAudio, configureFadeIn(){}, defaultEventDate:'2026-11-22', defaultVenueName:'Venue',
       eventDateLabels, countdownParts:target => {countdownTarget = target; return [];}, setInterval(){},
     });
     assert.equal(node('#open-invitation').disabled, false);

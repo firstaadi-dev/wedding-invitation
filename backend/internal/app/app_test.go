@@ -95,6 +95,16 @@ func TestValidation(t *testing.T) {
 	rejects(t, func() { validateSettings(map[string]any{"tenant_id": "other"}) }, 400)
 }
 
+func TestFadeInMode(t *testing.T) {
+	validateSettings(map[string]any{})
+	for _, mode := range []string{"disabled", "once", "repeat"} {
+		validateSettings(map[string]any{"fadeInMode": mode})
+	}
+	for _, mode := range []any{"", "always", 1, nil, true, []any{"once"}, map[string]any{"mode": "once"}} {
+		rejects(t, func() { validateSettings(map[string]any{"fadeInMode": mode}) }, 400)
+	}
+}
+
 func TestGiftDisplay(t *testing.T) {
 	validateSettings(map[string]any{})
 	for _, display := range []string{"collapsed", "open"} {

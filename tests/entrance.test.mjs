@@ -18,23 +18,24 @@ assert.equal(sectionProgress(-2000, 1000), 1);
 assert.equal(sectionProgress(0, 0), 1);
 
 const invitationSource = readFileSync(new URL('../frontend/invitation.js',import.meta.url),'utf8').replace(/^export /gm,'');
-function revealHarness(supported = true) {
+function revealHarness(mode = 'once', supported = true, reducedMotion = false) {
   const cards = Array.from({length:3},() => {
     const classes = new Set();return {classes,classList:{
       add:name => classes.add(name),
+      toggle:(name,enabled) => enabled ? classes.add(name) : classes.delete(name),
     }};
   });
   let observer;
   const context = {
     document:{querySelector:() => ({addEventListener(){}}),querySelectorAll:selector => selector.includes('.portrait-paper') ? cards : []},
-    window:{matchMedia:() => ({matches:false,addEventListener(){}}),addEventListener(){},requestAnimationFrame(){return 1;}},
+    window:{matchMedia:() => ({matches:reducedMotion,addEventListener(){}}),addEventListener(){},requestAnimationFrame(){return 1;}},
   };
   if (supported) context.IntersectionObserver = class {
     constructor(callback) {this.callback=callback;this.observed=new Set();observer=this;}
     observe(card) {this.observed.add(card);}
     unobserve(card) {this.observed.delete(card);}
   };
-  runInNewContext(invitationSource,context);return {cards,observer};
+  runInNewContext(`${invitationSource}\nconfigureFadeIn(${JSON.stringify(mode)});`,context);return {cards,observer};
 }
 const {cards,observer} = revealHarness();
 assert.equal(observer.observed.size,3);
@@ -54,7 +55,16 @@ assert.equal(cards[1].classes.has('is-revealed'),true);
 assert.equal(cards[0].classes.has('is-revealed'),true);
 assert.equal(observer.observed.has(cards[0]),false);
 assert.equal(observer.observed.has(cards[2]),true,'Unseen cards still wait for their first reveal');
-assert.ok(revealHarness(false).cards.every(card => card.classes.size === 0),'Cards remain visible without IntersectionObserver');
+const repeated = revealHarness('repeat');
+for (const isIntersecting of [true,false,true,false,true]) {
+  repeated.observer.callback([{target:repeated.cards[0],isIntersecting}]);
+  assert.equal(repeated.cards[0].classes.has('is-revealed'),isIntersecting,'Repeat mode follows viewport entry and exit from either direction');
+  assert.equal(repeated.observer.observed.has(repeated.cards[0]),true);
+}
+for (const harness of [revealHarness('disabled'),revealHarness('once',false),revealHarness('repeat',true,true)]) {
+  assert.equal(harness.observer,undefined);
+  assert.ok(harness.cards.every(card => card.classes.size === 0),'Disabled, reduced-motion and unsupported browsers keep every card visible');
+}
 
 const page = readFileSync(new URL('../frontend/index.html', import.meta.url), 'utf8');
 assert.doesNotMatch(page, /<nav\b|hamburger|bottom-nav/i);
@@ -82,4 +92,4 @@ assert.match(gifts, /id="gift-accounts"/);
 const content = readFileSync(new URL('../frontend/content.js', import.meta.url), 'utf8');
 assert.doesNotMatch(content, /Firsta|Talitha|Nugroho|Arieta|Sudaryatno|Wuri|0033 1600 0000|1350018340537/);
 
-console.log('Lolos: parallax, transisi section 3D, kartu fade-in sekali dan tetap terlihat saat scroll kembali, fallback tanpa observer, dan konten undangan.');
+console.log('Lolos: parallax, transisi section 3D, fade-in nonaktif/sekali/bolak-balik, reduced motion, fallback tanpa observer, dan konten undangan.');

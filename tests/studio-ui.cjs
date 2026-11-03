@@ -89,7 +89,32 @@ createRoot(document.getElementById("root")!).render(<StudioFixture/>);
     if(display==='open' && width!==320)await invitation.screenshot({path:path.join(shots,`gift-open-${width}.png`),fullPage:true});
    }
   }
+  for(const width of [1440,390]){
+   await invitation.setViewportSize({width,height:1000});
+   for(const fadeInMode of ['disabled','once','repeat']){
+    giftSettings={giftAccounts:accounts,giftDisplay:'open',fadeInMode};
+    await invitation.goto('https://invitation.example/preview');await invitation.addScriptTag({path:path.join(out,'content.js')});
+    const card=invitation.locator('#gift-accounts');
+    await invitation.waitForFunction(()=>document.querySelector('#gift-accounts').children.length===2);
+    await card.evaluate(el=>{el.dataset.revealStarts='0';el.addEventListener('animationstart',event=>{if(event.animationName==='card-reveal')el.dataset.revealStarts=String(Number(el.dataset.revealStarts)+1);});});
+    await card.scrollIntoViewIfNeeded();
+    if(fadeInMode==='disabled')assert.equal(await card.evaluate(el=>el.classList.contains('reveal-card')),false);
+    else await invitation.waitForFunction(()=>document.querySelector('#gift-accounts').dataset.revealStarts==='1');
+    await invitation.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+    await invitation.waitForFunction(()=>scrollY===0);
+    if(fadeInMode==='repeat')await invitation.waitForFunction(()=>!document.querySelector('#gift-accounts').classList.contains('is-revealed'));
+    await card.scrollIntoViewIfNeeded();
+    if(fadeInMode==='repeat')await invitation.waitForFunction(()=>document.querySelector('#gift-accounts').dataset.revealStarts==='2');
+    assert.equal(await card.getAttribute('data-reveal-starts'),fadeInMode==='disabled'?'0':fadeInMode==='once'?'1':'2');
+   }
+  }
+  await invitation.emulateMedia({reducedMotion:'reduce'});
+  giftSettings={giftAccounts:accounts,giftDisplay:'open',fadeInMode:'repeat'};
+  await invitation.goto('https://invitation.example/preview');await invitation.addScriptTag({path:path.join(out,'content.js')});
+  await invitation.waitForFunction(()=>document.querySelector('#gift-accounts').children.length===2);
+  assert.equal(await invitation.locator('.reveal-card').count(),0);
   await invitation.close();
+  console.log('Fade-in: disabled/once/repeat use 0/1/2 animations across viewport re-entry; reduced motion keeps cards visible PASS');
   console.log('Gift display: legacy/collapsed keyboard disclosure, open without button, disabled/empty at desktop and mobile PASS');
   for(const width of [1440,390,320]){
    for(const route of ['tamu','pesan','media','acara','login']){
@@ -211,6 +236,18 @@ createRoot(document.getElementById("root")!).render(<StudioFixture/>);
   await load('acara',1440);await choose('event','akses');await page.locator('[name=deviceLimit]').fill('0');await choose('event','pasangan');await page.getByRole('button',{name:'Simpan detail acara',exact:true}).click();assert(await page.locator('#event-part-akses').isVisible());await page.locator('[name=deviceLimit]').fill('4');await choose('event','pasangan');await page.locator('[name=partnerOneName]').fill('Nara Baru');await page.getByRole('button',{name:'Simpan detail acara',exact:true}).click();await page.getByText('Pengaturan tersimpan',{exact:true}).filter({visible:true}).waitFor();
   const eventPayload=await page.evaluate(()=>window.__calls.at(-1).value);assert.equal(eventPayload.deviceLimit,'4');assert.equal(eventPayload.partnerOneName,'Nara Baru');assert.deepEqual(eventPayload.giftAccounts,[]);assert.equal(eventPayload.giftEnabled,'false');assert.equal(eventPayload.eventDate,'2026-12-12');
   assert.equal(eventPayload.giftDisplay,'collapsed');
+  assert.equal(eventPayload.fadeInMode,'once');
+  for(const width of [1440,390]){
+   await load('acara',width);await choose('event','tampilan');
+   const mode=page.getByLabel('Efek fade-in');assert.equal(await mode.inputValue(),'once');
+   for(const value of ['disabled','repeat','once']){
+    await mode.selectOption(value);await page.getByRole('button',{name:'Simpan detail acara',exact:true}).click();
+    await page.getByText('Pengaturan tersimpan',{exact:true}).filter({visible:true}).waitFor();
+    assert.equal(await page.evaluate(()=>window.__calls.at(-1).value.fadeInMode),value);
+    assert.equal(await mode.inputValue(),value);
+   }
+   await overflow();await capture(`fade-settings-${width}`);
+  }
   for(const width of [1440,390]){
    await load('acara',width);await choose('event','hadiah');
    const display=page.getByLabel('Tampilan tanda kasih');assert(await display.isDisabled());

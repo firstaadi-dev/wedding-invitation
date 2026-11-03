@@ -3385,6 +3385,12 @@
             ],
             "description": "Whether to show the gift-account section to guests."
           },
+          "fadeInMode": {
+            "type": "string",
+            "enum": ["disabled", "once", "repeat"],
+            "default": "once",
+            "description": "Invitation card entrance effects. disabled keeps cards visible without fade-in; once (also when absent) reveals each card only on its first entry into the viewport; repeat reveals cards on every entry from either scroll direction. The device's reduced-motion preference overrides animation."
+          },
           "giftDisplay": {
             "type": "string",
             "enum": ["collapsed", "open"],

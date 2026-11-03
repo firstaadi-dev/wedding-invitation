@@ -1,0 +1,29 @@
+$kind: http-request
+name: Save fade-in mode
+description: Choose disabled, once or repeat for invitation card fade-in effects while preserving the other settings and media.
+url: '{{cmsBaseUrl}}/api/admin/content'
+method: PUT
+order: 3200
+headers:
+  - key: Cookie
+    value: '{{adminCookie}}'
+  - key: X-CSRF-Token
+    value: '{{csrf}}'
+  - key: Content-Type
+    value: application/json
+  - key: Origin
+    value: '{{cmsOrigin}}'
+body:
+  type: json
+  content: |-
+    {"fadeInMode":"{{fadeInMode}}"}
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      pm.variables.set('fadeInMode', pm.iterationData.get('fadeInMode') || 'once');
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Fade-in mode saves successfully', () => pm.response.to.have.status(200));
+      pm.test('Selected fade-in mode is returned', () => pm.expect(pm.response.json().settings.fadeInMode).to.eql(pm.variables.get('fadeInMode')));

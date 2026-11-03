@@ -130,7 +130,10 @@ func validMap(v any) bool {
 	return err == nil && u.Scheme == "https" && u.Host == "www.google.com" && u.User == nil && strings.HasPrefix(u.Path, "/maps/embed")
 }
 func validateSettings(v map[string]any) {
-	only(v, "partnerOneName", "partnerTwoName", "partnerOneFather", "partnerOneMother", "partnerTwoFather", "partnerTwoMother", "giftEnabled", "giftDisplay", "giftAccounts", "ceremonyTitle", "receptionTitle", "ceremonyTime", "receptionTime", "countdownTime", "countdownDate", "eventDate", "ceremonyDate", "receptionDate", "venueName", "ceremonyVenue", "receptionVenue", "mapEmbedUrl", "whatsappTemplate", "linkPreviewTitle", "linkPreviewDescription", "deviceLimitEnabled", "deviceLimit", "galleryLayout")
+	only(v, "partnerOneName", "partnerTwoName", "partnerOneFather", "partnerOneMother", "partnerTwoFather", "partnerTwoMother", "giftEnabled", "giftDisplay", "giftAccounts", "ceremonyTitle", "receptionTitle", "ceremonyTime", "receptionTime", "countdownTime", "countdownDate", "eventDate", "ceremonyDate", "receptionDate", "venueName", "ceremonyVenue", "receptionVenue", "mapEmbedUrl", "whatsappTemplate", "linkPreviewTitle", "linkPreviewDescription", "deviceLimitEnabled", "deviceLimit", "galleryLayout", "fadeInMode")
+	if raw, exists := v["fadeInMode"]; exists && raw != "disabled" && raw != "once" && raw != "repeat" {
+		fail(400, "fade_in_mode", "Pilih efek fade-in yang valid.")
+	}
 	if raw, exists := v["galleryLayout"]; exists && raw != "8" && raw != "9" {
 		fail(400, "gallery_layout", "Pilih tampilan galeri 8 atau 9 foto.")
 	}

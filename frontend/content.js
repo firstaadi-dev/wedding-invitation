@@ -1,6 +1,7 @@
 import {countdownParts} from './countdown.js';
 import {eventSchedule, eventDateLabels, mapTitle} from './event.js';
 import {playAudio} from './audio.js';
+import {configureFadeIn} from './invitation.js';
 const music = document.querySelector('.music-status');
 if (location.hash) location.replace(`${location.pathname}?access=1${location.hash}`);
 const scope = new URLSearchParams();
@@ -107,6 +108,7 @@ async function load() {
     frame.loading = 'lazy';frame.referrerPolicy = 'strict-origin-when-cross-origin';frame.allowFullscreen = true;
     document.querySelector('.map-placeholder').replaceWith(frame);
   }
+  configureFadeIn(settings.fadeInMode);
 }
 function photo(src,alt) {
   const image = document.createElement('img');
