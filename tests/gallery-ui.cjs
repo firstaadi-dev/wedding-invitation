@@ -63,6 +63,9 @@ const photos=Object.fromEntries(Array.from({length:9},(_,i)=>[`gallery${i+1}`,
     assert.equal(await page.locator('#gallery-featured').isVisible(),false);
     assert.equal(await page.locator('#gallery-position').isVisible(),false);
     await load({gallery9:photos.gallery9});
+    assert(await page.locator('#gallery-empty').isVisible());
+    assert.equal(await page.locator('#gallery-thumbnails button').count(),0);
+    await load({gallery9:photos.gallery9},'9');
     assert.equal(await page.locator('#gallery-thumbnails button').count(),1);
     assert.equal(await page.locator('#gallery-featured img').getAttribute('src'),photos.gallery9);
     await page.locator('#gallery-featured').click();

@@ -122,7 +122,7 @@ function startCountdown(time, date) {
   const timer = setInterval(() => {update();if (Date.now() >= target) clearInterval(timer);},1000);
 }
 function renderGallery(media, layout = '8') {
-  const photos = Array.from({length:9},(_,i) => media[`gallery${i+1}`]).filter(Boolean).slice(0,layout === '9' ? 9 : 8);
+  const photos = Array.from({length:layout === '9' ? 9 : 8},(_,i) => media[`gallery${i+1}`]).filter(Boolean);
   if (!photos.length) return;
   document.querySelector('.gallery-album').dataset.layout = layout;
   const featured = document.querySelector('#gallery-featured');
