@@ -103,7 +103,7 @@ const messageSections: EditorSection[] = [
 ];
 const mediaSections: EditorSection[] = [
   {id:"couple",title:"Foto pasangan",short:"Dua foto mempelai"},
-  {id:"gallery",title:"Galeri undangan",short:"Sembilan slot foto"},
+  {id:"gallery",title:"Galeri undangan",short:"Foto untuk galeri"},
   {id:"music",title:"Lagu undangan",short:"Musik latar acara"},
 ];
 function SectionNavigation({sections, current, onChange, prefix, disabled = false}: {
@@ -1369,6 +1369,8 @@ function MediaPage({content, api, onContent, confirm, notice, active}: {
   const [dialogOpen,setDialogOpen]=useState(false);
   const savedLayout=content.settings.galleryLayout === "9" ? "9" : "8";
   const [galleryLayout,setGalleryLayout]=useState(savedLayout);
+  const galleryCount=galleryLayout === "9" ? 9 : 8;
+  const visibleSlot=galleryLayout === "8" && slot === "gallery9" ? "gallery1" : slot;
   const [layoutBusy,setLayoutBusy]=useState(false);
   useEffect(()=>setGalleryLayout(savedLayout),[savedLayout]);
   const dialog=useRef<HTMLDialogElement>(null);
@@ -1411,7 +1413,7 @@ function MediaPage({content, api, onContent, confirm, notice, active}: {
   const card=(key:string,title:string,compact=false)=><MediaCard key={key} slot={key} title={title} caption={compact ? String(content.settings[key==="groom" ? "partnerOneName" : "partnerTwoName"] || title) : undefined} src={content.media[key]} api={api} onContent={onContent} confirm={confirm} notice={notice} compact={compact} active={active && part==="music"} onStateChange={reportState}/>;
   return <>
     <header className="page-heading"><div><h1 id="media-title" tabIndex={-1}>Foto &amp; Lagu</h1><p>Foto pasangan, koleksi galeri, dan musik. Kelola satu per satu dengan jelas.</p></div></header>
-    <p className="media-format-note">2 foto pasangan · 9 foto galeri · 1 lagu. Foto JPG, PNG, WebP maksimal 12 MiB. Audio MP3, M4A, AAC, WAV, OGG/Opus, FLAC, WebM maksimal 25 MiB. Pilih foto, atur crop, lalu Unggah.</p>
+    <p className="media-format-note">2 foto pasangan · {galleryCount} foto galeri · 1 lagu. Foto JPG, PNG, WebP maksimal 12 MiB. Audio MP3, M4A, AAC, WAV, OGG/Opus, FLAC, WebM maksimal 25 MiB. Pilih foto, atur crop, lalu Unggah.</p>
     <div className="settings-workspace media-workspace">
       <SectionNavigation sections={mediaSections} current={part} onChange={showPart} prefix="media" disabled={galleryBusy && dialogOpen}/>
       <div className="media-content-column">
@@ -1420,7 +1422,7 @@ function MediaPage({content, api, onContent, confirm, notice, active}: {
           <div id="couple-media" className="media-grid couple-grid">{card("groom","Foto mempelai pertama",true)}{card("bride","Foto mempelai kedua",true)}</div>
         </section>
         <section id="media-part-gallery" hidden={part!=="gallery"}>
-          <div className="section-heading"><h2 tabIndex={-1}>Galeri undangan</h2><span className="tag">{Array.from({length:9},(_,i)=>content.media[`gallery${i+1}`]).filter(Boolean).length}/9 terpasang</span></div>
+          <div className="section-heading"><h2 tabIndex={-1}>Galeri undangan</h2><span className="tag">{Array.from({length:galleryCount},(_,i)=>content.media[`gallery${i+1}`]).filter(Boolean).length}/{galleryCount} terpasang</span></div>
           <form className="gallery-layout-form" onSubmit={saveGalleryLayout} aria-busy={layoutBusy}>
             <label htmlFor="gallery-layout">Tampilan galeri
               <select id="gallery-layout" value={galleryLayout} onChange={event=>setGalleryLayout(event.target.value as "8"|"9")} disabled={layoutBusy || galleryBusy} aria-describedby="gallery-layout-help">
@@ -1428,13 +1430,13 @@ function MediaPage({content, api, onContent, confirm, notice, active}: {
                 <option value="9">9 foto — foto besar + thumbnail geser + kolase</option>
               </select>
             </label>
-            <p id="gallery-layout-help" className="help">Mode 8 menampilkan delapan foto pertama yang terpasang. Foto ke-9 tetap tersimpan dan muncul kembali saat memilih mode 9.</p>
+            <p id="gallery-layout-help" className="help">Mode 8 menampilkan Foto 1–8. Foto 9 disembunyikan dan tetap tersimpan; pilih mode 9 untuk menampilkannya kembali.</p>
             <button className="primary" type="submit" disabled={layoutBusy || galleryBusy || galleryLayout === savedLayout}>{layoutBusy ? "Menyimpan…" : "Simpan tampilan"}</button>
           </form>
           <div className="gallery-workbench">
-            <div className="gallery-tile-grid" role="group" aria-label="Sembilan slot galeri">{Array.from({length:9},(_,i)=>{
+            <div className="gallery-tile-grid" role="group" aria-label={`${galleryCount} slot galeri`}>{Array.from({length:9},(_,i)=>{
               const key=`gallery${i+1}`;
-              return <button key={key} type="button" className="gallery-tile" data-gallery-slot={key} aria-pressed={slot===key} disabled={galleryBusy}
+              return <button key={key} type="button" className="gallery-tile" data-gallery-slot={key} hidden={i>=galleryCount} aria-pressed={visibleSlot===key} disabled={galleryBusy}
                 aria-controls="gallery-slot-dialog" onClick={e=>{
                   setSlot(key); trigger.current=e.currentTarget;
                   if(matchMedia("(max-width:899px)").matches){dialog.current?.showModal();setDialogOpen(true);}
@@ -1447,7 +1449,7 @@ function MediaPage({content, api, onContent, confirm, notice, active}: {
             <dialog ref={dialog} className="gallery-slot-dialog" id="gallery-slot-dialog" aria-labelledby="gallery-dialog-title"
               onCancel={e=>{if(galleryBusy)e.preventDefault();}} onClose={()=>{setDialogOpen(false);if(trigger.current?.checkVisibility())trigger.current.focus();}}>
               <div className="dialog-heading"><h2 id="gallery-dialog-title">Kelola foto galeri</h2><button type="button" disabled={galleryBusy} onClick={closeGallery} aria-label="Tutup editor foto">Tutup</button></div>
-              {Array.from({length:9},(_,i)=>{const key=`gallery${i+1}`;return <div key={key} data-gallery-editor={key} hidden={slot!==key}>{card(key,`Galeri ${i+1}`)}</div>;})}
+              {Array.from({length:9},(_,i)=>{const key=`gallery${i+1}`;return <div key={key} data-gallery-editor={key} hidden={visibleSlot!==key}>{card(key,`Galeri ${i+1}`)}</div>;})}
             </dialog>
           </div>
         </section>
