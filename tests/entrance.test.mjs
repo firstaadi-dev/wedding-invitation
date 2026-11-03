@@ -22,7 +22,6 @@ function revealHarness(supported = true) {
   const cards = Array.from({length:3},() => {
     const classes = new Set();return {classes,classList:{
       add:name => classes.add(name),
-      toggle:(name,enabled) => enabled ? classes.add(name) : classes.delete(name),
     }};
   });
   let observer;
@@ -33,6 +32,7 @@ function revealHarness(supported = true) {
   if (supported) context.IntersectionObserver = class {
     constructor(callback) {this.callback=callback;this.observed=new Set();observer=this;}
     observe(card) {this.observed.add(card);}
+    unobserve(card) {this.observed.delete(card);}
   };
   runInNewContext(invitationSource,context);return {cards,observer};
 }
@@ -44,16 +44,16 @@ assert.equal(cards[2].classes.has('reveal-right'),false);
 observer.callback([{target:cards[0],isIntersecting:false},{target:cards[1],isIntersecting:true}]);
 assert.equal(cards[0].classes.has('is-revealed'),false);
 assert.equal(cards[1].classes.has('is-revealed'),true);
-assert.equal(observer.observed.has(cards[1]),true);
+assert.equal(observer.observed.has(cards[1]),false,'Revealed cards stop being observed');
 observer.callback([{target:cards[1],isIntersecting:false}]);
-assert.equal(cards[1].classes.has('is-revealed'),false,'Leaving the viewport resets the animation');
+assert.equal(cards[1].classes.has('is-revealed'),true,'Leaving the viewport keeps the card visible');
 observer.callback([{target:cards[1],isIntersecting:true}]);
-assert.equal(cards[1].classes.has('is-revealed'),true,'Re-entering from the opposite scroll direction reveals the card again');
+assert.equal(cards[1].classes.has('is-revealed'),true,'Scrolling back up does not reset the reveal');
 observer.callback([{target:cards[1],isIntersecting:false},{target:cards[0],isIntersecting:true}]);
-assert.equal(cards[1].classes.has('is-revealed'),false);
+assert.equal(cards[1].classes.has('is-revealed'),true);
 assert.equal(cards[0].classes.has('is-revealed'),true);
-observer.callback([{target:cards[1],isIntersecting:true}]);
-assert.equal(cards[1].classes.has('is-revealed'),true,'Reveal repeats across multiple visits');
+assert.equal(observer.observed.has(cards[0]),false);
+assert.equal(observer.observed.has(cards[2]),true,'Unseen cards still wait for their first reveal');
 assert.ok(revealHarness(false).cards.every(card => card.classes.size === 0),'Cards remain visible without IntersectionObserver');
 
 const page = readFileSync(new URL('../frontend/index.html', import.meta.url), 'utf8');
@@ -82,4 +82,4 @@ assert.match(gifts, /id="gift-accounts"/);
 const content = readFileSync(new URL('../frontend/content.js', import.meta.url), 'utf8');
 assert.doesNotMatch(content, /Firsta|Talitha|Nugroho|Arieta|Sudaryatno|Wuri|0033 1600 0000|1350018340537/);
 
-console.log('Lolos: parallax, transisi section 3D, kartu berulang saat masuk layar dari kedua arah scroll, fallback tanpa observer, dan konten undangan.');
+console.log('Lolos: parallax, transisi section 3D, kartu fade-in sekali dan tetap terlihat saat scroll kembali, fallback tanpa observer, dan konten undangan.');

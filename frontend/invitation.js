@@ -25,7 +25,10 @@ if (typeof document !== 'undefined') {
   if (typeof IntersectionObserver !== 'undefined') {
     const observer = new IntersectionObserver(entries => {
       for (const {target,isIntersecting} of entries) {
-        target.classList.toggle('is-revealed',isIntersecting);
+        if (isIntersecting) {
+          target.classList.add('is-revealed');
+          observer.unobserve(target);
+        }
       }
     });
     document.querySelectorAll('.portrait-paper,.countdown,.event-paper,.location-paper,.gallery-album,.guest-paper,.wishes-area').forEach((card,index) => {
