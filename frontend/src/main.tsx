@@ -1438,6 +1438,10 @@ function MediaPage({content, api, onContent, confirm, notice, active}: {
   const [slot,setSlot]=useState("gallery1");
   const [states,setStates]=useState<Record<string,MediaState>>({});
   const [dialogOpen,setDialogOpen]=useState(false);
+  const savedLayout=content.settings.galleryLayout === "9" ? "9" : "8";
+  const [galleryLayout,setGalleryLayout]=useState(savedLayout);
+  const [layoutBusy,setLayoutBusy]=useState(false);
+  useEffect(()=>setGalleryLayout(savedLayout),[savedLayout]);
   const dialog=useRef<HTMLDialogElement>(null);
   const trigger=useRef<HTMLButtonElement>(null);
   const galleryBusy=Object.entries(states).some(([key,state])=>key.startsWith("gallery") && state.busy);
@@ -1462,6 +1466,19 @@ function MediaPage({content, api, onContent, confirm, notice, active}: {
     setPart(id);
     requestAnimationFrame(()=>document.getElementById(`media-part-${id}`)?.querySelector<HTMLElement>("h2")?.focus());
   }
+  async function saveGalleryLayout(event:FormEvent) {
+    event.preventDefault();
+    if(layoutBusy || galleryBusy) return;
+    setLayoutBusy(true);
+    try {
+      onContent(await api<Content>("/api/admin/content","PUT",{galleryLayout}));
+      notice("Tampilan galeri disimpan.");
+    } catch(error) {
+      notice(errorMessage(error),true);
+    } finally {
+      setLayoutBusy(false);
+    }
+  }
   const card=(key:string,title:string,compact=false)=><MediaCard key={key} slot={key} title={title} caption={compact ? String(content.settings[key==="groom" ? "partnerOneName" : "partnerTwoName"] || title) : undefined} src={content.media[key]} api={api} onContent={onContent} confirm={confirm} notice={notice} compact={compact} active={active && part==="music"} onStateChange={reportState}/>;
   return <>
     <header className="page-heading"><div><h1 id="media-title" tabIndex={-1}>Foto &amp; Lagu</h1><p>Foto pasangan, koleksi galeri, dan musik. Kelola satu per satu dengan jelas.</p></div></header>
@@ -1475,6 +1492,16 @@ function MediaPage({content, api, onContent, confirm, notice, active}: {
         </section>
         <section id="media-part-gallery" hidden={part!=="gallery"}>
           <div className="section-heading"><h2 tabIndex={-1}>Galeri undangan</h2><span className="tag">{Array.from({length:9},(_,i)=>content.media[`gallery${i+1}`]).filter(Boolean).length}/9 terpasang</span></div>
+          <form className="gallery-layout-form" onSubmit={saveGalleryLayout} aria-busy={layoutBusy}>
+            <label htmlFor="gallery-layout">Tampilan galeri
+              <select id="gallery-layout" value={galleryLayout} onChange={event=>setGalleryLayout(event.target.value as "8"|"9")} disabled={layoutBusy || galleryBusy} aria-describedby="gallery-layout-help">
+                <option value="8">8 foto — foto besar + thumbnail 4 × 2</option>
+                <option value="9">9 foto — foto besar + thumbnail geser + kolase</option>
+              </select>
+            </label>
+            <p id="gallery-layout-help" className="help">Mode 8 menampilkan delapan foto pertama yang terpasang. Foto ke-9 tetap tersimpan dan muncul kembali saat memilih mode 9.</p>
+            <button className="primary" type="submit" disabled={layoutBusy || galleryBusy || galleryLayout === savedLayout}>{layoutBusy ? "Menyimpan…" : "Simpan tampilan"}</button>
+          </form>
           <div className="gallery-workbench">
             <div className="gallery-tile-grid" role="group" aria-label="Sembilan slot galeri">{Array.from({length:9},(_,i)=>{
               const key=`gallery${i+1}`;
