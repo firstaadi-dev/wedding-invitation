@@ -1780,6 +1780,9 @@ function SettingsForm({
   const [giftEnabled, setGiftEnabled] = useState(
     content.settings.giftEnabled !== "false",
   );
+  const [giftDisplay, setGiftDisplay] = useState(
+    content.settings.giftDisplay === "open" ? "open" : "collapsed",
+  );
   const [giftAccounts, setGiftAccounts] = useState<GiftOption[]>(() =>
     Array.isArray(content.settings.giftAccounts)
       ? (content.settings.giftAccounts.map((item) =>
@@ -1918,6 +1921,7 @@ function SettingsForm({
     );
     if (kind === "event") {
       payload.giftEnabled = String(giftEnabled);
+      payload.giftDisplay = giftDisplay;
       payload.giftAccounts = giftAccounts;
     }
     setBusy(true);
@@ -2299,6 +2303,25 @@ function SettingsForm({
                 </p>
               )}
               <fieldset disabled={!giftEnabled} className="gift-fields">
+                <label>
+                  Tampilan tanda kasih
+                  <select
+                    value={giftDisplay}
+                    aria-describedby="gift-display-help"
+                    onChange={(event) => {
+                      setGiftDisplay(event.target.value);
+                      setDirty(true);
+                    }}
+                  >
+                    <option value="collapsed">Tersembunyi dulu</option>
+                    <option value="open">Langsung terbuka</option>
+                  </select>
+                </label>
+                <p id="gift-display-help" className="help">
+                  {giftDisplay === "open"
+                    ? "Rekening dan alamat langsung tampil tanpa tombol Berbagi tanda kasih."
+                    : "Tamu menekan tombol Berbagi tanda kasih untuk melihat rekening dan alamat."}
+                </p>
                 {giftAccounts.map((item, index) => (
                   <article className="gift-card" key={index}>
                     <div className="gift-card-heading">
@@ -2513,7 +2536,7 @@ function SettingsForm({
                   <div><dt>Rangkaian acara</dt><dd>{values.ceremonyTitle || "Acara pertama"} · {event.ceremonyDate} · {values.ceremonyTime || "Waktu akan diinformasikan"} · {event.ceremonyVenue}<br/>{values.receptionTitle || "Acara kedua"} · {event.receptionDate} · {values.receptionTime || "Waktu akan diinformasikan"} · {event.receptionVenue}</dd></div>
                   <div><dt>Tempat</dt><dd>{venueName}</dd></div>
                   <div><dt>Tujuan countdown</dt><dd>{eventDateLabels(values.countdownDate || eventDate).full}{(values.countdownDate || eventDate) && ` · ${values.countdownTime || "00:00"} WIB`}</dd></div>
-                  <div><dt>Informasi hadiah</dt><dd>{giftEnabled ? "Ditampilkan" : "Disembunyikan"} · {giftAccounts.length} informasi</dd></div>
+                  <div><dt>Informasi hadiah</dt><dd>{giftEnabled ? (giftDisplay === "open" ? "Langsung terbuka" : "Tersembunyi dulu") : "Disembunyikan"} · {giftAccounts.length} informasi</dd></div>
                   <div><dt>Batas akses</dt><dd>{values.deviceLimitEnabled==="false" ? "Tanpa limit global" : `${values.deviceLimit} browser per undangan`}</dd></div>
                 </dl>
                 <p>Ringkasan mengikuti isian saat ini. Tekan Simpan untuk menerapkan perubahan.</p>

@@ -56,6 +56,7 @@ createRoot(document.getElementById("root")!).render(<StudioFixture/>);
   async function capture(name){await page.evaluate(()=>{document.activeElement?.blur();scrollTo(0,0)});await page.screenshot({path:path.join(shots,name+'.png'),fullPage:true});}
   async function overflow(){assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'page overflow');}
   const invitation=await browser.newPage();
+  invitation.on('pageerror',error=>errors.push(error.message));
   const template=fs.readFileSync(path.join(root,'frontend/index.html'),'utf8').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<link\b[^>]*>/gi,'').replace('</head>',`<style>${fs.readFileSync(path.join(out,'invitation.css'),'utf8')}</style></head>`);
   for(const width of [1440,390,320]){
    await invitation.setViewportSize({width,height:1000});await invitation.setContent(template);
@@ -63,7 +64,33 @@ createRoot(document.getElementById("root")!).render(<StudioFixture/>);
    const appearance=await frame.evaluate(el=>({ratio:el.offsetWidth/el.offsetHeight,radius:getComputedStyle(el).borderTopLeftRadius}));
    assert(Math.abs(appearance.ratio-(width>600?246/250:225/280))<.01,'public portrait ratio must match the crop');assert.equal(appearance.radius,'150px');
   }
+  await esbuild.build({entryPoints:[path.join(root,'frontend/content.js')],bundle:true,outfile:path.join(out,'content.js')});
+  const accounts=[{type:'account',bank:'BCA',number:'1234567890',owner:'Nara'},{type:'address',recipient:'Dimas',address:'Jalan Melati No. 1',phone:'081234567890'}];
+  let giftSettings;
+  await invitation.route('https://invitation.example/**',route=>route.fulfill({contentType:route.request().url().includes('/api/')?'application/json':'text/html',body:route.request().url().includes('/api/invitation')?JSON.stringify({settings:giftSettings,media:{}}):route.request().url().includes('/api/wishes')?JSON.stringify({wishes:[]}):template}));
+  for(const width of [1440,390,320]){
+   await invitation.setViewportSize({width,height:1000});
+   for(const display of [undefined,'collapsed','open','disabled','empty']){
+    giftSettings={giftAccounts:display==='empty'?[]:accounts,giftEnabled:display==='disabled'?'false':'true',giftDisplay:['disabled','empty'].includes(display)?'open':display};
+    await invitation.goto('https://invitation.example/preview');await invitation.addScriptTag({path:path.join(out,'content.js')});
+    await invitation.waitForFunction(()=>document.querySelector('#gift-accounts').children.length>0 || document.querySelector('#gift-accounts').hidden);
+    const details=invitation.locator('.gift-details');const summary=details.locator('summary');
+    if(['disabled','empty'].includes(display)){assert(!(await invitation.locator('#gift-accounts').isVisible()));assert.equal(await summary.count(),0);continue;}
+    if(display==='open'){assert.equal(await summary.count(),0);assert.equal(await details.count(),0);}
+    else assert(await summary.isVisible());
+    if(display!=='open'){
+     assert(!(await invitation.getByText('Alamat pengiriman',{exact:true}).isVisible()));
+     await summary.focus();await invitation.keyboard.press('Enter');
+    }
+    assert(await invitation.getByText('Alamat pengiriman',{exact:true}).isVisible());assert(await invitation.getByText('BCA',{exact:true}).isVisible());
+    assert.equal(await invitation.locator('.gift-bank').count(),2);
+    await invitation.locator('#sumbangan').scrollIntoViewIfNeeded();
+    assert(await invitation.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+    if(display==='open' && width!==320)await invitation.screenshot({path:path.join(shots,`gift-open-${width}.png`),fullPage:true});
+   }
+  }
   await invitation.close();
+  console.log('Gift display: legacy/collapsed keyboard disclosure, open without button, disabled/empty at desktop and mobile PASS');
   for(const width of [1440,390,320]){
    for(const route of ['tamu','pesan','media','acara','login']){
     await load(route,width);await overflow();
@@ -183,6 +210,19 @@ createRoot(document.getElementById("root")!).render(<StudioFixture/>);
   const payload=await page.evaluate(()=>window.__calls.at(-1).value);assert.equal(payload.whatsappTemplate,'Halo {nama} {link}');assert.equal(payload.linkPreviewTitle,'Judul baru');assert.equal(Object.keys(payload).length,3);
   await load('acara',1440);await choose('event','akses');await page.locator('[name=deviceLimit]').fill('0');await choose('event','pasangan');await page.getByRole('button',{name:'Simpan detail acara',exact:true}).click();assert(await page.locator('#event-part-akses').isVisible());await page.locator('[name=deviceLimit]').fill('4');await choose('event','pasangan');await page.locator('[name=partnerOneName]').fill('Nara Baru');await page.getByRole('button',{name:'Simpan detail acara',exact:true}).click();await page.getByText('Pengaturan tersimpan',{exact:true}).filter({visible:true}).waitFor();
   const eventPayload=await page.evaluate(()=>window.__calls.at(-1).value);assert.equal(eventPayload.deviceLimit,'4');assert.equal(eventPayload.partnerOneName,'Nara Baru');assert.deepEqual(eventPayload.giftAccounts,[]);assert.equal(eventPayload.giftEnabled,'false');assert.equal(eventPayload.eventDate,'2026-12-12');
+  assert.equal(eventPayload.giftDisplay,'collapsed');
+  for(const width of [1440,390]){
+   await load('acara',width);await choose('event','hadiah');
+   const display=page.getByLabel('Tampilan tanda kasih');assert(await display.isDisabled());
+   await page.getByRole('switch',{name:'Tampilkan bagian hadiah'}).click();assert.equal(await display.inputValue(),'collapsed');
+   await display.selectOption('open');await page.getByText('Rekening dan alamat langsung tampil tanpa tombol Berbagi tanda kasih.',{exact:true}).waitFor();
+   await overflow();await capture(`gift-settings-${width}`);
+   await page.getByRole('button',{name:'Simpan detail acara',exact:true}).click();await page.getByText('Pengaturan tersimpan',{exact:true}).filter({visible:true}).waitFor();
+   assert.equal(await page.evaluate(()=>window.__calls.at(-1).value.giftDisplay),'open');
+   await page.getByRole('switch',{name:'Tampilkan bagian hadiah'}).click();assert(await display.isDisabled());
+   await page.getByRole('button',{name:'Simpan detail acara',exact:true}).click();await page.getByText('Pengaturan tersimpan',{exact:true}).filter({visible:true}).waitFor();
+   assert.equal(await page.evaluate(()=>window.__calls.at(-1).value.giftDisplay),'open');
+  }
   // The preview image upload is independent from the text save, and is visible with the full body.
   await load('pesan',390);await page.locator('[name=whatsappTemplate]').fill('Draft {link}');await choose('message','link');
   const exampleImage=await page.evaluate(()=>{const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=630;const ctx=canvas.getContext('2d');ctx.fillStyle='#D3E7DC';ctx.fillRect(0,0,1200,630);ctx.fillStyle='#183D32';ctx.textAlign='center';ctx.font='600 64px Manrope';ctx.fillText('Nara & Dimas',600,300);ctx.font='32px Manrope';ctx.fillText('Gambar contoh · 12 Desember 2026',600,370);return canvas.toDataURL('image/png').split(',')[1];});

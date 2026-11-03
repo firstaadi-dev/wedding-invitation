@@ -1,0 +1,29 @@
+$kind: http-request
+name: Save gift display
+description: Choose whether gift accounts and delivery addresses start collapsed or appear immediately without a disclosure button. Existing gift entries and enabled state are preserved.
+url: '{{cmsBaseUrl}}/api/admin/content'
+method: PUT
+order: 3100
+headers:
+  - key: Cookie
+    value: '{{adminCookie}}'
+  - key: X-CSRF-Token
+    value: '{{csrf}}'
+  - key: Content-Type
+    value: application/json
+  - key: Origin
+    value: '{{cmsOrigin}}'
+body:
+  type: json
+  content: |-
+    {"giftDisplay":"{{giftDisplay}}"}
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      pm.variables.set('giftDisplay', pm.iterationData.get('giftDisplay') || 'collapsed');
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Gift display saves successfully', () => pm.response.to.have.status(200));
+      pm.test('Selected gift display is returned', () => pm.expect(pm.response.json().settings.giftDisplay).to.eql(pm.variables.get('giftDisplay')));

@@ -130,7 +130,7 @@ func validMap(v any) bool {
 	return err == nil && u.Scheme == "https" && u.Host == "www.google.com" && u.User == nil && strings.HasPrefix(u.Path, "/maps/embed")
 }
 func validateSettings(v map[string]any) {
-	only(v, "partnerOneName", "partnerTwoName", "partnerOneFather", "partnerOneMother", "partnerTwoFather", "partnerTwoMother", "giftEnabled", "giftAccounts", "ceremonyTitle", "receptionTitle", "ceremonyTime", "receptionTime", "countdownTime", "countdownDate", "eventDate", "ceremonyDate", "receptionDate", "venueName", "ceremonyVenue", "receptionVenue", "mapEmbedUrl", "whatsappTemplate", "linkPreviewTitle", "linkPreviewDescription", "deviceLimitEnabled", "deviceLimit", "galleryLayout")
+	only(v, "partnerOneName", "partnerTwoName", "partnerOneFather", "partnerOneMother", "partnerTwoFather", "partnerTwoMother", "giftEnabled", "giftDisplay", "giftAccounts", "ceremonyTitle", "receptionTitle", "ceremonyTime", "receptionTime", "countdownTime", "countdownDate", "eventDate", "ceremonyDate", "receptionDate", "venueName", "ceremonyVenue", "receptionVenue", "mapEmbedUrl", "whatsappTemplate", "linkPreviewTitle", "linkPreviewDescription", "deviceLimitEnabled", "deviceLimit", "galleryLayout")
 	if raw, exists := v["galleryLayout"]; exists && raw != "8" && raw != "9" {
 		fail(400, "gallery_layout", "Pilih tampilan galeri 8 atau 9 foto.")
 	}
@@ -208,6 +208,9 @@ func validateSettings(v map[string]any) {
 		if raw != "true" && raw != "false" {
 			fail(400, "gift_enabled", "Pengaturan hadiah tidak valid.")
 		}
+	}
+	if raw, exists := v["giftDisplay"]; exists && raw != "collapsed" && raw != "open" {
+		fail(400, "gift_display", "Pilih tampilan hadiah yang valid.")
 	}
 	if raw, exists := v["giftAccounts"]; exists {
 		accounts, ok := raw.([]any)

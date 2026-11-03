@@ -3385,6 +3385,12 @@
             ],
             "description": "Whether to show the gift-account section to guests."
           },
+          "giftDisplay": {
+            "type": "string",
+            "enum": ["collapsed", "open"],
+            "default": "collapsed",
+            "description": "Gift information presentation. collapsed (also when absent) requires opening the Berbagi tanda kasih disclosure; open shows accounts and delivery addresses immediately with no disclosure button. giftEnabled=false or empty giftAccounts still hides gift information."
+          },
           "giftAccounts": {
             "type": "array",
             "maxItems": 10,

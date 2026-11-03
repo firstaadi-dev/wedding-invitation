@@ -95,6 +95,16 @@ func TestValidation(t *testing.T) {
 	rejects(t, func() { validateSettings(map[string]any{"tenant_id": "other"}) }, 400)
 }
 
+func TestGiftDisplay(t *testing.T) {
+	validateSettings(map[string]any{})
+	for _, display := range []string{"collapsed", "open"} {
+		validateSettings(map[string]any{"giftDisplay": display})
+	}
+	for _, display := range []any{"", "always", 1, nil, true, []any{"open"}, map[string]any{"display": "open"}} {
+		rejects(t, func() { validateSettings(map[string]any{"giftDisplay": display}) }, 400)
+	}
+}
+
 func TestGalleryLayout(t *testing.T) {
 	validateSettings(map[string]any{})
 	for _, layout := range []string{"8", "9"} {

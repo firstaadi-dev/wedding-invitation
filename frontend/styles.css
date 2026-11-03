@@ -36,8 +36,8 @@
 .gift-details[open] summary:after {transform:rotate(225deg);margin-bottom:-4px;}
 .gift-details summary:focus-visible {outline:3px solid #eacda5;outline-offset:6px;}
 .gift-icon {width:18px;height:18px;flex-shrink:0;}
-.gift-details .gift-paper {width:min(100%,380px);margin-top:16px;padding:20px;box-shadow:inset 0 1px 0 #fff,0 12px 32px #020c0859;}
-.gift-details .gift-paper:before {display:none;}
+.gift-scene .gift-paper {width:min(100%,380px);margin-top:16px;padding:20px;box-shadow:inset 0 1px 0 #fff,0 12px 32px #020c0859;}
+.gift-scene .gift-paper:before {display:none;}
 .gift-bank {display:grid;gap:8px;}
 .gift-bank h3 {font:600 14px/1.5 'Plus Jakarta Sans',system-ui,sans-serif;color:var(--forest);}
 .gift-bank>p {font-size:13px;line-height:1.6;color:var(--wood);}
@@ -69,7 +69,6 @@
 
 html {
   scroll-behavior:smooth;
-  scroll-snap-type:y mandatory;
   overflow-x:clip;
 }
 
@@ -146,11 +145,6 @@ main {
   position:relative;
   height:185svh;
   min-height:1200px;
-}
-
-.entrance-track,.scene {
-  scroll-snap-align:start;
-  scroll-snap-stop:always;
 }
 
 .entrance-scene {
@@ -642,12 +636,6 @@ body.gallery-open {overflow:hidden;}
 }
 
 @media(max-width:600px) {
-  html {
-    scroll-snap-type:none;
-  }
-  .entrance-track,.scene {
-    scroll-snap-stop:normal;
-  }
   h1 {
     font-size:60px;
   }
@@ -778,7 +766,6 @@ body.gallery-open {overflow:hidden;}
 @media(prefers-reduced-motion:reduce) {
   html {
     scroll-behavior:auto;
-    scroll-snap-type:none;
   }
   *,*:before,*:after {
     animation:none!important;

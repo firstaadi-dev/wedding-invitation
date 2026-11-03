@@ -71,6 +71,10 @@ async function load() {
   const accounts = settings.giftAccounts || [];
   gifts.hidden = settings.giftEnabled === 'false' || !accounts.length;
   const giftContainer = document.querySelector('#gift-accounts');
+  if (settings.giftDisplay === 'open') {
+    giftContainer.hidden = gifts.hidden;
+    gifts.replaceWith(giftContainer);
+  }
   giftContainer.replaceChildren(...accounts.map(account => {
     const card = document.createElement('div');card.className = 'gift-bank';
     if (account.type === 'address') {
