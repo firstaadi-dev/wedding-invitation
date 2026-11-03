@@ -3371,6 +3371,12 @@
             "type": "string",
             "maxLength": 120
           },
+          "galleryLayout": {
+            "type": "string",
+            "enum": ["8", "9"],
+            "default": "8",
+            "description": "Gallery presentation. 8 shows the first eight installed photos as a featured photo, position counter and a four-column thumbnail grid without a collage (default when absent). 9 shows all installed photos with the previous featured photo, scrolling thumbnails and collage. Switching preserves every uploaded photo."
+          },
           "giftEnabled": {
             "type": "string",
             "enum": [

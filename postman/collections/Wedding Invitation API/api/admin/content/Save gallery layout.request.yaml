@@ -1,0 +1,29 @@
+$kind: http-request
+name: Save gallery layout
+description: Switch between the eight-photo thumbnail grid and the previous nine-photo gallery without deleting uploaded media.
+url: '{{cmsBaseUrl}}/api/admin/content'
+method: PUT
+order: 3000
+headers:
+  - key: Cookie
+    value: '{{adminCookie}}'
+  - key: X-CSRF-Token
+    value: '{{csrf}}'
+  - key: Content-Type
+    value: application/json
+  - key: Origin
+    value: '{{cmsOrigin}}'
+body:
+  type: json
+  content: |-
+    {"galleryLayout":"{{galleryLayout}}"}
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      pm.variables.set('galleryLayout', pm.iterationData.get('galleryLayout') || '8');
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Gallery layout saves successfully', () => pm.response.to.have.status(200));
+      pm.test('Selected gallery layout is returned', () => pm.expect(pm.response.json().settings.galleryLayout).to.eql(pm.variables.get('galleryLayout')));

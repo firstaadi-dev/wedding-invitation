@@ -552,6 +552,10 @@ main {
 .gallery-thumbnails {display:flex;gap:10px;margin:14px 0 22px;padding:4px;overflow-x:auto;}
 .gallery-thumbnails button {flex:0 0 70px;height:60px;opacity:.65;}
 .gallery-thumbnails button[aria-pressed="true"] {opacity:1;outline:2px solid #e3cfb0;outline-offset:2px;}
+.gallery-position {margin-top:16px;color:#e3cfb0;font-size:13px;font-variant-numeric:tabular-nums;}
+.gallery-album[data-layout="8"] .gallery-featured img {object-fit:contain;}
+.gallery-album[data-layout="8"] .gallery-thumbnails {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:12px 0 0;overflow:visible;}
+.gallery-album[data-layout="8"] .gallery-thumbnails button {width:100%;height:auto;min-height:44px;aspect-ratio:4/5;}
 .gallery-collage {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
 .gallery-collage button {aspect-ratio:2/3;box-shadow:0 12px 24px #020c0840;}
 .gallery-album button:focus-visible {outline-offset:-4px;}

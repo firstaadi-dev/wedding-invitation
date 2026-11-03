@@ -96,7 +96,7 @@ async function load() {
     frames[index].replaceChildren(photo(media[slot],partners[index]));
     frames[index].classList.add('has-photo');
   });
-  renderGallery(media);
+  renderGallery(media,settings.galleryLayout);
   if (settings.mapEmbedUrl) {
     const frame = document.createElement('iframe');
     frame.src = settings.mapEmbedUrl;frame.title = mapTitle(venueName);
@@ -121,12 +121,15 @@ function startCountdown(time, date) {
   update();
   const timer = setInterval(() => {update();if (Date.now() >= target) clearInterval(timer);},1000);
 }
-function renderGallery(media) {
-  const photos = Array.from({length:9},(_,i) => media[`gallery${i+1}`]).filter(Boolean);
+function renderGallery(media, layout = '8') {
+  const photos = Array.from({length:9},(_,i) => media[`gallery${i+1}`]).filter(Boolean).slice(0,layout === '9' ? 9 : 8);
   if (!photos.length) return;
+  document.querySelector('.gallery-album').dataset.layout = layout;
   const featured = document.querySelector('#gallery-featured');
+  const position = document.querySelector('#gallery-position');
   const thumbnails = document.querySelector('#gallery-thumbnails');
   const collage = document.querySelector('#gallery-collage');
+  collage.hidden = layout !== '9';
   const viewer = document.querySelector('#gallery-viewer');
   const full = document.querySelector('#gallery-full');
   let selected = 0;
@@ -135,13 +138,14 @@ function renderGallery(media) {
     const description = `Kenangan mempelai · Foto ${selected+1} dari ${photos.length}`;
     featured.replaceChildren(photo(photos[selected],description));
     featured.setAttribute('aria-label',`Perbesar ${description}`);
+    position.textContent = `${selected+1} / ${photos.length}`;
     [...thumbnails.children].forEach((button,i) => button.setAttribute('aria-pressed',String(i === selected)));
     full.src = photos[selected];full.alt = description;
     document.querySelector('#gallery-caption').textContent = description;
   }
   function open(index) {select(index);viewer.showModal();document.body.classList.add('gallery-open');}
   photos.forEach((src,index) => {
-    for (const [container,isThumbnail] of [[thumbnails,true],[collage,false]]) {
+    for (const [container,isThumbnail] of (layout === '9' ? [[thumbnails,true],[collage,false]] : [[thumbnails,true]])) {
       const button = document.createElement('button');button.type = 'button';
       button.setAttribute('aria-label',`${isThumbnail ? 'Pilih' : 'Perbesar'} foto ${index+1}`);
       button.append(photo(src,`Kenangan mempelai · Foto ${index+1}`));
@@ -149,7 +153,7 @@ function renderGallery(media) {
       container.append(button);
     }
   });
-  document.querySelector('#gallery-empty').hidden = true;featured.hidden = false;select(0);
+  document.querySelector('#gallery-empty').hidden = true;featured.hidden = false;position.hidden = layout === '9';select(0);
   featured.addEventListener('click',() => open(selected));
   document.querySelector('#gallery-close').addEventListener('click',() => viewer.close());
   document.querySelector('#gallery-previous').addEventListener('click',() => select(selected-1));

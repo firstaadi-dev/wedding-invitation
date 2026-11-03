@@ -45,6 +45,8 @@ Ad blocker harus dinonaktifkan untuk tes CDN lokal. Helium terdeteksi sebagai an
 
 Media disimpan di tiga belas slot Postgres; foto didekode, diputar sesuai EXIF, diperkecil dan dikonversi ke WebP. Ini cukup untuk undangan kecil. Gunakan object storage jika galeri besar; transfer media memakai bandwidth database. Audio MP3, M4A/AAC, WAV, OGG/Opus, FLAC, dan WebM dibatasi 25 MiB. MP3 divalidasi per frame dan disimpan utuh; format lain didekode dan dikonversi menjadi MP3 untuk pemutaran browser. Input, hasil konversi, dan waktu pemrosesan dibatasi; upload gagal mempertahankan lagu sebelumnya. Fixture tes `tests/fixtures/silence.mp3` adalah 40 frame MPEG-1 Layer III hening yang dibuat sendiri, bukan lagu produksi; decoder macOS memeriksanya. Fixture `silence-id3.mp3` memakai audio hening yang sama dengan dua tag ID3v2 untuk menguji upload metadata berlapis. Fixture audio dalam format lain juga dibuat dari audio hening yang sama. Media hanya dilayani kepada sesi admin/tamu aktif, dengan dukungan Range.
 
+Tampilan galeri dapat dipilih di **Foto & Lagu → Galeri undangan**. Mode bawaan **8 foto** menampilkan foto besar, penanda posisi, dan thumbnail 4 × 2 tanpa kolase. Mode **9 foto** memakai tampilan sebelumnya: foto besar, thumbnail geser, dan kolase. Mengganti mode tidak menghapus foto; delapan foto pertama yang terpasang ditampilkan pada mode 8.
+
 ## Sumbangan, konfirmasi & ucapan
 
 Logo bank memakai artwork dari situs resmi [blu](https://blubybcadigital.id/) dan [Mandiri](https://www.bankmandiri.co.id/en/brandguideline), disimpan lokal sebagai WebP tanpa mengubah warna atau bentuk logo.
