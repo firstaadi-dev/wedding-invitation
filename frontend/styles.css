@@ -243,10 +243,10 @@ main {
 
 .scene.is-in-view .scene-copy {will-change:transform,opacity;}
 
-.reveal-card {--reveal-x:clamp(-180px,-14vw,-72px);}
-.reveal-card.reveal-right {--reveal-x:clamp(72px,14vw,180px);--reveal-delay:.12s;}
+.reveal-card {--reveal-x:clamp(-72px,-6vw,-28px);}
+.reveal-card.reveal-right {--reveal-x:clamp(28px,6vw,72px);--reveal-delay:.1s;}
 .reveal-card:not(.is-revealed) {opacity:0;translate:var(--reveal-x) 0;}
-.reveal-card.is-revealed {animation:card-reveal .9s cubic-bezier(.22,1,.36,1) var(--reveal-delay,0s) backwards;}
+.reveal-card.is-revealed {animation:card-reveal 2s cubic-bezier(.22,1,.36,1) var(--reveal-delay,0s) backwards;}
 .reveal-card:focus-within {opacity:1;translate:none;animation:none;}
 @keyframes card-reveal {
   from {opacity:0;translate:var(--reveal-x) 0;}
