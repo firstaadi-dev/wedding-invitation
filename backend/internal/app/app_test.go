@@ -95,6 +95,16 @@ func TestValidation(t *testing.T) {
 	rejects(t, func() { validateSettings(map[string]any{"tenant_id": "other"}) }, 400)
 }
 
+func TestGalleryLayout(t *testing.T) {
+	validateSettings(map[string]any{})
+	for _, layout := range []string{"8", "9"} {
+		validateSettings(map[string]any{"galleryLayout": layout})
+	}
+	for _, layout := range []any{"", "7", "10", 8, 9, nil, true, []any{"8"}, map[string]any{"layout": "8"}} {
+		rejects(t, func() { validateSettings(map[string]any{"galleryLayout": layout}) }, 400)
+	}
+}
+
 func TestMessageTokensAndSeparateEventDates(t *testing.T) {
 	validateSettings(map[string]any{"whatsappTemplate": "{nama} {link} {tanggal} {tempat} {jam_acara_1} {jam_acara_2}"})
 	for _, key := range []string{"ceremonyDate", "receptionDate", "countdownDate"} {
