@@ -1,0 +1,15 @@
+/* Shared materials for invitation effects and their CMS previews. */
+.transition-foliage {
+  position:absolute;
+  inset:0;
+  z-index:3;
+  display:block;
+  pointer-events:none;
+  background:url('/assets/forest-foreground.webp') center bottom / cover no-repeat;
+  transform:scaleX(var(--leaf-side,1));
+}
+:is(.complex-reveal,.section-fade-stage > span)[data-reveal-animation="botanical"] {
+  position:relative;
+  isolation:isolate;
+  overflow:clip;
+}

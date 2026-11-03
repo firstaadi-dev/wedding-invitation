@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
+import {fadeInSections,complexFadeInAnimations,playFadeIn} from '../frontend/fade-in.js';
 import {entranceProgress,sectionProgress} from '../frontend/invitation.js';
 
 assert.equal(entranceProgress(100, 1800, 1000), 0);
@@ -17,17 +18,18 @@ assert.equal(sectionProgress(0, 1000), 1);
 assert.equal(sectionProgress(-2000, 1000), 1);
 assert.equal(sectionProgress(0, 0), 1);
 
-const invitationSource = readFileSync(new URL('../frontend/invitation.js',import.meta.url),'utf8').replace(/^export /gm,'');
-function revealHarness(mode = 'once', supported = true, reducedMotion = false) {
+const invitationSource = readFileSync(new URL('../frontend/invitation.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'').replace(/^export /gm,'');
+function revealHarness(mode = 'once', supported = true, reducedMotion = false, sections = {}) {
   const cards = Array.from({length:3},() => {
-    const classes = new Set();return {classes,classList:{
+    const classes = new Set();return {classes,dataset:{},style:{setProperty(name,value){this[name]=value;}},classList:{
       add:name => classes.add(name),
       toggle:(name,enabled) => enabled ? classes.add(name) : classes.delete(name),
     }};
   });
   let observer;
   const context = {
-    document:{querySelector:() => ({addEventListener(){}}),querySelectorAll:selector => selector.includes('.portrait-paper') ? cards : []},
+    fadeInSections,complexFadeInAnimations,playFadeIn,
+    document:{querySelector:() => ({addEventListener(){}}),querySelectorAll:selector => selector === '.portrait-paper' ? cards.slice(0,2) : selector === '.gift-paper' ? cards.slice(2) : []},
     window:{matchMedia:() => ({matches:reducedMotion,addEventListener(){}}),addEventListener(){},requestAnimationFrame(){return 1;}},
   };
   if (supported) context.IntersectionObserver = class {
@@ -35,7 +37,7 @@ function revealHarness(mode = 'once', supported = true, reducedMotion = false) {
     observe(card) {this.observed.add(card);}
     unobserve(card) {this.observed.delete(card);}
   };
-  runInNewContext(`${invitationSource}\nconfigureFadeIn(${JSON.stringify(mode)});`,context);return {cards,observer};
+  runInNewContext(`${invitationSource}\nconfigureFadeIn(${JSON.stringify(mode)},${JSON.stringify(sections)});`,context);return {cards,observer};
 }
 const {cards,observer} = revealHarness();
 assert.equal(observer.observed.size,3);
@@ -62,9 +64,26 @@ for (const isIntersecting of [true,false,true,false,true]) {
   assert.equal(repeated.observer.observed.has(repeated.cards[0]),true);
 }
 for (const harness of [revealHarness('disabled'),revealHarness('once',false),revealHarness('repeat',true,true)]) {
-  assert.equal(harness.observer,undefined);
+  assert.equal(harness.observer?.observed.size || 0,0);
   assert.ok(harness.cards.every(card => card.classes.size === 0),'Disabled, reduced-motion and unsupported browsers keep every card visible');
 }
+
+const custom = revealHarness('disabled',true,false,{
+  mempelai:{mode:'repeat',animation:'zoom',duration:0.5},sumbangan:{mode:'once',animation:'up',duration:10},
+});
+assert.equal(custom.observer.observed.size,3,'Sections can override a disabled global mode');
+assert.equal(custom.cards[0].dataset.revealAnimation,'zoom');
+assert.equal(custom.cards[0].style['--reveal-duration'],'0.5s');
+assert.equal(custom.cards[2].dataset.revealAnimation,'up');
+assert.equal(custom.cards[2].style['--reveal-duration'],'10s');
+custom.observer.callback([{target:custom.cards[0],isIntersecting:true},{target:custom.cards[2],isIntersecting:true}]);
+custom.observer.callback([{target:custom.cards[0],isIntersecting:false},{target:custom.cards[2],isIntersecting:false}]);
+assert.equal(custom.cards[0].classes.has('is-revealed'),false);
+assert.equal(custom.cards[2].classes.has('is-revealed'),true);
+const disabledSection = revealHarness('once',true,false,{mempelai:{mode:'disabled'}});
+assert.equal(disabledSection.observer.observed.size,1);
+assert.equal(disabledSection.cards[0].classes.size,0);
+assert.equal(cards[0].style['--reveal-duration'],'2s','Legacy duration remains 2 seconds');
 
 const page = readFileSync(new URL('../frontend/index.html', import.meta.url), 'utf8');
 assert.doesNotMatch(page, /<nav\b|hamburger|bottom-nav/i);

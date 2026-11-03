@@ -20,7 +20,9 @@ import { guestSummary, queryGuests, mediaType, updateSelectedGuests } from "../a
 import { cropRectangle, cropPhoto, photoFrame } from "../image-crop.js";
 import { importRows, saveImportedGuests } from "../guest-import.js";
 import { defaultEventDate, defaultVenueName, eventDateLabels } from "../event.js";
+import { fadeInSections, fadeInAnimations, playFadeIn } from "../fade-in.js";
 import type {
+  SectionFadeIn,
   Account,
   Session,
   Guest,
@@ -95,7 +97,7 @@ const eventSections: EditorSection[] = [
   {id:"waktu",title:"Acara & waktu",short:"Tanggal, rangkaian, countdown"},
   {id:"lokasi",title:"Lokasi acara",short:"Tempat dan Google Maps"},
   {id:"hadiah",title:"Hadiah",short:"Rekening atau alamat pengiriman"},
-  {id:"tampilan",title:"Tampilan undangan",short:"Efek fade-in saat scroll"},
+  {id:"tampilan",title:"Tampilan undangan",short:"Transisi dan durasi tiap bagian"},
   {id:"akses",title:"Akses undangan",short:"Pengaturan limit akses"},
 ];
 const messageSections: EditorSection[] = [
@@ -107,6 +109,40 @@ const mediaSections: EditorSection[] = [
   {id:"gallery",title:"Galeri undangan",short:"Foto untuk galeri"},
   {id:"music",title:"Lagu undangan",short:"Musik latar acara"},
 ];
+function FadeInPreview({label, config, mode, active, media}: {label:string; config:SectionFadeIn; mode:string; active:boolean; media:Record<string,string>}) {
+  const sample = useRef<HTMLSpanElement>(null);
+  const animation = useRef<{cancel:()=>void} | null>(null);
+  const alternateRight = useRef(false);
+  const disabled = mode === "disabled";
+  const play = useCallback(()=>{
+    animation.current?.cancel();
+    if (disabled || !sample.current) return;
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const effect = config.animation === "alternate" || !config.animation
+      ? (alternateRight.current ? "right" : "left") : config.animation;
+    alternateRight.current = !alternateRight.current;
+    animation.current = reduced
+      ? sample.current.animate([{opacity:.6},{opacity:1}],{duration:150})
+      : playFadeIn(sample.current,effect,config.duration ?? 2);
+  },[config.animation,config.duration,disabled]);
+  useEffect(()=>{
+    if (!active || disabled || !sample.current) return;
+    // Play only the visible sample, once per settings change; never loop all sections.
+    const observer = new IntersectionObserver(entries=>{
+      if (entries.some(entry=>entry.isIntersecting)) {play();observer.disconnect();}
+    },{threshold:.5});
+    observer.observe(sample.current);
+    const motion = matchMedia("(prefers-reduced-motion: reduce)");
+    const stop = ()=>animation.current?.cancel();
+    motion.addEventListener("change",stop);
+    return ()=>{observer.disconnect();animation.current?.cancel();motion.removeEventListener("change",stop);};
+  },[active,disabled,play]);
+  return <div className="section-fade-preview">
+    <div className="section-fade-stage" aria-hidden="true"><span ref={sample} data-reveal-animation={config.animation}><strong>{label}</strong>{config.animation === "fan" ? <em className="transition-photo-row">{[1,2,3].map(index=><b key={index} className="transition-photo">{media[`gallery${index}`] ? <img src={media[`gallery${index}`]} alt=""/> : `Foto ${index}`}</b>)}</em> : <><small>Pratinjau transisi undangan</small><small>Nama, foto, dan informasi acara</small></>}</span></div>
+    <button type="button" disabled={disabled} aria-label={`Coba efek ${label}`} onClick={play}>Coba efek</button>
+    <small>{disabled ? "Efek nonaktif untuk bagian ini." : `${config.duration ?? 2} detik · Preview otomatis saat efek atau durasi diubah. Simpan untuk menerapkan.`}</small>
+  </div>;
+}
 function SectionNavigation({sections, current, onChange, prefix, disabled = false}: {
   sections: EditorSection[]; current: string; onChange: (id:string)=>void; prefix:string; disabled?:boolean;
 }) {
@@ -1757,6 +1793,7 @@ function SettingsForm({
     partnerTwoFather: textSetting("partnerTwoFather", ""),
     partnerTwoMother: textSetting("partnerTwoMother", ""),
   }));
+  const [sectionFades, setSectionFades] = useState<Record<string, SectionFadeIn>>(content.settings.fadeInSections || {});
   const [busy, setBusy] = useState(false),
     [dirty, setDirty] = useState(false);
   const [part, setPart] = useState(kind === "messages" ? "template" : "pasangan");
@@ -1922,6 +1959,7 @@ function SettingsForm({
       new FormData(e.currentTarget),
     );
     if (kind === "event") {
+      payload.fadeInSections = sectionFades;
       payload.giftEnabled = String(giftEnabled);
       payload.giftDisplay = giftDisplay;
       payload.giftAccounts = giftAccounts;
@@ -2476,7 +2514,7 @@ function SettingsForm({
             </section>
               </section>
               <section className="event-part" id="event-part-tampilan" data-settings-part="tampilan" hidden={part!=="tampilan"}>
-                <header className="event-part-heading"><h2 tabIndex={-1}>Tampilan undangan</h2><p>Efek fade-in saat scroll</p></header>
+                <header className="event-part-heading"><h2 tabIndex={-1}>Tampilan undangan</h2><p>Pilih transisi dan durasi kemunculan tiap bagian saat tamu menggulir undangan.</p></header>
                 <section className="panel">
                   <label>
                     Efek fade-in
@@ -2490,6 +2528,36 @@ function SettingsForm({
                     </select>
                   </label>
                   <p className="help" id="fade-in-help">Atur kemunculan kartu saat masuk layar. Mode sekali membuat kartu tetap terlihat setelah muncul; mode bolak-balik mengulang efek setiap kartu masuk layar. Preferensi kurangi gerakan pada perangkat tetap diutamakan.</p>
+                </section>
+                <section className="panel">
+                  <div className="section-heading"><h3>Transisi per bagian</h3></div>
+                  <p className="help">Atur arah masuk dan durasi tiap bagian secara terpisah. Foto mempelai mencakup kedua foto; kartu lokasi mencakup informasi tempat dan peta. Mode bawaan mengikuti pengaturan di atas, kecuali sampul, ayat pembuka, dan penutup yang awalnya tanpa efek.</p>
+                  <p className="help" id="fade-duration-help">Durasi 0,1–10 detik. Kosongkan untuk memakai durasi bawaan 2 detik.</p>
+                  {fadeInSections.map(section=>{
+                    const config = sectionFades[section.id] || {};
+                    const update = (next: SectionFadeIn) => {setSectionFades({...sectionFades,[section.id]:{...config,...next}});setDirty(true);};
+                    return <fieldset key={section.id} className="section-fade-fields">
+                      <legend>{section.label}</legend>
+                      <div className="two-columns">
+                        <label>Mode kemunculan
+                          <select aria-label={`Mode fade-in ${section.label}`} value={config.mode || ""} onChange={e=>update({mode:e.target.value || undefined})}>
+                            <option value="">Bawaan{section.staticDefault ? " (tanpa fade-in)" : " (ikuti global)"}</option>
+                            <option value="disabled">Nonaktif</option><option value="once">Aktif sekali</option><option value="repeat">Aktif bolak-balik</option>
+                          </select>
+                        </label>
+                        <label>Animasi
+                          <select aria-label={`Animasi fade-in ${section.label}`} value={config.animation || "alternate"} onChange={e=>update({animation:e.target.value})}>
+                            {fadeInAnimations.map(animation=><option key={animation.id} value={animation.id}>{animation.label}</option>)}
+                          </select>
+                        </label>
+                        <label>Durasi (detik)
+                          <input aria-label={`Durasi fade-in ${section.label}`} type="number" min="0.1" max="10" step="0.1" placeholder="2" aria-describedby="fade-duration-help" value={config.duration ?? ""} onChange={e=>update({duration:e.target.value==="" ? undefined : Number(e.target.value)})}/>
+                        </label>
+                      </div>
+                      {fadeInAnimations.find(item=>item.id===config.animation)?.description && <p className="help">{fadeInAnimations.find(item=>item.id===config.animation)?.description}</p>}
+                      <FadeInPreview media={content.media} active={part === "tampilan"} label={section.label} config={config} mode={config.mode || (section.staticDefault ? "disabled" : values.fadeInMode)}/>
+                    </fieldset>;
+                  })}
                 </section>
               </section>
               <section className="event-part" id="event-part-akses" data-settings-part="akses" hidden={part!=="akses"}>

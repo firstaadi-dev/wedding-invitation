@@ -3342,7 +3342,44 @@
           "account"
         ]
       },
-      "Settings": {
+
+      "SectionFadeIn": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "disabled",
+            "once",
+            "repeat"
+          ],
+          "description": "When absent, follows fadeInMode."
+        },
+        "animation": {
+          "type": "string",
+          "enum": [
+            "alternate",
+            "fade",
+            "up",
+            "down",
+            "left",
+            "right",
+            "zoom",
+            "arch", "curtain", "unfold", "focus", "layered", "fan", "ink", "botanical", "depth"
+          ],
+          "default": "alternate"
+        },
+        "duration": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 10,
+          "default": 2,
+          "description": "Entrance duration in seconds."
+        }
+      }
+    },
+    "Settings": {
         "type": "object",
         "properties": {
           "partnerOneName": {
@@ -3384,6 +3421,40 @@
               "false"
             ],
             "description": "Whether to show the gift-account section to guests."
+          },
+          "fadeInSections": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Optional per-section entrance overrides. Replaces the entire section map when supplied; omitted settings retain legacy behavior. Unconfigured cover, verse and closing sections stay static. Other sections inherit fadeInMode, alternating direction and 2 seconds. Reduced motion always disables entrance animations.",
+            "properties": {
+              "sampul": {
+                "$ref": "#/components/schemas/SectionFadeIn"
+              },
+              "ayat": {
+                "$ref": "#/components/schemas/SectionFadeIn"
+              },
+              "mempelai": {
+                "$ref": "#/components/schemas/SectionFadeIn"
+              },
+              "acara": {
+                "$ref": "#/components/schemas/SectionFadeIn"
+              },
+              "lokasi": {
+                "$ref": "#/components/schemas/SectionFadeIn"
+              },
+              "galeri": {
+                "$ref": "#/components/schemas/SectionFadeIn"
+              },
+              "sumbangan": {
+                "$ref": "#/components/schemas/SectionFadeIn"
+              },
+              "konfirmasi": {
+                "$ref": "#/components/schemas/SectionFadeIn"
+              },
+              "penutup": {
+                "$ref": "#/components/schemas/SectionFadeIn"
+              }
+            }
           },
           "fadeInMode": {
             "type": "string",

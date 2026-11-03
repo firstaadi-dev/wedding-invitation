@@ -130,9 +130,35 @@ func validMap(v any) bool {
 	return err == nil && u.Scheme == "https" && u.Host == "www.google.com" && u.User == nil && strings.HasPrefix(u.Path, "/maps/embed")
 }
 func validateSettings(v map[string]any) {
-	only(v, "partnerOneName", "partnerTwoName", "partnerOneFather", "partnerOneMother", "partnerTwoFather", "partnerTwoMother", "giftEnabled", "giftDisplay", "giftAccounts", "ceremonyTitle", "receptionTitle", "ceremonyTime", "receptionTime", "countdownTime", "countdownDate", "eventDate", "ceremonyDate", "receptionDate", "venueName", "ceremonyVenue", "receptionVenue", "mapEmbedUrl", "whatsappTemplate", "linkPreviewTitle", "linkPreviewDescription", "deviceLimitEnabled", "deviceLimit", "galleryLayout", "fadeInMode")
+	only(v, "partnerOneName", "partnerTwoName", "partnerOneFather", "partnerOneMother", "partnerTwoFather", "partnerTwoMother", "giftEnabled", "giftDisplay", "giftAccounts", "ceremonyTitle", "receptionTitle", "ceremonyTime", "receptionTime", "countdownTime", "countdownDate", "eventDate", "ceremonyDate", "receptionDate", "venueName", "ceremonyVenue", "receptionVenue", "mapEmbedUrl", "whatsappTemplate", "linkPreviewTitle", "linkPreviewDescription", "deviceLimitEnabled", "deviceLimit", "galleryLayout", "fadeInMode", "fadeInSections")
 	if raw, exists := v["fadeInMode"]; exists && raw != "disabled" && raw != "once" && raw != "repeat" {
 		fail(400, "fade_in_mode", "Pilih efek fade-in yang valid.")
+	}
+	if raw, exists := v["fadeInSections"]; exists {
+		sections, ok := raw.(map[string]any)
+		if !ok {
+			fail(400, "fade_in_sections", "Pengaturan fade-in per section tidak valid.")
+		}
+		only(sections, "sampul", "ayat", "mempelai", "acara", "lokasi", "galeri", "sumbangan", "konfirmasi", "penutup")
+		for _, rawConfig := range sections {
+			config, ok := rawConfig.(map[string]any)
+			if !ok {
+				fail(400, "fade_in_sections", "Pengaturan fade-in per section tidak valid.")
+			}
+			only(config, "mode", "animation", "duration")
+			if raw, exists := config["mode"]; exists && raw != "disabled" && raw != "once" && raw != "repeat" {
+				fail(400, "fade_in_sections", "Pilih mode fade-in yang valid.")
+			}
+			if raw, exists := config["animation"]; exists && raw != "alternate" && raw != "fade" && raw != "up" && raw != "down" && raw != "left" && raw != "right" && raw != "zoom" && raw != "arch" && raw != "curtain" && raw != "unfold" && raw != "focus" && raw != "layered" && raw != "fan" && raw != "ink" && raw != "botanical" && raw != "depth" {
+				fail(400, "fade_in_sections", "Pilih animasi fade-in yang valid.")
+			}
+			if raw, exists := config["duration"]; exists {
+				duration, ok := raw.(float64)
+				if !ok || !(duration >= 0.1 && duration <= 10) {
+					fail(400, "fade_in_sections", "Durasi fade-in harus 0,1–10 detik.")
+				}
+			}
+		}
 	}
 	if raw, exists := v["galleryLayout"]; exists && raw != "8" && raw != "9" {
 		fail(400, "gallery_layout", "Pilih tampilan galeri 8 atau 9 foto.")

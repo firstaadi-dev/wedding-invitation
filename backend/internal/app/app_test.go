@@ -105,6 +105,24 @@ func TestFadeInMode(t *testing.T) {
 	}
 }
 
+func TestSectionFadeIn(t *testing.T) {
+	for _, animation := range []string{"alternate", "fade", "up", "down", "left", "right", "zoom", "arch", "curtain", "unfold", "focus", "layered", "fan", "ink", "botanical", "depth"} {
+		for _, duration := range []float64{0.1, 2, 10} {
+			validateSettings(map[string]any{"fadeInSections": map[string]any{"mempelai": map[string]any{"mode": "repeat", "animation": animation, "duration": duration}}})
+		}
+	}
+	validateSettings(map[string]any{"fadeInSections": map[string]any{}})
+	for _, value := range []any{nil, "once", []any{}, map[string]any{"unknown": map[string]any{}}, map[string]any{"mempelai": nil}} {
+		rejects(t, func() { validateSettings(map[string]any{"fadeInSections": value}) }, 400)
+	}
+	for _, config := range []map[string]any{
+		{"mode": "always"}, {"mode": nil}, {"animation": "spin"}, {"animation": true}, {"unknown": "x"},
+		{"duration": 0.0}, {"duration": 0.09}, {"duration": 10.1}, {"duration": "2"}, {"duration": nil},
+	} {
+		rejects(t, func() { validateSettings(map[string]any{"fadeInSections": map[string]any{"mempelai": config}}) }, 400)
+	}
+}
+
 func TestGiftDisplay(t *testing.T) {
 	validateSettings(map[string]any{})
 	for _, display := range []string{"collapsed", "open"} {

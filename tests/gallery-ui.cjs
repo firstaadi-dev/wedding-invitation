@@ -25,6 +25,16 @@ const photos=Object.fromEntries(Array.from({length:9},(_,i)=>[`gallery${i+1}`,
       await page.addScriptTag({content:functions});
       await page.evaluate(({media,layout})=>renderGallery(media,layout),{media,layout});
     }
+    async function swipe(selector,dx,dy=0) {
+      const surface=page.locator(selector);
+      await surface.scrollIntoViewIfNeeded();
+      const box=await surface.boundingBox();
+      const x=box.x+box.width/2,y=box.y+box.height/2;
+      await page.mouse.move(x,y);
+      await page.mouse.down();
+      await page.mouse.move(x+dx,y+dy,{steps:8});
+      await page.mouse.up();
+    }
     for(const width of [1440,768,390,320]) {
       await page.setViewportSize({width,height:900});
       await load();
@@ -41,14 +51,22 @@ const photos=Object.fromEntries(Array.from({length:9},(_,i)=>[`gallery${i+1}`,
       assert.equal(await page.locator('#gallery-position').textContent(),'8 / 8');
       assert.equal(await buttons.nth(7).getAttribute('aria-pressed'),'true');
       assert.equal(await page.locator('#gallery-featured img').getAttribute('src'),photos.gallery8);
-      await page.locator('#gallery-featured').press('Enter');
-      assert(await page.locator('#gallery-viewer').evaluate(el=>el.open));
-      await page.keyboard.press('ArrowRight');
-      assert.equal(await page.locator('#gallery-full').getAttribute('src'),photos.gallery1);
-      await page.keyboard.press('ArrowLeft');
-      assert.equal(await page.locator('#gallery-full').getAttribute('src'),photos.gallery8);
-      await page.keyboard.press('Escape');
-      assert(await page.locator('#gallery-featured').evaluate(el=>el===document.activeElement));
+      await swipe('#gallery-featured',-80);
+      assert.equal(await page.locator('#gallery-position').textContent(),'1 / 8');
+      assert.equal(await buttons.first().getAttribute('aria-pressed'),'true');
+      assert.equal(await page.locator('dialog').count(),0,'Gallery stays inline');
+      await swipe('#gallery-featured',80);
+      assert.equal(await page.locator('#gallery-position').textContent(),'8 / 8');
+      await swipe('#gallery-featured',10,80);
+      assert.equal(await page.locator('#gallery-position').textContent(),'8 / 8','vertical gestures do not change photos');
+      await swipe('#gallery-featured',20);
+      assert.equal(await page.locator('#gallery-position').textContent(),'8 / 8','short gestures do not change photos');
+      await page.locator('#gallery-featured').click();
+      assert.equal(await page.locator('dialog').count(),0,'Clicking the photo cannot open a lightbox');
+      await page.locator('#gallery-featured').press('ArrowRight');
+      assert.equal(await page.locator('#gallery-position').textContent(),'1 / 8');
+      await page.locator('#gallery-featured').press('ArrowLeft');
+      assert.equal(await page.locator('#gallery-position').textContent(),'8 / 8');
       await page.locator('#gallery-thumbnails button').first().click();
       await page.locator('.gallery-album').screenshot({path:path.join(root,`outputs/gallery-layout/invitation-${width}.png`)});
       await load(photos,'9');
@@ -56,8 +74,33 @@ const photos=Object.fromEntries(Array.from({length:9},(_,i)=>[`gallery${i+1}`,
       assert.equal(await page.locator('#gallery-collage button').count(),9);
       assert.equal(await page.locator('#gallery-position').isVisible(),false);
       assert.equal(await page.locator('#gallery-thumbnails').evaluate(el=>getComputedStyle(el).display),'flex');
-      console.log(`PASS ${width}px: default C, 4 × 2 thumbnails, selection, lightbox, arrow wrap, Escape/focus, previous 9-photo layout`);
+      await swipe('#gallery-featured',-80);
+      assert.equal(await page.locator('#gallery-featured img').getAttribute('src'),photos.gallery2);
+      await page.locator('#gallery-collage button').nth(8).click();
+      assert.equal(await page.locator('#gallery-featured img').getAttribute('src'),photos.gallery9);
+      assert.equal(await page.locator('dialog').count(),0);
+      console.log(`PASS ${width}px: 4 × 2 thumbnails, inline swipe, gesture thresholds, keyboard arrow wrap, no lightbox, previous 9-photo layout`);
     }
+    const touch=await page.context().newCDPSession(page);
+    async function touchSwipe(selector,dx,dy=0) {
+      const surface=page.locator(selector);
+      await surface.scrollIntoViewIfNeeded();
+      const box=await surface.boundingBox();
+      const x=box.x+box.width/2,y=box.y+box.height/2;
+      await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
+      for(let i=1;i<=8;i++) await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+dx*i/8,y:y+dy*i/8}]});
+      await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+    }
+    await load();
+    await touchSwipe('#gallery-featured',-80);
+    assert.equal(await page.locator('#gallery-position').textContent(),'2 / 8');
+    assert.equal(await page.locator('dialog').count(),0);
+    await touchSwipe('#gallery-featured',80);
+    assert.equal(await page.locator('#gallery-position').textContent(),'1 / 8');
+    await touchSwipe('#gallery-featured',0,-80);
+    assert.equal(await page.locator('#gallery-position').textContent(),'1 / 8');
+    await touch.detach();
+    console.log('PASS touch swipes on inline photos and vertical scroll gesture');
     await load({});
     assert(await page.locator('#gallery-empty').isVisible());
     assert.equal(await page.locator('#gallery-featured').isVisible(),false);
@@ -69,8 +112,10 @@ const photos=Object.fromEntries(Array.from({length:9},(_,i)=>[`gallery${i+1}`,
     assert.equal(await page.locator('#gallery-thumbnails button').count(),1);
     assert.equal(await page.locator('#gallery-featured img').getAttribute('src'),photos.gallery9);
     await page.locator('#gallery-featured').click();
-    assert(await page.locator('#gallery-next').isDisabled());
-    assert(await page.locator('#gallery-previous').isDisabled());
+    assert.equal(await page.locator('dialog').count(),0);
+    assert.equal(await page.locator('#gallery-swipe-help').isVisible(),false);
+    await swipe('#gallery-featured',-80);
+    assert.equal(await page.locator('#gallery-featured img').getAttribute('src'),photos.gallery9);
     assert.deepEqual(errors,[]);
     console.log('PASS empty/single-photo galleries, nonconsecutive slots and no browser errors');
   } finally {await browser.close();}

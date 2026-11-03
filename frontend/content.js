@@ -108,7 +108,7 @@ async function load() {
     frame.loading = 'lazy';frame.referrerPolicy = 'strict-origin-when-cross-origin';frame.allowFullscreen = true;
     document.querySelector('.map-placeholder').replaceWith(frame);
   }
-  configureFadeIn(settings.fadeInMode);
+  configureFadeIn(settings.fadeInMode,settings.fadeInSections);
 }
 function photo(src,alt) {
   const image = document.createElement('img');
@@ -136,40 +136,49 @@ function renderGallery(media, layout = '8') {
   const thumbnails = document.querySelector('#gallery-thumbnails');
   const collage = document.querySelector('#gallery-collage');
   collage.hidden = layout !== '9';
-  const viewer = document.querySelector('#gallery-viewer');
-  const full = document.querySelector('#gallery-full');
   let selected = 0;
   function select(index) {
     selected = (index + photos.length) % photos.length;
     const description = `Kenangan mempelai · Foto ${selected+1} dari ${photos.length}`;
     featured.replaceChildren(photo(photos[selected],description));
-    featured.setAttribute('aria-label',`Perbesar ${description}`);
+    featured.setAttribute('aria-label',description);
     position.textContent = `${selected+1} / ${photos.length}`;
     [...thumbnails.children].forEach((button,i) => button.setAttribute('aria-pressed',String(i === selected)));
-    full.src = photos[selected];full.alt = description;
-    document.querySelector('#gallery-caption').textContent = description;
   }
-  function open(index) {select(index);viewer.showModal();document.body.classList.add('gallery-open');}
+  let start = null;
+  featured.style.touchAction = 'pan-y pinch-zoom';
+  featured.addEventListener('dragstart',event => event.preventDefault());
+  featured.addEventListener('pointerdown',event => {
+    if (!event.isPrimary || event.button !== 0) {start = null;return;}
+    start = {id:event.pointerId,x:event.clientX,y:event.clientY};
+    featured.setPointerCapture(event.pointerId);
+  });
+  featured.addEventListener('pointerup',event => {
+    if (!start || start.id !== event.pointerId) return;
+    const dx = event.clientX-start.x;
+    const dy = event.clientY-start.y;
+    start = null;
+    if (photos.length < 2 || Math.abs(dx) < 40 || Math.abs(dx) <= Math.abs(dy)*1.25) return;
+    select(selected+(dx < 0 ? 1 : -1));
+  });
+  for (const type of ['pointercancel','lostpointercapture']) featured.addEventListener(type,() => {start = null;});
+  featured.addEventListener('keydown',event => {
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      event.preventDefault();select(selected+(event.key === 'ArrowLeft' ? -1 : 1));
+    }
+  });
   photos.forEach((src,index) => {
-    for (const [container,isThumbnail] of (layout === '9' ? [[thumbnails,true],[collage,false]] : [[thumbnails,true]])) {
+    for (const container of (layout === '9' ? [thumbnails,collage] : [thumbnails])) {
       const button = document.createElement('button');button.type = 'button';
-      button.setAttribute('aria-label',`${isThumbnail ? 'Pilih' : 'Perbesar'} foto ${index+1}`);
+      button.setAttribute('aria-label',`Pilih foto ${index+1}`);
       button.append(photo(src,`Kenangan mempelai · Foto ${index+1}`));
-      button.addEventListener('click',() => isThumbnail ? select(index) : open(index));
+      button.addEventListener('click',() => select(index));
       container.append(button);
     }
   });
-  document.querySelector('#gallery-empty').hidden = true;featured.hidden = false;position.hidden = layout === '9';select(0);
-  featured.addEventListener('click',() => open(selected));
-  document.querySelector('#gallery-close').addEventListener('click',() => viewer.close());
-  document.querySelector('#gallery-previous').addEventListener('click',() => select(selected-1));
-  document.querySelector('#gallery-next').addEventListener('click',() => select(selected+1));
-  for (const id of ['gallery-previous','gallery-next']) document.querySelector(`#${id}`).disabled = photos.length === 1;
-  viewer.addEventListener('keydown',event => {
-    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {event.preventDefault();select(selected+(event.key === 'ArrowLeft' ? -1 : 1));}
-  });
-  viewer.addEventListener('click',event => {if (event.target === viewer) viewer.close();});
-  viewer.addEventListener('close',() => document.body.classList.remove('gallery-open'));
+  document.querySelector('#gallery-empty').hidden = true;featured.hidden = false;position.hidden = layout === '9';
+  document.querySelector('#gallery-swipe-help').hidden = photos.length < 2;
+  select(0);
 }
 function label(playing) {
 const text = playing ? 'Jeda musik' : 'Putar musik';

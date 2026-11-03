@@ -108,6 +108,44 @@ createRoot(document.getElementById("root")!).render(<StudioFixture/>);
     assert.equal(await card.getAttribute('data-reveal-starts'),fadeInMode==='disabled'?'0':fadeInMode==='once'?'1':'2');
    }
   }
+  giftSettings={fadeInMode:'disabled',fadeInSections:{mempelai:{mode:'once',animation:'right',duration:.7},lokasi:{mode:'repeat',animation:'fade',duration:1.3}}};
+  await invitation.goto('https://invitation.example/preview');await invitation.addScriptTag({path:path.join(out,'content.js')});
+  await invitation.waitForFunction(()=>document.querySelector('.portrait-paper').dataset.revealAnimation==='right');
+  const portraitStyle=await invitation.locator('.portrait-paper').first().evaluate(el=>({x:getComputedStyle(el).getPropertyValue('--reveal-x'),duration:el.style.getPropertyValue('--reveal-duration')}));
+  assert.match(portraitStyle.x,/28px/);assert.equal(portraitStyle.duration,'0.7s');
+  const locationStyle=await invitation.locator('.location-paper').evaluate(el=>({x:getComputedStyle(el).getPropertyValue('--reveal-x'),duration:el.style.getPropertyValue('--reveal-duration')}));
+  assert.equal(locationStyle.x,'0px');assert.equal(locationStyle.duration,'1.3s');
+  console.log('Section transitions: portrait enters from right; map fades at centre with independent durations PASS');
+  for (const effect of ['arch','curtain','unfold','focus','layered','fan','ink','botanical','depth']) {
+   giftSettings={fadeInMode:'disabled',fadeInSections:{mempelai:{mode:'repeat',animation:effect,duration:.8}}};
+   await invitation.goto('https://invitation.example/preview');await invitation.addScriptTag({path:path.join(out,'content.js')});
+   const card=invitation.locator('.portrait-paper').first();
+   await invitation.waitForFunction(()=>document.querySelector('.portrait-paper').dataset.revealAnimation);
+   await card.scrollIntoViewIfNeeded();
+   await invitation.waitForFunction(()=>document.querySelector('.portrait-paper').getAnimations({subtree:true}).length>0);
+   if (effect==='botanical') assert.equal(await card.locator('.transition-foliage').count(),2);
+   if (['layered','fan','ink'].includes(effect)) assert(await card.evaluate(el=>el.getAnimations({subtree:true}).length>1));
+   await invitation.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+   await invitation.waitForFunction(()=>!document.querySelector('.portrait-paper').classList.contains('is-revealed'));
+   assert.equal(await card.evaluate(el=>el.getAnimations({subtree:true}).length),0,'Viewport exit cancels all parts');
+   assert.equal(await card.locator('.transition-foliage').count(),0,'Viewport exit removes decorations');
+   await card.scrollIntoViewIfNeeded();
+   await invitation.waitForFunction(()=>document.querySelector('.portrait-paper').getAnimations({subtree:true}).length>0);
+   await card.evaluate(el=>{const button=document.createElement('button');button.textContent='Focus check';el.append(button);button.focus();});
+   assert.equal(await card.evaluate(el=>el.getAnimations({subtree:true}).length),0,'Keyboard focus shows card immediately');
+   console.log(`Complex public ${effect}: entrance, inner layers, repeat cancellation and keyboard focus PASS`);
+  }
+  giftSettings={fadeInMode:'disabled',fadeInSections:{mempelai:{mode:'repeat',animation:'botanical',duration:10}}};
+  await invitation.goto('https://invitation.example/preview');await invitation.addScriptTag({path:path.join(out,'content.js')});
+  await invitation.waitForFunction(()=>document.querySelector('.portrait-paper').dataset.revealAnimation);
+  await invitation.locator('.portrait-paper').first().scrollIntoViewIfNeeded();
+  await invitation.waitForFunction(()=>document.querySelectorAll('.transition-foliage').length>0);
+  await invitation.emulateMedia({reducedMotion:'reduce'});
+  await invitation.waitForFunction(()=>document.querySelectorAll('.transition-foliage').length===0);
+  assert.equal(await invitation.locator('.portrait-paper').first().evaluate(el=>el.getAnimations({subtree:true}).length),0);
+  assert.equal(await invitation.locator('.portrait-paper').first().evaluate(el=>getComputedStyle(el).opacity),'1');
+  await invitation.emulateMedia({reducedMotion:'no-preference'});
+  console.log('Runtime reduced motion cancels active botanical layers and keeps content visible PASS');
   await invitation.emulateMedia({reducedMotion:'reduce'});
   giftSettings={giftAccounts:accounts,giftDisplay:'open',fadeInMode:'repeat'};
   await invitation.goto('https://invitation.example/preview');await invitation.addScriptTag({path:path.join(out,'content.js')});
@@ -246,6 +284,51 @@ createRoot(document.getElementById("root")!).render(<StudioFixture/>);
     assert.equal(await page.evaluate(()=>window.__calls.at(-1).value.fadeInMode),value);
     assert.equal(await mode.inputValue(),value);
    }
+   const portrait=page.getByLabel('Animasi fade-in Foto mempelai');
+   await page.emulateMedia({reducedMotion:'no-preference'});
+   await portrait.scrollIntoViewIfNeeded();
+   await portrait.selectOption('right');
+   await page.waitForFunction(()=>document.querySelectorAll('.section-fade-stage span')[2].getAnimations().length>0);
+   const automatic=await page.locator('.section-fade-stage span').nth(2).evaluate(el=>el.getAnimations()[0].effect.getKeyframes()[0].transform);
+   assert.match(automatic,/48/, 'Selecting a direction automatically previews it');
+   await page.getByLabel('Durasi fade-in Foto mempelai').fill('0.7');
+   await page.getByLabel('Animasi fade-in Kartu lokasi & peta').selectOption('fade');
+   await page.getByLabel('Durasi fade-in Kartu lokasi & peta').fill('1.3');
+   await page.getByRole('button',{name:'Coba efek Foto mempelai',exact:true}).click();
+   await page.emulateMedia({reducedMotion:'no-preference'});
+   await page.getByRole('button',{name:'Coba efek Kartu lokasi & peta',exact:true}).click();
+   const timing=await page.locator('.section-fade-stage span').nth(4).evaluate(el=>el.getAnimations()[0].effect.getTiming().duration);
+   assert.equal(timing,1300);
+   await page.emulateMedia({reducedMotion:'reduce'});
+   await choose('event','pasangan');await choose('event','tampilan');
+   assert.equal(await portrait.inputValue(),'right','Changing settings sections preserves the animation draft');
+   await page.getByRole('button',{name:'Simpan detail acara',exact:true}).click();
+   await page.getByText('Pengaturan tersimpan',{exact:true}).filter({visible:true}).waitFor();
+   const fades=await page.evaluate(()=>window.__calls.at(-1).value.fadeInSections);
+   assert.deepEqual(fades.mempelai,{animation:'right',duration:0.7});
+   assert.deepEqual(fades.lokasi,{animation:'fade',duration:1.3});
+   await page.getByLabel('Durasi fade-in Foto mempelai').fill('11');
+   await choose('event','pasangan');
+   const callCount=await page.evaluate(()=>window.__calls.length);
+   await page.getByRole('button',{name:'Simpan detail acara',exact:true}).click();
+   assert(await page.locator('#event-part-tampilan').isVisible(),'Invalid duration opens the correct section');
+   assert.equal(await page.evaluate(()=>window.__calls.length),callCount,'Invalid duration is not saved');
+   await page.getByLabel('Durasi fade-in Foto mempelai').fill('0.7');
+   await page.emulateMedia({reducedMotion:'no-preference'});
+   const sample=page.locator('.section-fade-stage > span').nth(2);
+   for (const effect of ['arch','curtain','unfold','focus','layered','fan','ink','botanical','depth']) {
+    await portrait.selectOption(effect);
+    await page.getByRole('button',{name:'Coba efek Foto mempelai',exact:true}).click();
+    assert(await sample.evaluate(el=>el.getAnimations({subtree:true}).length>0));
+    await sample.evaluate(el=>el.getAnimations({subtree:true}).forEach(animation=>{animation.pause();animation.currentTime=120;}));
+    await sample.locator('..').screenshot({path:path.join(shots,`effect-${effect}-${width}.png`)});
+   }
+   await page.getByLabel('Mode fade-in Foto mempelai').selectOption('disabled');
+   assert.equal(await sample.evaluate(el=>el.getAnimations({subtree:true}).length),0);
+   assert(await page.getByRole('button',{name:'Coba efek Foto mempelai',exact:true}).isDisabled());
+   await page.getByLabel('Mode fade-in Foto mempelai').selectOption('once');
+   await portrait.selectOption('right');
+   await page.emulateMedia({reducedMotion:'reduce'});
    await overflow();await capture(`fade-settings-${width}`);
   }
   for(const width of [1440,390]){

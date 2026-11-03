@@ -1,6 +1,6 @@
 $kind: http-request
 name: Save fade-in mode
-description: Choose disabled, once or repeat for invitation card fade-in effects while preserving the other settings and media.
+description: Choose disabled, once or repeat for invitation card fade-in effects with per-section direction, complex transitions and duration while preserving the other settings and media.
 url: '{{cmsBaseUrl}}/api/admin/content'
 method: PUT
 order: 3200
@@ -16,14 +16,16 @@ headers:
 body:
   type: json
   content: |-
-    {"fadeInMode":"{{fadeInMode}}"}
+    {"fadeInMode":"{{fadeInMode}}","fadeInSections":{{fadeInSections}}}
 scripts:
   - type: beforeRequest
     language: text/javascript
     code: |-
       pm.variables.set('fadeInMode', pm.iterationData.get('fadeInMode') || 'once');
+      pm.variables.set('fadeInSections', JSON.stringify(pm.iterationData.get('fadeInSections') || {}));
   - type: afterResponse
     language: text/javascript
     code: |-
       pm.test('Fade-in mode saves successfully', () => pm.response.to.have.status(200));
       pm.test('Selected fade-in mode is returned', () => pm.expect(pm.response.json().settings.fadeInMode).to.eql(pm.variables.get('fadeInMode')));
+      pm.test('Per-section overrides are returned', () => pm.expect(pm.response.json().settings.fadeInSections).to.eql(JSON.parse(pm.variables.get('fadeInSections'))));

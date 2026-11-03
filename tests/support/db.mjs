@@ -1,8 +1,9 @@
 import pg from "pg";
+import {fileURLToPath} from "node:url";
 import { spawn } from "node:child_process";
 export const binary =
   process.env.BACKEND_BINARY ||
-  new URL("../../.local/invitation", import.meta.url).pathname;
+  fileURLToPath(new URL("../../.local/invitation", import.meta.url));
 export function command(args, env = {}, input) {
   return new Promise((resolve, reject) => {
     const child = spawn(binary, args, {

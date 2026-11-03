@@ -165,7 +165,7 @@ The guest table keeps search, filters, sorting, pagination, page selection and r
 
 ### Detail Acara
 
-Five sections cover Pasangan & keluarga, Acara & waktu, Lokasi acara, Hadiah and Akses undangan. Section selection and the previous/next pager preserve mounted fields. The overview describes current draft inputs rather than a successful save. One save applies all event fields; validation reveals the correct hidden section before focusing the invalid field.
+Six sections cover Pasangan & keluarga, Acara & waktu, Lokasi acara, Hadiah, Tampilan undangan and Akses undangan. Section selection and the previous/next pager preserve mounted fields. The overview describes current draft inputs rather than a successful save. One save applies all event fields; validation reveals the correct hidden section before focusing the invalid field.
 
 ### Pesan & Preview
 
@@ -198,3 +198,11 @@ The production UI check in `../tests/studio-ui.cjs` uses callback fixtures; scre
 - **Don't** split the final WhatsApp preview into section-dependent fragments.
 - **Don't** treat a selected file as installed media or a thumbnail upload as a text save.
 - **Don't** infer publishing, automated WhatsApp delivery, extra media slots or backend changes from the layout.
+
+### Tampilan undangan
+
+Global reveal behavior can be disabled, play once, or repeat on viewport entry. Each of nine invitation sections can inherit its default or set its own behavior, direction and duration (0.1–10 seconds; blank uses 2 seconds). The couple-photo choice applies to both portraits; the location choice applies to the location and map card. Cover, opening verse and farewell default to no reveal. Directions include alternating left/right, centered fade, up, down, left, right and centered zoom. A bounded inline card sample automatically plays when visible after an effect or duration change. Coba efek replays it, alternating directions for the left/right option; leaving the settings section cancels playback. No preview loops run. Disabled sections keep their sample visible; disabled sections explain their state. Preview respects reduced motion with a brief opacity change. Settings share the event form's save, dirty state and validation, including revealing a hidden section containing an invalid duration.
+
+Complex entrance choices add Arch Reveal, Curtain Reveal, Paper Unfold, Soft Focus, Layered Entrance, Photo Fan, Ink Reveal, Botanical Reveal and Depth Arrival. A shared Web Animations engine drives the CMS sample and public invitation. Layered and ink effects animate child content; Photo Fan fans up to eight thumbnail buttons, falling back to the card's own children outside a gallery. Botanical uses the existing forest image on two temporary, noninteractive overlays. Child delays fit within the selected duration. Repeat exits, keyboard focus and a runtime reduced-motion change cancel all active layers and remove overlays. Cards remain visible when Web Animations is unavailable. No new animation dependency is introduced.
+
+The public gallery's featured photo stays inline. Horizontal pointer or touch swipes change photos in both gallery layouts; vertical gestures preserve page scrolling. Clicking a photo never opens a lightbox. Thumbnails and the nine-photo collage select the featured photo, and the focusable photo region also supports Left/Right keys. A short swipe hint appears only when multiple photos are installed. No viewer dialog, backdrop or viewer navigation controls are rendered.

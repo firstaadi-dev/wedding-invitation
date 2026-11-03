@@ -1,3 +1,5 @@
+import {fadeInSections, complexFadeInAnimations, playFadeIn} from './fade-in.js';
+
 export function entranceProgress(top, height, viewport) {
   return Math.min(1, Math.max(0, -top / Math.max(1, height - viewport)));
 }
@@ -6,22 +8,57 @@ export function sectionProgress(top, viewport) {
   return 1 - Math.min(1, Math.max(0, top / Math.max(1, viewport)));
 }
 
-export function configureFadeIn(mode = 'once') {
-  if (mode === 'disabled' || typeof IntersectionObserver === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+export function configureFadeIn(mode = 'once', sections = {}) {
+  if (typeof IntersectionObserver === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const modes = new WeakMap();
+  const running = new Map();
+  function stop(target) {running.get(target)?.cancel();running.delete(target);}
+  function reveal(target,isIntersecting) {
+    if (!complexFadeInAnimations.has(target.dataset.revealAnimation)) return;
+    stop(target);
+    if (target.matches?.(':focus-within')) return;
+    if (isIntersecting) running.set(target,playFadeIn(target,target.dataset.revealAnimation,Number(target.style.getPropertyValue('--reveal-duration').replace('s',''))));
+  }
   const observer = new IntersectionObserver(entries => {
     for (const {target,isIntersecting} of entries) {
-      if (mode === 'repeat') target.classList.toggle('is-revealed',isIntersecting);
+      if (modes.get(target) === 'repeat') {
+        target.classList.toggle('is-revealed',isIntersecting);
+        reveal(target,isIntersecting);
+      }
       else if (isIntersecting) {
         target.classList.add('is-revealed');
+        reveal(target,true);
         observer.unobserve(target);
       }
     }
   });
-  document.querySelectorAll('.portrait-paper,.countdown,.event-paper,.location-paper,.gallery-album,.guest-paper,.wishes-area').forEach((card,index) => {
-    card.classList.add('reveal-card');
-    if (index % 2) card.classList.add('reveal-right');
-    observer.observe(card);
+  const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  motion.addEventListener('change',event=>{
+    if (!event.matches) return;
+    observer.disconnect();
+    for (const target of running.keys()) stop(target);
+    for (const card of document.querySelectorAll('.reveal-card')) card.classList.add('is-revealed');
   });
+  let index = 0;
+  for (const section of fadeInSections) {
+    const config = sections[section.id];
+    if (section.staticDefault && !config?.mode) continue;
+    const selectedMode = config?.mode || mode;
+    for (const card of document.querySelectorAll(section.selector)) {
+      const right = index++ % 2;
+      if (selectedMode === 'disabled') continue;
+      modes.set(card,selectedMode);
+      if (complexFadeInAnimations.has(config?.animation)) {
+        card.classList.add('complex-reveal');
+        card.addEventListener('focusin',()=>{stop(card);card.classList.add('is-revealed');});
+      }
+      card.classList.add('reveal-card');
+      if (right) card.classList.add('reveal-right');
+      card.dataset.revealAnimation = config?.animation || 'alternate';
+      card.style.setProperty('--reveal-duration', `${config?.duration ?? 2}s`);
+      observer.observe(card);
+    }
+  }
 }
 
 if (typeof document !== 'undefined') {

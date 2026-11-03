@@ -1,1 +1,155 @@
-[{"fadeInMode":"once"},{"fadeInMode":"disabled"},{"fadeInMode":"repeat"},{"fadeInMode":"once"}]
+[
+  {
+    "fadeInMode": "once"
+  },
+  {
+    "fadeInMode": "disabled"
+  },
+  {
+    "fadeInMode": "repeat"
+  },
+  {
+    "fadeInMode": "once",
+    "fadeInSections": {
+      "mempelai": {
+        "mode": "repeat",
+        "animation": "zoom",
+        "duration": 0.5
+      },
+      "sumbangan": {
+        "mode": "disabled"
+      },
+      "ayat": {
+        "mode": "once",
+        "animation": "fade",
+        "duration": 10
+      }
+    }
+  },
+  {
+    "fadeInMode": "once",
+    "fadeInSections": {
+      "mempelai": {
+        "animation": "arch",
+        "mode": "repeat",
+        "duration": 0.8
+      },
+      "lokasi": {
+        "animation": "arch",
+        "duration": 1.2
+      }
+    }
+  },
+  {
+    "fadeInMode": "once",
+    "fadeInSections": {
+      "mempelai": {
+        "animation": "curtain",
+        "mode": "repeat",
+        "duration": 0.8
+      },
+      "lokasi": {
+        "animation": "curtain",
+        "duration": 1.2
+      }
+    }
+  },
+  {
+    "fadeInMode": "once",
+    "fadeInSections": {
+      "mempelai": {
+        "animation": "unfold",
+        "mode": "repeat",
+        "duration": 0.8
+      },
+      "lokasi": {
+        "animation": "unfold",
+        "duration": 1.2
+      }
+    }
+  },
+  {
+    "fadeInMode": "once",
+    "fadeInSections": {
+      "mempelai": {
+        "animation": "focus",
+        "mode": "repeat",
+        "duration": 0.8
+      },
+      "lokasi": {
+        "animation": "focus",
+        "duration": 1.2
+      }
+    }
+  },
+  {
+    "fadeInMode": "once",
+    "fadeInSections": {
+      "mempelai": {
+        "animation": "layered",
+        "mode": "repeat",
+        "duration": 0.8
+      },
+      "lokasi": {
+        "animation": "layered",
+        "duration": 1.2
+      }
+    }
+  },
+  {
+    "fadeInMode": "once",
+    "fadeInSections": {
+      "mempelai": {
+        "animation": "fan",
+        "mode": "repeat",
+        "duration": 0.8
+      },
+      "lokasi": {
+        "animation": "fan",
+        "duration": 1.2
+      }
+    }
+  },
+  {
+    "fadeInMode": "once",
+    "fadeInSections": {
+      "mempelai": {
+        "animation": "ink",
+        "mode": "repeat",
+        "duration": 0.8
+      },
+      "lokasi": {
+        "animation": "ink",
+        "duration": 1.2
+      }
+    }
+  },
+  {
+    "fadeInMode": "once",
+    "fadeInSections": {
+      "mempelai": {
+        "animation": "botanical",
+        "mode": "repeat",
+        "duration": 0.8
+      },
+      "lokasi": {
+        "animation": "botanical",
+        "duration": 1.2
+      }
+    }
+  },
+  {
+    "fadeInMode": "once",
+    "fadeInSections": {
+      "mempelai": {
+        "animation": "depth",
+        "mode": "repeat",
+        "duration": 0.8
+      },
+      "lokasi": {
+        "animation": "depth",
+        "duration": 1.2
+      }
+    }
+  }
+]

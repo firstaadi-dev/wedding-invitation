@@ -553,8 +553,14 @@ test('Neon-backed CMS and guest access end to end',async t => {
       let output='';child.stdout.on('data',chunk=>output+=chunk);child.stderr.on('data',chunk=>output+=chunk);
       const [code]=await once(child,'close');console.log(output);assert.equal(code,0,output);
       const after=(await adminRequest('/api/admin/content')).value;
-      assert.deepEqual(after,{...before,settings:{...before.settings,fadeInMode:'once'}});
+      const fadeInSections=JSON.parse(readFileSync(new URL('./fixtures/fade-in-modes.json',import.meta.url),'utf8')).at(-1).fadeInSections;
+      assert.deepEqual(after,{...before,settings:{...before.settings,fadeInMode:'once',fadeInSections}});
+      assert.deepEqual((await request('/api/invitation',{jar:guestBrowser})).value.settings.fadeInSections,fadeInSections);
       assert.equal((await request('/api/invitation',{jar:guestBrowser})).value.settings.fadeInMode,'once');
+      for(const fadeInSections of [null, [], {mempelai:{duration:0}}, {mempelai:{duration:10.1}}, {mempelai:{duration:'2'}}, {mempelai:{animation:'spin'}}, {mempelai:{mode:'always'}}, {unknown:{}}]) {
+        const invalid=await adminRequest('/api/admin/content',{method:'PUT',data:{fadeInSections}});
+        assert.equal(invalid.response.status,400);
+      }
       for(const fadeInMode of ['', 'always', 1, null, true, ['once'], {mode:'once'}]) {
         const invalid=await adminRequest('/api/admin/content',{method:'PUT',data:{fadeInMode}});
         assert.equal(invalid.response.status,400);

@@ -137,7 +137,8 @@
         <p class="introduction">Setiap foto menyimpan cerita.</p>
         <div class="gallery-album">
           <p id="gallery-empty" class="photo-placeholder"><span class="leaf-mark" aria-hidden="true">❦</span><span>Foto belum tersedia.</span></p>
-          <button id="gallery-featured" class="gallery-featured invitation-gallery-frame" type="button" aria-label="Perbesar foto pilihan" hidden></button>
+          <div id="gallery-featured" class="gallery-featured invitation-gallery-frame" role="group" tabindex="0" aria-label="Foto pilihan" aria-describedby="gallery-swipe-help" hidden></div>
+          <p id="gallery-swipe-help" class="gallery-swipe-help" hidden>Geser foto ke kiri atau kanan.</p>
           <p id="gallery-position" class="gallery-position" aria-live="polite" aria-atomic="true" hidden></p>
           <div id="gallery-thumbnails" class="gallery-thumbnails" role="group" aria-label="Pilih foto utama"></div>
           <div id="gallery-collage" class="gallery-collage" role="group" aria-label="Kolase foto"></div>
@@ -211,11 +212,6 @@
       </div>
     </section>
   </main>
-  <dialog id="gallery-viewer" class="gallery-viewer" aria-label="Foto kenangan" aria-describedby="gallery-caption">
-    <button id="gallery-close" class="gallery-close" type="button" aria-label="Tutup foto" autofocus>×</button>
-    <img id="gallery-full" alt="">
-    <div class="gallery-viewer-controls"><button id="gallery-previous" type="button" aria-label="Foto sebelumnya">←</button><p id="gallery-caption" aria-live="polite"></p><button id="gallery-next" type="button" aria-label="Foto berikutnya">→</button></div>
-  </dialog>
   <button class="music-status" type="button" disabled aria-label="Lagu belum ditambahkan" title="Lagu belum ditambahkan"><span aria-hidden="true">♫</span></button>
 </body>
 </html>

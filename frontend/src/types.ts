@@ -25,8 +25,9 @@ export type Guest = {
 export type GiftOption =
   | { type: "account"; bank: string; number: string; owner: string }
   | { type: "address"; recipient: string; address: string; phone: string };
+export type SectionFadeIn = { mode?: string; animation?: string; duration?: number };
 export type Content = {
-  settings: Record<string, string | GiftOption[]>;
+  settings: Record<string, string | GiftOption[]> & { fadeInSections?: Record<string, SectionFadeIn> };
   media: Record<string, string>;
 };
 export type API = <T>(

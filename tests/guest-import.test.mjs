@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {fileURLToPath} from 'node:url';
 import {importRows, saveImportedGuests} from '../frontend/guest-import.js';
 
 test('Excel guest rows support reordered columns, optional WhatsApp and blank rows', () => {
@@ -38,7 +39,7 @@ test('partial import stops on failure and leaves only unsaved rows for continuat
 
 test('reads an actual Excel workbook including text, numeric and blank WhatsApp cells', async () => {
   const {readSheet} = await import('../frontend/node_modules/read-excel-file/node/index.js');
-  const rows = await readSheet(new URL('./fixtures/guest-import.xlsx', import.meta.url).pathname);
+  const rows = await readSheet(fileURLToPath(new URL('./fixtures/guest-import.xlsx', import.meta.url)));
   assert.deepEqual(importRows(rows), [
     {name:'Sari',phone:'081234567890'}, {name:'Budi',phone:''},
     {name:'Dewi',phone:'628123456789'},

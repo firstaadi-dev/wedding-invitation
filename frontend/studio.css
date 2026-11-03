@@ -1,4 +1,5 @@
 @import "./photo-frame.css";
+@import "./transitions.css";
 
 @font-face {
   font-family: Manrope;
@@ -1605,3 +1606,16 @@ h3 {
   height: 32px;
   flex-shrink: 0;
 }
+
+.section-fade-fields {border:0;border-top:1px solid var(--line);padding:20px 0 8px;margin:20px 0 0;min-width:0;}
+.section-fade-fields legend {font-weight:600;padding:0 12px 0 0;}
+
+.section-fade-preview {display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-top:16px;}
+.section-fade-stage {display:grid;place-items:center;overflow:hidden;min-height:156px;width:100%;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px;}
+.section-fade-stage span {display:grid;gap:8px;max-width:100%;width:240px;text-align:center;padding:24px 16px;background:var(--cream);color:var(--forest);border-radius:12px;font-size:16px;}
+.section-fade-stage span small {color:var(--forest);font-size:12px;line-height:1.5;}
+.section-fade-preview > small {flex:1 1 180px;color:var(--muted);font-size:12px;line-height:1.5;}
+
+.transition-photo-row {display:flex;justify-content:center;gap:8px;font-style:normal;}
+.transition-photo {display:grid;place-items:center;flex:1;min-width:0;aspect-ratio:4/5;overflow:hidden;background:var(--paper);border:1px solid var(--line);border-radius:4px;font-size:12px;font-weight:500;}
+.transition-photo img {display:block;width:100%;height:100%;object-fit:cover;}
