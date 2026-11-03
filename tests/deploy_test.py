@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+from types import SimpleNamespace
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -19,6 +20,29 @@ OLD='b'*40
 FE='ghcr.io/example/invitation-frontend:'+SHA
 BE='ghcr.io/example/invitation-backend:'+SHA
 class DeploymentTests(unittest.TestCase):
+    def test_single_service_deploy_runs_after_skipped_cache_and_requires_all_gates(self):
+        workflow=(ROOT/'.github/workflows/deploy.yml').read_text()
+        condition=workflow.split('\n  deploy:\n',1)[1].split('\n    if:',1)[1].splitlines()[0].strip()
+        self.assertIn('always()',condition,'A skipped shared-cache job must not skip a healthy single-service deployment')
+        expression=condition.replace('&&','and').replace('||','or')
+        def allowed(results=None,event='push',ref='refs/heads/main',enabled='true'):
+            results=results or {}
+            context={
+                'always':lambda:True,
+                'needs':SimpleNamespace(**{job:SimpleNamespace(result=results.get(job,'success')) for job in ('changes','images','checks')}),
+                'github':SimpleNamespace(event_name=event,ref=ref),
+                'vars':SimpleNamespace(VPS_DEPLOY_ENABLED=enabled,STAGING_VPS_DEPLOY_ENABLED=enabled),
+            }
+            return eval(expression,{'__builtins__':{}},context)
+        self.assertTrue(allowed())
+        self.assertTrue(allowed(ref='refs/heads/staging'))
+        for job in ('changes','images','checks'):
+            for result in ('failure','cancelled','skipped'):
+                with self.subTest(job=job,result=result):self.assertFalse(allowed({job:result}))
+        self.assertFalse(allowed(event='pull_request'))
+        self.assertFalse(allowed(ref='refs/heads/feature'))
+        self.assertFalse(allowed(enabled='false'))
+
     def test_docker_images_share_frontend_build_stage(self):
         frontend=(ROOT/'frontend/Dockerfile').read_text().split('\nFROM ',1)[0].splitlines()
         backend=(ROOT/'backend/Dockerfile').read_text().split('\nFROM ',1)[0].splitlines()

@@ -207,7 +207,8 @@ jobs:
 
   deploy:
     needs: [changes, images, checks]
-    if: github.event_name != 'pull_request' && ((github.ref == 'refs/heads/main' && vars.VPS_DEPLOY_ENABLED == 'true') || (github.ref == 'refs/heads/staging' && vars.STAGING_VPS_DEPLOY_ENABLED == 'true'))
+    # A single-service build skips the shared cache job; evaluate the release gates explicitly.
+    if: always() && needs.changes.result == 'success' && needs.images.result == 'success' && needs.checks.result == 'success' && github.event_name != 'pull_request' && ((github.ref == 'refs/heads/main' && vars.VPS_DEPLOY_ENABLED == 'true') || (github.ref == 'refs/heads/staging' && vars.STAGING_VPS_DEPLOY_ENABLED == 'true'))
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
