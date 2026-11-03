@@ -966,6 +966,13 @@ h3 {
   max-width: 85ch;
   margin-bottom: 28px;
 }
+.gallery-layout-form {
+  max-width: 650px;
+  margin-bottom: 28px;
+}
+.gallery-layout-form button {
+  margin-top: 12px;
+}
 .media-card {
   box-shadow: none;
   border-radius: 12px;

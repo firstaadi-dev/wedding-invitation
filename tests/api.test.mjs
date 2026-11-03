@@ -513,6 +513,25 @@ test('Neon-backed CMS and guest access end to end',async t => {
       assert.equal((await adminRequest('/api/admin/media/music',{method:'DELETE'})).response.status,200);
       assert.equal((await request('/api/invitation',{jar:guestBrowser})).value.media.music,undefined);
     });
+    await t.test('gallery layouts persist, reject invalid values and preserve all uploaded media',async () => {
+      const before=(await adminRequest('/api/admin/content')).value;
+      assert.ok(before.media.gallery9);
+      const child=spawn('postman',['collection','run','postman/collections/Wedding Invitation API','-i','Save gallery layout','-d','tests/fixtures/gallery-layouts.json','--env-var',`cmsBaseUrl=${base}`,'--env-var',`cmsOrigin=${cmsOrigin}`,'--env-var',`adminCookie=wedding_admin=${admin.wedding_admin}`,'--env-var',`csrf=${csrf}`,'--no-report-events'],{stdio:['ignore','pipe','pipe']});
+      let output='';child.stdout.on('data',chunk=>output+=chunk);child.stderr.on('data',chunk=>output+=chunk);
+      const [code]=await once(child,'close');console.log(output);assert.equal(code,0,output);
+      const after=(await adminRequest('/api/admin/content')).value;
+      assert.deepEqual(after.media,before.media);
+      assert.deepEqual(after.settings,{...before.settings,galleryLayout:'8'});
+      assert.equal((await request('/api/invitation',{jar:guestBrowser})).value.settings.galleryLayout,'8');
+      for(const galleryLayout of ['', '7', '10', 8, 9, null, true, ['8'], {layout:'8'}]) {
+        const invalid=await adminRequest('/api/admin/content',{method:'PUT',data:{galleryLayout}});
+        assert.equal(invalid.response.status,400);
+        assert.equal(invalid.value.code,'gallery_layout');
+      }
+      assert.deepEqual((await adminRequest('/api/admin/content')).value,after);
+      // Keep these extra checks within the suite's shared 120/minute admin budget.
+      await pool.query('DELETE FROM wedding.rate_limits WHERE key=$1',[createHash('sha256').update('admin:127.0.0.1').digest('hex')]);
+    });
     await t.test('common audio formats upload, play as MP3, support ranges and preserve music on failure',async () => {
       const child=spawn('postman',['collection','run','postman/collections/Wedding Invitation API','-i','Upload common audio format','-d','tests/fixtures/audio-formats.json','--env-var',`cmsBaseUrl=${base}`,'--env-var',`cmsOrigin=${cmsOrigin}`,'--env-var',`adminCookie=wedding_admin=${admin.wedding_admin}`,'--env-var',`csrf=${csrf}`,'--working-dir',process.cwd(),'--no-report-events'],{stdio:['ignore','pipe','pipe']});
       let output='';child.stdout.on('data',c=>output+=c);child.stderr.on('data',c=>output+=c);
