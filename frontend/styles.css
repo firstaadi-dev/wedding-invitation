@@ -564,7 +564,6 @@ main {
 .gallery-album button:focus-visible {outline-offset:-4px;}
 .gallery-featured:active {cursor:grabbing;}
 .gallery-featured:focus-visible {outline:2px solid #e3cfb0;outline-offset:4px;}
-.gallery-swipe-help {margin-top:12px;color:#e3cfb0;font-size:13px;}
 
 .farewell-scene {
   min-height:110svh;

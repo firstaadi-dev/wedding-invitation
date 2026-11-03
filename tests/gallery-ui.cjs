@@ -113,7 +113,7 @@ const photos=Object.fromEntries(Array.from({length:9},(_,i)=>[`gallery${i+1}`,
     assert.equal(await page.locator('#gallery-featured img').getAttribute('src'),photos.gallery9);
     await page.locator('#gallery-featured').click();
     assert.equal(await page.locator('dialog').count(),0);
-    assert.equal(await page.locator('#gallery-swipe-help').isVisible(),false);
+    assert.equal(await page.locator('#gallery-swipe-help').count(),0);
     await swipe('#gallery-featured',-80);
     assert.equal(await page.locator('#gallery-featured img').getAttribute('src'),photos.gallery9);
     assert.deepEqual(errors,[]);

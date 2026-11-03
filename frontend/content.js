@@ -177,7 +177,6 @@ function renderGallery(media, layout = '8') {
     }
   });
   document.querySelector('#gallery-empty').hidden = true;featured.hidden = false;position.hidden = layout === '9';
-  document.querySelector('#gallery-swipe-help').hidden = photos.length < 2;
   select(0);
 }
 function label(playing) {
