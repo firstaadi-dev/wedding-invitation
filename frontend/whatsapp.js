@@ -45,5 +45,6 @@ export function invitationMessage(template, guest, event = {}) {
 }
 
 export function whatsappUrl(template, guest, event) {
-  return `https://wa.me/${guest.phone}?text=${encodeURIComponent(invitationMessage(template, guest, event))}`;
+  // The wa.me redirect replaces emoji with U+FFFD before handing off to WhatsApp.
+  return `https://api.whatsapp.com/send?phone=${guest.phone}&text=${encodeURIComponent(invitationMessage(template, guest, event))}`;
 }

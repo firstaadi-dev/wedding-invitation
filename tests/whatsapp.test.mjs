@@ -42,11 +42,26 @@ test('WhatsApp message substitutes once and preserves names, line breaks and sec
   const expected = `Yth. ${guest.name},\n${guest.link}\n${guest.name}`;
   assert.equal(invitationMessage(template,guest),expected);
   const url = new URL(whatsappUrl(template,guest));
-  assert.equal(url.origin,'https://wa.me');
-  assert.equal(url.pathname,'/628123456789');
+  assert.equal(url.origin,'https://api.whatsapp.com');
+  assert.equal(url.pathname,'/send');
+  assert.equal(url.searchParams.get('phone'),'628123456789');
   assert.equal(url.searchParams.get('text'),expected);
   assert.equal(url.hash,'');
   assert.ok(invitationMessage(defaultWhatsappTemplate,guest).includes(guest.link));
+});
+
+test('WhatsApp links bypass the wa.me redirect and preserve emoji sequences', () => {
+  const guest = {name:'Keluarga 👨‍👩‍👧‍👦',phone:'628123456789',link:'https://invitation.example/u/secret'};
+  const template = '💌 {nama}\n💍 Firsta & Talitha ❤️\n📅 {tanggal}\n🕚 11.00–13.00\n📍 {tempat}\n🙏🏽 {link}';
+  const event = {date:'Minggu, 22 November 2026',venue:'Arjuna Ballroom'};
+  const expected = `💌 ${guest.name}\n💍 Firsta & Talitha ❤️\n📅 ${event.date}\n🕚 11.00–13.00\n📍 ${event.venue}\n🙏🏽 ${guest.link}`;
+  const url = new URL(whatsappUrl(template,guest,event));
+  assert.equal(url.origin,'https://api.whatsapp.com');
+  assert.equal(url.pathname,'/send');
+  assert.equal(url.searchParams.get('phone'),guest.phone);
+  assert.equal(invitationMessage(template,guest,event),expected);
+  assert.equal(url.searchParams.get('text'),expected);
+  assert.ok(!url.href.includes('%EF%BF%BD'));
 });
 
 test('WhatsApp date and venue tokens follow current event settings', () => {

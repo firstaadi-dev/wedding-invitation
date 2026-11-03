@@ -9,7 +9,7 @@ test('Excel export preserves messages, clickable WA links, numeric phones and fa
     {name:'Tanpa nomor', phone:'', link:'https://invitation.example/u/other'},
     {name:'=SUM(1,2)', phone:'', link:null},
   ];
-  const template = 'Yth. *{nama}*\n\n{tanggal}\n{tempat}\n{link}';
+  const template = '💌 Yth. *{nama}*\n\n📅 {tanggal}\n📍 {tempat}\n{link}';
   const event = {date:'Sabtu, 9 Januari 2027',venue:'Gedung Baru'};
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(await guestExport(guests,template,event));
@@ -21,14 +21,18 @@ test('Excel export preserves messages, clickable WA links, numeric phones and fa
   assert.equal(sheet.rowCount, 4);
   assert.equal(sheet.getCell('B2').value, 628123456789);
   assert.equal(sheet.getCell('B2').numFmt, '0');
-  const expected = 'Yth. *Sari & Budi*\n\nSabtu, 9 Januari 2027\nGedung Baru\nhttps://invitation.example/u/secret';
+  const expected = '💌 Yth. *Sari & Budi*\n\n📅 Sabtu, 9 Januari 2027\n📍 Gedung Baru\nhttps://invitation.example/u/secret';
   assert.equal(sheet.getCell('D2').value, expected);
   assert.equal(sheet.getCell('D2').alignment.wrapText, true);
   const url = new URL(sheet.getCell('C2').hyperlink);
-  assert.equal(url.pathname, '/628123456789');
+  assert.equal(url.origin, 'https://api.whatsapp.com');
+  assert.equal(url.pathname, '/send');
+  assert.equal(url.searchParams.get('phone'), '628123456789');
   assert.equal(url.searchParams.get('text'), expected);
   assert.equal(sheet.getCell('B3').value, null);
-  assert.equal(new URL(sheet.getCell('C3').hyperlink).pathname, '/');
+  const withoutPhone = new URL(sheet.getCell('C3').hyperlink);
+  assert.equal(withoutPhone.searchParams.get('phone'), '');
+  assert.equal(withoutPhone.searchParams.get('text'), expected.replace('Sari & Budi', 'Tanpa nomor').replace('/secret', '/other'));
   assert.equal(sheet.getCell('A4').value, '=SUM(1,2)');
   assert.equal(sheet.getCell('A4').type, ExcelJS.ValueType.String);
   assert.equal(sheet.getCell('C4').text, '');
