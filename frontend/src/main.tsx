@@ -916,25 +916,29 @@ function GuestsPage({
     setSort("name-asc");
     resetPage();
   }
-  async function setActive(active: boolean | null) {
+  async function runBulkAction(action: boolean | null | "devices") {
     if (!selected.length) return;
     const ids = [...selected];
+    const resetting = action === "devices";
+    const verb = resetting ? "direset akses browsernya" : action === null ? "dihapus" : "diperbarui";
     setBulkBusy(true);
     setBulkProgress(0);
     try {
       if (
         !(await confirm(
-          active === null
+          resetting
+            ? `Semua akses browser untuk ${ids.length} tamu yang dipilih akan direset. Sesi aktif dihentikan; tamu dapat membuka kembali undangan melalui tautan yang sama.`
+            : action === null
             ? `Hapus ${ids.length} tamu yang dipilih beserta tautan, seluruh akses, konfirmasi, dan ucapannya? Data tidak dapat dipulihkan.`
-            : active
+            : action
             ? `${ids.length} undangan yang dipilih dapat kembali dibuka.`
             : `${ids.length} undangan yang dipilih tidak dapat dibuka dan semua akses saat ini dihentikan. Data tetap tersimpan.`,
-          active === null ? `Hapus ${ids.length} tamu?` : `${active ? "Aktifkan" : "Nonaktifkan"} ${ids.length} undangan?`,
-          active === null ? "Hapus tamu" : active ? "Aktifkan undangan" : "Nonaktifkan undangan",
+          resetting ? `Reset akses ${ids.length} tamu?` : action === null ? `Hapus ${ids.length} tamu?` : `${action ? "Aktifkan" : "Nonaktifkan"} ${ids.length} undangan?`,
+          resetting ? "Reset akses browser" : action === null ? "Hapus tamu" : action ? "Aktifkan undangan" : "Nonaktifkan undangan",
         ))
       )
         return;
-      const {done, error} = await updateSelectedGuests(ids, active, api, setBulkProgress);
+      const {done, error} = await updateSelectedGuests(ids, action, api, setBulkProgress);
       let failed = error ? errorMessage(error) : "";
       try {
         await refresh();
@@ -944,8 +948,8 @@ function GuestsPage({
       setSelected([]);
       notice(
         failed
-          ? `${done} dari ${ids.length} undangan ${active === null ? "dihapus" : "diperbarui"}. ${failed}`
-          : active === null ? `${done} tamu berhasil dihapus.` : `Status ${done} undangan disimpan.`,
+          ? `${done} dari ${ids.length} undangan ${verb}. ${failed}`
+          : resetting ? `Akses browser ${done} tamu direset.` : action === null ? `${done} tamu berhasil dihapus.` : `Status ${done} undangan disimpan.`,
         Boolean(failed),
       );
     } catch (e) {
@@ -1117,22 +1121,25 @@ function GuestsPage({
               <button
                 type="button"
                 disabled={bulkBusy}
-                onClick={() => setActive(true)}
+                onClick={() => runBulkAction(true)}
               >
                 Aktifkan
               </button>
               <button
                 type="button"
                 disabled={bulkBusy}
-                onClick={() => setActive(false)}
+                onClick={() => runBulkAction(false)}
               >
                 Nonaktifkan
+              </button>
+              <button type="button" disabled={bulkBusy} onClick={() => runBulkAction("devices")}>
+                Reset akses browser
               </button>
               <button
                 className="danger"
                 type="button"
                 disabled={bulkBusy}
-                onClick={() => setActive(null)}
+                onClick={() => runBulkAction(null)}
               >
                 Hapus tamu
               </button>

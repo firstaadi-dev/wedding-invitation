@@ -26,6 +26,26 @@ test('bulk delete completes multiple batches and status actions retain PATCH pay
   }
 });
 
+test('bulk browser reset uses only selected device endpoints and reports progress across batches', async () => {
+  const calls = [], progress = [];
+  assert.deepEqual(await updateSelectedGuests(['a','b','c','d','e'], 'devices',
+    async (...args) => calls.push(args), count => progress.push(count)), {done:5,error:null});
+  assert.deepEqual(calls, ['a','b','c','d','e'].map(id => [`/api/admin/guests/${id}/devices`, 'DELETE']));
+  assert.deepEqual(progress, [4,5]);
+});
+
+test('bulk browser reset reports partial failure and stops before another batch', async () => {
+  const calls = [], progress = [], failure = new Error('Reset failed');
+  const result = await updateSelectedGuests(['a','b','c','d','e'], 'devices', async (...args) => {
+    calls.push(args);
+    if (args[0].endsWith('/b/devices')) throw failure;
+  }, count => progress.push(count));
+  assert.deepEqual(calls, ['a','b','c','d'].map(id => [`/api/admin/guests/${id}/devices`, 'DELETE']));
+  assert.deepEqual(result, {done:3,error:failure});
+  assert.deepEqual(progress, [3]);
+  assert.deepEqual(await updateSelectedGuests([], 'devices', async () => assert.fail('No selection'), () => assert.fail('No progress')), {done:0,error:null});
+});
+
 test('CMS summary counts invitations separately from people, excluding inactive responses',() => {
   const guests = [
     {name:'Keluarga Sari',phone:'628123456789',active:1,response:{attendance:'attending',guestCount:3}},

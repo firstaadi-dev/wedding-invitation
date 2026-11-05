@@ -1,10 +1,12 @@
-export async function updateSelectedGuests(ids, active, api, progress) {
+export async function updateSelectedGuests(ids, action, api, progress) {
   let done = 0;
   for (let i = 0; i < ids.length; i += 4) {
     const results = await Promise.allSettled(ids.slice(i, i + 4).map(id =>
-      active === null
+      action === "devices"
+        ? api(`/api/admin/guests/${id}/devices`, "DELETE")
+        : action === null
         ? api(`/api/admin/guests/${id}`, "DELETE")
-        : api(`/api/admin/guests/${id}`, "PATCH", {active}),
+        : api(`/api/admin/guests/${id}`, "PATCH", {active: action}),
     ));
     done += results.filter(result => result.status === "fulfilled").length;
     progress(done);
